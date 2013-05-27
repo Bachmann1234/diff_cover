@@ -39,6 +39,43 @@ class XmlCoverageReporter(BaseCoverageReporter):
         by the lxml.etree with root element `xml_root`.
         """
         super(XmlCoverageReporter, self).__init__()
+        self._xml = xml_root
+
+        # Create a dict to cache coverage_info dict results
+        # Keys are source file paths, values are output of `coverage_info()`
+        self._info_cache = dict()
 
     def coverage_info(self, src_path, line_start, line_end):
-        pass
+        """
+        See base class comments.
+        """
+
+        # If we have not yet loaded this source file
+        if src_path not in self._info_cache:
+
+            # Retrieve the <line> elements for this file
+            xpath = ".//class[@filename='{0}']/lines/line".format(src_path)
+            line_nodes = self._xml.findall(xpath)
+
+            # If nothing found, then no coverage information
+            if len(line_nodes) < 1:
+                self._info_cache[src_path] = dict()
+
+            # Process each line element
+            else:
+                results_dict = dict()
+
+                for line in line_nodes:
+
+                    line_num = int(line.get('number'))
+                    line_hits = int(line.get('hits'))
+                    results_dict[line_num] = (line_hits > 0)
+
+                # Store the result in the cache
+                self._info_cache[src_path] = results_dict
+
+        # Return the line numbers that match the range
+        src_line_dict = self._info_cache[src_path]
+
+        return { key: src_line_dict[key] for key in src_line_dict.keys()
+                 if key >= line_start and key <= line_end }
