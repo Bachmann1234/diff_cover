@@ -8,10 +8,10 @@ from coverage_reporter import XmlCoverageReporter
 from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
 
-DESCRIPTION = ""
-GIT_BRANCH_HELP = ""
-COVERAGE_XML_HELP = ""
-HTML_REPORT_HELP = ""
+DESCRIPTION = "Automatically find diff lines that need test coverage."
+GIT_BRANCH_HELP = "Git branch to compare against the current branch."
+COVERAGE_XML_HELP = "XML coverage report"
+HTML_REPORT_HELP = "Diff coverage HTML output"
 
 def parse_args(argv):
     """
@@ -57,3 +57,7 @@ def generate_report(coverage_xml=None, git_branch=None, html_report=None):
 
     # Generate the report
     reporter.generate_report(output_file)
+
+def main():
+    arg_dict = parse_args(sys.argv[1:])
+    generate_report(**arg_dict)
