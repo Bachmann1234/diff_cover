@@ -3,9 +3,9 @@ Implement the command-line tool interface.
 """
 import argparse
 import sys
-from diff_cover.diff_reporter import GitDiffReporter
-from diff_cover.coverage_reporter import XmlCoverageReporter
-from diff_cover.report_generator import HtmlReportGenerator, StringReportGenerator
+from diff_reporter import GitDiffReporter
+from coverage_reporter import XmlCoverageReporter
+from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
 
 DESCRIPTION = ""
@@ -34,7 +34,7 @@ def parse_args(argv):
                         help=GIT_BRANCH_HELP)
     parser.add_argument('--coverage-xml', type=str, default='',
                         help=COVERAGE_XML_HELP, required=True)
-    parser.add_argument('--html-report', type=str, default='',
+    parser.add_argument('--html-report', type=str, default=None,
                         help=HTML_REPORT_HELP)
 
     return vars(parser.parse_args(argv))
@@ -43,9 +43,9 @@ def generate_report(coverage_xml=None, git_branch=None, html_report=None):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
-    
     diff = GitDiffReporter(git_branch)
-    coverage = XmlCoverageReporter(etree.parse(coverage_xml))
+    xml_root = etree.parse(coverage_xml)
+    coverage = XmlCoverageReporter(xml_root)
 
     # Build a report generator
     if html_report is not None:

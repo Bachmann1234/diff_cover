@@ -113,7 +113,7 @@ class GitDiffReporter(BaseDiffReporter):
         output, err = process.communicate()
 
         # If an error with git diff, raise an exception
-        if err != 0:
+        if err is not None:
             raise GitDiffError('Exit status {0}'.format(err))
 
         # Return the output string

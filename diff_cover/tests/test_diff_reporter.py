@@ -58,7 +58,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Configure the process to return with a diff string
         diff_str = self.GIT_DIFF_OUTPUT
-        self.process.communicate.return_value = (diff_str, 0)
+        self.process.communicate.return_value = (diff_str, None)
 
     def test_git_source_paths(self):
 
@@ -97,7 +97,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Configure the process to return with an empty string
         diff_str = ""
-        self.process.communicate.return_value = (diff_str, 0)
+        self.process.communicate.return_value = (diff_str, None)
 
         # Expect no files changed
         source_paths = self.diff.src_paths_changed()
