@@ -3,7 +3,7 @@ Implement the command-line tool interface.
 """
 import argparse
 import sys
-from diff_reporter import GitDiffReporter
+from diff_reporter import GitDiffReporter, GitDiffError
 from coverage_reporter import XmlCoverageReporter
 from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
@@ -61,3 +61,6 @@ def generate_report(coverage_xml=None, git_branch=None, html_report=None):
 def main():
     arg_dict = parse_args(sys.argv[1:])
     generate_report(**arg_dict)
+
+if __name__ == "__main__":
+    main()

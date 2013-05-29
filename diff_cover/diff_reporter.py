@@ -109,12 +109,13 @@ class GitDiffReporter(BaseDiffReporter):
         stdout_pipe = self._subprocess_mod.PIPE
 
         # Execute `git diff` and capture output to stdout
-        process = self._subprocess_mod.Popen(command, stdout=stdout_pipe)
+        process = self._subprocess_mod.Popen(command, stdout=stdout_pipe,
+                                                      stderr=stdout_pipe)
         output, err = process.communicate()
 
         # If an error with git diff, raise an exception
-        if err is not None:
-            raise GitDiffError('Exit status {0}'.format(err))
+        if err is not '':
+            raise GitDiffError(str(err))
 
         # Return the output string
         return output

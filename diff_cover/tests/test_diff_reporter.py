@@ -58,7 +58,28 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Configure the process to return with a diff string
         diff_str = self.GIT_DIFF_OUTPUT
-        self.process.communicate.return_value = (diff_str, None)
+        self.process.communicate.return_value = (diff_str, '')
+
+    def test_popen_src_paths(self):
+
+        # Call the interface method
+        self.diff.src_paths_changed()
+
+        # Expect that subprocess.Popen() was configured correctly
+        self.subprocess.Popen.assert_called_with(['git', 'diff', 'master'],
+                                                 stdout=self.subprocess.PIPE,
+                                                 stderr=self.subprocess.PIPE)
+
+    def test_popen_hunks_changed(self):
+
+        # Call the interface method
+        self.diff.hunks_changed('subdir/file1.py')
+
+        # Expect that subprocess.Popen() was configured correctly
+        self.subprocess.Popen.assert_called_with(['git', 'diff', 'master'],
+                                                 stdout=self.subprocess.PIPE,
+                                                 stderr=self.subprocess.PIPE)
+
 
     def test_git_source_paths(self):
 
@@ -97,7 +118,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Configure the process to return with an empty string
         diff_str = ""
-        self.process.communicate.return_value = (diff_str, None)
+        self.process.communicate.return_value = (diff_str, '')
 
         # Expect no files changed
         source_paths = self.diff.src_paths_changed()
@@ -105,8 +126,8 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_diff_error(self):
 
-        # Configure the process to return with an exit status 1
-        self.process.communicate.return_value = ("", 1)
+        # Configure the process to return with an err to stderr
+        self.process.communicate.return_value = ("", "fatal error occurred")
 
         with self.assertRaises(GitDiffError):
             self.diff.src_paths_changed()
