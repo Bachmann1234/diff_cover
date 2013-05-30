@@ -146,66 +146,83 @@ class GitDiffReporter(BaseDiffReporter):
             # If the line starts with "diff --git", try to parse the
             # source path.
             if line.startswith('diff --git'):
-                groups = self.SRC_FILE_RE.findall(line)
-
-                if len(groups) == 1:
-
-                    # Store the name of the source path
-                    src_path = groups[0]
-
-                    # If there is not a list for this source path
-                    # already, create one.
-                    if src_path not in diff_dict:
-                        diff_dict[src_path] = []
-
-                # Something invalid in the format
-                # Rather than risk misinterpreting the diff, raise an exception
-                else:
-                    raise GitDiffError("Could not parse '{0}'".format(line))
+                src_path = self._parse_source_line(line, diff_dict)
 
             # If the line starts with "@@", try to parse the hunk
             # start and end lines
             elif line.startswith('@@'):
-                groups = self.HUNK_LINE_RE.findall(line)
-
-                if len(groups) == 1:
-
-                    hunk_str = groups[0]
-                    components = hunk_str.split(',')
-
-                    # Calculate the end line (counting start_line as the first)
-                    # Handle the case in which num_lines is not specified
-                    # (because there is only one line in the file)
-                    if len(components) == 1:
-                        start_line = int(components[0])
-                        end_line = start_line
-
-                    elif len(components) > 1:
-                        start_line = int(components[0])
-                        num_lines = int(components[1])
-                        end_line = start_line + num_lines
-
-                    else:
-                        raise GitDiffError("Could not parse hunk '{0}'".format(line))
-
-                    # Add the hunk to the current source file
-                    if src_path is not None:
-                        hunk = (start_line, end_line)
-
-                        # Handle the special case in which a file is deleted
-                        if hunk == (0, 0):
-                            pass
-                        else:
-                            diff_dict[src_path].append(hunk)
-
-                    # Got a hunk before a source file: input string is invalid
-                    else:
-                        msg = "Hunk has no source file: '{0}'".format(line)
-                        raise GitDiffError(msg)
-
-                else:
-                    raise GitDiffError("Could not parse '{0}'".format(line))
-
+                self._parse_hunk_line(line, src_path, diff_dict)
             # Ignore all other lines
 
         return diff_dict
+
+    def _parse_source_line(self, line, diff_dict):
+        """
+        Parse `line` for the source file path.
+        Update `diff_dict` with key for the path and an empty list value,
+        and return the source path.
+        """
+        groups = self.SRC_FILE_RE.findall(line)
+
+        if len(groups) == 1:
+
+            # Store the name of the source path
+            src_path = groups[0]
+
+            # If there is not a list for this source path
+            # already, create one.
+            if src_path not in diff_dict:
+                diff_dict[src_path] = []
+
+        # Something invalid in the format
+        # Rather than risk misinterpreting the diff, raise an exception
+        else:
+            raise GitDiffError("Could not parse '{0}'".format(line))
+
+        return src_path
+
+    def _parse_hunk_line(self, line, src_path, diff_dict):
+        """
+        Parse a line containing a "hunk" of code (start/end line numbers).
+        Update `diff_dict[src_path]` by appending `(start_line, end_line)`
+        tuple to the value (a list)
+        """
+        groups = self.HUNK_LINE_RE.findall(line)
+
+        if len(groups) == 1:
+
+            hunk_str = groups[0]
+            components = hunk_str.split(',')
+
+            # Calculate the end line (counting start_line as the first)
+            # Handle the case in which num_lines is not specified
+            # (because there is only one line in the file)
+            if len(components) == 1:
+                start_line = int(components[0])
+                end_line = start_line
+
+            elif len(components) > 1:
+                start_line = int(components[0])
+                num_lines = int(components[1])
+                end_line = start_line + num_lines
+
+            else:
+                raise GitDiffError("Could not parse hunk '{0}'".format(line))
+
+            # Add the hunk to the current source file
+            if src_path is not None:
+                hunk = (start_line, end_line)
+
+                # Handle the special case in which a file is deleted
+                if hunk == (0, 0):
+                    pass
+                else:
+                    diff_dict[src_path].append(hunk)
+
+            # Got a hunk before a source file: input string is invalid
+            else:
+                msg = "Hunk has no source file: '{0}'".format(line)
+                raise GitDiffError(msg)
+
+        else:
+            raise GitDiffError("Could not parse '{0}'".format(line))
