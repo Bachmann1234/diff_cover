@@ -13,7 +13,7 @@ and reports which lines in the diff are covered.
 XML coverage reports can be generated with tools such as 
 `coverage.py`__
 
-__ <http://nedbatchelder.com/code/coverage/>
+__ http://nedbatchelder.com/code/coverage/
 
 
 Getting Started
