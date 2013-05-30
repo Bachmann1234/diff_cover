@@ -114,7 +114,7 @@ class GitDiffReporter(BaseDiffReporter):
         output, err = process.communicate()
 
         # If an error with git diff, raise an exception
-        if err is not '':
+        if bool(err):
             raise GitDiffError(str(err))
 
         # Return the output string
