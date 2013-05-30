@@ -37,6 +37,13 @@ will be ignored.
 If ``--html-report`` is not specified, ``diff-cover`` prints a text report
 to stdout.
 
+By default, ``diff-cover`` compares the current branch to ``master``.
+For projects with many branches, it is often more helpful to compare
+the current branch to the common ancestor with master, using
+"..." notation:
+
+    diff-cover coverage.xml --git-branch master...HEAD
+
 
 License
 -------
