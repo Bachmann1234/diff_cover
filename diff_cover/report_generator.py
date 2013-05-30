@@ -112,24 +112,30 @@ class StringReportGenerator(BaseReportGenerator):
         # Header line
         output_file.write("Diff Coverage\n-------------\n")
 
-        # Source file info
-        for (src_path, line_dict) in cover_info.items():
+        # If no coverage information, explain this
+        if len(cover_info) == 0:
+            output_file.write("No lines with coverage information in this diff.\n")
 
-            # Calculate percent coverage
-            percent_covered = _percent_covered(line_dict)
+        else:
 
-            # Find missing lines
-            missing_lines = _missing_lines(line_dict)
+            # Source file info
+            for (src_path, line_dict) in cover_info.items():
 
-            # Print the info
-            if percent_covered < 100.0:
-                info_str = "{0} ({1}%): Missing line(s) {2}\n".format(\
-                            src_path, percent_covered, 
-                            ",".join(missing_lines))
-            else:
-                info_str = "{0} (100%)\n".format(src_path)
+                # Calculate percent coverage
+                percent_covered = _percent_covered(line_dict)
 
-            output_file.write(info_str)
+                # Find missing lines
+                missing_lines = _missing_lines(line_dict)
+
+                # Print the info
+                if percent_covered < 100.0:
+                    info_str = "{0} ({1}%): Missing line(s) {2}\n".format(\
+                                src_path, percent_covered, 
+                                ",".join(missing_lines))
+                else:
+                    info_str = "{0} (100%)\n".format(src_path)
+
+                output_file.write(info_str)
 
 class HtmlReportGenerator(BaseReportGenerator):
     """
@@ -167,35 +173,46 @@ class HtmlReportGenerator(BaseReportGenerator):
         # Body
         output_file.write('<body>\n')
         output_file.write(self.CONTENT_TITLE + '\n')
-        output_file.write(self.TABLE_HEADER + '\n')
 
-        # Source file information
-        for (src_path, line_dict) in cover_info.items():
+        # If no coverage information, explain this
+        if len(cover_info) == 0:
+            output_file.write("<p>No lines with coverage information in this diff.</p>\n")
 
-            # Calculate percent coverage
-            percent_covered = _percent_covered(line_dict)
+        else:
 
-            # Find missing lines
-            missing_lines = _missing_lines(line_dict)
+            # Start the table
+            output_file.write(self.TABLE_HEADER + '\n')
 
-            # Print the info
-            if percent_covered < 100.0:
-                info_str = dedent("""
-                <tr>
-                <td>{0}</td>
-                <td>{1}%</td>
-                <td>{2}</td>
-                </tr>""".format(src_path, percent_covered, 
-                                ",".join(missing_lines))).strip()
-            else:
-                info_str = dedent("""
-                <tr>
-                <td>{0}</td>
-                <td>100%</td>
-                <td>&nbsp;</td>
-                </tr>""".format(src_path)).strip()
+            # Source file information
+            for (src_path, line_dict) in cover_info.items():
 
-            output_file.write(info_str + '\n')
+                # Calculate percent coverage
+                percent_covered = _percent_covered(line_dict)
+
+                # Find missing lines
+                missing_lines = _missing_lines(line_dict)
+
+                # Print the info
+                if percent_covered < 100.0:
+                    info_str = dedent("""
+                    <tr>
+                    <td>{0}</td>
+                    <td>{1}%</td>
+                    <td>{2}</td>
+                    </tr>""".format(src_path, percent_covered, 
+                                    ",".join(missing_lines))).strip()
+                else:
+                    info_str = dedent("""
+                    <tr>
+                    <td>{0}</td>
+                    <td>100%</td>
+                    <td>&nbsp;</td>
+                    </tr>""".format(src_path)).strip()
+
+                output_file.write(info_str + '\n')
+
+            # Close the table
+            output_file.write('</table>\n')
 
         # Closing tags
-        output_file.write('</table>\n</body>\n</html>')
+        output_file.write('</body>\n</html>')

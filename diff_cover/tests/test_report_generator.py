@@ -63,6 +63,8 @@ class StringReportGeneratorTest(unittest.TestCase):
         # Create a report generator
         self.report = StringReportGenerator(None, None)
 
+    def test_generate_report(self):
+
         # Mock the superclass `diff_coverage()` method
         # (this is the only access the subclass has to 
         # the dependencies).
@@ -72,8 +74,6 @@ class StringReportGeneratorTest(unittest.TestCase):
                        'subdir/file3.py': { 4: True }}
 
         self.report.diff_coverage = mock.Mock(return_value=cover_dict)
-
-    def test_generate_report(self):
 
         # Create a buffer for the output
         output = StringIO.StringIO()
@@ -96,12 +96,41 @@ class StringReportGeneratorTest(unittest.TestCase):
 
         self.assertEqual(output_str, expected)
 
+    def test_empty_report(self):
+
+        # Return an empty coverage dict
+        self.report.diff_coverage = mock.Mock(return_value=dict())
+
+        # Create a buffer for the output
+        output = StringIO.StringIO()
+
+        # Generate the report
+        self.report.generate_report(output)
+
+        # Get the output
+        output_str = output.getvalue().strip()
+        output.close()
+
+        # Verify that we got the expected string
+        expected = dedent("""
+        Diff Coverage
+        -------------
+        No lines with coverage information in this diff.
+        """).strip()
+
+        self.assertEqual(output_str, expected)
+
+
+
+
 class HtmlReportGeneratorTest(unittest.TestCase):
 
     def setUp(self):
 
         # Create a report generator
         self.report = HtmlReportGenerator(None, None)
+
+    def test_generate_report(self):
 
         # Mock the superclass `diff_coverage()` method
         # (this is the only access the subclass has to 
@@ -112,8 +141,6 @@ class HtmlReportGeneratorTest(unittest.TestCase):
                        'subdir/file3.py': { 4: True }}
 
         self.report.diff_coverage = mock.Mock(return_value=cover_dict)
-
-    def test_generate_report(self):
 
         # Create a buffer for the output
         output = StringIO.StringIO()
@@ -157,6 +184,38 @@ class HtmlReportGeneratorTest(unittest.TestCase):
         <td>&nbsp;</td>
         </tr>
         </table>
+        </body>
+        </html>
+        """).strip()
+
+        self.assertEqual(output_str, expected)
+
+    def test_empty_report(self):
+
+        # Return an empty coverage dict
+        self.report.diff_coverage = mock.Mock(return_value=dict())
+
+        # Create a buffer for the output
+        output = StringIO.StringIO()
+
+        # Generate the report
+        self.report.generate_report(output)
+
+        # Get the output
+        output_str = output.getvalue()
+        output.close()
+
+        # Verify that we got the expected string
+        expected = dedent("""
+        <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+        <html>
+        <head>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+        <title>Diff Coverage</title>
+        </head>
+        <body>
+        <h1>Diff Coverage</h1>
+        <p>No lines with coverage information in this diff.</p>
         </body>
         </html>
         """).strip()
