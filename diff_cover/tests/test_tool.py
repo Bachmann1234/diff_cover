@@ -4,8 +4,7 @@ from diff_cover.tool import parse_args, generate_report
 class ParseArgsTest(unittest.TestCase):
 
     def test_parse_with_html_report(self):
-        argv = ['--git-branch', 'master',
-                '--coverage-xml', 'reports/coverage.xml',
+        argv = ['reports/coverage.xml', '--git-branch', 'master',
                 '--html-report', 'diff_cover.html']
 
         arg_dict = parse_args(argv)
@@ -15,8 +14,7 @@ class ParseArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
 
     def test_parse_with_no_html_report(self):
-        argv = ['--git-branch', 'master',
-                '--coverage-xml', 'reports/coverage.xml']
+        argv = ['reports/coverage.xml', '--git-branch', 'master']
 
         arg_dict = parse_args(argv)
 
@@ -24,7 +22,7 @@ class ParseArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get('coverage_xml'), 'reports/coverage.xml')
 
     def test_default_git_branch(self):
-        argv = ['--coverage-xml', 'reports/coverage.xml']
+        argv = ['reports/coverage.xml']
 
         arg_dict = parse_args(argv)
 
@@ -33,7 +31,8 @@ class ParseArgsTest(unittest.TestCase):
 
     def test_parse_invalid_arg(self):
 
-        invalid_argv = [[], ['invalid'],
+        # No coverage XML report specified
+        invalid_argv = [[], ['--html-report', 'diff_cover.html'],
                         ['--git-branch', 'master']] # No report file specified
 
         for argv in invalid_argv:

@@ -30,10 +30,9 @@ def parse_args(argv):
     The path strings may or may not exist.
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser.add_argument('coverage_xml', type=str, help=COVERAGE_XML_HELP)
     parser.add_argument('--git-branch', type=str, default='master',
                         help=GIT_BRANCH_HELP)
-    parser.add_argument('--coverage-xml', type=str, default='',
-                        help=COVERAGE_XML_HELP, required=True)
     parser.add_argument('--html-report', type=str, default=None,
                         help=HTML_REPORT_HELP)
 
