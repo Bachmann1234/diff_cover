@@ -56,11 +56,11 @@ class GitDiffReporterTest(unittest.TestCase):
         self.diff = GitDiffReporter(compare_branch, 
                                     subprocess_mod=self.subprocess)
 
-        # Configure the process to return with a diff string
-        diff_str = self.GIT_DIFF_OUTPUT
-        self.process.communicate.return_value = (diff_str, '')
 
     def test_popen_src_paths(self):
+
+        # Configure the git diff output
+        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, '')
 
         # Call the interface method
         self.diff.src_paths_changed()
@@ -72,6 +72,9 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_popen_hunks_changed(self):
 
+        # Configure the git diff output
+        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, '')
+
         # Call the interface method
         self.diff.hunks_changed('subdir/file1.py')
 
@@ -82,6 +85,9 @@ class GitDiffReporterTest(unittest.TestCase):
 
 
     def test_git_source_paths(self):
+
+        # Configure the git diff output
+        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, '')
 
         # Get the source paths in the diff
         source_paths = self.diff.src_paths_changed()
@@ -95,6 +101,9 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_hunks_changed(self):
 
+        # Configure the git diff output
+        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, '')
+
         # Get the hunks changed in the diff
         hunks_changed = self.diff.hunks_changed('subdir/file1.py')
 
@@ -104,6 +113,10 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(hunks_changed[1], (34, 47))
 
     def test_git_deleted_hunk(self):
+
+        # Configure the git diff output
+        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, '')
+
         # Get the hunks changed in the diff
         hunks_changed = self.diff.hunks_changed('README.md')
 
@@ -111,14 +124,17 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(len(hunks_changed), 0)
 
     def test_git_no_such_file(self):
+
+        # Configure the git diff output
+        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, '')
+
         hunks_changed = self.diff.hunks_changed('no_such_file.txt')
         self.assertEqual(hunks_changed, [])
 
     def test_no_diff(self):
 
         # Configure the process to return with an empty string
-        diff_str = ""
-        self.process.communicate.return_value = (diff_str, '')
+        self._set_git_diff_output('', '')
 
         # Expect no files changed
         source_paths = self.diff.src_paths_changed()
@@ -126,11 +142,46 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_diff_error(self):
 
-        # Configure the process to return with an err to stderr
-        self.process.communicate.return_value = ("", "fatal error occurred")
+        invalid_hunk_str = dedent("""
+                           diff --git a/subdir/file1.py b/subdir/file1.py
+                           @@ invalid @@ Text
+                           """).strip()
 
-        with self.assertRaises(GitDiffError):
-            self.diff.src_paths_changed()
+        no_src_line_str = "@@ -33,10 +34,13 @@ Text"
+        non_numeric_lines = dedent("""
+                            diff --git a/subdir/file1.py b/subdir/file1.py
+                            @@ -1,2 +a,b @@
+                            """).strip()
+        missing_line_num = dedent("""
+                            diff --git a/subdir/file1.py b/subdir/file1.py
+                            @@ -1,2 +  @@
+                            """).strip()
 
-        with self.assertRaises(GitDiffError):
-            self.diff.hunks_changed('subdir/file1.py')
+        # List of (stdout, stderr) git diff pairs that should cause
+        # a GitDiffError to be raised.
+        err_outputs = [ ('', 'fatal error occurred'),
+                        (invalid_hunk_str, ''), 
+                        (no_src_line_str, ''),
+                        (non_numeric_lines, '')]
+
+        for (stdout_str, stderr_str) in err_outputs:
+
+            # Configure the process to return the output
+            self._set_git_diff_output(stdout_str, stderr_str)
+
+            fail_msg = "Failed for stdout='{0}' and stderr='{1}'".format(
+                    stdout_str, stderr_str)
+
+            # Expect that both methods that access git diff raise an error
+            with self.assertRaises(GitDiffError, msg=fail_msg):
+                self.diff.src_paths_changed()
+
+            with self.assertRaises(GitDiffError, msg=fail_msg):
+                self.diff.hunks_changed('subdir/file1.py')
+
+    def _set_git_diff_output(self, stdout_str, stderr_str):
+        """ 
+        Configure the git diff process to print `stdout_str` to stdout
+        and `stderr_str` to stderr.
+        """
+        self.process.communicate.return_value = (stdout_str, stderr_str)

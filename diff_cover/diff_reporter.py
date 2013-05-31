@@ -192,21 +192,25 @@ class GitDiffReporter(BaseDiffReporter):
         if len(groups) == 1:
 
             hunk_str = groups[0]
+
+            # Split is guaranteed to return at least one component,
+            # so we handle only the cases where len(components) >= 1 below.
             components = hunk_str.split(',')
 
             # Calculate the end line (counting start_line as the first)
             # Handle the case in which num_lines is not specified
             # (because there is only one line in the file)
-            if len(components) == 1:
-                start_line = int(components[0])
-                end_line = start_line
+            try:
+                if len(components) == 1:
+                    start_line = int(components[0])
+                    end_line = start_line
 
-            elif len(components) > 1:
-                start_line = int(components[0])
-                num_lines = int(components[1])
-                end_line = start_line + num_lines
+                elif len(components) > 1:
+                    start_line = int(components[0])
+                    num_lines = int(components[1])
+                    end_line = start_line + num_lines
 
-            else:
+            except ValueError:
                 raise GitDiffError("Could not parse hunk '{0}'".format(line))
 
             # Add the hunk to the current source file
