@@ -79,6 +79,10 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     -------------
     subdir/file2.py (50%): Missing line(s) 8
     subdir/file1.py (50%): Missing line(s) 8
+    -------------
+    Total:   4 line(s)
+    Missing: 2 line(s)
+    Coverage: 50%
     """).strip() + "\n"
 
     EXPECTED_HTML_REPORT = dedent("""
@@ -107,6 +111,11 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     <td>8</td>
     </tr>
     </table>
+    <ul>
+    <li><b>Total</b>: 4 line(s)</li>
+    <li><b>Missing</b>: 2 line(s)</li>
+    <li><b>Coverage</b>: 50%</li>
+    </ul>
     </body>
     </html>
     """).strip()
