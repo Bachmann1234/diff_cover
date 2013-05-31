@@ -45,6 +45,21 @@ the current branch to the common ancestor with master, using
     diff-cover coverage.xml --git-branch master...HEAD
 
 
+Troubleshooting
+----------------------
+
+**Issue**: ``diff-cover`` always reports: "No lines with coverage information in this diff."
+
+**Solution**: ``diff-cover`` matches source files in the coverage XML report with
+source files in the ``git diff``.  For this reason, it's important
+that the relative paths to the files match.  If you are using `coverage.py`__
+to generate the coverage XML report, then make sure you run
+``diff-cover`` from the same working directory.
+
+__ http://nedbatchelder.com/code/coverage/
+
+
+
 License
 -------
 
