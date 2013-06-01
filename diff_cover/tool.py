@@ -3,7 +3,7 @@ Implement the command-line tool interface.
 """
 import argparse
 import sys
-from diff_reporter import GitDiffReporter, GitDiffError
+from diff_reporter import GitDiffReporter
 from coverage_reporter import XmlCoverageReporter
 from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
@@ -61,8 +61,13 @@ def generate_report(coverage_xml=None, git_branch=None, html_report=None):
 
 
 def main():
+    """
+    Main entry point for the tool, used by setup.py
+    """
     arg_dict = parse_args(sys.argv[1:])
-    generate_report(**arg_dict)
+    generate_report(coverage_xml=arg_dict['coverage_xml'],
+                    git_branch=arg_dict['git_branch'],
+                    html_report=arg_dict['html_report'])
 
 if __name__ == "__main__":
     main()

@@ -84,7 +84,7 @@ class BaseReportGenerator(object):
                               in line_cover_dict.items()]
 
             # Filter out `None` values
-            missing_lines = filter(lambda x: x is not None, missing_lines)
+            missing_lines = [x for x in missing_lines if x is not None]
 
             # Sort and return
             return sorted(missing_lines)

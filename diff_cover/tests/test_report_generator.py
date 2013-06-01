@@ -179,6 +179,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Coverage: 100%
         """).strip()
 
+        self.assertEqual(output_str, expected)
+
     def test_empty_report(self):
 
         # Have the dependencies return an empty report

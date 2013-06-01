@@ -1,5 +1,5 @@
 import unittest
-from diff_cover.tool import parse_args, generate_report
+from diff_cover.tool import parse_args
 
 
 class ParseArgsTest(unittest.TestCase):

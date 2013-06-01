@@ -77,7 +77,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
             src_node = etree.SubElement(classes, 'class')
             src_node.set('filename', path)
 
-            methods = etree.SubElement(src_node, 'methods')
+            etree.SubElement(src_node, 'methods')
             lines_node = etree.SubElement(src_node, 'lines')
 
             # Create a node for each line
