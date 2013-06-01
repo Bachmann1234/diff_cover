@@ -3,6 +3,7 @@ import mock
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter, GitDiffError
 
+
 class GitDiffReporterTest(unittest.TestCase):
 
     GIT_DIFF_OUTPUT = dedent("""
@@ -53,9 +54,8 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Create the diff reporter
         compare_branch = 'master'
-        self.diff = GitDiffReporter(compare_branch, 
+        self.diff = GitDiffReporter(compare_branch,
                                     subprocess_mod=self.subprocess)
-
 
     def test_popen_src_paths(self):
 
@@ -82,7 +82,6 @@ class GitDiffReporterTest(unittest.TestCase):
         self.subprocess.Popen.assert_called_with(['git', 'diff', 'master'],
                                                  stdout=self.subprocess.PIPE,
                                                  stderr=self.subprocess.PIPE)
-
 
     def test_git_source_paths(self):
 
@@ -159,10 +158,10 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # List of (stdout, stderr) git diff pairs that should cause
         # a GitDiffError to be raised.
-        err_outputs = [ ('', 'fatal error occurred'),
-                        (invalid_hunk_str, ''), 
-                        (no_src_line_str, ''),
-                        (non_numeric_lines, '')]
+        err_outputs = [('', 'fatal error occurred'),
+                       (invalid_hunk_str, ''),
+                       (no_src_line_str, ''),
+                       (non_numeric_lines, '')]
 
         for (stdout_str, stderr_str) in err_outputs:
 
@@ -180,7 +179,7 @@ class GitDiffReporterTest(unittest.TestCase):
                 self.diff.hunks_changed('subdir/file1.py')
 
     def _set_git_diff_output(self, stdout_str, stderr_str):
-        """ 
+        """
         Configure the git diff process to print `stdout_str` to stdout
         and `stderr_str` to stderr.
         """

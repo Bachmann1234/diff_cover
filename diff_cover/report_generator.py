@@ -5,6 +5,7 @@ Classes for generating diff coverage reports.
 from abc import ABCMeta, abstractmethod
 from textwrap import dedent
 
+
 class BaseReportGenerator(object):
     """
     Generate a diff coverage report.
@@ -16,7 +17,8 @@ class BaseReportGenerator(object):
         """
         Configure the report generator to build a report
         from `coverage_reporter` (of type BaseCoverageReporter)
-        and `diff_reporter` (of type BaseDiffReporter)"""
+        and `diff_reporter` (of type BaseDiffReporter)
+        """
         self._coverage = coverage_reporter
         self._diff = diff_reporter
 
@@ -28,8 +30,8 @@ class BaseReportGenerator(object):
         Write the report to `output_file`, which is a file-like
         object implementing the `write()` method.
 
-        Concrete subclasses should use `diff_line_coverage()`
-        to get the required information.
+        Concrete subclasses should access diff coverage info
+        using the base class methods.
         """
         pass
 
@@ -44,19 +46,20 @@ class BaseReportGenerator(object):
         """
         Return an integer percent of lines covered for the source
         in `src_path`.
-        
+
         If we have no coverage information for `src_path`, returns None
         """
         line_cover_dict = self._diff_coverage().get(src_path)
 
         if line_cover_dict is None:
             return None
-        
+
         else:
-            num_covered = sum([1 if covered else 0 
+            num_covered = sum([1 if covered else 0
                           for covered in line_cover_dict.values()])
 
-            percent_covered = int(float(num_covered) / len(line_cover_dict) * 100)
+            covered = float(num_covered) / len(line_cover_dict)
+            percent_covered = int(covered * 100)
 
             return percent_covered
 
@@ -64,7 +67,7 @@ class BaseReportGenerator(object):
         """
         Return a list of missing lines (integers) in `src_path`.
 
-        If we have no coverage information for `src_path`, returns 
+        If we have no coverage information for `src_path`, returns
         an empty list.
         """
 
@@ -76,8 +79,9 @@ class BaseReportGenerator(object):
         else:
             # Get all lines that are not covered, using None to indicate
             # that the line is not included
-            missing_lines = [ int(line_num) if not covered else None
-                              for (line_num, covered) in line_cover_dict.items()]
+            missing_lines = [int(line_num) if not covered else None
+                              for (line_num, covered)
+                              in line_cover_dict.items()]
 
             # Filter out `None` values
             missing_lines = filter(lambda x: x is not None, missing_lines)
@@ -87,15 +91,15 @@ class BaseReportGenerator(object):
 
     def total_num_lines(self):
         """
-        Return the total number of lines in the diff for 
+        Return the total number of lines in the diff for
         which we have coverage info.
         """
-        return sum([len(line_cover_dict) for line_cover_dict 
+        return sum([len(line_cover_dict) for line_cover_dict
                     in self._diff_coverage().values()])
 
     def total_num_missing(self):
         """
-        Returns the total number of lines in the diff 
+        Returns the total number of lines in the diff
         that should be covered, but aren't.
         """
 
@@ -125,7 +129,7 @@ class BaseReportGenerator(object):
         Returns a dictionary of the form:
 
             { SRC_PATH: { LINE_NUM: True | False } }
-        
+
         where `SRC_PATH` is the path to the source file,
         `LINE_NUM` is the line number in the source
         file included in the diff, and the value
@@ -152,8 +156,8 @@ class BaseReportGenerator(object):
                 for (start_line, end_line) in hunks:
 
                     # Retrieve line coverage information
-                    line_cover = self._coverage.coverage_info(src_path, 
-                                                              start_line, 
+                    line_cover = self._coverage.coverage_info(src_path,
+                                                              start_line,
                                                               end_line)
 
                     # Include only files with coverage information
@@ -183,7 +187,8 @@ class StringReportGenerator(BaseReportGenerator):
 
         # If no coverage information, explain this
         if len(self.src_paths()) == 0:
-            output_file.write("No lines with coverage information in this diff.\n")
+            msg = "No lines with coverage information in this diff.\n"
+            output_file.write(msg)
 
         else:
 
@@ -210,12 +215,13 @@ class StringReportGenerator(BaseReportGenerator):
         percent_covered = self.percent_covered(src_path)
 
         # Find missing lines
-        missing_lines = [ str(line) for line in self.missing_lines(src_path) ]
+        missing_lines = [str(line) for line
+                         in self.missing_lines(src_path)]
 
         # Print the info
         if percent_covered < 100.0:
             info_str = "{0} ({1}%): Missing line(s) {2}\n".format(\
-                        src_path, percent_covered, 
+                        src_path, percent_covered,
                         ",".join(missing_lines))
         else:
             info_str = "{0} (100%)\n".format(src_path)
@@ -237,6 +243,7 @@ class StringReportGenerator(BaseReportGenerator):
                    self.total_percent_covered())).strip()
 
         output_file.write(info_str + "\n")
+
 
 class HtmlReportGenerator(BaseReportGenerator):
     """
@@ -261,7 +268,7 @@ class HtmlReportGenerator(BaseReportGenerator):
         Write an HTML-formatted report to `output_file`.
         """
 
-        # Header 
+        # Header
         output_file.write(self.DOCTYPE + '\n')
         output_file.write('<html>\n<head>\n')
         output_file.write(self.META + '\n')
@@ -274,7 +281,8 @@ class HtmlReportGenerator(BaseReportGenerator):
 
         # If no coverage information, explain this
         if len(self.src_paths()) == 0:
-            output_file.write("<p>No lines with coverage information in this diff.</p>\n")
+            msg = "<p>No lines with coverage information in this diff.</p>\n"
+            output_file.write(msg)
 
         else:
 
@@ -303,7 +311,8 @@ class HtmlReportGenerator(BaseReportGenerator):
         percent_covered = self.percent_covered(src_path)
 
         # Find missing lines
-        missing_lines = [ str(line) for line in self.missing_lines(src_path) ]
+        missing_lines = [str(line) for line
+                         in self.missing_lines(src_path)]
 
         # Print the info
         if percent_covered < 100.0:
@@ -312,7 +321,7 @@ class HtmlReportGenerator(BaseReportGenerator):
             <td>{0}</td>
             <td>{1}%</td>
             <td>{2}</td>
-            </tr>""".format(src_path, percent_covered, 
+            </tr>""".format(src_path, percent_covered,
                             ",".join(missing_lines))).strip()
         else:
             info_str = dedent("""
@@ -323,7 +332,6 @@ class HtmlReportGenerator(BaseReportGenerator):
             </tr>""".format(src_path)).strip()
 
         output_file.write(info_str + '\n')
-
 
     def _print_summary_stats(self, output_file):
         """

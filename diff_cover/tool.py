@@ -13,9 +13,10 @@ GIT_BRANCH_HELP = "Git branch to compare against the current branch."
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 
+
 def parse_args(argv):
     """
-    Parse command line arguments, returning a dict of 
+    Parse command line arguments, returning a dict of
     valid options:
 
         {
@@ -38,6 +39,7 @@ def parse_args(argv):
 
     return vars(parser.parse_args(argv))
 
+
 def generate_report(coverage_xml=None, git_branch=None, html_report=None):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
@@ -56,6 +58,7 @@ def generate_report(coverage_xml=None, git_branch=None, html_report=None):
 
     # Generate the report
     reporter.generate_report(output_file)
+
 
 def main():
     arg_dict = parse_args(sys.argv[1:])

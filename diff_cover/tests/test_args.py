@@ -1,6 +1,7 @@
 import unittest
 from diff_cover.tool import parse_args, generate_report
 
+
 class ParseArgsTest(unittest.TestCase):
 
     def test_parse_with_html_report(self):
@@ -33,7 +34,7 @@ class ParseArgsTest(unittest.TestCase):
 
         # No coverage XML report specified
         invalid_argv = [[], ['--html-report', 'diff_cover.html'],
-                        ['--git-branch', 'master']] # No report file specified
+                        ['--git-branch', 'master']]
 
         for argv in invalid_argv:
             with self.assertRaises(SystemExit):
