@@ -2,31 +2,32 @@ import unittest
 from lxml import etree
 from diff_cover.coverage_reporter import XmlCoverageReporter
 
+
 class XmlCoverageReporterTest(unittest.TestCase):
 
     def test_coverage_info(self):
 
         # Construct the XML report
         file_paths = ['file1.py', 'subdir/file2.py']
-        line_dict = { 2: True, 3: False, 5: True, 6: False, 8: False }
+        line_dict = {2: True, 3: False, 5: True, 6: False, 8: False}
         xml = self._coverage_xml(file_paths, line_dict)
 
         # Parse the report
         coverage = XmlCoverageReporter(xml)
 
-        # By construction, each file has the same set 
+        # By construction, each file has the same set
         # of covered/uncovered lines
         result = coverage.coverage_info('file1.py', 1, 8)
         self.assertEqual(result, line_dict)
 
         # Try getting a smaller range
         result = coverage.coverage_info('subdir/file2.py', 3, 7)
-        expected = { 3: False, 5: True, 6: False }
+        expected = {3: False, 5: True, 6: False}
         self.assertEqual(result, expected)
 
         # Once more on the first file (for caching)
         result = coverage.coverage_info('file1.py', 5, 7)
-        expected = { 5: True, 6: False }
+        expected = {5: True, 6: False}
         self.assertEqual(result, expected)
 
     def test_no_such_file(self):
@@ -44,7 +45,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
     def test_no_such_line(self):
         # Construct the XML report
         file_paths = ['file.py']
-        line_dict = { 2: True, 3: False, 5: True, 6: False, 8: False }
+        line_dict = {2: True, 3: False, 5: True, 6: False, 8: False}
         xml = self._coverage_xml(file_paths, line_dict)
 
         # Parse the report
@@ -76,7 +77,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
             src_node = etree.SubElement(classes, 'class')
             src_node.set('filename', path)
 
-            methods = etree.SubElement(src_node, 'methods')
+            etree.SubElement(src_node, 'methods')
             lines_node = etree.SubElement(src_node, 'lines')
 
             # Create a node for each line

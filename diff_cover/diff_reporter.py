@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 import subprocess
 import re
 
+
 class BaseDiffReporter(object):
     """
     Query information about lines changed in a diff.
@@ -30,12 +31,14 @@ class BaseDiffReporter(object):
         """
         pass
 
+
 class GitDiffError(Exception):
     """
     `git diff` command exited with non-zero status,
     or `git diff` produced invalid output.
     """
     pass
+
 
 class GitDiffReporter(BaseDiffReporter):
     """
@@ -48,7 +51,7 @@ class GitDiffReporter(BaseDiffReporter):
         with `compare_branch`.
 
         Uses `subprocess_mod` to perform the system call to
-        `git diff`.  
+        `git diff`.
         """
         super(GitDiffReporter, self).__init__()
 
@@ -80,14 +83,14 @@ class GitDiffReporter(BaseDiffReporter):
     def _git_diff(self):
         """
         Run `git diff` and returns a dict in which the keys
-        are changed file paths and the values are lists of 
+        are changed file paths and the values are lists of
         `(start_line, end_line)` tuples.
 
         Returns a cached result if called multiple times.
 
         Raises a GitDiffError if `git diff` has an error exit status.
         """
-        
+
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
 

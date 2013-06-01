@@ -4,7 +4,6 @@ High-level integration tests of diff-cover tool.
 
 import unittest
 from mock import patch
-import sys
 import os
 import os.path
 from subprocess import Popen
@@ -14,6 +13,7 @@ import shutil
 from textwrap import dedent
 from diff_cover.tool import main
 from diff_cover.diff_reporter import GitDiffError
+
 
 class DiffCoverIntegrationTest(unittest.TestCase):
     """

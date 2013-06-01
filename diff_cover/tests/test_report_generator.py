@@ -7,6 +7,7 @@ from diff_cover.coverage_reporter import BaseCoverageReporter
 from diff_cover.report_generator import BaseReportGenerator, \
         HtmlReportGenerator, StringReportGenerator
 
+
 class SimpleReportGenerator(BaseReportGenerator):
     """
     Bare-bones concrete implementation of a report generator.
@@ -18,6 +19,7 @@ class SimpleReportGenerator(BaseReportGenerator):
     def generate_report(self, output_file):
         pass
 
+
 class BaseReportGeneratorTest(unittest.TestCase):
     """
     Base class for constructing test cases of report generators.
@@ -26,9 +28,9 @@ class BaseReportGeneratorTest(unittest.TestCase):
     # Test data, returned by default from the mocks
     SRC_PATHS = ['file1.py', 'subdir/file2.py']
     HUNKS = [(2, 5), (10, 15)]
-    COVERAGE = { 1: True, 2: True, 3: True, 
-                 4: True, 7: True, 10: False, 11: False, 15: True, 
-                 20: False, 30: True}
+    COVERAGE = {1: True, 2: True, 3: True,
+                4: True, 7: True, 10: False, 11: False, 15: True,
+                20: False, 30: True}
 
     # Subclasses override this to provide the class under test
     REPORT_GENERATOR_CLASS = None
@@ -80,7 +82,7 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         # Check that we get the expected coverage percentages
         # By construction, both files have the same hunk
         # and coverage information
-        # Because the diff_reporter is reponsible for 
+        # Because the diff_reporter is reponsible for
         # filtering non-diff lines, we expect to get
         # all the lines included
         for src_path in self.SRC_PATHS:
@@ -156,7 +158,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Have the dependencies return an empty report
         self.set_src_paths_changed(['file.py'])
-        self.set_hunks_changed([(0,100)])
+        self.set_hunks_changed([(0, 100)])
         self.set_coverage_info({2: True})
 
         # Generate the report
@@ -176,6 +178,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Missing: 0 line(s)
         Coverage: 100%
         """).strip()
+
+        self.assertEqual(output_str, expected)
 
     def test_empty_report(self):
 

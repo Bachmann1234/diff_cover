@@ -4,6 +4,7 @@ Classes for querying the information in a test coverage report.
 
 from abc import ABCMeta, abstractmethod
 
+
 class BaseCoverageReporter(object):
     """
     Query information from a coverage report.
@@ -27,6 +28,7 @@ class BaseCoverageReporter(object):
         source file.
         """
         pass
+
 
 class XmlCoverageReporter(BaseCoverageReporter):
     """
@@ -77,5 +79,5 @@ class XmlCoverageReporter(BaseCoverageReporter):
         # Return the line numbers that match the range
         src_line_dict = self._info_cache[src_path]
 
-        return { key: src_line_dict[key] for key in src_line_dict.keys()
-                 if key >= line_start and key <= line_end }
+        return {key: src_line_dict[key] for key in src_line_dict.keys()
+                 if key >= line_start and key <= line_end}

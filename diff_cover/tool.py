@@ -3,7 +3,7 @@ Implement the command-line tool interface.
 """
 import argparse
 import sys
-from diff_reporter import GitDiffReporter, GitDiffError
+from diff_reporter import GitDiffReporter
 from coverage_reporter import XmlCoverageReporter
 from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
@@ -13,9 +13,10 @@ GIT_BRANCH_HELP = "Git branch to compare against the current branch."
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 
+
 def parse_args(argv):
     """
-    Parse command line arguments, returning a dict of 
+    Parse command line arguments, returning a dict of
     valid options:
 
         {
@@ -38,6 +39,7 @@ def parse_args(argv):
 
     return vars(parser.parse_args(argv))
 
+
 def generate_report(coverage_xml=None, git_branch=None, html_report=None):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
@@ -57,9 +59,15 @@ def generate_report(coverage_xml=None, git_branch=None, html_report=None):
     # Generate the report
     reporter.generate_report(output_file)
 
+
 def main():
+    """
+    Main entry point for the tool, used by setup.py
+    """
     arg_dict = parse_args(sys.argv[1:])
-    generate_report(**arg_dict)
+    generate_report(coverage_xml=arg_dict['coverage_xml'],
+                    git_branch=arg_dict['git_branch'],
+                    html_report=arg_dict['html_report'])
 
 if __name__ == "__main__":
     main()
