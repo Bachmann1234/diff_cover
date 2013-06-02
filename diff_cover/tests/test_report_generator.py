@@ -32,6 +32,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
                 4: True, 7: True, 10: False, 11: False, 15: True, 
                 20: False, 30: True}
     XML_REPORT_NAME = "reports/coverage.xml"
+    DIFF_REPORT_NAME = "master"
 
     # Subclasses override this to provide the class under test
     REPORT_GENERATOR_CLASS = None
@@ -42,8 +43,9 @@ class BaseReportGeneratorTest(unittest.TestCase):
         self.coverage = mock.MagicMock(BaseCoverageReporter)
         self.diff = mock.MagicMock(BaseDiffReporter)
 
-        # Set the name of the XML coverage report
+        # Set the names of the XML and diff reports
         self.coverage.name.return_value = self.XML_REPORT_NAME
+        self.diff.name.return_value = self.DIFF_REPORT_NAME
 
         # Have the mocks return default values
         self.set_src_paths_changed(self.SRC_PATHS)
@@ -82,6 +84,10 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
     def test_coverage_name(self):
         self.assertEqual(self.report.coverage_report_name(), 
                          self.XML_REPORT_NAME)
+
+    def test_diff_name(self):
+        self.assertEqual(self.report.diff_report_name(), 
+                         self.DIFF_REPORT_NAME)
 
     def test_percent_covered(self):
 
@@ -148,6 +154,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Diff Coverage
         -------------
         Coverage Report: reports/coverage.xml
+        Diff: master
         -------------
         file1.py (70%): Missing line(s) 10,11,20
         subdir/file2.py (70%): Missing line(s) 10,11,20
@@ -181,6 +188,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Diff Coverage
         -------------
         Coverage Report: reports/coverage.xml
+        Diff: master
         -------------
         file.py (100%)
         -------------
@@ -213,6 +221,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Diff Coverage
         -------------
         Coverage Report: reports/coverage.xml
+        Diff: master
         -------------
         No lines with coverage information in this diff.
         """).strip()
@@ -247,6 +256,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         <body>
         <h1>Diff Coverage</h1>
         <p>Coverage Report: reports/coverage.xml</p>
+        <p>Diff: master</p>
         <table border="1">
         <tr>
         <th>Source File</th>
@@ -303,6 +313,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         <body>
         <h1>Diff Coverage</h1>
         <p>Coverage Report: reports/coverage.xml</p>
+        <p>Diff: master</p>
         <p>No lines with coverage information in this diff.</p>
         </body>
         </html>

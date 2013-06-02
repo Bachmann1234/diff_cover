@@ -14,6 +14,13 @@ class BaseDiffReporter(object):
 
     __metaclass__ = ABCMeta
 
+    def __init__(self, name):
+        """
+        Provide a `name` for the diff report, which will
+        be included in the diff coverage report.
+        """
+        self._name = name
+
     @abstractmethod
     def src_paths_changed(self):
         """
@@ -30,6 +37,13 @@ class BaseDiffReporter(object):
         in the current version of the source file.
         """
         pass
+
+    def name(self):
+        """
+        Retrieve the name of the diff report, which will
+        be incluided in the diff coverage report.
+        """
+        return self._name
 
 
 class GitDiffError(Exception):
@@ -53,7 +67,7 @@ class GitDiffReporter(BaseDiffReporter):
         Uses `subprocess_mod` to perform the system call to
         `git diff`.
         """
-        super(GitDiffReporter, self).__init__()
+        super(GitDiffReporter, self).__init__(compare_branch)
 
         self._compare_branch = compare_branch
         self._subprocess_mod = subprocess_mod

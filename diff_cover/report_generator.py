@@ -41,6 +41,12 @@ class BaseReportGenerator(object):
         """
         return self._coverage.name()
 
+    def diff_report_name(self):
+        """
+        Return the name of the diff.
+        """
+        return self._diff.name()
+
     def src_paths(self):
         """
         Return a list of source files in the diff
@@ -192,6 +198,8 @@ class StringReportGenerator(BaseReportGenerator):
         self._print_divider(output_file)
         output_file.write("Coverage Report: {0}\n".format(
                           self.coverage_report_name()))
+        output_file.write("Diff: {0}\n".format(
+                          self.diff_report_name()))
         self._print_divider(output_file)
 
         # If no coverage information, explain this
@@ -288,9 +296,11 @@ class HtmlReportGenerator(BaseReportGenerator):
         output_file.write('<body>\n')
         output_file.write(self.CONTENT_TITLE + '\n')
 
-        # Original coverage report info
+        # Source report names
         output_file.write("<p>Coverage Report: {0}</p>\n".format(
-                          self.coverage_report_name()))
+                         self.coverage_report_name()))
+        output_file.write("<p>Diff: {0}</p>\n".format(
+                         self.diff_report_name()))
 
         # If no coverage information, explain this
         if len(self.src_paths()) == 0:

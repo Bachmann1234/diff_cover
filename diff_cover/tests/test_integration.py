@@ -78,6 +78,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     Diff Coverage
     -------------
     Coverage Report: {coverage_xml}
+    Diff: master
     -------------
     subdir/file2.py (50%): Missing line(s) 8
     subdir/file1.py (50%): Missing line(s) 8
@@ -97,6 +98,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     <body>
     <h1>Diff Coverage</h1>
     <p>Coverage Report: {coverage_xml}</p>
+    <p>Diff: master</p>
     <table border="1">
     <tr>
     <th>Source File</th>
@@ -133,7 +135,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         # Write the XML coverage report to a temp directory
         self._coverage_xml_path = self._write_to_temp(self.COVERAGE_XML)
 
-        # Create mocks 
+        # Create mocks
         self._mock_communicate = patch.object(Popen, 'communicate').start()
         self._mock_sys = patch('diff_cover.tool.sys').start()
 
