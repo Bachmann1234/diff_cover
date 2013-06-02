@@ -34,7 +34,7 @@ class BaseDiffReporter(object):
 
 class GitDiffError(Exception):
     """
-    `git diff` command exited with non-zero status,
+    `git diff` command had an error
     or `git diff` produced invalid output.
     """
     pass
@@ -88,7 +88,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         Returns a cached result if called multiple times.
 
-        Raises a GitDiffError if `git diff` has an error exit status.
+        Raises a GitDiffError if `git diff` has an error.
         """
 
         # If we do not have a cached result, execute `git diff`
@@ -106,7 +106,7 @@ class GitDiffReporter(BaseDiffReporter):
     def _git_diff_str(self):
         """
         Execute `git diff` and return the output string,
-        raising a GitDiffError if non-zero exit status.
+        raising a GitDiffError if `git diff` reports an error.
         """
         command = ['git', 'diff', self._compare_branch]
         stdout_pipe = self._subprocess_mod.PIPE
