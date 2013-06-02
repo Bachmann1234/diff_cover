@@ -12,6 +12,13 @@ class BaseCoverageReporter(object):
 
     __metaclass__ = ABCMeta
 
+    def __init__(self, name):
+        """
+        Provide a name for the coverage report, which will be included
+        in the generated diff report.
+        """
+        self._name = name
+
     @abstractmethod
     def coverage_info(self, src_path, line_start, line_end):
         """
@@ -29,18 +36,31 @@ class BaseCoverageReporter(object):
         """
         pass
 
+    def name(self):
+        """
+        Retrieve the name of the report, to be included in the generated
+        diff report.
+
+        For example, `name()` could return the path to the coverage
+        report file.
+        """
+        return self._name
+
 
 class XmlCoverageReporter(BaseCoverageReporter):
     """
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_root):
+    def __init__(self, xml_root, name):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
+
+        `name` is a name used to identify the report, which will
+        be included in the generated diff coverage report.
         """
-        super(XmlCoverageReporter, self).__init__()
+        super(XmlCoverageReporter, self).__init__(name)
         self._xml = xml_root
 
         # Create a dict to cache coverage_info dict results

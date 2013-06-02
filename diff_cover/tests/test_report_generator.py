@@ -28,9 +28,10 @@ class BaseReportGeneratorTest(unittest.TestCase):
     # Test data, returned by default from the mocks
     SRC_PATHS = ['file1.py', 'subdir/file2.py']
     HUNKS = [(2, 5), (10, 15)]
-    COVERAGE = {1: True, 2: True, 3: True,
-                4: True, 7: True, 10: False, 11: False, 15: True,
+    COVERAGE = {1: True, 2: True, 3: True, 
+                4: True, 7: True, 10: False, 11: False, 15: True, 
                 20: False, 30: True}
+    XML_REPORT_NAME = "reports/coverage.xml"
 
     # Subclasses override this to provide the class under test
     REPORT_GENERATOR_CLASS = None
@@ -40,6 +41,9 @@ class BaseReportGeneratorTest(unittest.TestCase):
         # Create mocks of the dependencies
         self.coverage = mock.MagicMock(BaseCoverageReporter)
         self.diff = mock.MagicMock(BaseDiffReporter)
+
+        # Set the name of the XML coverage report
+        self.coverage.name.return_value = self.XML_REPORT_NAME
 
         # Have the mocks return default values
         self.set_src_paths_changed(self.SRC_PATHS)
@@ -73,9 +77,11 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = SimpleReportGenerator
 
     def test_src_paths(self):
-
-        # Should get the correct source path information
         self.assertEqual(self.report.src_paths(), self.SRC_PATHS)
+
+    def test_coverage_name(self):
+        self.assertEqual(self.report.coverage_report_name(), 
+                         self.XML_REPORT_NAME)
 
     def test_percent_covered(self):
 
@@ -141,6 +147,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         Diff Coverage
         -------------
+        Coverage Report: reports/coverage.xml
+        -------------
         file1.py (70%): Missing line(s) 10,11,20
         subdir/file2.py (70%): Missing line(s) 10,11,20
         -------------
@@ -172,6 +180,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         Diff Coverage
         -------------
+        Coverage Report: reports/coverage.xml
+        -------------
         file.py (100%)
         -------------
         Total:   1 line(s)
@@ -201,6 +211,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         # Verify that we got the expected string
         expected = dedent("""
         Diff Coverage
+        -------------
+        Coverage Report: reports/coverage.xml
         -------------
         No lines with coverage information in this diff.
         """).strip()
@@ -234,6 +246,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         </head>
         <body>
         <h1>Diff Coverage</h1>
+        <p>Coverage Report: reports/coverage.xml</p>
         <table border="1">
         <tr>
         <th>Source File</th>
@@ -289,6 +302,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         </head>
         <body>
         <h1>Diff Coverage</h1>
+        <p>Coverage Report: reports/coverage.xml</p>
         <p>No lines with coverage information in this diff.</p>
         </body>
         </html>

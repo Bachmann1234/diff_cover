@@ -77,6 +77,8 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     EXPECTED_CONSOLE_REPORT = dedent("""
     Diff Coverage
     -------------
+    Coverage Report: {coverage_xml}
+    -------------
     subdir/file2.py (50%): Missing line(s) 8
     subdir/file1.py (50%): Missing line(s) 8
     -------------
@@ -94,6 +96,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     </head>
     <body>
     <h1>Diff Coverage</h1>
+    <p>Coverage Report: {coverage_xml}</p>
     <table border="1">
     <tr>
     <th>Source File</th>
@@ -160,7 +163,9 @@ class DiffCoverIntegrationTest(unittest.TestCase):
 
         # Check the output to stdout
         report = string_buffer.getvalue()
-        self.assertEqual(report, self.EXPECTED_CONSOLE_REPORT)
+        expected = self.EXPECTED_CONSOLE_REPORT.format(
+                        coverage_xml=self._coverage_xml_path)
+        self.assertEqual(report, expected)
 
     def test_diff_cover_html(self):
 
@@ -184,7 +189,9 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         # Load the content of the HTML report
         with open(report_path) as html_report:
             html = html_report.read()
-            self.assertEqual(html, self.EXPECTED_HTML_REPORT)
+            expected = self.EXPECTED_HTML_REPORT.format(
+                            coverage_xml=self._coverage_xml_path)
+            self.assertEqual(html, expected)
 
     def test_git_diff_error(self):
 

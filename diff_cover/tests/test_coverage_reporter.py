@@ -8,12 +8,16 @@ class XmlCoverageReporterTest(unittest.TestCase):
     def test_coverage_info(self):
 
         # Construct the XML report
+        name = "subdir/coverage.xml"
         file_paths = ['file1.py', 'subdir/file2.py']
         line_dict = {2: True, 3: False, 5: True, 6: False, 8: False}
         xml = self._coverage_xml(file_paths, line_dict)
 
         # Parse the report
-        coverage = XmlCoverageReporter(xml)
+        coverage = XmlCoverageReporter(xml, name)
+
+        # Expect that the name is set
+        self.assertEqual(coverage.name(), name)
 
         # By construction, each file has the same set
         # of covered/uncovered lines
@@ -36,7 +40,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml = self._coverage_xml([], dict())
 
         # Parse the report
-        coverage = XmlCoverageReporter(xml)
+        coverage = XmlCoverageReporter(xml, '')
 
         # Expect that we get no results
         result = coverage.coverage_info('file.py', 1, 100)
@@ -49,7 +53,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml = self._coverage_xml(file_paths, line_dict)
 
         # Parse the report
-        coverage = XmlCoverageReporter(xml)
+        coverage = XmlCoverageReporter(xml, '')
 
         result = coverage.coverage_info('file.py', 10, 15)
         self.assertEqual(result, dict())
