@@ -14,6 +14,13 @@ class BaseDiffReporter(object):
 
     __metaclass__ = ABCMeta
 
+    def __init__(self, name):
+        """
+        Provide a `name` for the diff report, which will
+        be included in the diff coverage report.
+        """
+        self._name = name
+
     @abstractmethod
     def src_paths_changed(self):
         """
@@ -31,10 +38,17 @@ class BaseDiffReporter(object):
         """
         pass
 
+    def name(self):
+        """
+        Retrieve the name of the diff report, which will
+        be incluided in the diff coverage report.
+        """
+        return self._name
+
 
 class GitDiffError(Exception):
     """
-    `git diff` command exited with non-zero status,
+    `git diff` command had an error
     or `git diff` produced invalid output.
     """
     pass
@@ -53,7 +67,7 @@ class GitDiffReporter(BaseDiffReporter):
         Uses `subprocess_mod` to perform the system call to
         `git diff`.
         """
-        super(GitDiffReporter, self).__init__()
+        super(GitDiffReporter, self).__init__(compare_branch)
 
         self._compare_branch = compare_branch
         self._subprocess_mod = subprocess_mod
@@ -88,7 +102,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         Returns a cached result if called multiple times.
 
-        Raises a GitDiffError if `git diff` has an error exit status.
+        Raises a GitDiffError if `git diff` has an error.
         """
 
         # If we do not have a cached result, execute `git diff`
@@ -106,7 +120,7 @@ class GitDiffReporter(BaseDiffReporter):
     def _git_diff_str(self):
         """
         Execute `git diff` and return the output string,
-        raising a GitDiffError if non-zero exit status.
+        raising a GitDiffError if `git diff` reports an error.
         """
         command = ['git', 'diff', self._compare_branch]
         stdout_pipe = self._subprocess_mod.PIPE

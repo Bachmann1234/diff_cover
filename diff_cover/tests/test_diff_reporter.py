@@ -57,6 +57,11 @@ class GitDiffReporterTest(unittest.TestCase):
         self.diff = GitDiffReporter(compare_branch,
                                     subprocess_mod=self.subprocess)
 
+    def test_name(self):
+
+        # Expect that diff report is named after its compare branch
+        self.assertEqual(self.diff.name(), 'master')
+
     def test_popen_src_paths(self):
 
         # Configure the git diff output
