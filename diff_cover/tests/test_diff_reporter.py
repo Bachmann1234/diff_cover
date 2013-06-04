@@ -73,11 +73,25 @@ class GitDiffReporterTest(unittest.TestCase):
         source_paths = self.diff.src_paths_changed()
 
         # Validate the source paths
+        # They should be in alphabetical order
         self.assertEqual(len(source_paths), 4)
-        self.assertIn('subdir/file1.py', source_paths)
-        self.assertIn('subdir/file2.py', source_paths)
-        self.assertIn('one_line.txt', source_paths)
-        self.assertIn('README.md', source_paths)
+        self.assertEqual('one_line.txt', source_paths[0])
+        self.assertEqual('README.md', source_paths[1])
+        self.assertEqual('subdir/file1.py', source_paths[2])
+        self.assertEqual('subdir/file2.py', source_paths[3])
+
+    def test_duplicate_source_paths(self):
+
+        # Duplicate the output for committed, staged, and unstaged changes
+        self._set_git_diff_output(self.MASTER_DIFF, self.MASTER_DIFF,
+                                  self.MASTER_DIFF)
+
+        # Get the source paths in the diff
+        source_paths = self.diff.src_paths_changed()
+
+        # Should see only one copy of source files in MASTER_DIFF
+        self.assertEqual(len(source_paths), 1)
+        self.assertEqual('subdir/file1.py', source_paths[0])
 
     def test_git_hunks_changed(self):
 
@@ -104,6 +118,71 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Validate no hunks changed
         self.assertEqual(len(hunks_changed), 0)
+
+    def test_git_repeat_hunk(self):
+
+        # Have the committed, staged, and unstaged hunks
+        # all be the same
+        self._set_git_diff_output(self.MASTER_DIFF, self.MASTER_DIFF,
+                                  self.MASTER_DIFF)
+
+        # Get the hunks changed in the diff
+        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+
+        # Validate the hunks changed
+        self.assertEqual(len(hunks_changed), 2)
+        self.assertEqual(hunks_changed[0], (3, 10))
+        self.assertEqual(hunks_changed[1], (34, 47))
+
+    def test_git_overlapping_hunk(self):
+
+        # Overlap, extending the end of the hunk (lines 3 to 10)
+        overlap_1 = dedent("""
+        diff --git a/subdir/file1.py b/subdir/file1.py
+        @@ -3,6 +5,9 @@ Text
+        """).strip()
+
+        # Overlap, extending the beginning of the hunk (lines 34 to 47)
+        overlap_2 = dedent("""
+        diff --git a/subdir/file1.py b/subdir/file1.py
+        @@ -33,10 +32,5 @@ Text
+        """).strip()
+
+        # Hunks in staged / unstaged overlap with hunks in master
+        self._set_git_diff_output(self.MASTER_DIFF, overlap_1, overlap_2)
+
+        # Get the hunks changed in the diff
+        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+
+        # Validate the hunks changed
+        self.assertEqual(len(hunks_changed), 2)
+        self.assertEqual(hunks_changed[0], (3, 14))
+        self.assertEqual(hunks_changed[1], (32, 47))
+
+    def test_git_hunk_within_hunk(self):
+
+        # Surround hunk in master (lines 3 to 10)
+        surround = dedent("""
+        diff --git a/subdir/file1.py b/subdir/file1.py
+        @@ -3,6 +2,9 @@ Text
+        """).strip()
+
+        # Within hunk in master (lines 34 to 47)
+        within = dedent("""
+        diff --git a/subdir/file1.py b/subdir/file1.py
+        @@ -33,10 +35,11 @@ Text
+        """).strip()
+
+        # Hunks in staged / unstaged overlap with hunks in master
+        self._set_git_diff_output(self.MASTER_DIFF, surround, within)
+
+        # Get the hunks changed in the diff
+        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+
+        # Validate the hunks changed
+        self.assertEqual(len(hunks_changed), 2)
+        self.assertEqual(hunks_changed[0], (2, 11))
+        self.assertEqual(hunks_changed[1], (34, 47))
 
     def test_git_no_such_file(self):
 

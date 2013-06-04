@@ -25,6 +25,8 @@ class BaseDiffReporter(object):
     def src_paths_changed(self):
         """
         Returns a list of source paths changed in this diff.
+
+        Source paths are guaranteed to be unique.
         """
         pass
 
@@ -35,6 +37,8 @@ class BaseDiffReporter(object):
         Each hunk is a `(start_line, end_line)` tuple indicating
         the starting and ending line numbers of the hunk
         in the current version of the source file.
+
+        Hunks are guaranteed to be non-overlapping.
         """
         pass
 
@@ -71,7 +75,8 @@ class GitDiffReporter(BaseDiffReporter):
         diff_dict = self._git_diff()
 
         # Return the changed file paths (dict keys)
-        return diff_dict.keys()
+        # in alphabetical order
+        return sorted(diff_dict.keys(), key=str.lower)
 
     def hunks_changed(self, src_path):
 
