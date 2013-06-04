@@ -79,8 +79,8 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     """)
 
     EXPECTED_CONSOLE_REPORT = dedent("""
-    Diff Coverage
     -------------
+    Diff Coverage
     Coverage Report: {coverage_xml}
     Diff: master...HEAD, staged, and unstaged changes
     -------------
@@ -90,6 +90,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     Total:   4 line(s)
     Missing: 2 line(s)
     Coverage: 50%
+    -------------
     """).strip() + "\n"
 
     EXPECTED_HTML_REPORT = dedent("""

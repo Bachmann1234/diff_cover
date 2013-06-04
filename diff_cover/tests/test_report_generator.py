@@ -151,8 +151,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Verify that we got the expected string
         expected = dedent("""
-        Diff Coverage
         -------------
+        Diff Coverage
         Coverage Report: reports/coverage.xml
         Diff: master
         -------------
@@ -162,6 +162,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Total:   20 line(s)
         Missing: 6 line(s)
         Coverage: 70%
+        -------------
         """).strip()
 
         self.assertEqual(output_str, expected)
@@ -185,8 +186,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Verify that we got the expected string
         expected = dedent("""
-        Diff Coverage
         -------------
+        Diff Coverage
         Coverage Report: reports/coverage.xml
         Diff: master
         -------------
@@ -195,6 +196,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Total:   1 line(s)
         Missing: 0 line(s)
         Coverage: 100%
+        -------------
         """).strip()
 
         self.assertEqual(output_str, expected)
@@ -218,12 +220,13 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Verify that we got the expected string
         expected = dedent("""
-        Diff Coverage
         -------------
+        Diff Coverage
         Coverage Report: reports/coverage.xml
         Diff: master
         -------------
         No lines with coverage information in this diff.
+        -------------
         """).strip()
 
         self.assertEqual(output_str, expected)
