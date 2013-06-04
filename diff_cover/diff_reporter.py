@@ -108,6 +108,10 @@ class GitDiffReporter(BaseDiffReporter):
             # Parse the output of the diff string
             self._diff_dict = self._parse_diff_str(diff_str)
 
+            # Resolve overlapping hunks
+            for (src_path, hunk_list) in self._diff_dict.items():
+                self._diff_dict[src_path] = self._resolve_overlaps(hunk_list)
+
         # Return the diff cache
         return self._diff_dict
 
@@ -236,3 +240,40 @@ class GitDiffReporter(BaseDiffReporter):
 
         else:
             raise GitDiffError("Could not parse '{0}'".format(line))
+
+    def _resolve_overlaps(self, hunk_list):
+        """
+        Given a list of `(start_line, end_line)` tuples representing
+        hunks in a file, return a list in which all overlapping hunks
+        have been combined.
+        """
+
+        if len(hunk_list) == 0:
+            return []
+
+        # First, sort the hunks into ascending order by start line
+        sorted_hunks = sorted(hunk_list, key=lambda hunk: hunk[0])
+
+        # Iterate through the hunks, combining overlaps
+        last_hunk = sorted_hunks[0]
+        results = [last_hunk]
+        for hunk in sorted_hunks[1:]:
+            (last_start, last_end) = last_hunk
+            (start, end) = hunk
+
+            # If the start of the current hunk is less than the
+            # end of the last hunk, combine them
+            # Choose the max of (end, last_end)
+            # to handle the case where the new hunk is entirely
+            # within the last hunk.
+            if start < last_end:
+                results[-1] = (last_start, max(end, last_end))
+
+            # Otherwise, add a new hunk
+            else:
+                results.append(hunk)
+
+            # Store the last hunk
+            last_hunk = hunk
+
+        return results
