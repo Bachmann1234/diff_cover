@@ -217,7 +217,8 @@ class StringReportGenerator(BaseReportGenerator):
             self._print_divider(output_file)
             self._print_summary_stats(output_file)
 
-    def _print_divider(self, output_file):
+    @staticmethod
+    def _print_divider(output_file):
         """
         Print a divider line to `output_file`.
         """

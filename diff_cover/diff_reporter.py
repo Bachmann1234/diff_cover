@@ -3,7 +3,7 @@ Classes for querying which lines have changed based on a diff.
 """
 
 from abc import ABCMeta, abstractmethod
-import subprocess
+from git_diff import GitDiffError
 import re
 
 
@@ -25,6 +25,8 @@ class BaseDiffReporter(object):
     def src_paths_changed(self):
         """
         Returns a list of source paths changed in this diff.
+
+        Source paths are guaranteed to be unique.
         """
         pass
 
@@ -35,23 +37,17 @@ class BaseDiffReporter(object):
         Each hunk is a `(start_line, end_line)` tuple indicating
         the starting and ending line numbers of the hunk
         in the current version of the source file.
+
+        Hunks are guaranteed to be non-overlapping.
         """
         pass
 
     def name(self):
         """
-        Retrieve the name of the diff report, which will
-        be incluided in the diff coverage report.
+        Return the name of the diff, which will be included
+        in the diff coverage report.
         """
         return self._name
-
-
-class GitDiffError(Exception):
-    """
-    `git diff` command had an error
-    or `git diff` produced invalid output.
-    """
-    pass
 
 
 class GitDiffReporter(BaseDiffReporter):
@@ -59,18 +55,17 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch, subprocess_mod=subprocess):
-        """
-        Configure the reporter to compare the current repo branch
-        with `compare_branch`.
+    NAME = 'master...HEAD, staged, and unstaged changes'
 
-        Uses `subprocess_mod` to perform the system call to
-        `git diff`.
+    def __init__(self, git_diff=None):
         """
-        super(GitDiffReporter, self).__init__(compare_branch)
+        Configure the reporter to use `git_diff` as the wrapper
+        for the `git diff` tool.  (Should have same interface
+        as `git_diff.GitDiffTool`
+        """
+        super(GitDiffReporter, self).__init__(self.NAME)
 
-        self._compare_branch = compare_branch
-        self._subprocess_mod = subprocess_mod
+        self._git_diff_tool = git_diff
 
         # Cache diff information as a dictionary
         # with file path keys and hunk list values
@@ -82,7 +77,8 @@ class GitDiffReporter(BaseDiffReporter):
         diff_dict = self._git_diff()
 
         # Return the changed file paths (dict keys)
-        return diff_dict.keys()
+        # in alphabetical order
+        return sorted(diff_dict.keys(), key=str.lower)
 
     def hunks_changed(self, src_path):
 
@@ -114,6 +110,10 @@ class GitDiffReporter(BaseDiffReporter):
             # Parse the output of the diff string
             self._diff_dict = self._parse_diff_str(diff_str)
 
+            # Resolve overlapping hunks
+            for (src_path, hunk_list) in self._diff_dict.items():
+                self._diff_dict[src_path] = self._resolve_overlaps(hunk_list)
+
         # Return the diff cache
         return self._diff_dict
 
@@ -122,20 +122,14 @@ class GitDiffReporter(BaseDiffReporter):
         Execute `git diff` and return the output string,
         raising a GitDiffError if `git diff` reports an error.
         """
-        command = ['git', 'diff', self._compare_branch]
-        stdout_pipe = self._subprocess_mod.PIPE
 
-        # Execute `git diff` and capture output to stdout
-        process = self._subprocess_mod.Popen(command, stdout=stdout_pipe,
-                                                      stderr=stdout_pipe)
-        output, err = process.communicate()
+        # Execute `git diff` for each changeset we need
+        output = [self._git_diff_tool.diff_committed(),
+                  self._git_diff_tool.diff_unstaged(),
+                  self._git_diff_tool.diff_staged()]
 
-        # If an error with git diff, raise an exception
-        if bool(err):
-            raise GitDiffError(str(err))
-
-        # Return the output string
-        return output
+        # Return the concatenated output string
+        return "\n".join(output)
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile('^diff --git a/.* b/([^ \n]*)')
@@ -247,3 +241,41 @@ class GitDiffReporter(BaseDiffReporter):
 
         else:
             raise GitDiffError("Could not parse '{0}'".format(line))
+
+    @staticmethod
+    def _resolve_overlaps(hunk_list):
+        """
+        Given a list of `(start_line, end_line)` tuples representing
+        hunks in a file, return a list in which all overlapping hunks
+        have been combined.
+        """
+
+        if len(hunk_list) == 0:
+            return []
+
+        # First, sort the hunks into ascending order by start line
+        sorted_hunks = sorted(hunk_list, key=lambda hunk: hunk[0])
+
+        # Iterate through the hunks, combining overlaps
+        last_hunk = sorted_hunks[0]
+        results = [last_hunk]
+        for hunk in sorted_hunks[1:]:
+            (last_start, last_end) = last_hunk
+            (start, end) = hunk
+
+            # If the start of the current hunk is less than the
+            # end of the last hunk, combine them
+            # Choose the max of (end, last_end)
+            # to handle the case where the new hunk is entirely
+            # within the last hunk.
+            if start < last_end:
+                results[-1] = (last_start, max(end, last_end))
+
+            # Otherwise, add a new hunk
+            else:
+                results.append(hunk)
+
+            # Store the last hunk
+            last_hunk = hunk
+
+        return results
