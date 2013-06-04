@@ -3,11 +3,13 @@ Wrapper for `git diff` command.
 """
 import subprocess
 
+
 class GitDiffError(Exception):
     """
     `git diff` command produced an error.
     """
     pass
+
 
 class GitDiffTool(object):
     """
@@ -67,5 +69,5 @@ class GitDiffTool(object):
         # If we get a non-empty output to stderr, raise an exception
         if bool(stderr):
             raise GitDiffError(stderr)
-        
+
         return stdout

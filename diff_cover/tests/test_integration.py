@@ -231,7 +231,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     def _set_git_diff_outputs(self, outputs):
         """
         Patch the call to `git diff` to return a series of ouputs.
-        `outputs` is a list of `(stdout, stderr)` tuples to 
+        `outputs` is a list of `(stdout, stderr)` tuples to
         be returned in sequence for each call to subprocess.
         """
         self._mock_communicate.side_effect = outputs

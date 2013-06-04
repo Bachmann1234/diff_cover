@@ -3,7 +3,7 @@ Classes for querying which lines have changed based on a diff.
 """
 
 from abc import ABCMeta, abstractmethod
-from git_diff import GitDiffTool, GitDiffError
+from git_diff import GitDiffError
 import re
 
 
@@ -55,13 +55,15 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
+    NAME = 'master...HEAD, staged, and unstaged changes'
+
     def __init__(self, git_diff=None):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
         as `git_diff.GitDiffTool`
         """
-        super(GitDiffReporter, self).__init__('master...HEAD, staged, and unstaged changes')
+        super(GitDiffReporter, self).__init__(self.NAME)
 
         self._git_diff_tool = git_diff
 
@@ -125,7 +127,6 @@ class GitDiffReporter(BaseDiffReporter):
         output = [self._git_diff_tool.diff_committed(),
                   self._git_diff_tool.diff_unstaged(),
                   self._git_diff_tool.diff_staged()]
-
 
         # Return the concatenated output string
         return "\n".join(output)
@@ -241,7 +242,8 @@ class GitDiffReporter(BaseDiffReporter):
         else:
             raise GitDiffError("Could not parse '{0}'".format(line))
 
-    def _resolve_overlaps(self, hunk_list):
+    @staticmethod
+    def _resolve_overlaps(hunk_list):
         """
         Given a list of `(start_line, end_line)` tuples representing
         hunks in a file, return a list in which all overlapping hunks

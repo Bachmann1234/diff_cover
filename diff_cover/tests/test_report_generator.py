@@ -28,8 +28,8 @@ class BaseReportGeneratorTest(unittest.TestCase):
     # Test data, returned by default from the mocks
     SRC_PATHS = ['file1.py', 'subdir/file2.py']
     HUNKS = [(2, 5), (10, 15)]
-    COVERAGE = {1: True, 2: True, 3: True, 
-                4: True, 7: True, 10: False, 11: False, 15: True, 
+    COVERAGE = {1: True, 2: True, 3: True,
+                4: True, 7: True, 10: False, 11: False, 15: True,
                 20: False, 30: True}
     XML_REPORT_NAME = "reports/coverage.xml"
     DIFF_REPORT_NAME = "master"
@@ -82,11 +82,11 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         self.assertEqual(self.report.src_paths(), self.SRC_PATHS)
 
     def test_coverage_name(self):
-        self.assertEqual(self.report.coverage_report_name(), 
+        self.assertEqual(self.report.coverage_report_name(),
                          self.XML_REPORT_NAME)
 
     def test_diff_name(self):
-        self.assertEqual(self.report.diff_report_name(), 
+        self.assertEqual(self.report.diff_report_name(),
                          self.DIFF_REPORT_NAME)
 
     def test_percent_covered(self):

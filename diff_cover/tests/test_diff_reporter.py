@@ -60,7 +60,7 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_name(self):
 
         # Expect that diff report is named after its compare branch
-        self.assertEqual(self.diff.name(), 
+        self.assertEqual(self.diff.name(),
                          'master...HEAD, staged, and unstaged changes')
 
     def test_git_source_paths(self):
@@ -221,7 +221,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # List of (stdout, stderr) git diff pairs that should cause
         # a GitDiffError to be raised.
-        err_outputs = [invalid_hunk_str, no_src_line_str, 
+        err_outputs = [invalid_hunk_str, no_src_line_str,
                        non_numeric_lines, missing_line_num]
 
         for diff_str in err_outputs:

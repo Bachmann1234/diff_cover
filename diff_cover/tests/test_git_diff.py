@@ -2,6 +2,7 @@ from unittest import TestCase
 import mock
 from diff_cover.git_diff import GitDiffTool, GitDiffError
 
+
 class TestGitDiffTool(TestCase):
 
     def setUp(self):

@@ -5,7 +5,7 @@ from diff_cover.tool import parse_args
 class ParseArgsTest(unittest.TestCase):
 
     def test_parse_with_html_report(self):
-        argv = ['reports/coverage.xml', 
+        argv = ['reports/coverage.xml',
                 '--html-report', 'diff_cover.html']
 
         arg_dict = parse_args(argv)
