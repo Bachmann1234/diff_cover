@@ -194,8 +194,8 @@ class StringReportGenerator(BaseReportGenerator):
         """
 
         # Header line
-        output_file.write("Diff Coverage\n")
         self._print_divider(output_file)
+        output_file.write("Diff Coverage\n")
         output_file.write("Coverage Report: {0}\n".format(
                           self.coverage_report_name()))
         output_file.write("Diff: {0}\n".format(
@@ -216,6 +216,8 @@ class StringReportGenerator(BaseReportGenerator):
             # Summary stats
             self._print_divider(output_file)
             self._print_summary_stats(output_file)
+
+        self._print_divider(output_file)
 
     @staticmethod
     def _print_divider(output_file):
