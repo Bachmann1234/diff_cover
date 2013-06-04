@@ -21,7 +21,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     The `git diff` is a mock, but everything else is our code.
     """
 
-    GIT_DIFF_OUTPUT = dedent("""
+    MASTER_DIFF = dedent("""
     diff --git a/subdir/file1.py b/subdir/file1.py
     index 629e8ad..91b8c0a 100644
     --- a/subdir/file1.py
@@ -33,7 +33,9 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     @@ -33,10 +34,13 @@ Text
      More text
     +Another change
+    """).strip()
 
+    STAGED_DIFF = dedent("""
     diff --git a/subdir/file2.py b/subdir/file2.py
     index 629e8ad..91b8c0a 100644
     --- a/subdir/file2.py
@@ -41,7 +43,9 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     @@ -3,6 +3,7 @@ Text
      More text
     -Even more text
+    """).strip()
 
+    UNSTAGED_DIFF = dedent("""
     diff --git a/README.rst b/README.rst
     index 629e8ad..91b8c0a 100644
     @@ -3,6 +3,7 @@ Text
@@ -78,7 +82,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     Diff Coverage
     -------------
     Coverage Report: {coverage_xml}
-    Diff: master
+    Diff: master...HEAD, staged, and unstaged changes
     -------------
     subdir/file2.py (50%): Missing line(s) 8
     subdir/file1.py (50%): Missing line(s) 8
@@ -98,7 +102,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     <body>
     <h1>Diff Coverage</h1>
     <p>Coverage Report: {coverage_xml}</p>
-    <p>Diff: master</p>
+    <p>Diff: master...HEAD, staged, and unstaged changes</p>
     <table border="1">
     <tr>
     <th>Source File</th>
@@ -150,15 +154,16 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     def test_diff_cover_console(self):
 
         # Patch the output of `git diff`
-        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, "")
+        self._set_git_diff_outputs([(self.MASTER_DIFF, ""),
+                                    (self.STAGED_DIFF, ""),
+                                    (self.UNSTAGED_DIFF, "")])
 
         # Capture stdout to a string buffer
         string_buffer = StringIO()
         self._capture_stdout(string_buffer)
 
         # Patch sys.argv
-        self._set_sys_args(['diff-cover', self._coverage_xml_path,
-                            '--git-branch', 'master'])
+        self._set_sys_args(['diff-cover', self._coverage_xml_path])
 
         # Run diff-cover
         main()
@@ -172,7 +177,9 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     def test_diff_cover_html(self):
 
         # Patch the output of `git diff`
-        self._set_git_diff_output(self.GIT_DIFF_OUTPUT, "")
+        self._set_git_diff_outputs([(self.MASTER_DIFF, ""),
+                                    (self.STAGED_DIFF, ""),
+                                    (self.UNSTAGED_DIFF, "")])
 
         # Create a temporary directory to hold the output HTML report
         # Add a cleanup to ensure the directory gets deleted
@@ -182,7 +189,6 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         # Patch sys.argv
         report_path = os.path.join(temp_dir, 'diff_coverage.html')
         self._set_sys_args(['diff-cover', self._coverage_xml_path,
-                            '--git-branch', 'master',
                             '--html-report', report_path])
 
         # Run diff-cover
@@ -198,11 +204,12 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     def test_git_diff_error(self):
 
         # Patch sys.argv
-        self._set_sys_args(['diff-cover', self._coverage_xml_path,
-                            '--git-branch', 'master'])
+        self._set_sys_args(['diff-cover', self._coverage_xml_path])
 
-        # Configure git diff to output to stderr
-        self._set_git_diff_output("", "fatal error")
+        # Patch the output of `git diff`
+        self._set_git_diff_outputs([(self.MASTER_DIFF, ""),
+                                    (self.STAGED_DIFF, "fatal error"),
+                                    (self.UNSTAGED_DIFF, "")])
 
         # Expect an error
         with self.assertRaises(GitDiffError):
@@ -221,12 +228,13 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         """
         self._mock_sys.stdout = string_buffer
 
-    def _set_git_diff_output(self, stdout_str, stderr_str):
+    def _set_git_diff_outputs(self, outputs):
         """
-        Patch the call to `git diff` to always output
-        `stdout_str` to stdout and `stderr_str` to stderr.
+        Patch the call to `git diff` to return a series of ouputs.
+        `outputs` is a list of `(stdout, stderr)` tuples to 
+        be returned in sequence for each call to subprocess.
         """
-        self._mock_communicate.return_value = (stdout_str, stderr_str)
+        self._mock_communicate.side_effect = outputs
 
     def _write_to_temp(self, text):
         """

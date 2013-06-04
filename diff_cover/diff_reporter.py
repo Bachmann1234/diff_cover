@@ -3,7 +3,7 @@ Classes for querying which lines have changed based on a diff.
 """
 
 from abc import ABCMeta, abstractmethod
-import subprocess
+from git_diff import GitDiffTool, GitDiffError
 import re
 
 
@@ -40,18 +40,10 @@ class BaseDiffReporter(object):
 
     def name(self):
         """
-        Retrieve the name of the diff report, which will
-        be incluided in the diff coverage report.
+        Return the name of the diff, which will be included
+        in the diff coverage report.
         """
         return self._name
-
-
-class GitDiffError(Exception):
-    """
-    `git diff` command had an error
-    or `git diff` produced invalid output.
-    """
-    pass
 
 
 class GitDiffReporter(BaseDiffReporter):
@@ -59,18 +51,15 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch, subprocess_mod=subprocess):
+    def __init__(self, git_diff=None):
         """
-        Configure the reporter to compare the current repo branch
-        with `compare_branch`.
-
-        Uses `subprocess_mod` to perform the system call to
-        `git diff`.
+        Configure the reporter to use `git_diff` as the wrapper
+        for the `git diff` tool.  (Should have same interface
+        as `git_diff.GitDiffTool`
         """
-        super(GitDiffReporter, self).__init__(compare_branch)
+        super(GitDiffReporter, self).__init__('master...HEAD, staged, and unstaged changes')
 
-        self._compare_branch = compare_branch
-        self._subprocess_mod = subprocess_mod
+        self._git_diff_tool = git_diff
 
         # Cache diff information as a dictionary
         # with file path keys and hunk list values
@@ -122,20 +111,15 @@ class GitDiffReporter(BaseDiffReporter):
         Execute `git diff` and return the output string,
         raising a GitDiffError if `git diff` reports an error.
         """
-        command = ['git', 'diff', self._compare_branch]
-        stdout_pipe = self._subprocess_mod.PIPE
 
-        # Execute `git diff` and capture output to stdout
-        process = self._subprocess_mod.Popen(command, stdout=stdout_pipe,
-                                                      stderr=stdout_pipe)
-        output, err = process.communicate()
+        # Execute `git diff` for each changeset we need
+        output = [self._git_diff_tool.diff_committed(),
+                  self._git_diff_tool.diff_unstaged(),
+                  self._git_diff_tool.diff_staged()]
 
-        # If an error with git diff, raise an exception
-        if bool(err):
-            raise GitDiffError(str(err))
 
-        # Return the output string
-        return output
+        # Return the concatenated output string
+        return "\n".join(output)
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile('^diff --git a/.* b/([^ \n]*)')
