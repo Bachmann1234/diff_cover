@@ -39,7 +39,7 @@ to stdout.
 
 ``diff-cover`` uses the following to find diff lines:
 
-- Commits in the current branch that are not also in master (``git diff master...HEAD``).
+- Commits in the current branch that are not also in master (``git diff origin/master...HEAD``).
 - Staged changes in the current branch (``git diff --cached``).
 - Unstaged changes in the current branch (``git diff``).
 

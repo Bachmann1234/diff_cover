@@ -61,7 +61,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Expect that diff report is named after its compare branch
         self.assertEqual(self.diff.name(),
-                         'master...HEAD, staged, and unstaged changes')
+                         'origin/master...HEAD, staged, and unstaged changes')
 
     def test_git_source_paths(self):
 

@@ -82,7 +82,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     -------------
     Diff Coverage
     Coverage Report: {coverage_xml}
-    Diff: master...HEAD, staged, and unstaged changes
+    Diff: origin/master...HEAD, staged, and unstaged changes
     -------------
     subdir/file2.py (50%): Missing line(s) 8
     subdir/file1.py (50%): Missing line(s) 8
@@ -103,7 +103,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     <body>
     <h1>Diff Coverage</h1>
     <p>Coverage Report: {coverage_xml}</p>
-    <p>Diff: master...HEAD, staged, and unstaged changes</p>
+    <p>Diff: origin/master...HEAD, staged, and unstaged changes</p>
     <table border="1">
     <tr>
     <th>Source File</th>
