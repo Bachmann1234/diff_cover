@@ -25,7 +25,7 @@ class TestGitDiffTool(TestCase):
         self.assertEqual(output, 'test output')
 
         # Expect that the correct command was executed
-        expected = ['git', 'diff', 'master...HEAD']
+        expected = ['git', 'diff', 'origin/master...HEAD']
         self.subprocess.Popen.assert_called_with(expected,
                                                  stdout=self.subprocess.PIPE,
                                                  stderr=self.subprocess.PIPE)

@@ -55,7 +55,7 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    NAME = 'master...HEAD, staged, and unstaged changes'
+    NAME = 'origin/master...HEAD, staged, and unstaged changes'
 
     def __init__(self, git_diff=None):
         """

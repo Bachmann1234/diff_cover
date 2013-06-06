@@ -26,12 +26,12 @@ class GitDiffTool(object):
     def diff_committed(self):
         """
         Returns the output of `git diff` for committed
-        changes not yet in master.
+        changes not yet in origin/master.
 
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', 'master...HEAD'])
+        return self._execute(['git', 'diff', 'origin/master...HEAD'])
 
     def diff_unstaged(self):
         """
