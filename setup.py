@@ -7,7 +7,7 @@ REQUIREMENTS = [line.strip() for line in
 
 setup(
     name='diff_cover',
-    version='0.1.0',
+    version='0.1.1',
     description='Automatically find diff lines that need test coverage.',
     author='Will Daly',
     author_email='will@edx.org',
