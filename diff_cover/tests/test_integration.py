@@ -22,18 +22,12 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     The `git diff` is a mock, but everything else is our code.
     """
 
-    MASTER_DIFF = git_diff_output(
-                    {'subdir/file1.py': line_numbers(3, 10) +
-                                        line_numbers(34, 47)},
-                    line_buffer=False)
+    MASTER_DIFF = git_diff_output({'subdir/file1.py':
+                                   line_numbers(3, 10) + line_numbers(34, 47)})
 
-    STAGED_DIFF = git_diff_output(
-                    {'subdir/file2.py': line_numbers(3, 10)},
-                    line_buffer=False)
+    STAGED_DIFF = git_diff_output({'subdir/file2.py': line_numbers(3, 10)})
 
-    UNSTAGED_DIFF = git_diff_output(
-                    {'README.rst': line_numbers(3, 10)},
-                    line_buffer=False)
+    UNSTAGED_DIFF = git_diff_output({'README.rst': line_numbers(3, 10)})
 
     COVERAGE_XML = dedent("""
     <coverage>
@@ -153,8 +147,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
 
         # Check the output to stdout
         report = string_buffer.getvalue()
-        expected = self.EXPECTED_CONSOLE_REPORT.format(
-                        coverage_xml=self._coverage_xml_path)
+        expected = self.EXPECTED_CONSOLE_REPORT.format(coverage_xml=self._coverage_xml_path)
         self.assertEqual(report, expected)
 
     def test_diff_cover_html(self):
@@ -180,8 +173,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         # Load the content of the HTML report
         with open(report_path) as html_report:
             html = html_report.read()
-            expected = self.EXPECTED_HTML_REPORT.format(
-                            coverage_xml=self._coverage_xml_path)
+            expected = self.EXPECTED_HTML_REPORT.format(coverage_xml=self._coverage_xml_path)
             self.assertEqual(html, expected)
 
     def test_git_diff_error(self):

@@ -5,7 +5,7 @@ import random
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
-LINE_STRINGS = ['test',]
+LINE_STRINGS = ['test']
 
 
 def line_numbers(start, end):
@@ -15,12 +15,12 @@ def line_numbers(start, end):
     return [line for line in range(start, end + 1)]
 
 
-def git_diff_output(diff_dict, deleted_files=None, line_buffer=True):
+def git_diff_output(diff_dict, deleted_files=None):
     """
     Construct fake output from `git diff` using the description
     defined by `diff_dict`, which is a dictionary of the form:
 
-        { 
+        {
             SRC_FILE_NAME: MODIFIED_LINES,
             ...
         }
@@ -30,9 +30,6 @@ def git_diff_output(diff_dict, deleted_files=None, line_buffer=True):
     source file.
 
     `deleted_files` is a list of files that have been deleted
-
-    `line_buffer` controls whether extra lines are appended/prepended to the
-    diff hunks.
 
     The content of the source files are randomly generated.
 
@@ -47,12 +44,20 @@ def git_diff_output(diff_dict, deleted_files=None, line_buffer=True):
     # Entries for source files
     for (src_file, modified_lines) in diff_dict.items():
 
-        output.extend(_source_file_entry(src_file, modified_lines, line_buffer))
+        output.extend(_source_file_entry(src_file, modified_lines))
 
     return '\n'.join(output)
 
 
 def _deleted_file_entries(deleted_files):
+    """
+    Create fake `git diff` output for files that have been
+    deleted in this changeset.
+
+    `deleted_files` is a list of files deleted in the changeset.
+
+    Returns a list of lines in the diff output.
+    """
 
     output = []
 
@@ -75,7 +80,15 @@ def _deleted_file_entries(deleted_files):
     return output
 
 
-def _source_file_entry(src_file, modified_lines, line_buffer):
+def _source_file_entry(src_file, modified_lines):
+    """
+    Create fake `git diff` output for added/modified lines.
+
+    `src_file` is the source file with the changes;
+    `modified_lines` is the list of modified line numbers.
+
+    Returns a list of lines in the diff output.
+    """
 
     output = []
 
@@ -91,21 +104,28 @@ def _source_file_entry(src_file, modified_lines, line_buffer):
 
     # Hunk information
     for (start, end) in _hunks(modified_lines):
-        output.extend(_hunk_entry(start, end, modified_lines, line_buffer))
+        output.extend(_hunk_entry(start, end, modified_lines))
 
     return output
 
 
-def _hunk_entry(start, end, modified_lines, line_buffer):
+def _hunk_entry(start, end, modified_lines):
+    """
+    Generates fake `git diff` output for a hunk,
+    where `start` and `end` are the start/end lines of the hunk
+    and `modified_lines` is a list of modified lines in the hunk.
+
+    Just as `git diff` does, this will include a few lines before/after
+    the changed lines in each hunk.
+    """
     output = []
 
     # The actual hunk usually has a few lines before/after
-    if line_buffer:
-        start -= HUNK_BUFFER
-        end += HUNK_BUFFER
+    start -= HUNK_BUFFER
+    end += HUNK_BUFFER
 
-        if start < 0:
-            start = 0
+    if start < 0:
+        start = 0
 
     # Hunk definition line
     # Real `git diff` output would have different line numbers
@@ -167,9 +187,10 @@ def _hunks(modified_lines):
 
     return hunks
 
+
 def _random_string():
     """
-    Return a random byte string with length in the range 
+    Return a random byte string with length in the range
     [0, `MAX_LINE_LENGTH`] (inclusive).
     """
     return random.choice(LINE_STRINGS)

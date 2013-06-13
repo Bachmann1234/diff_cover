@@ -5,7 +5,7 @@ from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.coverage_reporter import BaseCoverageReporter
 from diff_cover.report_generator import BaseReportGenerator, \
-        HtmlReportGenerator, StringReportGenerator
+     HtmlReportGenerator, StringReportGenerator
 
 
 class SimpleReportGenerator(BaseReportGenerator):

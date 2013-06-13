@@ -8,22 +8,13 @@ from diff_cover.tests.helpers import line_numbers, git_diff_output
 
 class GitDiffReporterTest(unittest.TestCase):
 
-    MASTER_DIFF = git_diff_output(
-            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)},
-            line_buffer=False
-            )
-    
-    STAGED_DIFF = git_diff_output(
-            {'subdir/file2.py': line_numbers(3, 10),
-             'file3.py': [0]},
-            line_buffer=False
-            )
+    MASTER_DIFF = git_diff_output({'subdir/file1.py':
+                                   line_numbers(3, 10) + line_numbers(34, 47)})
 
-    UNSTAGED_DIFF = git_diff_output(
-            dict(),
-            deleted_files=['README.md'],
-            line_buffer=False
-            )
+    STAGED_DIFF = git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                                   'file3.py': [0]})
+
+    UNSTAGED_DIFF = git_diff_output(dict(), deleted_files=['README.md'])
 
     def setUp(self):
 
@@ -79,8 +70,8 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed, line_numbers(3, 10) + 
-                                        line_numbers(34, 47))
+        self.assertEqual(lines_changed,
+                         line_numbers(3, 10) + line_numbers(34, 47))
 
     def test_one_line_file(self):
 
@@ -128,22 +119,16 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed, line_numbers(3, 10) +
-                                        line_numbers(34, 47))
+        self.assertEqual(lines_changed,
+                         line_numbers(3, 10) + line_numbers(34, 47))
 
     def test_git_overlapping_lines(self):
 
         # Overlap, extending the end of the hunk (lines 3 to 10)
-        overlap_1 = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -3,6 +5,9 @@ Text
-        """).strip()
+        overlap_1 = git_diff_output({'subdir/file1.py': line_numbers(5, 14)})
 
         # Overlap, extending the beginning of the hunk (lines 34 to 47)
-        overlap_2 = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -33,10 +32,5 @@ Text
-        """).strip()
+        overlap_2 = git_diff_output({'subdir/file1.py': line_numbers(32, 37)})
 
         # Lines in staged / unstaged overlap with lines in master
         self._set_git_diff_output(self.MASTER_DIFF, overlap_1, overlap_2)
@@ -152,22 +137,16 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed, line_numbers(3, 14) +
-                                        line_numbers(32, 47))
+        self.assertEqual(lines_changed,
+                         line_numbers(3, 14) + line_numbers(32, 47))
 
     def test_git_line_within_hunk(self):
 
         # Surround hunk in master (lines 3 to 10)
-        surround = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -3,6 +2,9 @@ Text
-        """).strip()
+        surround = git_diff_output({'subdir/file1.py': line_numbers(2, 11)})
 
         # Within hunk in master (lines 34 to 47)
-        within = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -33,10 +35,11 @@ Text
-        """).strip()
+        within = git_diff_output({'subdir/file1.py': line_numbers(35, 46)})
 
         # Lines in staged / unstaged overlap with hunks in master
         self._set_git_diff_output(self.MASTER_DIFF, surround, within)
@@ -176,8 +155,8 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed, line_numbers(2, 11) +
-                                        line_numbers(34, 47))
+        self.assertEqual(lines_changed,
+                         line_numbers(2, 11) + line_numbers(34, 47))
 
     def test_git_no_such_file(self):
 
@@ -205,19 +184,24 @@ class GitDiffReporterTest(unittest.TestCase):
                            """).strip()
 
         no_src_line_str = "@@ -33,10 +34,13 @@ Text"
+
         non_numeric_lines = dedent("""
                             diff --git a/subdir/file1.py b/subdir/file1.py
                             @@ -1,2 +a,b @@
                             """).strip()
+
         missing_line_num = dedent("""
                             diff --git a/subdir/file1.py b/subdir/file1.py
                             @@ -1,2 +  @@
                             """).strip()
 
+        missing_src_str = "diff --git "
+
         # List of (stdout, stderr) git diff pairs that should cause
         # a GitDiffError to be raised.
         err_outputs = [invalid_hunk_str, no_src_line_str,
-                       non_numeric_lines, missing_line_num]
+                       non_numeric_lines, missing_line_num,
+                       missing_src_str]
 
         for diff_str in err_outputs:
 
