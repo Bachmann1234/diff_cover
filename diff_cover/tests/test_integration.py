@@ -13,6 +13,7 @@ import shutil
 from textwrap import dedent
 from diff_cover.tool import main
 from diff_cover.diff_reporter import GitDiffError
+from helpers import line_numbers, git_diff_output
 
 
 class DiffCoverIntegrationTest(unittest.TestCase):
@@ -21,37 +22,18 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     The `git diff` is a mock, but everything else is our code.
     """
 
-    MASTER_DIFF = dedent("""
-    diff --git a/subdir/file1.py b/subdir/file1.py
-    index 629e8ad..91b8c0a 100644
-    --- a/subdir/file1.py
-    +++ b/subdir/file1.py
-    @@ -3,6 +3,7 @@ Text
-    More text
-    Even more text
+    MASTER_DIFF = git_diff_output(
+                    {'subdir/file1.py': line_numbers(3, 10) +
+                                        line_numbers(34, 47)},
+                    line_buffer=False)
 
-    @@ -33,10 +34,13 @@ Text
-     More text
-    +Another change
-    """).strip()
+    STAGED_DIFF = git_diff_output(
+                    {'subdir/file2.py': line_numbers(3, 10)},
+                    line_buffer=False)
 
-    STAGED_DIFF = dedent("""
-    diff --git a/subdir/file2.py b/subdir/file2.py
-    index 629e8ad..91b8c0a 100644
-    --- a/subdir/file2.py
-    +++ b/subdir/file2.py
-    @@ -3,6 +3,7 @@ Text
-     More text
-    -Even more text
-    """).strip()
-
-    UNSTAGED_DIFF = dedent("""
-    diff --git a/README.rst b/README.rst
-    index 629e8ad..91b8c0a 100644
-    @@ -3,6 +3,7 @@ Text
-     More text
-    -Even more text
-    """).strip()
+    UNSTAGED_DIFF = git_diff_output(
+                    {'README.rst': line_numbers(3, 10)},
+                    line_buffer=False)
 
     COVERAGE_XML = dedent("""
     <coverage>
