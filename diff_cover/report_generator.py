@@ -163,18 +163,13 @@ class BaseReportGenerator(object):
             # For each modified file in the diff
             for src_path in self._diff.src_paths_changed():
 
-                # For each hunk changed
-                hunks = self._diff.hunks_changed(src_path)
-                for (start_line, end_line) in hunks:
+                # For each line changed
+                diff_lines = self._diff.lines_changed(src_path)
+                line_cover = self._coverage.coverage_info(src_path, diff_lines)
 
-                    # Retrieve line coverage information
-                    line_cover = self._coverage.coverage_info(src_path,
-                                                              start_line,
-                                                              end_line)
-
-                    # Include only files with coverage information
-                    if len(line_cover) > 0:
-                        cover_dict[src_path] = line_cover
+                # Include only files with coverage information
+                if len(line_cover) > 0:
+                    cover_dict[src_path] = line_cover
 
             # Cache the result
             self._cache_coverage = cover_dict

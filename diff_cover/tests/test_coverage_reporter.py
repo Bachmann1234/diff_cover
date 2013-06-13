@@ -1,6 +1,7 @@
 import unittest
 from lxml import etree
 from diff_cover.coverage_reporter import XmlCoverageReporter
+from helpers import line_numbers
 
 
 class XmlCoverageReporterTest(unittest.TestCase):
@@ -21,16 +22,16 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        result = coverage.coverage_info('file1.py', 1, 8)
+        result = coverage.coverage_info('file1.py', line_numbers(1, 8))
         self.assertEqual(result, line_dict)
 
         # Try getting a smaller range
-        result = coverage.coverage_info('subdir/file2.py', 3, 7)
+        result = coverage.coverage_info('subdir/file2.py', line_numbers(3, 7))
         expected = {3: False, 5: True, 6: False}
         self.assertEqual(result, expected)
 
         # Once more on the first file (for caching)
-        result = coverage.coverage_info('file1.py', 5, 7)
+        result = coverage.coverage_info('file1.py', line_numbers(5, 7))
         expected = {5: True, 6: False}
         self.assertEqual(result, expected)
 
@@ -43,7 +44,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         coverage = XmlCoverageReporter(xml, '')
 
         # Expect that we get no results
-        result = coverage.coverage_info('file.py', 1, 100)
+        result = coverage.coverage_info('file.py', line_numbers(1, 100))
         self.assertEqual(result, dict())
 
     def test_no_such_line(self):
@@ -55,7 +56,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         # Parse the report
         coverage = XmlCoverageReporter(xml, '')
 
-        result = coverage.coverage_info('file.py', 10, 15)
+        result = coverage.coverage_info('file.py', line_numbers(10, 15))
         self.assertEqual(result, dict())
 
     def _coverage_xml(self, file_paths, line_dict):

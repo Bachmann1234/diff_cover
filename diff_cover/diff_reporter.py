@@ -3,7 +3,7 @@ Classes for querying which lines have changed based on a diff.
 """
 
 from abc import ABCMeta, abstractmethod
-from git_diff import GitDiffError
+from diff_cover.git_diff import GitDiffError
 import re
 
 
@@ -31,14 +31,10 @@ class BaseDiffReporter(object):
         pass
 
     @abstractmethod
-    def hunks_changed(self, src_path):
+    def lines_changed(self, src_path):
         """
-        Returns a list of hunks changed in the source file at `src_path`.
-        Each hunk is a `(start_line, end_line)` tuple indicating
-        the starting and ending line numbers of the hunk
-        in the current version of the source file.
-
-        Hunks are guaranteed to be non-overlapping.
+        Returns a list of line numbers changed in the source file at `src_path`.
+        Each line is guaranteed to be included only once in the list.
         """
         pass
 
@@ -80,7 +76,7 @@ class GitDiffReporter(BaseDiffReporter):
         # in alphabetical order
         return sorted(diff_dict.keys(), key=str.lower)
 
-    def hunks_changed(self, src_path):
+    def lines_changed(self, src_path):
 
         # Get the diff dictionary
         diff_dict = self._git_diff()
@@ -88,7 +84,14 @@ class GitDiffReporter(BaseDiffReporter):
         # Return the list `(start_line, end_line)` hunks
         # for the file at `src_path`
         # If no such file, return an empty list.
-        return diff_dict.get(src_path, [])
+        hunks = diff_dict.get(src_path, [])
+
+        # Expand the hunks into lines
+        lines = []
+        for (start, end) in hunks:
+            lines.extend([line for line in range(start, end + 1)])
+
+        return lines
 
     def _git_diff(self):
         """
@@ -132,8 +135,8 @@ class GitDiffReporter(BaseDiffReporter):
         return "\n".join(output)
 
     # Regular expressions used to parse the diff output
-    SRC_FILE_RE = re.compile('^diff --git a/.* b/([^ \n]*)')
-    HUNK_LINE_RE = re.compile('^@@ -.* \+([0-9,]*) @@')
+    SRC_FILE_RE = re.compile(r'^diff --git a/.* b/([^ \n]*)')
+    HUNK_LINE_RE = re.compile(r'^@@ -.* \+([0-9,]*) @@')
 
     def _parse_diff_str(self, diff_str):
         """

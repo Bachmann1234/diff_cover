@@ -27,7 +27,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
 
     # Test data, returned by default from the mocks
     SRC_PATHS = ['file1.py', 'subdir/file2.py']
-    HUNKS = [(2, 5), (10, 15)]
+    LINES = [2, 3, 4, 5, 10, 11, 12, 13, 14, 15]
     COVERAGE = {1: True, 2: True, 3: True,
                 4: True, 7: True, 10: False, 11: False, 15: True,
                 20: False, 30: True}
@@ -49,7 +49,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
 
         # Have the mocks return default values
         self.set_src_paths_changed(self.SRC_PATHS)
-        self.set_hunks_changed(self.HUNKS)
+        self.set_lines_changed(self.LINES)
         self.set_coverage_info(self.COVERAGE)
 
         # Create a concrete instance of a report generator
@@ -61,11 +61,11 @@ class BaseReportGeneratorTest(unittest.TestCase):
         """
         self.diff.src_paths_changed.return_value = src_paths
 
-    def set_hunks_changed(self, hunks):
+    def set_lines_changed(self, lines):
         """
-        Patch the dependency `hunks_changed()` return value
+        Patch the dependency `lines_changed()` return value
         """
-        self.diff.hunks_changed.return_value = hunks
+        self.diff.lines_changed.return_value = lines
 
     def set_coverage_info(self, coverage_info):
         """
@@ -92,7 +92,7 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
     def test_percent_covered(self):
 
         # Check that we get the expected coverage percentages
-        # By construction, both files have the same hunk
+        # By construction, both files have the same diff line
         # and coverage information
         # Because the diff_reporter is reponsible for
         # filtering non-diff lines, we expect to get
@@ -174,7 +174,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Have the dependencies return an empty report
         self.set_src_paths_changed(['file.py'])
-        self.set_hunks_changed([(0, 100)])
+        self.set_lines_changed([line for line in range(0, 100)])
         self.set_coverage_info({2: True})
 
         # Generate the report
@@ -205,7 +205,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Have the dependencies return an empty report
         self.set_src_paths_changed([])
-        self.set_hunks_changed([])
+        self.set_lines_changed([])
         self.set_coverage_info(dict())
 
         # Create a buffer for the output
@@ -292,7 +292,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
 
         # Have the dependencies return an empty report
         self.set_src_paths_changed([])
-        self.set_hunks_changed([])
+        self.set_lines_changed([])
         self.set_coverage_info(dict())
 
         # Create a buffer for the output
