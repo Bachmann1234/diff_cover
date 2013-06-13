@@ -112,16 +112,7 @@ def _hunk_entry(start, end, modified_lines, line_buffer):
     # for before/after the change, but since we're only interested
     # in after the change, we use the same numbers for both.
     length = end - start
-    if length > 0:
-        output.append('@@ -{0},{1} +{0},{1} @@'.format(start, length))
-
-    # If we're only changing one line, then the `length` field gets
-    # left off in the "after" file.  We still generate a random
-    # placeholder for the length in the original file.
-    else:
-        original_length = random.randint(1, 100)
-        output.append('@@ -{0},{1} +{0} @@'.format(start, 
-                                                    original_length))
+    output.append('@@ -{0},{1} +{0},{1} @@'.format(start, length))
 
     # Output line modifications
     for line_number in range(start, end + 1):
@@ -149,7 +140,7 @@ def _hunk_entry(start, end, modified_lines, line_buffer):
     return output
 
 
-def _hunks(line_numbers):
+def _hunks(modified_lines):
     """
     Given a list of line numbers, return a list of hunks represented
     as `(start, end)` tuples.
@@ -159,13 +150,13 @@ def _hunks(line_numbers):
     hunks = []
     last_line = None
 
-    for line in sorted(line_numbers):
+    for line in sorted(modified_lines):
 
         # If this is contiguous with the last line, continue the hunk
         # We're guaranteed at this point to have at least one hunk
         if (line - 1) == last_line:
             start, _ = hunks[-1]
-            hunks[-1]= (start, line)
+            hunks[-1] = (start, line)
 
         # If non-contiguous, start a new hunk with just the current line
         else:

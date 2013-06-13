@@ -3,7 +3,7 @@ import mock
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool, GitDiffError
-from helpers import line_numbers, git_diff_output
+from diff_cover.tests.helpers import line_numbers, git_diff_output
 
 
 class GitDiffReporterTest(unittest.TestCase):
@@ -15,13 +15,15 @@ class GitDiffReporterTest(unittest.TestCase):
     
     STAGED_DIFF = git_diff_output(
             {'subdir/file2.py': line_numbers(3, 10),
-             'one_line.txt': [1]},
-            line_buffer=False)
+             'file3.py': [0]},
+            line_buffer=False
+            )
 
     UNSTAGED_DIFF = git_diff_output(
             dict(),
             deleted_files=['README.md'],
-            line_buffer=False)
+            line_buffer=False
+            )
 
     def setUp(self):
 
@@ -49,7 +51,7 @@ class GitDiffReporterTest(unittest.TestCase):
         # Validate the source paths
         # They should be in alphabetical order
         self.assertEqual(len(source_paths), 4)
-        self.assertEqual('one_line.txt', source_paths[0])
+        self.assertEqual('file3.py', source_paths[0])
         self.assertEqual('README.md', source_paths[1])
         self.assertEqual('subdir/file1.py', source_paths[2])
         self.assertEqual('subdir/file2.py', source_paths[3])
@@ -79,6 +81,30 @@ class GitDiffReporterTest(unittest.TestCase):
         # Validate the lines changed
         self.assertEqual(lines_changed, line_numbers(3, 10) + 
                                         line_numbers(34, 47))
+
+    def test_one_line_file(self):
+
+        # Files with only one line have a special format
+        # in which the "length" part of the hunk is not specified
+        diff_str = dedent("""
+            diff --git a/diff_cover/one_line.txt b/diff_cover/one_line.txt
+            index 0867e73..9daeafb 100644
+            --- a/diff_cover/one_line.txt
+            +++ b/diff_cover/one_line.txt
+            @@ -1,3 +1 @@
+            test
+            -test
+            -test
+            """).strip()
+
+        # Configure the git diff output
+        self._set_git_diff_output(diff_str, "", "")
+
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('one_line.txt')
+
+        # Expect that no lines are changed
+        self.assertEqual(len(lines_changed), 0)
 
     def test_git_deleted_lines(self):
 
