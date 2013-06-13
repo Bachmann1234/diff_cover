@@ -3,52 +3,25 @@ import mock
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool, GitDiffError
-from helpers import line_numbers
+from helpers import line_numbers, git_diff_output
 
 
 class GitDiffReporterTest(unittest.TestCase):
 
-    MASTER_DIFF = dedent("""
-    diff --git a/subdir/file1.py b/subdir/file1.py
-    index 629e8ad..91b8c0a 100644
-    --- a/subdir/file1.py
-    +++ b/subdir/file1.py
-    @@ -3,6 +3,7 @@ Text
-    More text
-    Even more text
+    MASTER_DIFF = git_diff_output(
+            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)},
+            line_buffer=False
+            )
+    
+    STAGED_DIFF = git_diff_output(
+            {'subdir/file2.py': line_numbers(3, 10),
+             'one_line.txt': [1]},
+            line_buffer=False)
 
-    @@ -33,10 +34,13 @@ Text
-     More text
-    +Another change
-    """).strip()
-
-    STAGED_DIFF = dedent("""
-    diff --git a/subdir/file2.py b/subdir/file2.py
-    index 629e8ad..91b8c0a 100644
-    --- a/subdir/file2.py
-    +++ b/subdir/file2.py
-    @@ -3,6 +3,7 @@ Text
-     More text
-    -Even more text
-
-    diff --git a/one_line.txt b/one_line.txt
-    @@ -1,18 +1 @@
-    Test of one line left
-    """).strip()
-
-    UNSTAGED_DIFF = dedent("""
-    diff --git a/README.md b/README.md
-    deleted file mode 100644
-    index 1be20b5..0000000
-    --- a/README.md
-    +++ /dev/null
-    @@ -1,18 +0,0 @@
-    -diff-cover
-    -==========
-    -
-    -Automatically find diff lines that need test coverage.
-    -
-    """).strip()
+    UNSTAGED_DIFF = git_diff_output(
+            dict(),
+            deleted_files=['README.md'],
+            line_buffer=False)
 
     def setUp(self):
 
