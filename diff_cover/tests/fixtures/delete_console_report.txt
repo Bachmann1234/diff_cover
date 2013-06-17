@@ -1,0 +1,7 @@
+-------------
+Diff Coverage
+Coverage Report: coverage.xml
+Diff: origin/master...HEAD, staged, and unstaged changes
+-------------
+No lines with coverage information in this diff.
+-------------

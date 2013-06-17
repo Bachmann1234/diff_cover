@@ -3,7 +3,7 @@ Classes for querying which lines have changed based on a diff.
 """
 
 from abc import ABCMeta, abstractmethod
-from git_diff import GitDiffError
+from diff_cover.git_diff import GitDiffError
 import re
 
 
@@ -31,14 +31,11 @@ class BaseDiffReporter(object):
         pass
 
     @abstractmethod
-    def hunks_changed(self, src_path):
+    def lines_changed(self, src_path):
         """
-        Returns a list of hunks changed in the source file at `src_path`.
-        Each hunk is a `(start_line, end_line)` tuple indicating
-        the starting and ending line numbers of the hunk
-        in the current version of the source file.
-
-        Hunks are guaranteed to be non-overlapping.
+        Returns a list of line numbers changed in the source file at `src_path`.
+        Each line is guaranteed to be included only once in the list
+        and in ascending order.
         """
         pass
 
@@ -68,10 +65,13 @@ class GitDiffReporter(BaseDiffReporter):
         self._git_diff_tool = git_diff
 
         # Cache diff information as a dictionary
-        # with file path keys and hunk list values
+        # with file path keys and line number list values
         self._diff_dict = None
 
     def src_paths_changed(self):
+        """
+        See base class docstring.
+        """
 
         # Get the diff dictionary
         diff_dict = self._git_diff()
@@ -80,21 +80,26 @@ class GitDiffReporter(BaseDiffReporter):
         # in alphabetical order
         return sorted(diff_dict.keys(), key=str.lower)
 
-    def hunks_changed(self, src_path):
+    def lines_changed(self, src_path):
+        """
+        See base class docstring.
+        """
 
-        # Get the diff dictionary
+        # Get the diff dictionary (cached)
         diff_dict = self._git_diff()
 
-        # Return the list `(start_line, end_line)` hunks
-        # for the file at `src_path`
-        # If no such file, return an empty list.
+        # Look up the modified lines for the source file
+        # If no lines modified, return an empty list
         return diff_dict.get(src_path, [])
 
     def _git_diff(self):
         """
         Run `git diff` and returns a dict in which the keys
         are changed file paths and the values are lists of
-        `(start_line, end_line)` tuples.
+        line numbers.
+
+        Guarantees that each line number within a file
+        is unique (no repeats) and in ascending order.
 
         Returns a cached result if called multiple times.
 
@@ -110,9 +115,9 @@ class GitDiffReporter(BaseDiffReporter):
             # Parse the output of the diff string
             self._diff_dict = self._parse_diff_str(diff_str)
 
-            # Resolve overlapping hunks
-            for (src_path, hunk_list) in self._diff_dict.items():
-                self._diff_dict[src_path] = self._resolve_overlaps(hunk_list)
+            # Eliminate repeats and order line numbers
+            for (src_path, lines) in self._diff_dict.items():
+                self._diff_dict[src_path] = self._unique_ordered_lines(lines)
 
         # Return the diff cache
         return self._diff_dict
@@ -132,15 +137,14 @@ class GitDiffReporter(BaseDiffReporter):
         return "\n".join(output)
 
     # Regular expressions used to parse the diff output
-    SRC_FILE_RE = re.compile('^diff --git a/.* b/([^ \n]*)')
-    HUNK_LINE_RE = re.compile('^@@ -.* \+([0-9,]*) @@')
+    SRC_FILE_RE = re.compile(r'^diff --git a/.* b/([^ \n]*)')
+    HUNK_LINE_RE = re.compile(r'^@@ -.* \+([0-9]*)')
 
     def _parse_diff_str(self, diff_str):
         """
         Parse the output of `git diff` into a dictionary with
         keys that are the source file paths, and values
-        that are lists of `(start_line, end_line)` hunks
-        changed.
+        that are lists of modified lines.
 
         If the output could not be parsed, raises a GitDiffError.
         """
@@ -148,134 +152,174 @@ class GitDiffReporter(BaseDiffReporter):
         # Create a dict to hold results
         diff_dict = dict()
 
-        # Keep track of the current source file
-        src_path = None
+        # Parse the diff string into sections by source file
+        for (src_path, diff_lines) in self._parse_source_sections(diff_str).items():
 
-        # Split the diff string into lines
-        for line in diff_str.split('\n'):
-
-            # If the line starts with "diff --git", try to parse the
-            # source path.
-            if line.startswith('diff --git'):
-                src_path = self._parse_source_line(line, diff_dict)
-
-            # If the line starts with "@@", try to parse the hunk
-            # start and end lines
-            elif line.startswith('@@'):
-                self._parse_hunk_line(line, src_path, diff_dict)
-            # Ignore all other lines
+            # Parse the hunk information for the source file
+            # to determine lines changed for the source file
+            diff_dict[src_path] = self._parse_changed_lines(diff_lines)
 
         return diff_dict
 
-    def _parse_source_line(self, line, diff_dict):
+    def _parse_source_sections(self, diff_str):
         """
-        Parse `line` for the source file path.
-        Update `diff_dict` with key for the path and an empty list value,
-        and return the source path.
+        Given the output of `git diff`, return a dictionary
+        with keys that are source file paths.
+
+        Each value is a list of lines from the `git diff` output
+        related to the source file.
+
+        Raises a `GitDiffError` if `diff_str` is in an invalid format.
+        """
+
+        # Create a dict to map source files to lines in the diff output
+        source_dict = dict()
+
+        # Keep track of the current source file
+        src_path = None
+
+        # Signal that we've found a hunk (after starting a source file)
+        found_hunk = False
+
+        # Parse the diff string into sections by source file
+        for line in diff_str.split('\n'):
+
+            # If the line starts with "diff --git" then it
+            # is the start of a new source file
+            if line.startswith('diff --git'):
+
+                # Retrieve the name of the source file
+                src_path = self._parse_source_line(line)
+
+                # Create an entry for the source file, if we don't
+                # already have one.
+                if src_path not in source_dict:
+                    source_dict[src_path] = []
+
+                # Signal that we're waiting for a hunk for this source file
+                found_hunk = False
+
+            # Every other line is stored in the dictionary for this source file
+            # once we find a hunk section
+            else:
+
+                # Only add lines if we're in a hunk section
+                # (ignore index and files changed lines)
+                if found_hunk or line.startswith('@@'):
+
+                    # Remember that we found a hunk
+                    found_hunk = True
+
+                    if src_path is not None:
+                        source_dict[src_path].append(line)
+
+                    else:
+                        # We tolerate other information before we have
+                        # a source file defined, unless it's a hunk line
+                        if line.startswith("@@"):
+                            msg = "Hunk has no source file: '{}'".format(line)
+                            raise GitDiffError(msg)
+
+        return source_dict
+
+    def _parse_changed_lines(self, diff_lines):
+        """
+        Given the diff lines output from `git diff` for a particular
+        source file, return a list of modified line numbers.
+
+        Raises a `GitDiffError` if the diff lines are in an invalid format.
+        """
+
+        changed_lines = []
+        current_line = None
+
+        for line in diff_lines:
+
+            # If this is the start of the hunk definition, retrieve
+            # the starting line number
+            if line.startswith('@@'):
+                current_line = self._parse_hunk_line(line)
+
+            # This is an added/modified line, so store the line number
+            elif line.startswith('+'):
+
+                if current_line is not None:
+
+                    # Store the changed line
+                    changed_lines.append(current_line)
+
+                    # Increment the line number in the file
+                    current_line += 1
+
+                # If we are not in a hunk, then ignore the line
+                else:
+                    pass
+
+
+            # This is a deleted line that does not exist in the final
+            # version, so skip it
+            elif line.startswith('-'):
+                pass
+
+            # This is a line in the final version that was not modified.
+            # Increment the line number, but do not store this as a changed
+            # line.
+            else:
+                if current_line is not None:
+                    current_line += 1
+
+                # If we are not in a hunk, then ignore the line
+                else:
+                    pass
+
+        return changed_lines
+
+    def _parse_source_line(self, line):
+        """
+        Given a source line in `git diff` output, return the path
+        to the source file.
         """
         groups = self.SRC_FILE_RE.findall(line)
 
         if len(groups) == 1:
+            return groups[0]
 
-            # Store the name of the source path
-            src_path = groups[0]
-
-            # If there is not a list for this source path
-            # already, create one.
-            if src_path not in diff_dict:
-                diff_dict[src_path] = []
-
-        # Something invalid in the format
-        # Rather than risk misinterpreting the diff, raise an exception
         else:
-            raise GitDiffError("Could not parse '{0}'".format(line))
+            msg = "Could not parse source path in line '{}'".format(line)
+            raise GitDiffError(msg)
 
-        return src_path
-
-    def _parse_hunk_line(self, line, src_path, diff_dict):
+    def _parse_hunk_line(self, line):
         """
-        Parse a line containing a "hunk" of code (start/end line numbers).
-        Update `diff_dict[src_path]` by appending `(start_line, end_line)`
-        tuple to the value (a list)
+        Given a hunk line in `git diff` output, return the line number
+        at the start of the hunk.
         """
         groups = self.HUNK_LINE_RE.findall(line)
 
         if len(groups) == 1:
 
-            hunk_str = groups[0]
-
-            # Split is guaranteed to return at least one component,
-            # so we handle only the cases where len(components) >= 1 below.
-            components = hunk_str.split(',')
-
-            # Calculate the end line (counting start_line as the first)
-            # Handle the case in which num_lines is not specified
-            # (because there is only one line in the file)
             try:
-                if len(components) == 1:
-                    start_line = int(components[0])
-                    end_line = start_line
-
-                elif len(components) > 1:
-                    start_line = int(components[0])
-                    num_lines = int(components[1])
-                    end_line = start_line + num_lines
+                return int(groups[0])
 
             except ValueError:
-                raise GitDiffError("Could not parse hunk '{0}'".format(line))
-
-            # Add the hunk to the current source file
-            if src_path is not None:
-                hunk = (start_line, end_line)
-
-                # Handle the special case in which a file is deleted
-                if hunk == (0, 0):
-                    pass
-                else:
-                    diff_dict[src_path].append(hunk)
-
-            # Got a hunk before a source file: input string is invalid
-            else:
-                msg = "Hunk has no source file: '{0}'".format(line)
+                msg = "Could not parse '{}' as a line number".format(groups[0])
                 raise GitDiffError(msg)
 
         else:
-            raise GitDiffError("Could not parse '{0}'".format(line))
+            msg = "Could not find start of hunk in line '{}'".format(line)
+            raise GitDiffError(msg)
 
     @staticmethod
-    def _resolve_overlaps(hunk_list):
+    def _unique_ordered_lines(line_numbers):
         """
-        Given a list of `(start_line, end_line)` tuples representing
-        hunks in a file, return a list in which all overlapping hunks
-        have been combined.
+        Given a list of line numbers, return a list in which each line
+        number is included once and the lines are ordered sequentially.
         """
 
-        if len(hunk_list) == 0:
+        if len(line_numbers) == 0:
             return []
 
-        # First, sort the hunks into ascending order by start line
-        sorted_hunks = sorted(hunk_list, key=lambda hunk: hunk[0])
+        # Ensure lines are unique by putting them in a set
+        line_set = set(line_numbers)
 
-        # Iterate through the hunks, combining overlaps
-        last_hunk = sorted_hunks[0]
-        results = [last_hunk]
-        for hunk in sorted_hunks[1:]:
-            (last_start, last_end) = last_hunk
-            (start, end) = hunk
-
-            # If the start of the current hunk is less than the
-            # end of the last hunk, combine them
-            # Choose the max of (end, last_end)
-            # to handle the case where the new hunk is entirely
-            # within the last hunk.
-            if start < last_end:
-                results[-1] = (last_start, max(end, last_end))
-
-            # Otherwise, add a new hunk
-            else:
-                results.append(hunk)
-
-            # Store the last hunk
-            last_hunk = hunk
-
-        return results
+        # Retrieve the list from the set, sort it, and return
+        return sorted([line for line in line_set])

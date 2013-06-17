@@ -20,11 +20,10 @@ class BaseCoverageReporter(object):
         self._name = name
 
     @abstractmethod
-    def coverage_info(self, src_path, line_start, line_end):
+    def coverage_info(self, src_path, lines):
         """
-        For each line in `src_path` between `line_start` and `line_end`
-        (inclusive), indicate whether the line is covered or uncovered
-        by the test suite.
+        For each line number in `lines`, indicate whether the 
+        line is covered or uncovered by the test suite.
 
         Returns a dict with line number keys and True/False values.
         For example:
@@ -67,7 +66,7 @@ class XmlCoverageReporter(BaseCoverageReporter):
         # Keys are source file paths, values are output of `coverage_info()`
         self._info_cache = dict()
 
-    def coverage_info(self, src_path, line_start, line_end):
+    def coverage_info(self, src_path, lines):
         """
         See base class comments.
         """
@@ -100,4 +99,4 @@ class XmlCoverageReporter(BaseCoverageReporter):
         src_line_dict = self._info_cache[src_path]
 
         return {key: src_line_dict[key] for key in src_line_dict.keys()
-                 if key >= line_start and key <= line_end}
+                 if key in lines}

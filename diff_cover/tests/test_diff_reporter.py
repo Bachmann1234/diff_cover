@@ -3,51 +3,10 @@ import mock
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool, GitDiffError
+from diff_cover.tests.helpers import line_numbers, git_diff_output
 
 
 class GitDiffReporterTest(unittest.TestCase):
-
-    MASTER_DIFF = dedent("""
-    diff --git a/subdir/file1.py b/subdir/file1.py
-    index 629e8ad..91b8c0a 100644
-    --- a/subdir/file1.py
-    +++ b/subdir/file1.py
-    @@ -3,6 +3,7 @@ Text
-    More text
-    Even more text
-
-    @@ -33,10 +34,13 @@ Text
-     More text
-    +Another change
-    """).strip()
-
-    STAGED_DIFF = dedent("""
-    diff --git a/subdir/file2.py b/subdir/file2.py
-    index 629e8ad..91b8c0a 100644
-    --- a/subdir/file2.py
-    +++ b/subdir/file2.py
-    @@ -3,6 +3,7 @@ Text
-     More text
-    -Even more text
-
-    diff --git a/one_line.txt b/one_line.txt
-    @@ -1,18 +1 @@
-    Test of one line left
-    """).strip()
-
-    UNSTAGED_DIFF = dedent("""
-    diff --git a/README.md b/README.md
-    deleted file mode 100644
-    index 1be20b5..0000000
-    --- a/README.md
-    +++ /dev/null
-    @@ -1,18 +0,0 @@
-    -diff-cover
-    -==========
-    -
-    -Automatically find diff lines that need test coverage.
-    -
-    """).strip()
 
     def setUp(self):
 
@@ -66,8 +25,12 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_git_source_paths(self):
 
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py':
+                             line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                             'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md']))
 
         # Get the source paths in the diff
         source_paths = self.diff.src_paths_changed()
@@ -75,7 +38,7 @@ class GitDiffReporterTest(unittest.TestCase):
         # Validate the source paths
         # They should be in alphabetical order
         self.assertEqual(len(source_paths), 4)
-        self.assertEqual('one_line.txt', source_paths[0])
+        self.assertEqual('file3.py', source_paths[0])
         self.assertEqual('README.md', source_paths[1])
         self.assertEqual('subdir/file1.py', source_paths[2])
         self.assertEqual('subdir/file2.py', source_paths[3])
@@ -83,115 +46,141 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_duplicate_source_paths(self):
 
         # Duplicate the output for committed, staged, and unstaged changes
-        self._set_git_diff_output(self.MASTER_DIFF, self.MASTER_DIFF,
-                                  self.MASTER_DIFF)
+        diff = git_diff_output({'subdir/file1.py':
+                                line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output(diff, diff, diff)
 
         # Get the source paths in the diff
         source_paths = self.diff.src_paths_changed()
 
-        # Should see only one copy of source files in MASTER_DIFF
+        # Should see only one copy of source files
         self.assertEqual(len(source_paths), 1)
         self.assertEqual('subdir/file1.py', source_paths[0])
 
-    def test_git_hunks_changed(self):
+    def test_git_lines_changed(self):
 
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py':
+                             line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                             'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md']))
 
-        # Get the hunks changed in the diff
-        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('subdir/file1.py')
 
-        # Validate the hunks changed
-        self.assertEqual(len(hunks_changed), 2)
-        self.assertEqual(hunks_changed[0], (3, 10))
-        self.assertEqual(hunks_changed[1], (34, 47))
+        # Validate the lines changed
+        self.assertEqual(lines_changed,
+                         line_numbers(3, 10) + line_numbers(34, 47))
 
-    def test_git_deleted_hunk(self):
+    def test_one_line_file(self):
+
+        # Files with only one line have a special format
+        # in which the "length" part of the hunk is not specified
+        diff_str = dedent("""
+            diff --git a/diff_cover/one_line.txt b/diff_cover/one_line.txt
+            index 0867e73..9daeafb 100644
+            --- a/diff_cover/one_line.txt
+            +++ b/diff_cover/one_line.txt
+            @@ -1,3 +1 @@
+            test
+            -test
+            -test
+            """).strip()
 
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(diff_str, "", "")
 
-        # Get the hunks changed in the diff
-        hunks_changed = self.diff.hunks_changed('README.md')
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('one_line.txt')
 
-        # Validate no hunks changed
-        self.assertEqual(len(hunks_changed), 0)
+        # Expect that no lines are changed
+        self.assertEqual(len(lines_changed), 0)
 
-    def test_git_repeat_hunk(self):
+    def test_git_deleted_lines(self):
 
-        # Have the committed, staged, and unstaged hunks
-        # all be the same
-        self._set_git_diff_output(self.MASTER_DIFF, self.MASTER_DIFF,
-                                  self.MASTER_DIFF)
+        # Configure the git diff output
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py':
+                             line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                             'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md']))
 
-        # Get the hunks changed in the diff
-        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('README.md')
 
-        # Validate the hunks changed
-        self.assertEqual(len(hunks_changed), 2)
-        self.assertEqual(hunks_changed[0], (3, 10))
-        self.assertEqual(hunks_changed[1], (34, 47))
+        # Validate no lines changed
+        self.assertEqual(len(lines_changed), 0)
 
-    def test_git_overlapping_hunk(self):
+    def test_git_repeat_lines(self):
+
+        # Same committed, staged, and unstaged lines
+        diff = git_diff_output({'subdir/file1.py':
+                                line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output(diff, diff, diff)
+
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('subdir/file1.py')
+
+        # Validate the lines changed
+        self.assertEqual(lines_changed,
+                         line_numbers(3, 10) + line_numbers(34, 47))
+
+    def test_git_overlapping_lines(self):
+
+        master_diff = git_diff_output(
+            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
 
         # Overlap, extending the end of the hunk (lines 3 to 10)
-        overlap_1 = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -3,6 +5,9 @@ Text
-        """).strip()
+        overlap_1 = git_diff_output({'subdir/file1.py': line_numbers(5, 14)})
 
         # Overlap, extending the beginning of the hunk (lines 34 to 47)
-        overlap_2 = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -33,10 +32,5 @@ Text
-        """).strip()
+        overlap_2 = git_diff_output({'subdir/file1.py': line_numbers(32, 37)})
 
-        # Hunks in staged / unstaged overlap with hunks in master
-        self._set_git_diff_output(self.MASTER_DIFF, overlap_1, overlap_2)
+        # Lines in staged / unstaged overlap with lines in master
+        self._set_git_diff_output(master_diff, overlap_1, overlap_2)
 
-        # Get the hunks changed in the diff
-        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('subdir/file1.py')
 
-        # Validate the hunks changed
-        self.assertEqual(len(hunks_changed), 2)
-        self.assertEqual(hunks_changed[0], (3, 14))
-        self.assertEqual(hunks_changed[1], (32, 47))
+        # Validate the lines changed
+        self.assertEqual(lines_changed,
+                         line_numbers(3, 14) + line_numbers(32, 47))
 
-    def test_git_hunk_within_hunk(self):
+    def test_git_line_within_hunk(self):
+
+        master_diff = git_diff_output(
+            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
 
         # Surround hunk in master (lines 3 to 10)
-        surround = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -3,6 +2,9 @@ Text
-        """).strip()
+        surround = git_diff_output({'subdir/file1.py': line_numbers(2, 11)})
 
         # Within hunk in master (lines 34 to 47)
-        within = dedent("""
-        diff --git a/subdir/file1.py b/subdir/file1.py
-        @@ -33,10 +35,11 @@ Text
-        """).strip()
+        within = git_diff_output({'subdir/file1.py': line_numbers(35, 46)})
 
-        # Hunks in staged / unstaged overlap with hunks in master
-        self._set_git_diff_output(self.MASTER_DIFF, surround, within)
+        # Lines in staged / unstaged overlap with hunks in master
+        self._set_git_diff_output(master_diff, surround, within)
 
-        # Get the hunks changed in the diff
-        hunks_changed = self.diff.hunks_changed('subdir/file1.py')
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('subdir/file1.py')
 
-        # Validate the hunks changed
-        self.assertEqual(len(hunks_changed), 2)
-        self.assertEqual(hunks_changed[0], (2, 11))
-        self.assertEqual(hunks_changed[1], (34, 47))
+        # Validate the lines changed
+        self.assertEqual(lines_changed,
+                         line_numbers(2, 11) + line_numbers(34, 47))
 
     def test_git_no_such_file(self):
 
-        # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        diff = git_diff_output({'subdir/file1.py': [1],
+                                'subdir/file2.py': [2],
+                                'file3.py': [3]})
 
-        hunks_changed = self.diff.hunks_changed('no_such_file.txt')
-        self.assertEqual(hunks_changed, [])
+        # Configure the git diff output
+        self._set_git_diff_output(diff, "", "")
+
+        lines_changed = self.diff.lines_changed('no_such_file.txt')
+        self.assertEqual(len(lines_changed), 0)
 
     def test_no_diff(self):
 
@@ -210,19 +199,24 @@ class GitDiffReporterTest(unittest.TestCase):
                            """).strip()
 
         no_src_line_str = "@@ -33,10 +34,13 @@ Text"
+
         non_numeric_lines = dedent("""
                             diff --git a/subdir/file1.py b/subdir/file1.py
                             @@ -1,2 +a,b @@
                             """).strip()
+
         missing_line_num = dedent("""
                             diff --git a/subdir/file1.py b/subdir/file1.py
                             @@ -1,2 +  @@
                             """).strip()
 
+        missing_src_str = "diff --git "
+
         # List of (stdout, stderr) git diff pairs that should cause
         # a GitDiffError to be raised.
         err_outputs = [invalid_hunk_str, no_src_line_str,
-                       non_numeric_lines, missing_line_num]
+                       non_numeric_lines, missing_line_num,
+                       missing_src_str]
 
         for diff_str in err_outputs:
 
@@ -236,7 +230,7 @@ class GitDiffReporterTest(unittest.TestCase):
                 self.diff.src_paths_changed()
 
             with self.assertRaises(GitDiffError, msg=fail_msg):
-                self.diff.hunks_changed('subdir/file1.py')
+                self.diff.lines_changed('subdir/file1.py')
 
     def _set_git_diff_output(self, committed_diff, staged_diff, unstaged_diff):
         """
