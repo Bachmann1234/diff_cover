@@ -8,14 +8,6 @@ from diff_cover.tests.helpers import line_numbers, git_diff_output
 
 class GitDiffReporterTest(unittest.TestCase):
 
-    MASTER_DIFF = git_diff_output({'subdir/file1.py':
-                                   line_numbers(3, 10) + line_numbers(34, 47)})
-
-    STAGED_DIFF = git_diff_output({'subdir/file2.py': line_numbers(3, 10),
-                                   'file3.py': [0]})
-
-    UNSTAGED_DIFF = git_diff_output(dict(), deleted_files=['README.md'])
-
     def setUp(self):
 
         # Create a mock git diff wrapper
@@ -33,8 +25,12 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_git_source_paths(self):
 
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py':
+                             line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                             'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md']))
 
         # Get the source paths in the diff
         source_paths = self.diff.src_paths_changed()
@@ -50,21 +46,26 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_duplicate_source_paths(self):
 
         # Duplicate the output for committed, staged, and unstaged changes
-        self._set_git_diff_output(self.MASTER_DIFF, self.MASTER_DIFF,
-                                  self.MASTER_DIFF)
+        diff = git_diff_output({'subdir/file1.py':
+                                line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output(diff, diff, diff)
 
         # Get the source paths in the diff
         source_paths = self.diff.src_paths_changed()
 
-        # Should see only one copy of source files in MASTER_DIFF
+        # Should see only one copy of source files
         self.assertEqual(len(source_paths), 1)
         self.assertEqual('subdir/file1.py', source_paths[0])
 
     def test_git_lines_changed(self):
 
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py':
+                             line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                             'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md']))
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('subdir/file1.py')
@@ -100,8 +101,12 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_git_deleted_lines(self):
 
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py':
+                             line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
+                             'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md']))
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('README.md')
@@ -112,8 +117,9 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_git_repeat_lines(self):
 
         # Same committed, staged, and unstaged lines
-        self._set_git_diff_output(self.MASTER_DIFF, self.MASTER_DIFF,
-                                  self.MASTER_DIFF)
+        diff = git_diff_output({'subdir/file1.py':
+                                line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output(diff, diff, diff)
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('subdir/file1.py')
@@ -124,6 +130,9 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_overlapping_lines(self):
 
+        master_diff = git_diff_output(
+            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+
         # Overlap, extending the end of the hunk (lines 3 to 10)
         overlap_1 = git_diff_output({'subdir/file1.py': line_numbers(5, 14)})
 
@@ -131,7 +140,7 @@ class GitDiffReporterTest(unittest.TestCase):
         overlap_2 = git_diff_output({'subdir/file1.py': line_numbers(32, 37)})
 
         # Lines in staged / unstaged overlap with lines in master
-        self._set_git_diff_output(self.MASTER_DIFF, overlap_1, overlap_2)
+        self._set_git_diff_output(master_diff, overlap_1, overlap_2)
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('subdir/file1.py')
@@ -142,6 +151,9 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_line_within_hunk(self):
 
+        master_diff = git_diff_output(
+            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+
         # Surround hunk in master (lines 3 to 10)
         surround = git_diff_output({'subdir/file1.py': line_numbers(2, 11)})
 
@@ -149,7 +161,7 @@ class GitDiffReporterTest(unittest.TestCase):
         within = git_diff_output({'subdir/file1.py': line_numbers(35, 46)})
 
         # Lines in staged / unstaged overlap with hunks in master
-        self._set_git_diff_output(self.MASTER_DIFF, surround, within)
+        self._set_git_diff_output(master_diff, surround, within)
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('subdir/file1.py')
@@ -160,9 +172,12 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_no_such_file(self):
 
+        diff = git_diff_output({'subdir/file1.py': [1],
+                                'subdir/file2.py': [2],
+                                'file3.py': [3]})
+
         # Configure the git diff output
-        self._set_git_diff_output(self.MASTER_DIFF, self.STAGED_DIFF,
-                                  self.UNSTAGED_DIFF)
+        self._set_git_diff_output(diff, "", "")
 
         lines_changed = self.diff.lines_changed('no_such_file.txt')
         self.assertEqual(len(lines_changed), 0)
