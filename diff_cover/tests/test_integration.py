@@ -10,10 +10,8 @@ from subprocess import Popen
 from StringIO import StringIO
 import tempfile
 import shutil
-from textwrap import dedent
 from diff_cover.tool import main
 from diff_cover.diff_reporter import GitDiffError
-from helpers import line_numbers, git_diff_output
 
 
 class DiffCoverIntegrationTest(unittest.TestCase):
@@ -22,173 +20,141 @@ class DiffCoverIntegrationTest(unittest.TestCase):
     The `git diff` is a mock, but everything else is our code.
     """
 
-    MASTER_DIFF = git_diff_output({'subdir/file1.py':
-                                   line_numbers(3, 10) + line_numbers(34, 47)})
-
-    STAGED_DIFF = git_diff_output({'subdir/file2.py': line_numbers(3, 10)})
-
-    UNSTAGED_DIFF = git_diff_output({'README.rst': line_numbers(3, 10)})
-
-    COVERAGE_XML = dedent("""
-    <coverage>
-        <packages>
-            <classes>
-                <class filename="subdir/file1.py">
-                    <methods />
-                    <lines>
-                        <line hits="0" number="2" />
-                        <line hits="1" number="7" />
-                        <line hits="0" number="8" />
-                    </lines>
-                </class>
-                <class filename="subdir/file2.py">
-                    <methods />
-                    <lines>
-                        <line hits="0" number="2" />
-                        <line hits="1" number="7" />
-                        <line hits="0" number="8" />
-                    </lines>
-                </class>
-            </classes>
-        </packages>
-    </coverage>
-    """)
-
-    EXPECTED_CONSOLE_REPORT = dedent("""
-    -------------
-    Diff Coverage
-    Coverage Report: {coverage_xml}
-    Diff: origin/master...HEAD, staged, and unstaged changes
-    -------------
-    subdir/file2.py (50%): Missing line(s) 8
-    subdir/file1.py (50%): Missing line(s) 8
-    -------------
-    Total:   4 line(s)
-    Missing: 2 line(s)
-    Coverage: 50%
-    -------------
-    """).strip() + "\n"
-
-    EXPECTED_HTML_REPORT = dedent("""
-    <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-    <html>
-    <head>
-    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
-    <title>Diff Coverage</title>
-    </head>
-    <body>
-    <h1>Diff Coverage</h1>
-    <p>Coverage Report: {coverage_xml}</p>
-    <p>Diff: origin/master...HEAD, staged, and unstaged changes</p>
-    <table border="1">
-    <tr>
-    <th>Source File</th>
-    <th>Diff Coverage (%)</th>
-    <th>Missing Line(s)</th>
-    </tr>
-    <tr>
-    <td>subdir/file2.py</td>
-    <td>50%</td>
-    <td>8</td>
-    </tr>
-    <tr>
-    <td>subdir/file1.py</td>
-    <td>50%</td>
-    <td>8</td>
-    </tr>
-    </table>
-    <ul>
-    <li><b>Total</b>: 4 line(s)</li>
-    <li><b>Missing</b>: 2 line(s)</li>
-    <li><b>Coverage</b>: 50%</li>
-    </ul>
-    </body>
-    </html>
-    """).strip()
-
-    # Path to the temporary coverage XML file, so we can clean it up later
-    _coverage_xml_path = None
+    _old_cwd = None
 
     def setUp(self):
         """
-        Create fake coverage XML file
+        Patch the output of `git diff` and set the cwd to the fixtures dir
         """
-        # Write the XML coverage report to a temp directory
-        self._coverage_xml_path = self._write_to_temp(self.COVERAGE_XML)
-
-        # Create mocks
         self._mock_communicate = patch.object(Popen, 'communicate').start()
         self._mock_sys = patch('diff_cover.tool.sys').start()
 
+        # Set the CWD to the fixtures dir
+        self._old_cwd = os.getcwd()
+        os.chdir(self._fixture_path())
+
     def tearDown(self):
         """
-        Clean up the XML coverage report we created.
-        Undo all patches.
+        Undo all patches and reset the cwd
         """
-        os.remove(self._coverage_xml_path)
         patch.stopall()
+        os.chdir(self._old_cwd)
 
-    def test_diff_cover_console(self):
+    def test_added_file_html(self):
+        self._check_html_report('git_diff_add.txt',
+                                'coverage.xml',
+                                'add_html_report.html')
+
+    def test_added_file_console(self):
+        self._check_console_report('git_diff_add.txt',
+                                   'coverage.xml',
+                                   'add_console_report.txt')
+
+    def test_deleted_file_html(self):
+        self._check_html_report('git_diff_delete.txt',
+                                'coverage.xml',
+                                'delete_html_report.html')
+
+    def test_deleted_file_console(self):
+        self._check_console_report('git_diff_delete.txt',
+                                   'coverage.xml',
+                                   'delete_console_report.txt')
+
+    def test_changed_file_html(self):
+        self._check_html_report('git_diff_changed.txt',
+                                'coverage.xml',
+                                'changed_html_report.html')
+
+    def test_changed_file_console(self):
+        self._check_console_report('git_diff_changed.txt',
+                                   'coverage.xml',
+                                   'changed_console_report.txt')
+
+    def test_moved_file_html(self):
+        self._check_html_report('git_diff_moved.txt',
+                                'moved_coverage.xml',
+                                'moved_html_report.html')
+
+    def test_moved_file_console(self):
+        self._check_console_report('git_diff_moved.txt',
+                                   'moved_coverage.xml',
+                                   'moved_console_report.txt')
+
+    def test_git_diff_error(self):
+
+        # Patch sys.argv
+        self._set_sys_args(['diff-cover', 'coverage.xml'])
+
+        # Patch the output of `git diff` to return an error
+        self._set_git_diff_output('', 'fatal error')
+
+        # Expect an error
+        with self.assertRaises(GitDiffError):
+            main()
+
+    def _check_html_report(self, git_diff_path, coverage_xml_path,
+                           expected_html_path):
+        """
+        Assert that given `git_diff_path` and `coverage_xml_path`,
+        the tool generates the expected HTML report.
+        """
 
         # Patch the output of `git diff`
-        self._set_git_diff_outputs([(self.MASTER_DIFF, ""),
-                                    (self.STAGED_DIFF, ""),
-                                    (self.UNSTAGED_DIFF, "")])
+        with open(git_diff_path) as git_diff_file:
+            self._set_git_diff_output(git_diff_file.read(), "")
+
+        # Create a temporary directory to hold the output HTML report
+        # Add a cleanup to ensure the directory gets deleted
+        temp_dir = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(temp_dir))
+        html_report_path = os.path.join(temp_dir, 'diff_coverage.html')
+
+        # Patch sys.argv
+        self._set_sys_args(['diff-cover', coverage_xml_path,
+                            '--html-report', html_report_path])
+
+        # Run diff-cover
+        main()
+
+        # Check the HTML report
+        with open(expected_html_path) as expected_file:
+            with open(html_report_path) as html_report:
+                html = html_report.read()
+                expected = expected_file.read()
+                self.assertEqual(html, expected)
+
+    def _check_console_report(self, git_diff_path, coverage_xml_path,
+                              expected_console_path):
+        """
+        Assert that given `git_diff_path` and `coverage_xml_path`,
+        the tool generates the expected console report.
+        """
+
+        # Patch the output of `git diff`
+        with open(git_diff_path) as git_diff_file:
+            self._set_git_diff_output(git_diff_file.read(), "")
 
         # Capture stdout to a string buffer
         string_buffer = StringIO()
         self._capture_stdout(string_buffer)
 
         # Patch sys.argv
-        self._set_sys_args(['diff-cover', self._coverage_xml_path])
+        self._set_sys_args(['diff-cover', coverage_xml_path])
 
         # Run diff-cover
         main()
 
-        # Check the output to stdout
-        report = string_buffer.getvalue()
-        expected = self.EXPECTED_CONSOLE_REPORT.format(coverage_xml=self._coverage_xml_path)
-        self.assertEqual(report, expected)
+        # Check the console report
+        with open(expected_console_path) as expected_file:
+            report = string_buffer.getvalue()
+            expected = expected_file.read()
+            self.assertEqual(report, expected)
 
-    def test_diff_cover_html(self):
-
-        # Patch the output of `git diff`
-        self._set_git_diff_outputs([(self.MASTER_DIFF, ""),
-                                    (self.STAGED_DIFF, ""),
-                                    (self.UNSTAGED_DIFF, "")])
-
-        # Create a temporary directory to hold the output HTML report
-        # Add a cleanup to ensure the directory gets deleted
-        temp_dir = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(temp_dir))
-
-        # Patch sys.argv
-        report_path = os.path.join(temp_dir, 'diff_coverage.html')
-        self._set_sys_args(['diff-cover', self._coverage_xml_path,
-                            '--html-report', report_path])
-
-        # Run diff-cover
-        main()
-
-        # Load the content of the HTML report
-        with open(report_path) as html_report:
-            html = html_report.read()
-            expected = self.EXPECTED_HTML_REPORT.format(coverage_xml=self._coverage_xml_path)
-            self.assertEqual(html, expected)
-
-    def test_git_diff_error(self):
-
-        # Patch sys.argv
-        self._set_sys_args(['diff-cover', self._coverage_xml_path])
-
-        # Patch the output of `git diff`
-        self._set_git_diff_outputs([(self.MASTER_DIFF, ""),
-                                    (self.STAGED_DIFF, "fatal error"),
-                                    (self.UNSTAGED_DIFF, "")])
-
-        # Expect an error
-        with self.assertRaises(GitDiffError):
-            main()
+    def _fixture_path(self):
+        """
+        Return an absolute path to the the test fixture directory
+        """
+        return os.path.join(os.path.dirname(__file__), 'fixtures')
 
     def _set_sys_args(self, argv):
         """
@@ -203,13 +169,12 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         """
         self._mock_sys.stdout = string_buffer
 
-    def _set_git_diff_outputs(self, outputs):
+    def _set_git_diff_output(self, stdout, stderr):
         """
-        Patch the call to `git diff` to return a series of ouputs.
-        `outputs` is a list of `(stdout, stderr)` tuples to
-        be returned in sequence for each call to subprocess.
+        Patch the call to `git diff` to output `stdout`
+        and `stderr`.
         """
-        self._mock_communicate.side_effect = outputs
+        self._mock_communicate.return_value = (stdout, stderr)
 
     def _write_to_temp(self, text):
         """
