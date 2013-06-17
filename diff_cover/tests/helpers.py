@@ -5,7 +5,7 @@ import random
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
-LINE_STRINGS = ['test']
+LINE_STRINGS = ['test', '+ has a plus sign', '- has a minus sign']
 
 
 def line_numbers(start, end):
@@ -154,8 +154,9 @@ def _hunk_entry(start, end, modified_lines):
                 output.append('-' + _random_string())
 
         # This is a line we didn't modify, so no + or - signs
+        # but prepend with a space.
         else:
-            output.append(_random_string())
+            output.append(' ' + _random_string())
 
     return output
 
