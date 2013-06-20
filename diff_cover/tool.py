@@ -3,13 +3,13 @@ Implement the command-line tool interface.
 """
 import argparse
 import sys
+import diff_cover
 from diff_reporter import GitDiffReporter
 from git_diff import GitDiffTool
 from coverage_reporter import XmlCoverageReporter
 from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
 
-DESCRIPTION = "Automatically find diff lines that need test coverage."
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 
@@ -28,7 +28,7 @@ def parse_args(argv):
 
     The path strings may or may not exist.
     """
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser = argparse.ArgumentParser(description=diff_cover.DESCRIPTION)
     parser.add_argument('coverage_xml', type=str, help=COVERAGE_XML_HELP)
     parser.add_argument('--html-report', type=str, default=None,
                         help=HTML_REPORT_HELP)
