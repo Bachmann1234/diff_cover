@@ -22,6 +22,7 @@ setup(
                  'Topic :: Software Development :: Testing',
                  'Topic :: Software Development :: Quality Assurance'],
     packages=['diff_cover'],
+    package_data={'diff_cover': ['templates/*.txt', 'templates/*.html']},
     install_requires=['setuptools'] + REQUIREMENTS,
     entry_points={
         'console_scripts': ['diff-cover = diff_cover.tool:main']
