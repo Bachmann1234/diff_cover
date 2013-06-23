@@ -1,3 +1,5 @@
+* Refactored diff report generator to use Jinja2 templates
+
 6/17/13 v0.1.2
 
     * Fix bug in which lines around a change were included in the report
