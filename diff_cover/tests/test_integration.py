@@ -175,15 +175,3 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         and `stderr`.
         """
         self._mock_communicate.return_value = (stdout, stderr)
-
-    def _write_to_temp(self, text):
-        """
-        Write `text` to a temporary file, then return the path.
-        """
-        _, path = tempfile.mkstemp()
-
-        with open(path, "w") as file_handle:
-            file_handle.write(text)
-            file_handle.close()
-
-        return path
