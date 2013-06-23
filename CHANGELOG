@@ -1,0 +1,8 @@
+6/17/13 v0.1.2
+
+    * Fix bug in which lines around a change were included in the report
+
+6/10/13 v0.1.1
+
+    * Compare with origin/master instead of master
+    * Includes staged and unstaged changes in report
