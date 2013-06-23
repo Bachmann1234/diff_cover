@@ -74,6 +74,23 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(lines_changed,
                          line_numbers(3, 10) + line_numbers(34, 47))
 
+    def test_ignore_lines_outside_src(self):
+
+        # Add some lines at the start of the diff, before any
+        # source files are specified
+        diff = git_diff_output({'subdir/file1.py': line_numbers(3, 10)})
+        master_diff = "\n".join(['- deleted line', '+ added line', diff])
+
+        # Configure the git diff output
+        self._set_git_diff_output(master_diff, "", "")
+
+        # Get the lines changed in the diff
+        lines_changed = self.diff.lines_changed('subdir/file1.py')
+
+        # Validate the lines changed
+        self.assertEqual(lines_changed, line_numbers(3, 10))
+
+
     def test_one_line_file(self):
 
         # Files with only one line have a special format
@@ -170,6 +187,51 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(lines_changed,
                          line_numbers(2, 11) + line_numbers(34, 47))
 
+    def test_inter_diff_conflict(self):
+
+        # Commit changes to lines 3 through 10
+        added_diff = git_diff_output({'file.py': line_numbers(3, 10)})
+
+        # Delete the lines we modified
+        deleted_lines = []
+        for line in added_diff.split('\n'):
+
+            # Any added line becomes a deleted line
+            if line.startswith('+'):
+                deleted_lines.append(line.replace('+', '-'))
+
+            # No need to include lines we already deleted
+            elif line.startswith('-'):
+                pass
+
+            # Keep any other line
+            else:
+                deleted_lines.append(line)
+
+        deleted_diff = "\n".join(deleted_lines)
+
+        # Try all combinations of diff conflicts
+        combinations = [(added_diff, deleted_diff, ''),
+                        (added_diff, '', deleted_diff),
+                        ('', added_diff, deleted_diff),
+                        (added_diff, deleted_diff, deleted_diff)]
+
+        for (master_diff, staged_diff, unstaged_diff) in combinations:
+
+            # Set up so we add lines, then delete them
+            self._set_git_diff_output(master_diff, staged_diff, unstaged_diff)
+
+            # Should have no lines changed, since
+            # we deleted all the lines we modified
+            fail_msg = dedent("""
+            master_diff = {}
+            staged_diff = {}
+            unstaged_diff = {}
+            """).format(master_diff, staged_diff, unstaged_diff)
+
+            self.assertEqual(self.diff.lines_changed('file.py'), [],
+                             msg=fail_msg)
+
     def test_git_no_such_file(self):
 
         diff = git_diff_output({'subdir/file1.py': [1],
@@ -223,13 +285,13 @@ class GitDiffReporterTest(unittest.TestCase):
             # Configure the git diff output
             self._set_git_diff_output(diff_str, '', '')
 
-            fail_msg = "Failed for '{0}'".format(diff_str)
-
             # Expect that both methods that access git diff raise an error
-            with self.assertRaises(GitDiffError, msg=fail_msg):
+            with self.assertRaises(GitDiffError):
+                print "src_paths_changed() should fail for {}".format(diff_str)
                 self.diff.src_paths_changed()
 
-            with self.assertRaises(GitDiffError, msg=fail_msg):
+            with self.assertRaises(GitDiffError):
+                print "lines_changed() should fail for {}".format(diff_str)
                 self.diff.lines_changed('subdir/file1.py')
 
     def _set_git_diff_output(self, committed_diff, staged_diff, unstaged_diff):
@@ -238,6 +300,7 @@ class GitDiffReporterTest(unittest.TestCase):
         `staged_diff`, and `unstaged_diff` as outputs from
         `git diff`
         """
+        self.diff.clear_cache()
         self._git_diff.diff_committed.return_value = committed_diff
         self._git_diff.diff_staged.return_value = staged_diff
         self._git_diff.diff_unstaged.return_value = unstaged_diff
