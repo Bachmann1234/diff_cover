@@ -232,6 +232,42 @@ class GitDiffReporterTest(unittest.TestCase):
             with self.assertRaises(GitDiffError, msg=fail_msg):
                 self.diff.lines_changed('subdir/file1.py')
 
+    def test_plus_sign_in_hunk_bug(self):
+
+        # This was a bug that caused a parse error
+        diff_str = dedent("""
+            diff --git a/file.py b/file.py
+            @@ -16,16 +16,7 @@ 1 + 2
+            + test
+            + test
+            + test
+            + test
+            """)
+
+        self._set_git_diff_output(diff_str, '', '')
+
+        lines_changed = self.diff.lines_changed('file.py')
+        self.assertEqual(lines_changed, [16, 17, 18, 19])
+
+    def test_terminating_chars_in_hunk(self):
+
+        # Check what happens when there's an @@ symbol after the
+        # first terminating @@ symbol
+        diff_str = dedent("""
+            diff --git a/file.py b/file.py
+            @@ -16,16 +16,7 @@ and another +23,2 @@ symbol
+            + test
+            + test
+            + test
+            + test
+            """)
+
+        self._set_git_diff_output(diff_str, '', '')
+
+        lines_changed = self.diff.lines_changed('file.py')
+        self.assertEqual(lines_changed, [16, 17, 18, 19])
+
+
     def _set_git_diff_output(self, committed_diff, staged_diff, unstaged_diff):
         """
         Configure the git diff tool to return `committed_diff`,
