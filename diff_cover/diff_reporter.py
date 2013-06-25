@@ -291,7 +291,18 @@ class GitDiffReporter(BaseDiffReporter):
     def _parse_hunk_line(self, line):
         """
         Given a hunk line in `git diff` output, return the line number
-        at the start of the hunk.
+        at the start of the hunk.  A hunk is a segment of code that
+        contains changes.
+
+        The format of the hunk line is:
+
+            @@ -k,l +n,m @@ TEXT
+        
+        where `k,l` represent the start line and length before the changes
+        and `n,m` represent the start line and length after the changes.
+
+        `git diff` will sometimes put a code excerpt from within the hunk
+        in the `TEXT` section of the line.
         """
         # Split the line at the @@ terminators (start and end of the line)
         components = line.split('@@')
