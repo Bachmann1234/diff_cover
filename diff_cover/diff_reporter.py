@@ -138,7 +138,7 @@ class GitDiffReporter(BaseDiffReporter):
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git a/.* b/([^ \n]*)')
-    HUNK_LINE_RE = re.compile(r'^@@ -.* \+([0-9]*)')
+    HUNK_LINE_RE = re.compile(r'\+([0-9]*)')
 
     def _parse_diff_str(self, diff_str):
         """
@@ -291,21 +291,46 @@ class GitDiffReporter(BaseDiffReporter):
     def _parse_hunk_line(self, line):
         """
         Given a hunk line in `git diff` output, return the line number
-        at the start of the hunk.
+        at the start of the hunk.  A hunk is a segment of code that
+        contains changes.
+
+        The format of the hunk line is:
+
+            @@ -k,l +n,m @@ TEXT
+        
+        where `k,l` represent the start line and length before the changes
+        and `n,m` represent the start line and length after the changes.
+
+        `git diff` will sometimes put a code excerpt from within the hunk
+        in the `TEXT` section of the line.
         """
-        groups = self.HUNK_LINE_RE.findall(line)
+        # Split the line at the @@ terminators (start and end of the line)
+        components = line.split('@@')
 
-        if len(groups) == 1:
+        # The first component should be an empty string, because
+        # the line starts with '@@'.  The second component should
+        # be the hunk information, and any additional components
+        # are excerpts from the code.
+        if len(components) >= 2:
 
-            try:
-                return int(groups[0])
+            hunk_info = components[1]
+            groups = self.HUNK_LINE_RE.findall(hunk_info)
 
-            except ValueError:
-                msg = "Could not parse '{}' as a line number".format(groups[0])
+            if len(groups) == 1:
+
+                try:
+                    return int(groups[0])
+
+                except ValueError:
+                    msg = "Could not parse '{}' as a line number".format(groups[0])
+                    raise GitDiffError(msg)
+
+            else:
+                msg = "Could not find start of hunk in line '{}'".format(line)
                 raise GitDiffError(msg)
 
         else:
-            msg = "Could not find start of hunk in line '{}'".format(line)
+            msg = "Could not parse hunk in line '{}'".format(line)
             raise GitDiffError(msg)
 
     @staticmethod
