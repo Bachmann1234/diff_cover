@@ -140,18 +140,11 @@ def _hunk_entry(start, end, modified_lines):
         # This is a changed line, so prepend a + sign
         if line_number in modified_lines:
 
-            # With some probability, introduce a deleted
-            # line BEFORE the changed line
-            if random.random() < 0.25:
-                output.append('-' + _random_string())
+            # Delete the old line
+            output.append('-' + _random_string())
 
             # Include the changed line
             output.append('+' + _random_string())
-
-            # With some probability, introduce a deleted
-            # line AFTER the changed line
-            if random.random() < 0.25:
-                output.append('-' + _random_string())
 
         # This is a line we didn't modify, so no + or - signs
         # but prepend with a space.
