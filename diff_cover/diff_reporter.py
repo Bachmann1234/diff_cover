@@ -33,7 +33,9 @@ class BaseDiffReporter(object):
     @abstractmethod
     def lines_changed(self, src_path):
         """
-        Returns a list of line numbers changed in the source file at `src_path`.
+        Returns a list of line numbers changed in the
+        source file at `src_path`.
+
         Each line is guaranteed to be included only once in the list
         and in ascending order.
         """
@@ -66,6 +68,12 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Cache diff information as a dictionary
         # with file path keys and line number list values
+        self._diff_dict = None
+
+    def clear_cache(self):
+        """
+        Reset the git diff result cache.
+        """
         self._diff_dict = None
 
     def src_paths_changed(self):
@@ -109,42 +117,47 @@ class GitDiffReporter(BaseDiffReporter):
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
 
-            # Get the output of `git diff`
-            diff_str = self._git_diff_str()
+            result_dict = dict()
 
-            # Parse the output of the diff string
-            self._diff_dict = self._parse_diff_str(diff_str)
+            for diff_str in [self._git_diff_tool.diff_committed(),
+                             self._git_diff_tool.diff_staged(),
+                             self._git_diff_tool.diff_unstaged()]:
+
+                # Parse the output of the diff string
+                diff_dict = self._parse_diff_str(diff_str)
+
+                for src_path in diff_dict.keys():
+
+                    added_lines, deleted_lines = diff_dict[src_path]
+
+                    # Remove any lines from the dict that have been deleted
+                    # Include any lines that have been added
+                    result_dict[src_path] = \
+                            [line for line in result_dict.get(src_path, [])
+                             if not line in deleted_lines] + added_lines
 
             # Eliminate repeats and order line numbers
-            for (src_path, lines) in self._diff_dict.items():
-                self._diff_dict[src_path] = self._unique_ordered_lines(lines)
+            for (src_path, lines) in result_dict.items():
+                result_dict[src_path] = self._unique_ordered_lines(lines)
+
+            # Store the resulting dict
+            self._diff_dict = result_dict
 
         # Return the diff cache
         return self._diff_dict
 
-    def _git_diff_str(self):
-        """
-        Execute `git diff` and return the output string,
-        raising a GitDiffError if `git diff` reports an error.
-        """
-
-        # Execute `git diff` for each changeset we need
-        output = [self._git_diff_tool.diff_committed(),
-                  self._git_diff_tool.diff_unstaged(),
-                  self._git_diff_tool.diff_staged()]
-
-        # Return the concatenated output string
-        return "\n".join(output)
-
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git a/.* b/([^ \n]*)')
-    HUNK_LINE_RE = re.compile(r'^@@ -.* \+([0-9]*)')
+    HUNK_LINE_RE = re.compile(r'\+([0-9]*)')
 
     def _parse_diff_str(self, diff_str):
         """
-        Parse the output of `git diff` into a dictionary with
-        keys that are the source file paths, and values
-        that are lists of modified lines.
+        Parse the output of `git diff` into a dictionary of the form:
+
+            { SRC_PATH: (ADDED_LINES, DELETED_LINES) }
+
+        where `ADDED_LINES` and `DELETED_LINES` are lists of line
+        numbers added/deleted respectively.
 
         If the output could not be parsed, raises a GitDiffError.
         """
@@ -153,11 +166,12 @@ class GitDiffReporter(BaseDiffReporter):
         diff_dict = dict()
 
         # Parse the diff string into sections by source file
-        for (src_path, diff_lines) in self._parse_source_sections(diff_str).items():
+        sections_dict = self._parse_source_sections(diff_str)
+        for (src_path, diff_lines) in sections_dict.items():
 
             # Parse the hunk information for the source file
             # to determine lines changed for the source file
-            diff_dict[src_path] = self._parse_changed_lines(diff_lines)
+            diff_dict[src_path] = self._parse_lines(diff_lines)
 
         return diff_dict
 
@@ -222,57 +236,75 @@ class GitDiffReporter(BaseDiffReporter):
 
         return source_dict
 
-    def _parse_changed_lines(self, diff_lines):
+    def _parse_lines(self, diff_lines):
         """
         Given the diff lines output from `git diff` for a particular
-        source file, return a list of modified line numbers.
+        source file, return a tuple of `(ADDED_LINES, DELETED_LINES)`
+
+        where `ADDED_LINES` and `DELETED_LINES` are lists of line
+        numbers added/deleted respectively.
 
         Raises a `GitDiffError` if the diff lines are in an invalid format.
         """
 
-        changed_lines = []
-        current_line = None
+        added_lines = []
+        deleted_lines = []
+
+        current_line_new = None
+        current_line_old = None
 
         for line in diff_lines:
 
             # If this is the start of the hunk definition, retrieve
             # the starting line number
             if line.startswith('@@'):
-                current_line = self._parse_hunk_line(line)
+                line_num = self._parse_hunk_line(line)
+                current_line_new, current_line_old = line_num, line_num
 
             # This is an added/modified line, so store the line number
             elif line.startswith('+'):
 
-                if current_line is not None:
+                # Since we parse for source file sections before
+                # calling this method, we're guaranteed to have a source
+                # file specified.  We check anyway just to be safe.
+                if current_line_new is not None:
 
-                    # Store the changed line
-                    changed_lines.append(current_line)
+                    # Store the added line
+                    added_lines.append(current_line_new)
 
                     # Increment the line number in the file
-                    current_line += 1
-
-                # If we are not in a hunk, then ignore the line
-                else:
-                    pass
-
+                    current_line_new += 1
 
             # This is a deleted line that does not exist in the final
             # version, so skip it
             elif line.startswith('-'):
-                pass
+
+                # Since we parse for source file sections before
+                # calling this method, we're guaranteed to have a source
+                # file specified.  We check anyway just to be safe.
+                if current_line_old is not None:
+
+                    # Store the deleted line
+                    deleted_lines.append(current_line_old)
+
+                    # Increment the line number in the file
+                    current_line_old += 1
 
             # This is a line in the final version that was not modified.
             # Increment the line number, but do not store this as a changed
             # line.
             else:
-                if current_line is not None:
-                    current_line += 1
+                if current_line_old is not None:
+                    current_line_old += 1
+
+                if current_line_new is not None:
+                    current_line_new += 1
 
                 # If we are not in a hunk, then ignore the line
                 else:
                     pass
 
-        return changed_lines
+        return added_lines, deleted_lines
 
     def _parse_source_line(self, line):
         """
@@ -291,21 +323,46 @@ class GitDiffReporter(BaseDiffReporter):
     def _parse_hunk_line(self, line):
         """
         Given a hunk line in `git diff` output, return the line number
-        at the start of the hunk.
+        at the start of the hunk.  A hunk is a segment of code that
+        contains changes.
+
+        The format of the hunk line is:
+
+            @@ -k,l +n,m @@ TEXT
+        
+        where `k,l` represent the start line and length before the changes
+        and `n,m` represent the start line and length after the changes.
+
+        `git diff` will sometimes put a code excerpt from within the hunk
+        in the `TEXT` section of the line.
         """
-        groups = self.HUNK_LINE_RE.findall(line)
+        # Split the line at the @@ terminators (start and end of the line)
+        components = line.split('@@')
 
-        if len(groups) == 1:
+        # The first component should be an empty string, because
+        # the line starts with '@@'.  The second component should
+        # be the hunk information, and any additional components
+        # are excerpts from the code.
+        if len(components) >= 2:
 
-            try:
-                return int(groups[0])
+            hunk_info = components[1]
+            groups = self.HUNK_LINE_RE.findall(hunk_info)
 
-            except ValueError:
-                msg = "Could not parse '{}' as a line number".format(groups[0])
+            if len(groups) == 1:
+
+                try:
+                    return int(groups[0])
+
+                except ValueError:
+                    msg = "Could not parse '{}' as a line number".format(groups[0])
+                    raise GitDiffError(msg)
+
+            else:
+                msg = "Could not find start of hunk in line '{}'".format(line)
                 raise GitDiffError(msg)
 
         else:
-            msg = "Could not find start of hunk in line '{}'".format(line)
+            msg = "Could not parse hunk in line '{}'".format(line)
             raise GitDiffError(msg)
 
     @staticmethod

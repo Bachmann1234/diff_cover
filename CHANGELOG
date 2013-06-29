@@ -1,4 +1,13 @@
-* Refactored diff report generator to use Jinja2 templates
+    * Refactored diff report generator to use Jinja2 templates
+
+6/28/13 v0.1.4
+
+    * Fix bug in which adding then deleting lines would result in
+      incorrect lines included in the diff report.
+
+6/25/13 v0.1.3
+
+    * Fix a bug in which plus signs in the hunk line would cause a parser error
 
 6/17/13 v0.1.2
 
