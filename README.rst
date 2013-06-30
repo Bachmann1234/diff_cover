@@ -27,7 +27,7 @@ You can then use the command:
 
     diff-cover COVERAGE_XML [--html-report REPORT.html]
 
-This will compare the current git branch to ``BRANCH``, identify lines
+This will compare the current git branch to ``origin/master``, identify lines
 that are not covered (based on ``COVERAGE_XML``), and (optionally) generate an HTML report.
 
 ``diff-cover`` ignores files not referenced in ``COVERAGE_XML``, since these files
