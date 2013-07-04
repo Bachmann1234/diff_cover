@@ -3,7 +3,7 @@ import mock
 import StringIO
 from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
-from diff_cover.coverage_reporter import BaseCoverageReporter
+from diff_cover.violations_reporter import BaseViolationReporter, Violation
 from diff_cover.report_generator import BaseReportGenerator, \
      HtmlReportGenerator, StringReportGenerator
 
@@ -26,11 +26,11 @@ class BaseReportGeneratorTest(unittest.TestCase):
     """
 
     # Test data, returned by default from the mocks
-    SRC_PATHS = ['file1.py', 'subdir/file2.py']
+    SRC_PATHS = set(['file1.py', 'subdir/file2.py'])
     LINES = [2, 3, 4, 5, 10, 11, 12, 13, 14, 15]
-    COVERAGE = {1: True, 2: True, 3: True,
-                4: True, 7: True, 10: False, 11: False, 15: True,
-                20: False, 30: True}
+    VIOLATIONS = [Violation(n, None) for n in (10, 11, 20)]
+    MEASURED = [1, 2, 3, 4, 7, 10, 11, 15, 20, 30]
+
     XML_REPORT_NAME = "reports/coverage.xml"
     DIFF_REPORT_NAME = "master"
 
@@ -40,7 +40,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
     def setUp(self):
 
         # Create mocks of the dependencies
-        self.coverage = mock.MagicMock(BaseCoverageReporter)
+        self.coverage = mock.MagicMock(BaseViolationReporter)
         self.diff = mock.MagicMock(BaseDiffReporter)
 
         # Set the names of the XML and diff reports
@@ -50,7 +50,8 @@ class BaseReportGeneratorTest(unittest.TestCase):
         # Have the mocks return default values
         self.set_src_paths_changed(self.SRC_PATHS)
         self.set_lines_changed(self.LINES)
-        self.set_coverage_info(self.COVERAGE)
+        self.set_violations(self.VIOLATIONS)
+        self.set_measured(self.MEASURED)
 
         # Create a concrete instance of a report generator
         self.report = self.REPORT_GENERATOR_CLASS(self.coverage, self.diff)
@@ -67,11 +68,17 @@ class BaseReportGeneratorTest(unittest.TestCase):
         """
         self.diff.lines_changed.return_value = lines
 
-    def set_coverage_info(self, coverage_info):
+    def set_violations(self, violations):
         """
-        Patch the dependency `coverage_info()` return value
+        Patch the dependency `violations()` return value
         """
-        self.coverage.coverage_info.return_value = coverage_info
+        self.coverage.violations.return_value = violations
+
+    def set_measured(self, measured):
+        """
+        Patch the dependency `measured_lines()` return value
+        """
+        self.coverage.measured_lines.return_value = measured
 
 
 class SimpleReportGeneratorTest(BaseReportGeneratorTest):
@@ -94,16 +101,16 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         # Check that we get the expected coverage percentages
         # By construction, both files have the same diff line
         # and coverage information
-        # Because the diff_reporter is reponsible for
-        # filtering non-diff lines, we expect to get
-        # all the lines included
+
+        # There are 6 lines that are both in the diff and measured,
+        # and 4 of those are covered.
         for src_path in self.SRC_PATHS:
-            self.assertEqual(self.report.percent_covered(src_path), 70)
+            self.assertAlmostEqual(self.report.percent_covered(src_path), 4.0/6*100)
 
     def test_missing_lines(self):
 
         # By construction, each file has the same coverage information
-        expected = [10, 11, 20]
+        expected = [10, 11]
         for src_path in self.SRC_PATHS:
             self.assertEqual(self.report.missing_lines(src_path), expected)
 
@@ -115,14 +122,14 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
     def test_total_num_lines(self):
 
         # By construction, each source file has the same coverage info
-        expected = len(self.SRC_PATHS) * len(self.COVERAGE)
+        expected = len(self.SRC_PATHS) * len(set(self.MEASURED).intersection(self.LINES))
         self.assertEqual(self.report.total_num_lines(), expected)
 
     def test_total_num_missing(self):
 
         # By construction, each source file has the same coverage info,
-        # in which 3 lines are uncovered
-        expected = len(self.SRC_PATHS) * 3
+        # in which 3 lines are uncovered, 2 of which are changed
+        expected = len(self.SRC_PATHS) * 2
         self.assertEqual(self.report.total_num_missing(), expected)
 
     def test_total_percent_covered(self):
@@ -130,7 +137,7 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         # Since each file has the same coverage info,
         # the total percent covered is the same as each file
         # individually.
-        self.assertEqual(self.report.total_percent_covered(), 70)
+        self.assertEqual(self.report.total_percent_covered(), 66)
 
 
 class StringReportGeneratorTest(BaseReportGeneratorTest):
@@ -156,12 +163,12 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Coverage Report: reports/coverage.xml
         Diff: master
         -------------
-        file1.py (70%): Missing line(s) 10,11,20
-        subdir/file2.py (70%): Missing line(s) 10,11,20
+        file1.py (66.7%): Missing line(s) 10,11
+        subdir/file2.py (66.7%): Missing line(s) 10,11
         -------------
-        Total:   20 line(s)
-        Missing: 6 line(s)
-        Coverage: 70%
+        Total:   12 line(s)
+        Missing: 4 line(s)
+        Coverage: 66%
         -------------
         """).strip()
 
@@ -175,7 +182,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         # Have the dependencies return an empty report
         self.set_src_paths_changed(['file.py'])
         self.set_lines_changed([line for line in range(0, 100)])
-        self.set_coverage_info({2: True})
+        self.set_violations([])
+        self.set_measured([2])
 
         # Generate the report
         self.report.generate_report(output)
@@ -206,7 +214,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         # Have the dependencies return an empty report
         self.set_src_paths_changed([])
         self.set_lines_changed([])
-        self.set_coverage_info(dict())
+        self.set_violations([])
+        self.set_measured([])
 
         # Create a buffer for the output
         output = StringIO.StringIO()
@@ -268,19 +277,19 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         </tr>
         <tr>
         <td>file1.py</td>
-        <td>70%</td>
-        <td>10,11,20</td>
+        <td>66.7%</td>
+        <td>10,11</td>
         </tr>
         <tr>
         <td>subdir/file2.py</td>
-        <td>70%</td>
-        <td>10,11,20</td>
+        <td>66.7%</td>
+        <td>10,11</td>
         </tr>
         </table>
         <ul>
-        <li><b>Total</b>: 20 line(s)</li>
-        <li><b>Missing</b>: 6 line(s)</li>
-        <li><b>Coverage</b>: 70%</li>
+        <li><b>Total</b>: 12 line(s)</li>
+        <li><b>Missing</b>: 4 line(s)</li>
+        <li><b>Coverage</b>: 66%</li>
         </ul>
         </body>
         </html>
@@ -293,7 +302,8 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         # Have the dependencies return an empty report
         self.set_src_paths_changed([])
         self.set_lines_changed([])
-        self.set_coverage_info(dict())
+        self.set_violations([])
+        self.set_measured([])
 
         # Create a buffer for the output
         output = StringIO.StringIO()
