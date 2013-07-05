@@ -6,7 +6,7 @@ import sys
 import diff_cover
 from diff_reporter import GitDiffReporter
 from git_diff import GitDiffTool
-from coverage_reporter import XmlCoverageReporter
+from violations_reporter import XmlCoverageReporter
 from report_generator import HtmlReportGenerator, StringReportGenerator
 from lxml import etree
 

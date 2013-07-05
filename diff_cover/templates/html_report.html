@@ -19,7 +19,7 @@
 {% if stats.percent_covered < 100 %}
 <tr>
 <td>{{ src_path }}</td>
-<td>{{ stats.percent_covered }}%</td>
+<td>{{ stats.percent_covered|round(1) }}%</td>
 <td>{{ stats.missing_lines|join(',') }}</td>
 </tr>
 {% else %}
