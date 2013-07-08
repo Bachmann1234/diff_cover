@@ -4,6 +4,8 @@ Classes for querying the information in a test coverage report.
 
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
+import re
+import subprocess
 
 
 Violation = namedtuple('Violation', 'line, message')
@@ -125,9 +127,116 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Yield all lines not covered
         return self._info_cache[src_path][0]
 
-    def measured(self, src_path):
+    def measured_lines(self, src_path):
         """
         See base class docstring
         """
         self._cache_file(src_path)
         return self._info_cache[src_path][1]
+
+
+class BaseQualityReporter(BaseViolationReporter):
+    """
+    Abstract class to report code quality information, using `COMMAND` (provided by
+    subclasses).
+    """
+    COMMAND = ''
+    OPTIONS = []
+
+    # A list of filetypes to run on.
+    EXTENSIONS = []
+
+    def __init__(self, name):
+        super(BaseQualityReporter, self).__init__(name)
+        self._info_cache = defaultdict(list)
+
+    def violations(self, src_path):
+        """
+        See base class comments.
+        """
+        if not any(src_path.endswith(ext) for ext in self.EXTENSIONS):
+            return []
+        if src_path not in self._info_cache:
+            output = self._run_command(src_path)
+            violations = [Violation(*violation) for violation in self._parse_output(output)]
+            self._info_cache[src_path] = violations
+
+        return self._info_cache[src_path]
+
+    def _run_command(self, src_path):
+        """
+        Run the quality command and return its output.
+        """
+        command = '{0} {1} {2}'.format(self.COMMAND, self.OPTIONS, src_path)
+        command = [self.COMMAND] + self.OPTIONS + [src_path]
+        process = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        stdout, stderr = process.communicate()
+
+        if stderr:
+            raise QualityReporterError(stderr)
+
+        return stdout.strip()
+
+    @abstractmethod
+    def _parse_output(self, output):
+        """
+        Parse the output of this reporter command into a list of (line, violation) pairs.
+        """
+        pass
+
+
+class Pep8QualityReporter(BaseQualityReporter):
+    """
+    Report PEP8 violations.
+    """
+    COMMAND = 'pep8'
+
+    EXTENSIONS = ['py']
+
+    def _parse_output(self, output):
+        lines = output.split('\n')
+        regex = re.compile(r'^.*\.py:(\d+).*([EW]\d{3}.*$)')
+        violations = []
+        for line in lines:
+            # Sometimes pep8 gives us a blank line
+            if line == '':
+                continue
+            line_number, message = regex.match(line).groups()
+            violations.append((int(line_number), message))
+        return violations
+
+
+class PylintQualityReporter(BaseQualityReporter):
+    """
+    Report Pylint violations.
+    """
+    COMMAND = 'pylint'
+    OPTIONS = ['--reports=no']
+
+    EXTENSIONS = ['py']
+
+    def _parse_output(self, output):
+        # No violations!
+        if output == '':
+            return []
+        # Take out the first line of the report, which specifies the
+        # module name
+        lines = output.split('\n')[1:]
+        error_regex = re.compile(r'^([CEFIRW]):\s*(\d+),.*: (.*$)')
+
+        violations = []
+        for line in lines:
+            error_match = error_regex.match(line)
+            error, line_number, message = error_match.groups()
+            violations.append((int(line_number), '{0}: {1}'.format(error, message)))
+
+        return violations
+
+
+class QualityReporterError(Exception):
+    """
+    A quality reporter command produced an error.
+    """
+    pass

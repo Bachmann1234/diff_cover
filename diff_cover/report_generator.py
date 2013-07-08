@@ -15,6 +15,7 @@ class DiffViolations(object):
     def __init__(self, violations, measured_lines, diff_lines):
         self.violations = violations
         self.lines = set(violation.line for violation in violations).intersection(diff_lines)
+        self.violations = set(violation for violation in violations if violation.line in self.lines)
 
         if measured_lines is None:
             self.measured_lines = set(diff_lines)
@@ -87,9 +88,9 @@ class BaseReportGenerator(object):
 
         return float(percent_covered)
 
-    def missing_lines(self, src_path):
+    def violation_lines(self, src_path):
         """
-        Return a list of missing lines (integers) in `src_path` that were changed.
+        Return a list of lines in violation (integers) in `src_path` that were changed.
 
         If we have no coverage information for `src_path`, returns
         an empty list.
@@ -102,6 +103,20 @@ class BaseReportGenerator(object):
 
         return sorted(diff_violations.lines)
 
+    def violation_messages(self, src_path):
+        """
+        Return a list of messages for each diff line of `src_path` in violation.
+
+        If we have no coverage information for `src_path`, returns
+        an empty list.
+        """
+        diff_violations = self._diff_violations.get(src_path)
+
+        if diff_violations is None:
+            return []
+
+        return diff_violations.messages
+
     def total_num_lines(self):
         """
         Return the total number of lines in the diff for
@@ -111,10 +126,10 @@ class BaseReportGenerator(object):
         return sum([len(summary.measured_lines) for summary
                     in self._diff_violations.values()])
 
-    def total_num_missing(self):
+    def total_num_violations(self):
         """
         Returns the total number of lines in the diff
-        that should be covered, but aren't.
+        that are in violation.
         """
 
         return sum(
@@ -131,7 +146,7 @@ class BaseReportGenerator(object):
         total_lines = self.total_num_lines()
 
         if total_lines > 0:
-            num_covered = total_lines - self.total_num_missing()
+            num_covered = total_lines - self.total_num_violations()
             return int(float(num_covered) / total_lines * 100)
 
         else:
@@ -199,10 +214,10 @@ class TemplateReportGenerator(BaseReportGenerator):
          'diff_name': DIFF_NAME,
          'src_stats': {SRC_PATH: {
                             'percent_covered': PERCENT_COVERED,
-                            'missing_lines': [LINE_NUM, ...]
+                            'violation_lines': [LINE_NUM, ...]
                             }, ... }
          'total_num_lines': TOTAL_NUM_LINES,
-         'total_num_missing': TOTAL_NUM_MISSING,
+         'total_num_violations': TOTAL_NUM_VIOLATIONS,
          'total_percent_covered': TOTAL_PERCENT_COVERED}
         """
 
@@ -214,30 +229,45 @@ class TemplateReportGenerator(BaseReportGenerator):
                 'diff_name': self.diff_report_name(),
                 'src_stats': src_stats,
                 'total_num_lines': self.total_num_lines(),
-                'total_num_missing': self.total_num_missing(),
+                'total_num_violations': self.total_num_violations(),
                 'total_percent_covered': self.total_percent_covered()}
 
     def _src_path_stats(self, src_path):
         """
         Return a dict of statistics for the source file at `src_path`.
         """
-        # Find missing lines
-        missing_lines = [str(line) for line
-                         in self.missing_lines(src_path)]
+        # Find violation lines
+        violation_lines = [str(line) for line
+                           in self.violation_lines(src_path)]
 
         return {'percent_covered': self.percent_covered(src_path),
-                'missing_lines': missing_lines}
+                'violation_lines': violation_lines,
+                'violations': self._diff_violations[src_path].violations}
 
 
 class StringReportGenerator(TemplateReportGenerator):
     """
     Generate a string diff coverage report.
     """
-    TEMPLATE_NAME = "console_report.txt"
+    TEMPLATE_NAME = "console_coverage_report.txt"
 
 
 class HtmlReportGenerator(TemplateReportGenerator):
     """
     Generate an HTML formatted diff coverage report.
     """
-    TEMPLATE_NAME = "html_report.html"
+    TEMPLATE_NAME = "html_coverage_report.html"
+
+
+class StringQualityReportGenerator(TemplateReportGenerator):
+    """
+    Generate a string diff quality report.
+    """
+    TEMPLATE_NAME = "console_quality_report.txt"
+
+
+class HtmlQualityReportGenerator(TemplateReportGenerator):
+    """
+    Generate an HTML formatted diff quality report.
+    """
+    TEMPLATE_NAME = "html_quality_report.html"
