@@ -1,0 +1,13 @@
+-------------
+Diff Quality
+Quality Report: pylint
+Diff: origin/master...HEAD, staged, and unstaged changes
+-------------
+violations_test_file.py (75.0%):
+    1: C: Missing docstring
+    2: C: Operator not preceded by a space
+-------------
+Total:   8 line(s)
+Violations: 2 line(s)
+% Quality: 75%
+-------------

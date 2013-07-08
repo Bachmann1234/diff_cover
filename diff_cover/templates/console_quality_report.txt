@@ -1,6 +1,6 @@
 -------------
 Diff Quality
-Quality Report: {{ report_name }}
+Quality Report: {{ report_names }}
 Diff: {{ diff_name }}
 -------------
 {% if src_stats %}

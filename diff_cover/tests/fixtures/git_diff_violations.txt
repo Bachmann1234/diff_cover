@@ -1,0 +1,19 @@
+diff --git a/violations_test_file.py b/violations_test_file.py
+index 8bf3de7..4e4b0df 100644
+--- a/violations_test_file.py
++++ b/violations_test_file.py
+@@ -1,6 +1,11 @@
+-def func_1(apple, my_list):
+-    d = {}
+-    if apple<10:
++def func_1(apple,my_list):
++    if apple< 10:
+         # Do something 
+         my_list.append(apple)
+     return my_list[1:]
++def func_2(spongebob, squarepants):
++    """A less messy function"""
++    for char in spongebob:
++        if char in squarepants:
++            return char
++    return None

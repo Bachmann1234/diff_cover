@@ -218,20 +218,21 @@ class PylintQualityReporter(BaseQualityReporter):
     EXTENSIONS = ['py']
 
     def _parse_output(self, output):
-        # No violations!
-        if output == '':
-            return []
         # Take out the first line of the report, which specifies the
         # module name
         lines = output.split('\n')[1:]
-        error_regex = re.compile(r'^([CEFIRW]):\s*(\d+),.*: (.*$)')
+        error_regex = re.compile(r'^([CEFIRW]\d*):\s*(\d+),.*: (.*$)')
 
         violations = []
         for line in lines:
-            error_match = error_regex.match(line)
-            error, line_number, message = error_match.groups()
-            violations.append((int(line_number), '{0}: {1}'.format(error, message)))
-
+            try:
+                error_match = error_regex.match(line)
+                error, line_number, message = error_match.groups()
+                violations.append((int(line_number), '{0}: {1}'.format(error, message)))
+            # Pylint prints out the offending source code for certain
+            # errors -- just skip them
+            except AttributeError:
+                continue
         return violations
 
 
