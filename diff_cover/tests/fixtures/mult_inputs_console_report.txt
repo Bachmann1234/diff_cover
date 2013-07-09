@@ -1,11 +1,11 @@
 -------------
 Diff Coverage
-Coverage Report(s) Used: moved_coverage.xml
+Coverage Report(s) Used: coverage1.xml, coverage2.xml
 Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
-test_moved.txt (50.0%): Missing line(s) 2,4,6,8,10
+test.txt (60.0%): Missing line(s) 4,6,8,10
 -------------
 Total:   10 line(s)
-Missing: 5 line(s)
-Coverage: 50%
+Missing: 4 line(s)
+Coverage: 60%
 -------------

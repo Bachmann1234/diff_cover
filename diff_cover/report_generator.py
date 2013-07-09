@@ -210,7 +210,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         src_stats = {src: self._src_path_stats(src)
                      for src in self.src_paths()}
 
-        return {'report_name': self.coverage_report_name(),
+        return {'report_names': self.coverage_report_name(),
                 'diff_name': self.diff_report_name(),
                 'src_stats': src_stats,
                 'total_num_lines': self.total_num_lines(),
@@ -227,6 +227,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         return {'percent_covered': self.percent_covered(src_path),
                 'missing_lines': missing_lines}
+
 
 class StringReportGenerator(TemplateReportGenerator):
     """

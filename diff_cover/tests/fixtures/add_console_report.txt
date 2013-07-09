@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Coverage Report: coverage.xml
+Coverage Report(s) Used: coverage.xml
 Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
 test.txt (50.0%): Missing line(s) 2,4,6,8,10
