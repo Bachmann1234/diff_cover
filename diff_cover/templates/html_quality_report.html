@@ -2,25 +2,31 @@
 <html>
 <head>
 <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
-<title>Diff Coverage</title>
+<title>Diff Quality</title>
 </head>
 <body>
-<h1>Diff Coverage</h1>
-<p>Coverage Report(s) Used: {{ report_names|join(', ') }}</p>
+<h1>Diff Quality</h1>
+<p>Quality Report: {{ report_names }}</p>
 <p>Diff: {{ diff_name }}</p>
 {% if src_stats %}
 <table border="1">
 <tr>
 <th>Source File</th>
-<th>Diff Coverage (%)</th>
-<th>Missing Line(s)</th>
+<th>Diff Quality (%)</th>
+<th>Line(s) in violation</th>
 </tr>
 {% for src_path, stats in src_stats.iteritems() %}
 {% if stats.percent_covered < 100 %}
 <tr>
 <td>{{ src_path }}</td>
 <td>{{ stats.percent_covered|round(1) }}%</td>
-<td>{{ stats.missing_lines|join(',') }}</td>
+<td>
+  <ul>
+    {% for line, message in stats.violations %}
+    <li>{{ line }}: {{ message }}</li>
+    {% endfor %}
+  </ul>
+</td>
 </tr>
 {% else %}
 <tr>
@@ -33,11 +39,11 @@
 </table>
 <ul>
 <li><b>Total</b>: {{ total_num_lines }} line(s)</li>
-<li><b>Missing</b>: {{ total_num_missing }} line(s)</li>
-<li><b>Coverage</b>: {{ total_percent_covered }}%</li>
+<li><b>Violation</b>: {{ total_num_violations }} line(s)</li>
+<li><b>% Quality</b>: {{ total_percent_covered }}%</li>
 </ul>
 {% else %}
-<p>No lines with coverage information in this diff.</p>
+<p>No lines with quality information in this diff.</p>
 {% endif %}
 </body>
 </html>

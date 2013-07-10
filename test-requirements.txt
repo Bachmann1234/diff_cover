@@ -1,3 +1,5 @@
 mock
 nose
 coverage
+pep8
+pylint

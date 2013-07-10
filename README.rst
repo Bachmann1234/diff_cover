@@ -1,7 +1,8 @@
 diff-cover
 ==========
 
-Automatically find diff lines that need test coverage.  
+Automatically find diff lines that need test coverage.
+Also finds diff lines that have violations (according to tools such as pep8 or pylint).
 This is used as a code quality metric during code reviews.
 
 Overview
@@ -95,6 +96,20 @@ You can also generate an HTML version of the report:
 
     diff-cover coverage.xml --html-report report.html
 
+4. Run ``diff-quality``:
+
+.. code :: bash
+
+    diff-quality --violations=<tool>
+
+Where ``tool`` is the quality checker to use. Currently ``pylint`` and
+``pep8`` are supported, but more checkers can (and should!) be integrated.
+
+Like ``diff-cover``, HTML reports can be generated with
+
+.. code:: bash
+
+    diff-quality --violations=<tool> --html-report report.html
 
 Troubleshooting
 ----------------------

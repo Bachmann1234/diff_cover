@@ -1,3 +1,7 @@
+7/8/13
+    * Add support for code quality metrics (pep8 and pylint for now).
+
+
     * Refactored diff report generator to use Jinja2 templates
 
 6/28/13 v0.1.4

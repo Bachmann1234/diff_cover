@@ -107,17 +107,17 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         for src_path in self.SRC_PATHS:
             self.assertAlmostEqual(self.report.percent_covered(src_path), 4.0/6*100)
 
-    def test_missing_lines(self):
+    def test_violation_lines(self):
 
         # By construction, each file has the same coverage information
         expected = [10, 11]
         for src_path in self.SRC_PATHS:
-            self.assertEqual(self.report.missing_lines(src_path), expected)
+            self.assertEqual(self.report.violation_lines(src_path), expected)
 
     def test_src_with_no_info(self):
 
         self.assertIs(self.report.percent_covered('unknown.py'), None)
-        self.assertEqual(self.report.missing_lines('unknown.py'), [])
+        self.assertEqual(self.report.violation_lines('unknown.py'), [])
 
     def test_total_num_lines(self):
 
@@ -130,7 +130,7 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         # By construction, each source file has the same coverage info,
         # in which 3 lines are uncovered, 2 of which are changed
         expected = len(self.SRC_PATHS) * 2
-        self.assertEqual(self.report.total_num_missing(), expected)
+        self.assertEqual(self.report.total_num_violations(), expected)
 
     def test_total_percent_covered(self):
 
