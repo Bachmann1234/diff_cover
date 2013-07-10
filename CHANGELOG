@@ -1,6 +1,8 @@
 7/8/13
+
     * Add support for code quality metrics (pep8 and pylint for now).
 
+    * Added support for multiple coverage XML inputs.
 
     * Refactored diff report generator to use Jinja2 templates
 
