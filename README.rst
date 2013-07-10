@@ -109,7 +109,9 @@ to generate the coverage XML report, then make sure you run
 
 __ http://nedbatchelder.com/code/coverage/
 
+**Issue**: GitDiffTool._execute() raises the error: "fatal: ambiguous argument 'origin/master...HEAD': unknown revision or path not in the working tree."
 
+**Solution**: run `git remote update` before `diff-cover`
 
 License
 -------

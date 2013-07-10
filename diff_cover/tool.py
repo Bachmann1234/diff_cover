@@ -29,7 +29,7 @@ def parse_args(argv):
     The path strings may or may not exist.
     """
     parser = argparse.ArgumentParser(description=diff_cover.DESCRIPTION)
-    parser.add_argument('coverage_xml', type=str, help=COVERAGE_XML_HELP)
+    parser.add_argument('coverage_xml', type=str, help=COVERAGE_XML_HELP, nargs='+')
     parser.add_argument('--html-report', type=str, default=None,
                         help=HTML_REPORT_HELP)
 
@@ -41,8 +41,9 @@ def generate_report(coverage_xml=None, html_report=None):
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
     diff = GitDiffReporter(git_diff=GitDiffTool())
-    xml_root = etree.parse(coverage_xml)
-    coverage = XmlCoverageReporter(xml_root, coverage_xml)
+    xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
+
+    coverage = XmlCoverageReporter(xml_roots, coverage_xml)
 
     # Build a report generator
     if html_report is not None:

@@ -42,43 +42,53 @@ class DiffCoverIntegrationTest(unittest.TestCase):
 
     def test_added_file_html(self):
         self._check_html_report('git_diff_add.txt',
-                                'coverage.xml',
+                                ['coverage.xml'],
                                 'add_html_report.html')
 
     def test_added_file_console(self):
         self._check_console_report('git_diff_add.txt',
-                                   'coverage.xml',
+                                   ['coverage.xml'],
                                    'add_console_report.txt')
 
     def test_deleted_file_html(self):
         self._check_html_report('git_diff_delete.txt',
-                                'coverage.xml',
+                                ['coverage.xml'],
                                 'delete_html_report.html')
 
     def test_deleted_file_console(self):
         self._check_console_report('git_diff_delete.txt',
-                                   'coverage.xml',
+                                   ['coverage.xml'],
                                    'delete_console_report.txt')
 
     def test_changed_file_html(self):
         self._check_html_report('git_diff_changed.txt',
-                                'coverage.xml',
+                                ['coverage.xml'],
                                 'changed_html_report.html')
 
     def test_changed_file_console(self):
         self._check_console_report('git_diff_changed.txt',
-                                   'coverage.xml',
+                                   ['coverage.xml'],
                                    'changed_console_report.txt')
 
     def test_moved_file_html(self):
         self._check_html_report('git_diff_moved.txt',
-                                'moved_coverage.xml',
+                                ['moved_coverage.xml'],
                                 'moved_html_report.html')
 
     def test_moved_file_console(self):
         self._check_console_report('git_diff_moved.txt',
-                                   'moved_coverage.xml',
+                                   ['moved_coverage.xml'],
                                    'moved_console_report.txt')
+
+    def test_mult_inputs_html(self):
+        self._check_html_report('git_diff_mult.txt',
+                                ['coverage1.xml', 'coverage2.xml'],
+                                'mult_inputs_html_report.html')
+
+    def test_mult_inputs_console(self):
+        self._check_console_report('git_diff_mult.txt',
+                                   ['coverage1.xml', 'coverage2.xml'],
+                                   'mult_inputs_console_report.txt')
 
     def test_git_diff_error(self):
 
@@ -92,7 +102,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         with self.assertRaises(GitDiffError):
             main()
 
-    def _check_html_report(self, git_diff_path, coverage_xml_path,
+    def _check_html_report(self, git_diff_path, coverage_xml_paths,
                            expected_html_path):
         """
         Assert that given `git_diff_path` and `coverage_xml_path`,
@@ -110,8 +120,8 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         html_report_path = os.path.join(temp_dir, 'diff_coverage.html')
 
         # Patch sys.argv
-        self._set_sys_args(['diff-cover', coverage_xml_path,
-                            '--html-report', html_report_path])
+        input_list = ['diff-cover'] + coverage_xml_paths + ['--html-report', html_report_path]
+        self._set_sys_args(input_list)
 
         # Run diff-cover
         main()
@@ -123,7 +133,7 @@ class DiffCoverIntegrationTest(unittest.TestCase):
                 expected = expected_file.read()
                 self.assertEqual(html, expected)
 
-    def _check_console_report(self, git_diff_path, coverage_xml_path,
+    def _check_console_report(self, git_diff_path, coverage_xml_paths,
                               expected_console_path):
         """
         Assert that given `git_diff_path` and `coverage_xml_path`,
@@ -139,7 +149,8 @@ class DiffCoverIntegrationTest(unittest.TestCase):
         self._capture_stdout(string_buffer)
 
         # Patch sys.argv
-        self._set_sys_args(['diff-cover', coverage_xml_path])
+        input_list = ['diff-cover'] + coverage_xml_paths
+        self._set_sys_args(input_list)
 
         # Run diff-cover
         main()

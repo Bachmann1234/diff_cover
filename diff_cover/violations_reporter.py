@@ -53,7 +53,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_root, name):
+    def __init__(self, xml_roots, name):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
@@ -62,7 +62,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         be included in the generated diff coverage report.
         """
         super(XmlCoverageReporter, self).__init__(name)
-        self._xml = xml_root
+        self._xml_roots = xml_roots
 
         # Create a dict to cache violations dict results
         # Keys are source file paths, values are output of `violations()`
@@ -70,23 +70,48 @@ class XmlCoverageReporter(BaseViolationReporter):
 
     def _cache_file(self, src_path):
         """
-        Load the data from `self._xml` for `src_path`, if it hasn't been already
+        Load the data from `self._xml_roots` for `src_path`, if it hasn't been already
         """
         # If we have not yet loaded this source file
         if src_path not in self._info_cache:
 
             # Retrieve the <line> elements for this file
             xpath = ".//class[@filename='{0}']/lines/line".format(src_path)
-            line_nodes = self._xml.findall(xpath)
 
-            violations = [
-                Violation(int(line.get('number')), None)
-                for line in line_nodes
-                if int(line.get('hits', 0)) == 0
-            ]
-            measured = [
-                int(line.get('number')) for line in line_nodes
-            ]
+            # We only want to keep violations that show up in each xml source.
+            # Thus, each time, we take the intersection.  However, to do this
+            # we must treat the first time as a special case and just add all
+            # the violations from the first xml report.
+            violations = None
+
+            # A line is measured if it is measured in any of the reports, so
+            # we take set union each time and can just start with the empty set
+            measured = set()
+
+            # Loop through the files that contain the xml roots
+            for xml_document in self._xml_roots:
+                line_nodes = xml_document.findall(xpath)
+
+                # First case, need to define violations initially
+                if violations is None:
+                    violations = set(
+                        Violation(int(line.get('number')), None)
+                        for line in line_nodes
+                        if int(line.get('hits', 0)) == 0)
+
+                # If we already have a violations set, take the intersection of the new
+                # violations set and its old self
+                else:
+                    violations = violations & set(
+                        Violation(int(line.get('number')), None)
+                        for line in line_nodes
+                        if int(line.get('hits', 0)) == 0
+                    )
+
+                # Measured is the union of itself and the new measured
+                measured = measured | set(
+                    int(line.get('number')) for line in line_nodes
+                )
 
             self._info_cache[src_path] = (violations, measured)
 

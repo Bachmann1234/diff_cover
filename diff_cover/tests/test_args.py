@@ -10,14 +10,14 @@ class ParseArgsTest(unittest.TestCase):
 
         arg_dict = parse_args(argv)
 
-        self.assertEqual(arg_dict.get('coverage_xml'), 'reports/coverage.xml')
+        self.assertEqual(arg_dict.get('coverage_xml'), ['reports/coverage.xml'])
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
 
     def test_parse_with_no_html_report(self):
         argv = ['reports/coverage.xml']
 
         arg_dict = parse_args(argv)
-        self.assertEqual(arg_dict.get('coverage_xml'), 'reports/coverage.xml')
+        self.assertEqual(arg_dict.get('coverage_xml'), ['reports/coverage.xml'])
 
     def test_parse_invalid_arg(self):
 

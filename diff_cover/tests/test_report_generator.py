@@ -31,7 +31,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
     VIOLATIONS = [Violation(n, None) for n in (10, 11, 20)]
     MEASURED = [1, 2, 3, 4, 7, 10, 11, 15, 20, 30]
 
-    XML_REPORT_NAME = "reports/coverage.xml"
+    XML_REPORT_NAME = ["reports/coverage.xml"]
     DIFF_REPORT_NAME = "master"
 
     # Subclasses override this to provide the class under test
@@ -160,7 +160,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         -------------
         Diff Coverage
-        Coverage Report: reports/coverage.xml
+        Coverage Report(s) Used: reports/coverage.xml
         Diff: master
         -------------
         file1.py (66.7%): Missing line(s) 10,11
@@ -196,7 +196,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         -------------
         Diff Coverage
-        Coverage Report: reports/coverage.xml
+        Coverage Report(s) Used: reports/coverage.xml
         Diff: master
         -------------
         file.py (100%)
@@ -231,7 +231,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         -------------
         Diff Coverage
-        Coverage Report: reports/coverage.xml
+        Coverage Report(s) Used: reports/coverage.xml
         Diff: master
         -------------
         No lines with coverage information in this diff.
@@ -267,7 +267,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         </head>
         <body>
         <h1>Diff Coverage</h1>
-        <p>Coverage Report: reports/coverage.xml</p>
+        <p>Coverage Report(s) Used: reports/coverage.xml</p>
         <p>Diff: master</p>
         <table border="1">
         <tr>
@@ -325,7 +325,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         </head>
         <body>
         <h1>Diff Coverage</h1>
-        <p>Coverage Report: reports/coverage.xml</p>
+        <p>Coverage Report(s) Used: reports/coverage.xml</p>
         <p>Diff: master</p>
         <p>No lines with coverage information in this diff.</p>
         </body>

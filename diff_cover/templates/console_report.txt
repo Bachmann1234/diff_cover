@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Coverage Report: {{ report_name }}
+Coverage Report(s) Used: {{ report_names|join(', ') }}
 Diff: {{ diff_name }}
 -------------
 {% if src_stats %}
