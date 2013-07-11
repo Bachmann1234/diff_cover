@@ -213,7 +213,7 @@ class PylintQualityReporter(BaseQualityReporter):
     Report Pylint violations.
     """
     COMMAND = 'pylint'
-    OPTIONS = ['--reports=no']
+    OPTIONS = ['--reports=no', '--include-ids=y']
 
     EXTENSIONS = ['py']
 
