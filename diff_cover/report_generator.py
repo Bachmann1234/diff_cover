@@ -227,7 +227,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         return {'percent_covered': self.percent_covered(src_path),
                 'violation_lines': violation_lines,
-                'violations': self._diff_violations[src_path].violations}
+                'violations': sorted(self._diff_violations[src_path].violations)}
 
 
 class StringReportGenerator(TemplateReportGenerator):
