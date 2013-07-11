@@ -4,6 +4,10 @@ python:
 install:
   - "pip install -r requirements.txt --use-mirrors"
   - "pip install -r test-requirements.txt --use-mirrors"
+  - "pip install coveralls"
   - "python setup.py install"
 script: 
-  - nosetests
+  - nosetests --with-coverage --cover-package=diff_cover
+after_success:
+  - coveralls
+
