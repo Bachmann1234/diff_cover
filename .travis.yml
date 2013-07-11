@@ -4,6 +4,9 @@ python:
 install:
   - "pip install -r requirements.txt --use-mirrors"
   - "pip install -r test-requirements.txt --use-mirrors"
+  - "pip install coveralls"
   - "python setup.py install"
 script: 
-  - nosetests
+  - coverage run -m nose
+after_success:
+  - coveralls
