@@ -16,6 +16,10 @@ class DiffViolations(object):
         self.lines = set(violation.line for violation in violations).intersection(diff_lines)
         self.violations = set(violation for violation in violations if violation.line in self.lines)
 
+        # By convention, a violation reporter
+        # can return `None` to indicate that all lines are "measured"
+        # by default.  This is an optimization to avoid counting
+        # lines in all the source files.
         if measured_lines is None:
             self.measured_lines = set(diff_lines)
         else:
@@ -68,7 +72,8 @@ class BaseReportGenerator(object):
         Return a list of source files in the diff
         for which we have coverage information.
         """
-        return set(src for src, summary in self._diff_violations.items() if len(summary.measured_lines) > 0)
+        return set(src for src, summary in self._diff_violations.items()
+                   if len(summary.measured_lines) > 0)
 
     def percent_covered(self, src_path):
         """
@@ -82,10 +87,14 @@ class BaseReportGenerator(object):
         if diff_violations is None:
             return None
 
-        uncovered = diff_violations.lines
-        percent_covered = 100 - float(len(uncovered)) / len(diff_violations.measured_lines) * 100
+        # Protect against a divide by zero
+        num_measured = len(diff_violations.measured_lines)
+        if num_measured > 0:
+            num_uncovered = len(diff_violations.lines)
+            return 100 - float(num_uncovered) / num_measured * 100
 
-        return float(percent_covered)
+        else:
+            return None
 
     def violation_lines(self, src_path):
         """

@@ -2,12 +2,14 @@ import unittest
 from lxml import etree
 from mock import patch
 from subprocess import Popen
-from diff_cover.violations_reporter import XmlCoverageReporter, Violation, Pep8QualityReporter, PylintQualityReporter, QualityReporterError
+from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
+    Pep8QualityReporter, PylintQualityReporter, QualityReporterError
 
 
 class XmlCoverageReporterTest(unittest.TestCase):
 
-    MANY_VIOLATIONS = set([Violation(3, None), Violation(7, None), Violation(11, None), Violation(13, None)])
+    MANY_VIOLATIONS = set([Violation(3, None), Violation(7, None),
+                           Violation(11, None), Violation(13, None)])
     FEW_MEASURED = set([2, 3, 5, 7, 11, 13])
 
     FEW_VIOLATIONS = set([Violation(3, None), Violation(11, None)])

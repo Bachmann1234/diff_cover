@@ -47,11 +47,17 @@ class BaseReportGeneratorTest(unittest.TestCase):
         self.coverage.name.return_value = self.XML_REPORT_NAME
         self.diff.name.return_value = self.DIFF_REPORT_NAME
 
-        # Have the mocks return default values
-        self.set_src_paths_changed(self.SRC_PATHS)
-        self.set_lines_changed(self.LINES)
-        self.set_violations(self.VIOLATIONS)
-        self.set_measured(self.MEASURED)
+        # Configure the mocks
+        self.set_src_paths_changed([])
+
+        self._lines_dict = dict()
+        self.diff.lines_changed.side_effect = self._lines_dict.get
+
+        self._violations_dict = dict()
+        self.coverage.violations.side_effect = self._violations_dict.get
+
+        self._measured_dict = dict()
+        self.coverage.measured_lines.side_effect = self._measured_dict.get
 
         # Create a concrete instance of a report generator
         self.report = self.REPORT_GENERATOR_CLASS(self.coverage, self.diff)
@@ -62,28 +68,50 @@ class BaseReportGeneratorTest(unittest.TestCase):
         """
         self.diff.src_paths_changed.return_value = src_paths
 
-    def set_lines_changed(self, lines):
+    def set_lines_changed(self, src_path, lines):
         """
-        Patch the dependency `lines_changed()` return value
+        Patch the dependency `lines_changed()` to return
+        `lines` when called with argument `src_path`.
         """
-        self.diff.lines_changed.return_value = lines
+        self._lines_dict.update({src_path: lines})
 
-    def set_violations(self, violations):
+    def set_violations(self, src_path, violations):
         """
-        Patch the dependency `violations()` return value
+        Patch the dependency `violations()` to return
+        `violations` when called with argument `src_path`.
         """
-        self.coverage.violations.return_value = violations
+        self._violations_dict.update({src_path: violations})
 
-    def set_measured(self, measured):
+    def set_measured(self, src_path, measured):
         """
-        Patch the dependency `measured_lines()` return value
+        Patch the dependency `measured_lines()` return
+        `measured` when called with argument `src_path`.
         """
-        self.coverage.measured_lines.return_value = measured
+        self._measured_dict.update({src_path: measured})
+
+    def use_default_values(self):
+        """
+        Configure the mocks to use default values
+        provided by class constants.
+
+        All source files are given the same line, violation,
+        and measured information.
+        """
+        self.set_src_paths_changed(self.SRC_PATHS)
+
+        for src in self.SRC_PATHS:
+            self.set_lines_changed(src, self.LINES)
+            self.set_violations(src, self.VIOLATIONS)
+            self.set_measured(src, self.MEASURED)
 
 
 class SimpleReportGeneratorTest(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = SimpleReportGenerator
+
+    def setUp(self):
+        super(SimpleReportGeneratorTest, self).setUp()
+        self.use_default_values()
 
     def test_src_paths(self):
         self.assertEqual(self.report.src_paths(), self.SRC_PATHS)
@@ -116,8 +144,20 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
 
     def test_src_with_no_info(self):
 
+        self.assertNotIn('unknown.py', self.report.src_paths())
         self.assertIs(self.report.percent_covered('unknown.py'), None)
         self.assertEqual(self.report.violation_lines('unknown.py'), [])
+
+    def test_src_paths_not_measured(self):
+
+        # Configure one of the source files to have no coverage info
+        self.set_measured('file1.py', [])
+        self.set_violations('file1.py', [])
+
+        # Expect that we treat the file like it doesn't exist
+        self.assertNotIn('file1.py', self.report.src_paths())
+        self.assertIs(self.report.percent_covered('file1.py'), None)
+        self.assertEqual(self.report.violation_lines('file1.py'), [])
 
     def test_total_num_lines(self):
 
@@ -145,6 +185,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = StringReportGenerator
 
     def test_generate_report(self):
+
+        self.use_default_values()
 
         # Create a buffer for the output
         output = StringIO.StringIO()
@@ -181,9 +223,9 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
         # Have the dependencies return an empty report
         self.set_src_paths_changed(['file.py'])
-        self.set_lines_changed([line for line in range(0, 100)])
-        self.set_violations([])
-        self.set_measured([2])
+        self.set_lines_changed('file.py', [line for line in range(0, 100)])
+        self.set_violations('file.py', [])
+        self.set_measured('file.py', [2])
 
         # Generate the report
         self.report.generate_report(output)
@@ -212,10 +254,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
     def test_empty_report(self):
 
         # Have the dependencies return an empty report
-        self.set_src_paths_changed([])
-        self.set_lines_changed([])
-        self.set_violations([])
-        self.set_measured([])
+        # (this is the default)
 
         # Create a buffer for the output
         output = StringIO.StringIO()
@@ -246,6 +285,8 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = HtmlReportGenerator
 
     def test_generate_report(self):
+
+        self.use_default_values()
 
         # Create a buffer for the output
         output = StringIO.StringIO()
@@ -300,10 +341,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
     def test_empty_report(self):
 
         # Have the dependencies return an empty report
-        self.set_src_paths_changed([])
-        self.set_lines_changed([])
-        self.set_violations([])
-        self.set_measured([])
+        # (this is the default)
 
         # Create a buffer for the output
         output = StringIO.StringIO()
