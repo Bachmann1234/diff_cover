@@ -34,8 +34,14 @@ class BaseViolationReporter(object):
 
     def measured_lines(self, src_path):
         """
-        Return a list of the lines in src_path that were measured by this reporter,
-        or None if all lines were measured
+        Return a list of the lines in src_path that were measured
+        by this reporter.
+
+        Some reporters will always consider all lines in the file "measured".
+        As an optimization, such violation reporters 
+        can return `None` to indicate that all lines are measured.  
+        The diff reporter generator will then use all changed lines
+        provided by the diff.
         """
         return None
 
@@ -129,7 +135,7 @@ class XmlCoverageReporter(BaseViolationReporter):
 
     def measured_lines(self, src_path):
         """
-        See base class docstring
+        See base class docstring.
         """
         self._cache_file(src_path)
         return self._info_cache[src_path][1]
