@@ -90,11 +90,13 @@ need to use different commands to generate the coverage XML report.
 This will compare the current ``git`` branch to ``origin/master`` and print
 the diff coverage report to the console.
 
+Other options for running ``diff-cover``:
+
 You can also generate an HTML version of the report:
 
 .. code:: bash
 
-    diff-cover coverage.xml --html-report report.html
+	diff-cover coverage.xml --html-report report.html
 
 4. Run ``diff-quality``:
 
@@ -110,6 +112,19 @@ Like ``diff-cover``, HTML reports can be generated with
 .. code:: bash
 
     diff-quality --violations=<tool> --html-report report.html
+
+Multiple XML Coverage Reports
+-------------------------------
+
+In the case that one has multiple xml reports form multiple test suites, you 
+can get a combined coverage report (a line is counted  as covered if it is 
+covered in ANY of the xml reports) by running ``diff-cover`` with multiple 
+coverage reports as arguments. You may specify any arbitrary number of coverage 
+reports:
+
+.. code:: bash
+
+	diff-cover coverage1.xml coverage2.xml 
 
 Troubleshooting
 ----------------------
