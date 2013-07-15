@@ -94,9 +94,25 @@ You can also generate an HTML version of the report:
 
 .. code:: bash
 
-    diff-cover coverage.xml --html-report report.html
+	diff-cover coverage.xml --html-report report.html
 
-4. Run ``diff-quality``:
+Multiple XML Coverage Reports
+-------------------------------
+
+In the case that one has multiple xml reports form multiple test suites, you 
+can get a combined coverage report (a line is counted  as covered if it is 
+covered in ANY of the xml reports) by running ``diff-cover`` with multiple 
+coverage reports as arguments. You may specify any arbitrary number of coverage 
+reports:
+
+.. code:: bash
+
+	diff-cover coverage1.xml coverage2.xml 
+
+Quality Coverage
+-----------------
+You can use diff-cover to see quality reports on the diff as well by running
+``diff-quality``.
 
 .. code :: bash
 
