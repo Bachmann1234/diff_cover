@@ -124,9 +124,21 @@ to generate the coverage XML report, then make sure you run
 
 __ http://nedbatchelder.com/code/coverage/
 
-**Issue**: GitDiffTool._execute() raises the error: "fatal: ambiguous argument 'origin/master...HEAD': unknown revision or path not in the working tree."
+**Issue**: ``GitDiffTool._execute()`` raises the error: 
 
-**Solution**: run `git remote update` before `diff-cover`
+.. code:: bash
+
+    fatal: ambiguous argument 'origin/master...HEAD': unknown revision or path not in the working tree.
+
+This is known to occur when running ``diff-cover`` in `Travis CI`__
+
+__ http://travis-ci.org
+
+**Solution**: Fetch the remote master branch before running ``diff-cover``:
+
+.. code:: bash
+
+    git fetch origin master:refs/remotes/origin/master
 
 **Issue**: ``diff-quality`` reports "diff_cover.violations_reporter.QualityReporterError: No config file found, using default configuration"
 

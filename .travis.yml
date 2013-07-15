@@ -1,6 +1,8 @@
 language: python
 python:
   - "2.7"
+before_install:
+  - git fetch origin master:refs/remotes/origin/master
 install:
   - "pip install -r requirements.txt --use-mirrors"
   - "pip install -r test-requirements.txt --use-mirrors"
@@ -8,5 +10,9 @@ install:
   - "python setup.py install"
 script: 
   - coverage run -m nose
+  - coverage xml
+  - diff-cover coverage.xml
+  - diff-quality --violation=pep8
+  - diff-quality --violation=pylint
 after_success:
   - coveralls
