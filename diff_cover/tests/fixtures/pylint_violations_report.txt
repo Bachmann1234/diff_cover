@@ -5,7 +5,8 @@ Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
 violations_test_file.py (75.0%):
     1: C0111: Missing docstring
-    2: C0322: Operator not preceded by a space
+    1: C0111: func_1: Missing docstring
+    2: C0322: func_1: Operator not preceded by a space
 -------------
 Total:   8 line(s)
 Violations: 2 line(s)

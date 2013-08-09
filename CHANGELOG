@@ -1,3 +1,7 @@
+8/9/13 v0.2.1
+	* Fix a bug in which function names and TODO: were not appearing in
+	   `diff-quality` reports.
+
 7/18/13 v0.2.0
 
     * Add support for code quality metrics (pep8 and pylint for now).
