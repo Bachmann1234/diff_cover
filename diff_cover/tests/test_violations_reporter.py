@@ -305,7 +305,12 @@ class PylintQualityReporterTest(unittest.TestCase):
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ("************* Module new_file\nC0111:  1,0: Missing docstring\ndef func_1(apple,my_list):\n                ^^\nC0111:  1,0:func_1: Missing docstring\n\nW0612:  2,4:func_1: Unused variable 'd'\nW0511: 2,10: TODO: Not the real way we'll store usages!", '')
-        violations = [Violation(1, 'C0111: Missing docstring'), Violation(1, 'C0111: func_1: Missing docstring'), Violation(2, "W0612: func_1: Unused variable 'd'"), Violation(2, "W0511: TODO: Not the real way we'll store usages!")]
+        violations = [
+            Violation(1, 'C0111: Missing docstring'),
+            Violation(1, 'C0111: func_1: Missing docstring'),
+            Violation(2, "W0612: func_1: Unused variable 'd'"),
+            Violation(2, "W0511: TODO: Not the real way we'll store usages!")
+        ]
         name = "pylint"
 
         # Parse the report
