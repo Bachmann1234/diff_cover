@@ -1,9 +1,9 @@
-import unittest
 from lxml import etree
 from mock import patch
 from subprocess import Popen
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PylintQualityReporter, QualityReporterError
+from diff_cover.tests.helpers import unittest
 
 
 class XmlCoverageReporterTest(unittest.TestCase):

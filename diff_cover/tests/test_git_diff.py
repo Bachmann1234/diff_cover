@@ -1,9 +1,9 @@
-from unittest import TestCase
 import mock
 from diff_cover.git_diff import GitDiffTool, GitDiffError
+from diff_cover.tests.helpers import unittest
 
 
-class TestGitDiffTool(TestCase):
+class TestGitDiffTool(unittest.TestCase):
 
     def setUp(self):
 

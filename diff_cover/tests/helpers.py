@@ -2,6 +2,12 @@
 Test helper functions.
 """
 import random
+import sys
+
+if sys.version_info[:2] <= (2, 6):
+    import unittest2 as unittest
+else:
+    import unittest
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
@@ -67,14 +73,14 @@ def _deleted_file_entries(deleted_files):
             # File information
             output.append('diff --git a/{0} b/{1}'.format(src_file, src_file))
             output.append('index 629e8ad..91b8c0a 100644')
-            output.append('--- a/{}'.format(src_file))
+            output.append('--- a/{0}'.format(src_file))
             output.append('+++ b/dev/null')
 
             # Choose a random number of lines
             num_lines = random.randint(1, 30)
 
             # Hunk information
-            output.append('@@ -0,{} +0,0 @@'.format(num_lines))
+            output.append('@@ -0,{0} +0,0 @@'.format(num_lines))
             output.extend(['-' + _random_string() for _ in range(num_lines)])
 
     return output
@@ -99,8 +105,8 @@ def _source_file_entry(src_file, modified_lines):
     output.append('index 629e8ad..91b8c0a 100644')
 
     # Additions/deletions
-    output.append('--- a/{}'.format(src_file))
-    output.append('+++ b/{}'.format(src_file))
+    output.append('--- a/{0}'.format(src_file))
+    output.append('+++ b/{0}'.format(src_file))
 
     # Hunk information
     for (start, end) in _hunks(modified_lines):
