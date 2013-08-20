@@ -148,6 +148,7 @@ class GitDiffReporter(BaseDiffReporter):
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git a/.* b/([^ \n]*)')
+    MERGE_CONFLICT_RE = re.compile(r'^diff --cc ([^ \n]*)')
     HUNK_LINE_RE = re.compile(r'\+([0-9]*)')
 
     def _parse_diff_str(self, diff_str):
@@ -198,9 +199,10 @@ class GitDiffReporter(BaseDiffReporter):
         # Parse the diff string into sections by source file
         for line in diff_str.split('\n'):
 
-            # If the line starts with "diff --git" then it
-            # is the start of a new source file
-            if line.startswith('diff --git'):
+            # If the line starts with "diff --git"
+            # or "diff --cc" (in the case of a merge conflict)
+            # then it is the start of a new source file
+            if line.startswith('diff --git') or line.startswith('diff --cc'):
 
                 # Retrieve the name of the source file
                 src_path = self._parse_source_line(line)
@@ -311,7 +313,16 @@ class GitDiffReporter(BaseDiffReporter):
         Given a source line in `git diff` output, return the path
         to the source file.
         """
-        groups = self.SRC_FILE_RE.findall(line)
+        if '--git' in line:
+            regex = self.SRC_FILE_RE
+        elif '--cc' in line:
+            regex = self.MERGE_CONFLICT_RE
+        else:
+            msg = "Do not recognize format of source in line '{}'".format(line)
+            raise GitDiffError(msg)
+
+        # Parse for the source file path
+        groups = regex.findall(line)
 
         if len(groups) == 1:
             return groups[0]
