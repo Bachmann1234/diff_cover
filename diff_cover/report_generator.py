@@ -157,13 +157,15 @@ class BaseReportGenerator(object):
 
         To make this efficient, we cache and reuse the result.
         """
-        return {
-            src_path: DiffViolations(
-                self._violations.violations(src_path),
-                self._violations.measured_lines(src_path),
-                self._diff.lines_changed(src_path),
+        return dict(
+            (
+                src_path, DiffViolations(
+                    self._violations.violations(src_path),
+                    self._violations.measured_lines(src_path),
+                    self._diff.lines_changed(src_path),
+                )
             ) for src_path in self._diff.src_paths_changed()
-        }
+        )
 
 
 # Set up the template environment
@@ -216,8 +218,9 @@ class TemplateReportGenerator(BaseReportGenerator):
         """
 
         # Calculate the information to pass to the template
-        src_stats = {src: self._src_path_stats(src)
-                     for src in self.src_paths()}
+        src_stats = dict(
+            (src, self._src_path_stats(src)) for src in self.src_paths()
+        )
 
         return {'report_names': self.coverage_report_name(),
                 'diff_name': self.diff_report_name(),

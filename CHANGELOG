@@ -1,6 +1,7 @@
 
 
     * Added --no-ext to git diff command
+    * Added Python 2.6 support
 
 8/9/13 v0.2.1
 	* Fix a bug in which function names and TODO: were not appearing in

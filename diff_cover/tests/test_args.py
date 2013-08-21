@@ -1,5 +1,5 @@
-import unittest
 from diff_cover.tool import parse_coverage_args, parse_quality_args
+from diff_cover.tests.helpers import unittest
 
 
 class ParseArgsTest(unittest.TestCase):

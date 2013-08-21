@@ -1,9 +1,8 @@
-import unittest
 import mock
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool, GitDiffError
-from diff_cover.tests.helpers import line_numbers, git_diff_output
+from diff_cover.tests.helpers import line_numbers, git_diff_output, unittest
 
 
 class GitDiffReporterTest(unittest.TestCase):
@@ -224,9 +223,9 @@ class GitDiffReporterTest(unittest.TestCase):
             # Should have no lines changed, since
             # we deleted all the lines we modified
             fail_msg = dedent("""
-            master_diff = {}
-            staged_diff = {}
-            unstaged_diff = {}
+            master_diff = {0}
+            staged_diff = {1}
+            unstaged_diff = {2}
             """).format(master_diff, staged_diff, unstaged_diff)
 
             self.assertEqual(self.diff.lines_changed('file.py'), [],
@@ -287,11 +286,11 @@ class GitDiffReporterTest(unittest.TestCase):
 
             # Expect that both methods that access git diff raise an error
             with self.assertRaises(GitDiffError):
-                print "src_paths_changed() should fail for {}".format(diff_str)
+                print "src_paths_changed() should fail for {0}".format(diff_str)
                 self.diff.src_paths_changed()
 
             with self.assertRaises(GitDiffError):
-                print "lines_changed() should fail for {}".format(diff_str)
+                print "lines_changed() should fail for {0}".format(diff_str)
                 self.diff.lines_changed('subdir/file1.py')
 
     def test_plus_sign_in_hunk_bug(self):

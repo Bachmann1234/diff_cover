@@ -231,7 +231,7 @@ class GitDiffReporter(BaseDiffReporter):
                         # We tolerate other information before we have
                         # a source file defined, unless it's a hunk line
                         if line.startswith("@@"):
-                            msg = "Hunk has no source file: '{}'".format(line)
+                            msg = "Hunk has no source file: '{0}'".format(line)
                             raise GitDiffError(msg)
 
         return source_dict
@@ -317,7 +317,7 @@ class GitDiffReporter(BaseDiffReporter):
             return groups[0]
 
         else:
-            msg = "Could not parse source path in line '{}'".format(line)
+            msg = "Could not parse source path in line '{0}'".format(line)
             raise GitDiffError(msg)
 
     def _parse_hunk_line(self, line):
@@ -354,15 +354,15 @@ class GitDiffReporter(BaseDiffReporter):
                     return int(groups[0])
 
                 except ValueError:
-                    msg = "Could not parse '{}' as a line number".format(groups[0])
+                    msg = "Could not parse '{0}' as a line number".format(groups[0])
                     raise GitDiffError(msg)
 
             else:
-                msg = "Could not find start of hunk in line '{}'".format(line)
+                msg = "Could not find start of hunk in line '{0}'".format(line)
                 raise GitDiffError(msg)
 
         else:
-            msg = "Could not parse hunk in line '{}'".format(line)
+            msg = "Could not parse hunk in line '{0}'".format(line)
             raise GitDiffError(msg)
 
     @staticmethod
