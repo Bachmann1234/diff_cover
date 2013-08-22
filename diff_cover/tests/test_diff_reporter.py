@@ -328,6 +328,28 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('file.py')
         self.assertEqual(lines_changed, [16, 17, 18, 19])
 
+    def test_merge_conflict_diff(self):
+
+        # Handle different git diff format when in the middle
+        # of a merge conflict
+        diff_str = dedent("""
+            diff --cc subdir/src.py
+            index d2034c0,e594d54..0000000
+            diff --cc subdir/src.py
+            index d2034c0,e594d54..0000000
+            --- a/subdir/src.py
+            +++ b/subdir/src.py
+            @@@ -16,88 -16,222 +16,7 @@@ text
+            + test
+            ++<<<<<< HEAD
+            + test
+            ++=======
+        """)
+
+        self._set_git_diff_output(diff_str, '', '')
+
+        lines_changed = self.diff.lines_changed('subdir/src.py')
+        self.assertEqual(lines_changed, [16, 17, 18, 19])
 
     def _set_git_diff_output(self, committed_diff, staged_diff, unstaged_diff):
         """

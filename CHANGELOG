@@ -1,5 +1,8 @@
 
 
+
+    * Fixed bug when running diff cover during a merge conflict (Issue #41)
+
     * Added --no-ext to git diff command
     * Added Python 2.6 support
 
