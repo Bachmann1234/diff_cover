@@ -118,6 +118,20 @@ class XmlCoverageReporterTest(unittest.TestCase):
         self.assertEqual(violations1 & violations2 & violations3, coverage.violations('file1.py'))
         self.assertEqual(measured1 | measured2 | measured3, coverage.measured_lines('file1.py'))
 
+    def test_different_files_in_inputs(self):
+
+        # Construct the XML report
+        xml_roots = [
+            self._coverage_xml(['file.py'], self.MANY_VIOLATIONS, self.FEW_MEASURED),
+            self._coverage_xml(['other_file.py'], self.FEW_VIOLATIONS, self.MANY_MEASURED)
+        ]
+
+        # Parse the report
+        coverage = XmlCoverageReporter(xml_roots, 'coverage.xml')
+
+        self.assertEqual(self.MANY_VIOLATIONS, coverage.violations('file.py'))
+        self.assertEqual(self.FEW_VIOLATIONS, coverage.violations('other_file.py'))
+
     def test_empty_violations(self):
         """
         Test that an empty violations report is handled properly

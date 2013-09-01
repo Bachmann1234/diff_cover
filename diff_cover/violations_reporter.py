@@ -98,28 +98,38 @@ class XmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for xml_document in self._xml_roots:
-                line_nodes = xml_document.findall(xpath)
 
-                # First case, need to define violations initially
-                if violations is None:
-                    violations = set(
-                        Violation(int(line.get('number')), None)
-                        for line in line_nodes
-                        if int(line.get('hits', 0)) == 0)
+                # Check that we've actually found a source file
+                src_element = xml_document.find(".//class[@filename='{0}']".format(src_path))
+                if src_element is not None:
+                    line_nodes = xml_document.findall(xpath)
 
-                # If we already have a violations set, take the intersection of the new
-                # violations set and its old self
-                else:
-                    violations = violations & set(
-                        Violation(int(line.get('number')), None)
-                        for line in line_nodes
-                        if int(line.get('hits', 0)) == 0
+                    # First case, need to define violations initially
+                    if violations is None:
+                        violations = set(
+                            Violation(int(line.get('number')), None)
+                            for line in line_nodes
+                            if int(line.get('hits', 0)) == 0)
+
+                    # If we already have a violations set,
+                    # take the intersection of the new
+                    # violations set and its old self
+                    else:
+                        violations = violations & set(
+                            Violation(int(line.get('number')), None)
+                            for line in line_nodes
+                            if int(line.get('hits', 0)) == 0
+                        )
+
+                    # Measured is the union of itself and the new measured
+                    measured = measured | set(
+                        int(line.get('number')) for line in line_nodes
                     )
 
-                # Measured is the union of itself and the new measured
-                measured = measured | set(
-                    int(line.get('number')) for line in line_nodes
-                )
+            # If we don't have any information about the source file,
+            # don't report any violations
+            if violations is None:
+                violations = set()
 
             self._info_cache[src_path] = (violations, measured)
 
