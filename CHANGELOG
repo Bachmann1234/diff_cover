@@ -1,5 +1,9 @@
 
 
+9/1/13 v0.2.2
+
+    * Fixed a bug that would cause multiple coverage reports to 
+      always show 100% coverage.
 
     * Fixed bug when running diff cover during a merge conflict (Issue #41)
 
