@@ -31,7 +31,10 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', 'origin/master...HEAD', '--no-ext-diff'])
+        return self._execute([
+            'git', 'diff',
+            'origin/master...HEAD', '--no-ext-diff'
+        ])
 
     def diff_unstaged(self):
         """
@@ -62,8 +65,10 @@ class GitDiffTool(object):
         to stderr.
         """
         stdout_pipe = self._subprocess.PIPE
-        process = self._subprocess.Popen(command, stdout=stdout_pipe,
-                                                  stderr=stdout_pipe)
+        process = self._subprocess.Popen(
+            command, stdout=stdout_pipe,
+            stderr=stdout_pipe
+        )
         stdout, stderr = process.communicate()
 
         # If we get a non-empty output to stderr, raise an exception

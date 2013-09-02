@@ -89,7 +89,6 @@ class GitDiffReporterTest(unittest.TestCase):
         # Validate the lines changed
         self.assertEqual(lines_changed, line_numbers(3, 10))
 
-
     def test_one_line_file(self):
 
         # Files with only one line have a special format
@@ -351,7 +350,8 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/src.py')
         self.assertEqual(lines_changed, [16, 17, 18, 19])
 
-    def _set_git_diff_output(self, committed_diff, staged_diff, unstaged_diff):
+    def _set_git_diff_output(self, committed_diff,
+                             staged_diff, unstaged_diff):
         """
         Configure the git diff tool to return `committed_diff`,
         `staged_diff`, and `unstaged_diff` as outputs from

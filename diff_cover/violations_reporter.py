@@ -38,8 +38,8 @@ class BaseViolationReporter(object):
         by this reporter.
 
         Some reporters will always consider all lines in the file "measured".
-        As an optimization, such violation reporters 
-        can return `None` to indicate that all lines are measured.  
+        As an optimization, such violation reporters
+        can return `None` to indicate that all lines are measured.
         The diff reporter generator will then use all changed lines
         provided by the diff.
         """
@@ -78,7 +78,8 @@ class XmlCoverageReporter(BaseViolationReporter):
 
     def _cache_file(self, src_path):
         """
-        Load the data from `self._xml_roots` for `src_path`, if it hasn't been already
+        Load the data from `self._xml_roots`
+        for `src_path`, if it hasn't been already.
         """
         # If we have not yet loaded this source file
         if src_path not in self._info_cache:
@@ -153,8 +154,9 @@ class XmlCoverageReporter(BaseViolationReporter):
 
 class BaseQualityReporter(BaseViolationReporter):
     """
-    Abstract class to report code quality information, using `COMMAND` (provided by
-    subclasses).
+    Abstract class to report code quality
+    information, using `COMMAND`
+    (provided by subclasses).
     """
     COMMAND = ''
     OPTIONS = []
@@ -174,7 +176,10 @@ class BaseQualityReporter(BaseViolationReporter):
             return []
         if src_path not in self._info_cache:
             output = self._run_command(src_path)
-            violations = [Violation(*violation) for violation in self._parse_output(output)]
+            violations = [
+                Violation(*violation)
+                for violation in self._parse_output(output)
+            ]
             self._info_cache[src_path] = violations
 
         return self._info_cache[src_path]
@@ -198,7 +203,8 @@ class BaseQualityReporter(BaseViolationReporter):
     @abstractmethod
     def _parse_output(self, output):
         """
-        Parse the output of this reporter command into a list of (line, violation) pairs.
+        Parse the output of this reporter
+        command into a list of (line, violation) pairs.
         """
         pass
 
@@ -243,7 +249,11 @@ class PylintQualityReporter(BaseQualityReporter):
             try:
                 error_match = error_regex.match(line)
                 error, line_number, message = error_match.groups()
-                violations.append((int(line_number), '{0}: {1}'.format(error, message.strip())))
+                violation_tuple = (
+                    int(line_number),
+                    '{0}: {1}'.format(error, message.strip())
+                )
+                violations.append(violation_tuple)
             # Pylint prints out the offending source code for certain
             # errors -- just skip them
             except AttributeError:

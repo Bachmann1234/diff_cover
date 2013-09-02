@@ -3,7 +3,7 @@ Diff Coverage
 Coverage Report(s) Used: coverage.xml
 Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
-test.txt (100%)
+test_src.txt (100%)
 -------------
 Total:   1 line(s)
 Missing: 0 line(s)

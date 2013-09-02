@@ -1,5 +1,7 @@
 
 
+    * Coverage report now includes snippets from the original source file
+
 9/1/13 v0.2.2
 
     * Fixed a bug that would cause multiple coverage reports to 

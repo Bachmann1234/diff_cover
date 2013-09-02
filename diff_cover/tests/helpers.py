@@ -2,6 +2,9 @@
 Test helper functions.
 """
 import random
+import os.path
+import difflib
+from nose.tools import ok_
 import sys
 
 if sys.version_info[:2] <= (2, 6):
@@ -12,6 +15,54 @@ else:
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
 LINE_STRINGS = ['test', '+ has a plus sign', '- has a minus sign']
+
+
+def assert_long_str_equal(expected, actual, strip=False):
+    """
+    Assert that two strings are equal and
+    print the diff if they are not.
+
+    If `strip` is True, strip both strings before comparing.
+    """
+    if strip:
+        expected = expected.strip()
+        actual = actual.strip()
+
+    if expected != actual:
+
+        # Print a human-readable diff
+        diff = difflib.Differ().compare(
+            expected.split('\n'), actual.split('\n')
+        )
+
+        # Fail the test
+        ok_(False, '\n\n' + '\n'.join(diff))
+
+
+def fixture_path(rel_path):
+    """
+    Returns the absolute path to a fixture file
+    given `rel_path` relative to the fixture directory.
+    """
+    fixture_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
+    return os.path.join(fixture_dir, rel_path)
+
+
+def load_fixture(rel_path, encoding=None):
+    """
+    Return the contents of the file at `rel_path`
+    (relative path to the "fixtures" directory).
+
+    If `encoding` is not None, attempts to decode
+    the contents as `encoding` (e.g. 'utf-8').
+    """
+    with open(fixture_path(rel_path)) as fixture_file:
+        contents = fixture_file.read()
+
+    if encoding is not None:
+        contents = contents.decode(encoding)
+
+    return contents
 
 
 def line_numbers(start, end):
