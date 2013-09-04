@@ -1,4 +1,7 @@
 
+9/4/2013 v0.2.3
+
+    * Fixed bug in parsing unicode filenames from git diff output
 
 9/1/13 v0.2.2
 
