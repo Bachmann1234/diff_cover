@@ -147,7 +147,7 @@ class GitDiffReporter(BaseDiffReporter):
         return self._diff_dict
 
     # Regular expressions used to parse the diff output
-    SRC_FILE_RE = re.compile(r'^diff --git a/.* b/([^ \n]*)')
+    SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^ \n"]*)"?')
     MERGE_CONFLICT_RE = re.compile(r'^diff --cc ([^ \n]*)')
     HUNK_LINE_RE = re.compile(r'\+([0-9]*)')
 
@@ -340,7 +340,7 @@ class GitDiffReporter(BaseDiffReporter):
         The format of the hunk line is:
 
             @@ -k,l +n,m @@ TEXT
-        
+
         where `k,l` represent the start line and length before the changes
         and `n,m` represent the start line and length after the changes.
 
