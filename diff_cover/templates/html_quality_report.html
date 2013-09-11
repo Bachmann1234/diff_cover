@@ -1,49 +1,49 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
-<title>Diff Quality</title>
-</head>
-<body>
-<h1>Diff Quality</h1>
-<p>Quality Report: {{ report_names }}</p>
-<p>Diff: {{ diff_name }}</p>
-{% if src_stats %}
-<table border="1">
-<tr>
-<th>Source File</th>
-<th>Diff Quality (%)</th>
-<th>Line(s) in violation</th>
-</tr>
-{% for src_path, stats in src_stats.iteritems() %}
-{% if stats.percent_covered < 100 %}
-<tr>
-<td>{{ src_path }}</td>
-<td>{{ stats.percent_covered|round(1) }}%</td>
-<td>
-  <ul>
-    {% for line, message in stats.violations %}
-    <li>{{ line }}: {{ message }}</li>
-    {% endfor %}
-  </ul>
-</td>
-</tr>
-{% else %}
-<tr>
-<td>{{ src_path }}</td>
-<td>100%</td>
-<td>&nbsp;</td>
-</tr>
-{% endif %}
-{% endfor %}
-</table>
-<ul>
-<li><b>Total</b>: {{ total_num_lines }} line(s)</li>
-<li><b>Violation</b>: {{ total_num_violations }} line(s)</li>
-<li><b>% Quality</b>: {{ total_percent_covered }}%</li>
-</ul>
-{% else %}
-<p>No lines with quality information in this diff.</p>
-{% endif %}
-</body>
+    <head>
+        <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+        <title>Diff Quality</title>
+    </head>
+    <body>
+        <h1>Diff Quality</h1>
+        <p>Quality Report: {{ report_names }}</p>
+        <p>Diff: {{ diff_name }}</p>
+        {% if src_stats %}
+        <table border="1">
+            <tr>
+                <th>Source File</th>
+                <th>Diff Quality (%)</th>
+                <th>Line(s) in violation</th>
+            </tr>
+            {% for src_path, stats in src_stats.iteritems() %}
+            {% if stats.percent_covered < 100 %}
+            <tr>
+                <td>{{ src_path }}</td>
+                <td>{{ stats.percent_covered|round(1) }}%</td>
+                <td>
+                    <ul>
+                        {% for line, message in stats.violations %}
+                        <li>{{ line }}: {{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td>{{ src_path }}</td>
+                <td>100%</td>
+                <td>&nbsp;</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+        <ul>
+            <li><b>Total</b>: {{ total_num_lines }} line(s)</li>
+            <li><b>Violation</b>: {{ total_num_violations }} line(s)</li>
+            <li><b>% Quality</b>: {{ total_percent_covered }}%</li>
+        </ul>
+        {% else %}
+        <p>No lines with quality information in this diff.</p>
+        {% endif %}
+    </body>
 </html>

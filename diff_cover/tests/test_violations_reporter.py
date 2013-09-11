@@ -1,6 +1,7 @@
 from lxml import etree
 from mock import patch
 from subprocess import Popen
+from textwrap import dedent
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PylintQualityReporter, QualityReporterError
 from diff_cover.tests.helpers import unittest
@@ -66,8 +67,15 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        self.assertEqual(violations1 & violations2, coverage.violations('file1.py'))
-        self.assertEqual(measured1 | measured2, coverage.measured_lines('file1.py'))
+        self.assertEqual(
+            violations1 & violations2,
+            coverage.violations('file1.py')
+        )
+
+        self.assertEqual(
+            measured1 | measured2,
+            coverage.measured_lines('file1.py')
+        )
 
     def test_two_inputs_second_violate(self):
 
@@ -89,8 +97,15 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        self.assertEqual(violations1 & violations2, coverage.violations('file1.py'))
-        self.assertEqual(measured1 | measured2, coverage.measured_lines('file1.py'))
+        self.assertEqual(
+            violations1 & violations2,
+            coverage.violations('file1.py')
+        )
+
+        self.assertEqual(
+            measured1 | measured2,
+            coverage.measured_lines('file1.py')
+        )
 
     def test_three_inputs(self):
 
@@ -115,8 +130,15 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        self.assertEqual(violations1 & violations2 & violations3, coverage.violations('file1.py'))
-        self.assertEqual(measured1 | measured2 | measured3, coverage.measured_lines('file1.py'))
+        self.assertEqual(
+            violations1 & violations2 & violations3,
+            coverage.violations('file1.py')
+        )
+
+        self.assertEqual(
+            measured1 | measured2 | measured3,
+            coverage.measured_lines('file1.py')
+        )
 
     def test_different_files_in_inputs(self):
 
@@ -155,8 +177,15 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        self.assertEqual(violations1 & violations2, coverage.violations('file1.py'))
-        self.assertEqual(measured1 | measured2, coverage.measured_lines('file1.py'))
+        self.assertEqual(
+            violations1 & violations2,
+            coverage.violations('file1.py')
+        )
+
+        self.assertEqual(
+            measured1 | measured2,
+            coverage.measured_lines('file1.py')
+        )
 
     def test_no_such_file(self):
 
@@ -209,6 +238,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
         return root
 
+
 class Pep8QualityReporterTest(unittest.TestCase):
 
     def tearDown(self):
@@ -221,8 +251,19 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ("\n../new_file.py:1:17: E231 whitespace\n../new_file.py:3:13: E225 whitespace\n../new_file.py:7:1: E302 blank lines\n\n", '')
-        violations = [Violation(1, 'E231 whitespace'), Violation(3, 'E225 whitespace'), Violation(7, 'E302 blank lines')]
+        _mock_communicate.return_value = (
+            '\n' + dedent("""
+                ../new_file.py:1:17: E231 whitespace
+                ../new_file.py:3:13: E225 whitespace
+                ../new_file.py:7:1: E302 blank lines
+            """).strip() + '\n', ''
+        )
+
+        violations = [
+            Violation(1, 'E231 whitespace'),
+            Violation(3, 'E225 whitespace'),
+            Violation(7, 'E302 blank lines')
+        ]
         name = "pep8"
 
         # Parse the report
@@ -230,7 +271,9 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Expect that the name is set
         self.assertEqual(quality.name(), name)
-        # measured_lines is undefined for a quality reporter since all lines are measured
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
         self.assertEqual(quality.measured_lines('file1.py'), None)
 
         # By construction, each file has the same set
@@ -277,7 +320,6 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
-
     def test_no_such_file(self):
         quality = Pep8QualityReporter('pep8')
 
@@ -293,10 +335,12 @@ class Pep8QualityReporterTest(unittest.TestCase):
             result = quality.violations(path)
             self.assertEqual(result, [])
 
+
 class PylintQualityReporterTest(unittest.TestCase):
+
     def tearDown(self):
         """
-        Undo all patches
+        Undo all patches.
         """
         patch.stopall()
 
@@ -318,7 +362,20 @@ class PylintQualityReporterTest(unittest.TestCase):
     def test_quality(self):
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ("************* Module new_file\nC0111:  1,0: Missing docstring\ndef func_1(apple,my_list):\n                ^^\nC0111:  1,0:func_1: Missing docstring\n\nW0612:  2,4:func_1: Unused variable 'd'\nW0511: 2,10: TODO: Not the real way we'll store usages!", '')
+
+        _mock_communicate.return_value = (
+            dedent("""
+            ************* Module new_file
+            C0111:  1,0: Missing docstring
+            def func_1(apple,my_list):
+                            ^^
+            C0111:  1,0:func_1: Missing docstring
+
+            W0612:  2,4:func_1: Unused variable 'd'
+            W0511: 2,10: TODO: Not the real way we'll store usages!
+            """).strip(), ''
+        )
+
         violations = [
             Violation(1, 'C0111: Missing docstring'),
             Violation(1, 'C0111: func_1: Missing docstring'),
@@ -332,7 +389,9 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Expect that the name is set
         self.assertEqual(quality.name(), name)
-        # measured_lines is undefined for a quality reporter since all lines are measured
+
+        # Measured_lines is undefined for a
+        # quality reporter since all lines are measured
         self.assertEqual(quality.measured_lines('file1.py'), None)
 
         # By construction, each file has the same set

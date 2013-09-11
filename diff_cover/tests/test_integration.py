@@ -11,7 +11,8 @@ import tempfile
 import shutil
 from diff_cover.tool import main
 from diff_cover.diff_reporter import GitDiffError
-from diff_cover.tests.helpers import unittest
+from diff_cover.tests.helpers import fixture_path, \
+    assert_long_str_equal, unittest
 
 
 class ToolsIntegrationBase(unittest.TestCase):
@@ -29,7 +30,7 @@ class ToolsIntegrationBase(unittest.TestCase):
 
         # Set the CWD to the fixtures dir
         self._old_cwd = os.getcwd()
-        os.chdir(self._fixture_path())
+        os.chdir(fixture_path(''))
 
     def tearDown(self):
         """
@@ -41,10 +42,13 @@ class ToolsIntegrationBase(unittest.TestCase):
     def _check_html_report(self, git_diff_path, coverage_xml_paths,
                            expected_html_path, quality_reporter='pep8'):
         """
-        If `coverage_xml_paths` is not empty, assert that given `git_diff_path`
-        and `coverage_xml_paths`, diff-cover generates the expected HTML report.
+        If `coverage_xml_paths` is not empty,
+        assert that given `git_diff_path`
+        and `coverage_xml_paths`, diff-cover
+        generates the expected HTML report.
 
-        If `coverage_xml_paths` is empty, asserts that given `git_diff_path` and
+        If `coverage_xml_paths` is empty,
+        asserts that given `git_diff_path` and
         `quality_reporter` generates the expected HTML report.
         """
 
@@ -57,7 +61,6 @@ class ToolsIntegrationBase(unittest.TestCase):
         temp_dir = tempfile.mkdtemp()
         self.addCleanup(lambda: shutil.rmtree(temp_dir))
         html_report_path = os.path.join(temp_dir, 'diff_coverage.html')
-
 
         if len(coverage_xml_paths) > 0:
             input_list = ['diff-cover'] + coverage_xml_paths + ['--html-report', html_report_path]
@@ -76,15 +79,18 @@ class ToolsIntegrationBase(unittest.TestCase):
             with open(html_report_path) as html_report:
                 html = html_report.read()
                 expected = expected_file.read()
-                self.assertEqual(html, expected)
+                assert_long_str_equal(expected, html, strip=True)
 
     def _check_console_report(self, git_diff_path, coverage_xml_paths,
                               expected_console_path, quality_reporter='pep8'):
         """
-        If `coverage_xml_paths` is not empty, assert that given `git_diff_path`
-        and `coverage_xml_paths`, diff-cover generates the expected console report.
+        If `coverage_xml_paths` is not empty,
+        assert that given `git_diff_path`
+        and `coverage_xml_paths`, diff-cover
+        generates the expected console report.
 
-        If `coverage_xml_paths` is empty, asserts that given `git_diff_path` and
+        If `coverage_xml_paths` is empty,
+        asserts that given `git_diff_path` and
         `quality_reporter` generates the expected console report.
         """
 
@@ -111,13 +117,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         with open(expected_console_path) as expected_file:
             report = string_buffer.getvalue()
             expected = expected_file.read()
-            self.assertEqual(report, expected)
-
-    def _fixture_path(self):
-        """
-        Return an absolute path to the the test fixture directory
-        """
-        return os.path.join(os.path.dirname(__file__), 'fixtures')
+            assert_long_str_equal(expected, report, strip=True)
 
     def _set_sys_args(self, argv):
         """

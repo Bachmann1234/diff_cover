@@ -6,8 +6,11 @@ import sys
 import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from git_diff import GitDiffTool
-from violations_reporter import XmlCoverageReporter, Pep8QualityReporter, PylintQualityReporter
-from report_generator import HtmlReportGenerator, StringReportGenerator, HtmlQualityReportGenerator, StringQualityReportGenerator
+from diff_cover.violations_reporter import XmlCoverageReporter, \
+    Pep8QualityReporter, PylintQualityReporter
+from diff_cover.report_generator import HtmlReportGenerator, \
+    StringReportGenerator, HtmlQualityReportGenerator, \
+    StringQualityReportGenerator
 from lxml import etree
 
 COVERAGE_XML_HELP = "XML coverage report"
@@ -35,9 +38,20 @@ def parse_coverage_args(argv):
     The path strings may or may not exist.
     """
     parser = argparse.ArgumentParser(description=diff_cover.DESCRIPTION)
-    parser.add_argument('coverage_xml', type=str, help=COVERAGE_XML_HELP, nargs='+')
-    parser.add_argument('--html-report', type=str, default=None,
-                        help=HTML_REPORT_HELP)
+
+    parser.add_argument(
+        'coverage_xml',
+        type=str,
+        help=COVERAGE_XML_HELP,
+        nargs='+'
+    )
+
+    parser.add_argument(
+        '--html-report',
+        type=str,
+        default=None,
+        help=HTML_REPORT_HELP
+    )
 
     return vars(parser.parse_args(argv))
 
@@ -54,10 +68,23 @@ def parse_quality_args(argv):
 
     where `HTML_REPORT` is a path.
     """
-    parser = argparse.ArgumentParser(description=diff_cover.QUALITY_DESCRIPTION)
-    parser.add_argument('--violations', type=str, help=VIOLATION_CMD_HELP, required=True)
-    parser.add_argument('--html-report', type=str, default=None,
-                        help=HTML_REPORT_HELP)
+    parser = argparse.ArgumentParser(
+        description=diff_cover.QUALITY_DESCRIPTION
+    )
+
+    parser.add_argument(
+        '--violations',
+        type=str,
+        help=VIOLATION_CMD_HELP,
+        required=True
+    )
+
+    parser.add_argument(
+        '--html-report',
+        type=str,
+        default=None,
+        help=HTML_REPORT_HELP
+    )
 
     return vars(parser.parse_args(argv))
 
@@ -97,6 +124,7 @@ def generate_quality_report(tool, html_report=None):
         output_file = sys.stdout
 
     reporter.generate_report(output_file)
+
 
 def main():
     """
