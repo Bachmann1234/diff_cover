@@ -243,7 +243,7 @@ class PylintQualityReporter(BaseQualityReporter):
         # Take out the first line of the report, which specifies the
         # module name
         lines = output.split('\n')[1:]
-        error_regex = re.compile(r'^([CEFIRW]\d*):\s*(\d+),\d*:(.*$)')
+        error_regex = re.compile(r'^(\S*):\s*(\d+),\d*:(.*$)')
         violations = []
         for line in lines:
             try:
