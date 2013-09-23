@@ -373,6 +373,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
             W0612:  2,4:func_1: Unused variable 'd'
             W0511: 2,10: TODO: Not the real way we'll store usages!
+            F0401(import-error):579,0: Unable to import 'rooted_paths'
             """).strip(), ''
         )
 
@@ -380,7 +381,8 @@ class PylintQualityReporterTest(unittest.TestCase):
             Violation(1, 'C0111: Missing docstring'),
             Violation(1, 'C0111: func_1: Missing docstring'),
             Violation(2, "W0612: func_1: Unused variable 'd'"),
-            Violation(2, "W0511: TODO: Not the real way we'll store usages!")
+            Violation(2, "W0511: TODO: Not the real way we'll store usages!"),
+            Violation(579, "F0401(import-error): Unable to import 'rooted_paths'"),
         ]
         name = "pylint"
 
