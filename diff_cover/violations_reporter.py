@@ -191,7 +191,7 @@ class BaseQualityReporter(BaseViolationReporter):
             output = self._run_command(src_path)
             violations = [
                 Violation(*violation)
-                for violation in self._parse_output(output)
+                for violation in self._parse_output(output, src_path)
             ]
             self._info_cache[src_path] = violations
 
@@ -203,6 +203,10 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         command = '{0} {1} {2}'.format(self.COMMAND, self.OPTIONS, src_path)
         command = [self.COMMAND] + self.OPTIONS + [src_path]
+
+        # DEBUG
+        print str(command)
+
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
@@ -214,10 +218,12 @@ class BaseQualityReporter(BaseViolationReporter):
         return stdout.strip()
 
     @abstractmethod
-    def _parse_output(self, output):
+    def _parse_output(self, output, src_path):
         """
         Parse the output of this reporter
         command into a list of (line, violation) pairs.
+
+        Return only violations for the source at `src_path`.
         """
         pass
 
@@ -230,7 +236,7 @@ class Pep8QualityReporter(BaseQualityReporter):
 
     EXTENSIONS = ['py']
 
-    def _parse_output(self, output):
+    def _parse_output(self, output, src_path):
         lines = output.split('\n')
         regex = re.compile(r'^.*\.py:(\d+).*([EW]\d{3}.*$)')
         violations = []
@@ -248,29 +254,40 @@ class PylintQualityReporter(BaseQualityReporter):
     Report Pylint violations.
     """
     COMMAND = 'pylint'
-    OPTIONS = ['--reports=no', '--include-ids=y']
+    OPTIONS = ['-f', 'parseable', '--reports=no', '--include-ids=y']
 
     EXTENSIONS = ['py']
 
-    def _parse_output(self, output):
-        # Take out the first line of the report, which specifies the
-        # module name
-        lines = output.split('\n')[1:]
-        error_regex = re.compile(r'^(\S*):\s*(\d+),\d*:(.*$)')
+    # Match lines of the form:
+    # path/to/file.py:123: [C0111] Missing docstring 
+    # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
+    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
+
+    def _parse_output(self, output, src_path):
+        lines = output.split('\n')
         violations = []
+
         for line in lines:
-            try:
-                error_match = error_regex.match(line)
-                error, line_number, message = error_match.groups()
-                violation_tuple = (
-                    int(line_number),
-                    '{0}: {1}'.format(error, message.strip())
-                )
-                violations.append(violation_tuple)
-            # Pylint prints out the offending source code for certain
-            # errors -- just skip them
-            except AttributeError:
-                continue
+            match = self.VIOLATION_REGEX.match(line)
+
+            # Ignore any line that isn't matched
+            # (for example, snippets from the source code)
+            if match is not None:
+
+                pylint_src_path, line_number, pylint_code, function_name, message = match.groups()
+
+                # Add the violation only if it's for the source file
+                # we're looking for.
+                if src_path == pylint_src_path:
+
+                    if function_name:
+                        error_str = "{0}: {1}: {2}".format(pylint_code, function_name, message)
+                    else:
+                        error_str = "{0}: {1}".format(pylint_code, message)
+
+                    violation_tuple = (int(line_number), error_str)
+                    violations.append(violation_tuple)
+
         return violations
 
 

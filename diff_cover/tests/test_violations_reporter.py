@@ -365,24 +365,35 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         _mock_communicate.return_value = (
             dedent("""
-            ************* Module new_file
-            C0111:  1,0: Missing docstring
-            def func_1(apple,my_list):
-                            ^^
-            C0111:  1,0:func_1: Missing docstring
-
-            W0612:  2,4:func_1: Unused variable 'd'
-            W0511: 2,10: TODO: Not the real way we'll store usages!
-            F0401(import-error):579,0: Unable to import 'rooted_paths'
+            file1.py:1: [C0111] Missing docstring
+            file1.py:1: [C0111, func_1] Missing docstring
+            file1.py:2: [W0612, cls_name.func] Unused variable 'd'
+            file1.py:2: [W0511] TODO: Not the real way we'll store usages!
+            file1.py:579: [F0401] Unable to import 'rooted_paths'
+            file1.py:113: [W0613, cache_relation.clear_pk] Unused argument 'cls'
+            file1.py:150: [F0010] error while code parsing ([Errno 2] No such file or directory)
+            file1.py:149: [C0324, Foo.__dict__] Comma not followed by a space
+                self.peer_grading._find_corresponding_module_for_location(Location('i4x','a','b','c','d'))
+            file1.py:162: [R0801] Similar lines in 2 files
+            ==external_auth.views:1
+            ==student.views:4
+            import json 
+            import logging
+            import random
+            path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
             """).strip(), ''
         )
 
-        violations = [
+        expected_violations = [
             Violation(1, 'C0111: Missing docstring'),
             Violation(1, 'C0111: func_1: Missing docstring'),
-            Violation(2, "W0612: func_1: Unused variable 'd'"),
+            Violation(2, "W0612: cls_name.func: Unused variable 'd'"),
             Violation(2, "W0511: TODO: Not the real way we'll store usages!"),
-            Violation(579, "F0401(import-error): Unable to import 'rooted_paths'"),
+            Violation(579, "F0401: Unable to import 'rooted_paths'"),
+            Violation(150, "F0010: error while code parsing ([Errno 2] No such file or directory)"),
+            Violation(149, "C0324: Foo.__dict__: Comma not followed by a space"),
+            Violation(162, "R0801: Similar lines in 2 files"),
+            Violation(113, "W0613: cache_relation.clear_pk: Unused argument 'cls'")
         ]
         name = "pylint"
 
@@ -396,13 +407,13 @@ class PylintQualityReporterTest(unittest.TestCase):
         # quality reporter since all lines are measured
         self.assertEqual(quality.measured_lines('file1.py'), None)
 
-        # By construction, each file has the same set
-        # of covered/uncovered lines
-        lines = quality.violations('file1.py')
-        print len(lines)
-        print lines
-
-        self.assertEqual(violations, quality.violations('file1.py'))
+        # Expect that we get violations for file1.py only
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('file1.py')
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
 
     def test_quality_error(self):
 
