@@ -164,7 +164,20 @@ class BaseQualityReporter(BaseViolationReporter):
     # A list of filetypes to run on.
     EXTENSIONS = []
 
-    def __init__(self, name):
+    def __init__(self, name, input_reports):
+        """
+        Create a new quality reporter.
+
+        `name` is an identifier for the reporter
+        (usually the name of the tool used to generate
+        the report).
+
+        `input_reports` is an optional list of
+        paths to pre-generated violation reports.
+        If this is provided, the reporter will
+        use the pre-generated reports instead of invoking
+        the tool directly.
+        """
         super(BaseQualityReporter, self).__init__(name)
         self._info_cache = defaultdict(list)
 

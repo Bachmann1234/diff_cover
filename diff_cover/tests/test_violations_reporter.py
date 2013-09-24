@@ -267,7 +267,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name)
+        quality = Pep8QualityReporter(name, [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), name)
@@ -289,7 +289,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name)
+        quality = Pep8QualityReporter(name, [])
         self.assertEqual(violations, quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
@@ -301,7 +301,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name)
+        quality = Pep8QualityReporter(name, [])
         self.assertEqual(violations, quality.violations('file1.py'))
 
     def test_quality_error(self):
@@ -313,7 +313,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name)
+        quality = Pep8QualityReporter(name, [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), name)
@@ -321,14 +321,14 @@ class Pep8QualityReporterTest(unittest.TestCase):
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
     def test_no_such_file(self):
-        quality = Pep8QualityReporter('pep8')
+        quality = Pep8QualityReporter('pep8', [])
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = Pep8QualityReporter('pep8')
+        quality = Pep8QualityReporter('pep8', [])
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -345,14 +345,14 @@ class PylintQualityReporterTest(unittest.TestCase):
         patch.stopall()
 
     def test_no_such_file(self):
-        quality = PylintQualityReporter('pylint')
+        quality = PylintQualityReporter('pylint', [])
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = PylintQualityReporter('pylint')
+        quality = PylintQualityReporter('pylint', [])
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -387,7 +387,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
+        quality = PylintQualityReporter(name, [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), name)
@@ -413,7 +413,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
+        quality = PylintQualityReporter(name, [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), name)
@@ -429,7 +429,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
+        quality = PylintQualityReporter(name, [])
         self.assertEqual(violations, quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
@@ -441,5 +441,5 @@ class PylintQualityReporterTest(unittest.TestCase):
         name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
+        quality = PylintQualityReporter(name, [])
         self.assertEqual(violations, quality.violations('file1.py'))

@@ -16,6 +16,7 @@ from lxml import etree
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 VIOLATION_CMD_HELP = "Which code quality tool to use"
+INPUT_REPORTS_HELP = "Pep8 or pylint reports to use"
 
 QUALITY_REPORTERS = {
     'pep8': Pep8QualityReporter,
@@ -86,6 +87,14 @@ def parse_quality_args(argv):
         help=HTML_REPORT_HELP
     )
 
+    parser.add_argument(
+        'input_reports',
+        type=str,
+        nargs="*",
+        default=[],
+        help=INPUT_REPORTS_HELP
+    )
+
     return vars(parser.parse_args(argv))
 
 
@@ -140,9 +149,15 @@ def main():
     elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(sys.argv[1:])
         tool = arg_dict['violations']
-        reporter = QUALITY_REPORTERS[tool](tool)
-        generate_quality_report(reporter, arg_dict['html_report'])
+        reporter_class = QUALITY_REPORTERS.get(tool)
 
+        if reporter_class is not None:
+            reporter = reporter_class(tool, arg_dict['input_reports'])
+            generate_quality_report(reporter, arg_dict['html_report'])
+
+        else:
+            print "Quality tool not recognized: '{0}'".format(tool)
+            exit(1)
 
 if __name__ == "__main__":
     main()

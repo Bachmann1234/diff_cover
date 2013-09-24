@@ -50,12 +50,32 @@ class ParseQualityArgsTest(unittest.TestCase):
 
         self.assertEqual(arg_dict.get('violations'), 'pep8')
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
+        self.assertEqual(arg_dict.get('input_reports'), [])
 
     def test_parse_with_no_html_report(self):
         argv = ['--violations', 'pylint']
 
         arg_dict = parse_quality_args(argv)
         self.assertEqual(arg_dict.get('violations'), 'pylint')
+        self.assertEqual(arg_dict.get('input_reports'), [])
+
+    def test_parse_with_one_input_report(self):
+        argv = ['--violations', 'pylint', 'pylint_report.txt']
+
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(arg_dict.get('input_reports'), ['pylint_report.txt'])
+
+    def test_parse_with_multiple_input_reports(self):
+        argv = [
+            '--violations', 'pylint',
+            'pylint_report_1.txt', 'pylint_report_2.txt'
+        ]
+
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(
+            arg_dict.get('input_reports'),
+            ['pylint_report_1.txt', 'pylint_report_2.txt']
+        )
 
     def test_parse_invalid_arg(self):
         # No code quality test provided
