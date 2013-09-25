@@ -2,6 +2,7 @@ from lxml import etree
 from mock import patch
 from subprocess import Popen
 from textwrap import dedent
+from StringIO import StringIO
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PylintQualityReporter, QualityReporterError
 from diff_cover.tests.helpers import unittest
@@ -259,50 +260,44 @@ class Pep8QualityReporterTest(unittest.TestCase):
             """).strip() + '\n', ''
         )
 
-        violations = [
+        # Parse the report
+        quality = Pep8QualityReporter('pep8', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'pep8')
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
             Violation(1, 'E231 whitespace'),
             Violation(3, 'E225 whitespace'),
             Violation(7, 'E302 blank lines')
         ]
-        name = "pep8"
 
-        # Parse the report
-        quality = Pep8QualityReporter(name, [])
-
-        # Expect that the name is set
-        self.assertEqual(quality.name(), name)
-
-        # Measured_lines is undefined for
-        # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('file1.py'), None)
-
-        # By construction, each file has the same set
-        # of covered/uncovered lines
-        self.assertEqual(violations, quality.violations('file1.py'))
+        self.assertEqual(expected_violations, quality.violations('../new_file.py'))
 
     def test_no_quality_issues_newline(self):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('\n', '')
-        violations = []
-        name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name, [])
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = Pep8QualityReporter('pep8', [])
+        self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('', '')
-        violations = []
-        name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name, [])
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = Pep8QualityReporter('pep8', [])
+        self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
 
@@ -310,13 +305,11 @@ class Pep8QualityReporterTest(unittest.TestCase):
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ("", 'whoops')
 
-        name = "pep8"
-
         # Parse the report
-        quality = Pep8QualityReporter(name, [])
+        quality = Pep8QualityReporter('pep8', [])
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), name)
+        self.assertEqual(quality.name(), 'pep8')
 
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
@@ -334,6 +327,49 @@ class Pep8QualityReporterTest(unittest.TestCase):
         for path in file_paths:
             result = quality.violations(path)
             self.assertEqual(result, [])
+
+    def test_quality_pregenerated_report(self):
+
+        # Patch the output of `pep8`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = ('', '')
+
+        # When the user provides us with a pre-generated pep8 report
+        # then use that instead of calling pep8 directly.
+        pep8_reports = [
+            StringIO('\n' + dedent("""
+                path/to/file.py:1:17: E231 whitespace
+                path/to/file.py:3:13: E225 whitespace
+                another/file.py:7:1: E302 blank lines
+            """).strip() + '\n'),
+
+            StringIO('\n' + dedent(u"""
+                path/to/file.py:24:2: W123 \u9134\u1912
+                another/file.py:50:1: E302 blank lines
+            """).strip() + '\n'),
+        ]
+
+        # Parse the report
+        quality = Pep8QualityReporter('pep8', pep8_reports)
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u'E231 whitespace'),
+            Violation(3, u'E225 whitespace'),
+            Violation(24, u'W123 \u9134\u1912')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
 
 
 class PylintQualityReporterTest(unittest.TestCase):
@@ -377,7 +413,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             file1.py:162: [R0801] Similar lines in 2 files
             ==external_auth.views:1
             ==student.views:4
-            import json 
+            import json
             import logging
             import random
             path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
@@ -395,13 +431,12 @@ class PylintQualityReporterTest(unittest.TestCase):
             Violation(162, "R0801: Similar lines in 2 files"),
             Violation(113, "W0613: cache_relation.clear_pk: Unused argument 'cls'")
         ]
-        name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name, [])
+        quality = PylintQualityReporter('pylint', [])
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), name)
+        self.assertEqual(quality.name(), 'pylint')
 
         # Measured_lines is undefined for a
         # quality reporter since all lines are measured
@@ -418,17 +453,14 @@ class PylintQualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output of `pylint`
+        # to output to stderr
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ("", 'whoops')
 
-        name = "pylint"
-
         # Parse the report
-        quality = PylintQualityReporter(name, [])
+        quality = PylintQualityReporter('pylint', [])
 
-        # Expect that the name is set
-        self.assertEqual(quality.name(), name)
-
+        # Expect an error
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
     def test_no_quality_issues_newline(self):
@@ -436,21 +468,60 @@ class PylintQualityReporterTest(unittest.TestCase):
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('\n', '')
-        violations = []
-        name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name, [])
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = PylintQualityReporter('pylint', [])
+        self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('', '')
-        violations = []
-        name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name, [])
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = PylintQualityReporter('pylint', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_quality_pregenerated_report(self):
+
+        # Patch the output of `pylint`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = ('\n', '')
+
+        # When the user provides us with a pre-generated pylint report
+        # then use that instead of calling pylint directly.
+        pylint_reports = [
+            StringIO(dedent(u"""
+                path/to/file.py:1: [C0111] Missing docstring
+                path/to/file.py:57: [W0511] TODO the name of this method is a little bit confusing
+                another/file.py:41: [W1201, assign_default_role] Specify string format arguments as logging function parameters
+                another/file.py:175: [C0322, Foo.bar] Operator not preceded by a space
+                        x=2+3
+                          ^
+                        Unicode: \u9404 \u1239
+                another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
+            """).strip()),
+
+            StringIO(dedent(u"""
+            path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
+            another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
+            """).strip())
+        ]
+
+        # Generate the violation report
+        quality = PylintQualityReporter('pylint', pylint_reports)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u'C0111: Missing docstring'),
+            Violation(57, u'W0511: TODO the name of this method is a little bit confusing'),
+            Violation(183, u'C0103: Foo.bar.gettag: Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)

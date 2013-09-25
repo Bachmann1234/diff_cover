@@ -24,6 +24,10 @@ QUALITY_REPORTERS = {
 }
 
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
+
 def parse_coverage_args(argv):
     """
     Parse command line arguments, returning a dict of
@@ -152,11 +156,26 @@ def main():
         reporter_class = QUALITY_REPORTERS.get(tool)
 
         if reporter_class is not None:
-            reporter = reporter_class(tool, arg_dict['input_reports'])
-            generate_quality_report(reporter, arg_dict['html_report'])
+            # If we've been given pre-generated reports,
+            # try to open the files
+            input_reports = []
 
+            for path in arg_dict['input_reports']:
+                try:
+                    input_reports.append(open(path))
+                except IOError:
+                    LOGGER.warning("Could not load '{0}'".format(path))
+
+            try:
+                reporter = reporter_class(tool, input_reports)
+                generate_quality_report(reporter, arg_dict['html_report'])
+
+            # Close any reports we opened
+            finally:
+                for file_handle in input_reports:
+                    file_handle.close()
         else:
-            print "Quality tool not recognized: '{0}'".format(tool)
+            LOGGER.error("Quality tool not recognized: '{0}'".format(tool))
             exit(1)
 
 if __name__ == "__main__":

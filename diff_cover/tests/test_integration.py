@@ -39,17 +39,19 @@ class ToolsIntegrationBase(unittest.TestCase):
         patch.stopall()
         os.chdir(self._old_cwd)
 
-    def _check_html_report(self, git_diff_path, coverage_xml_paths,
-                           expected_html_path, quality_reporter='pep8'):
+    def _check_html_report(self, git_diff_path, expected_html_path, tool_args):
         """
-        If `coverage_xml_paths` is not empty,
-        assert that given `git_diff_path`
-        and `coverage_xml_paths`, diff-cover
-        generates the expected HTML report.
+        Verify that the tool produces the expected HTML report.
 
-        If `coverage_xml_paths` is empty,
-        asserts that given `git_diff_path` and
-        `quality_reporter` generates the expected HTML report.
+        `git_diff_path` is a path to a fixture containing the (patched) output of
+        the call to `git diff`.
+
+        `expected_console_path` is a path to the fixture containing
+        the expected HTML output of the tool.
+
+        `tool_args` is a list of command line arguments to pass
+        to the tool.  You should include the name of the tool
+        as the first argument.
         """
 
         # Patch the output of `git diff`
@@ -62,16 +64,10 @@ class ToolsIntegrationBase(unittest.TestCase):
         self.addCleanup(lambda: shutil.rmtree(temp_dir))
         html_report_path = os.path.join(temp_dir, 'diff_coverage.html')
 
-        if len(coverage_xml_paths) > 0:
-            input_list = ['diff-cover'] + coverage_xml_paths + ['--html-report', html_report_path]
-            self._set_sys_args(input_list)
+        # Patch the command-line arguments
+        self._set_sys_args(tool_args + ['--html-report', html_report_path])
 
-        else:
-            self._set_sys_args(['diff-quality',
-                                '--violations', quality_reporter,
-                                '--html-report', html_report_path])
-
-        # Run diff-cover or diff-quality, as specified
+        # Execute the tool
         main()
 
         # Check the HTML report
@@ -81,17 +77,19 @@ class ToolsIntegrationBase(unittest.TestCase):
                 expected = expected_file.read()
                 assert_long_str_equal(expected, html, strip=True)
 
-    def _check_console_report(self, git_diff_path, coverage_xml_paths,
-                              expected_console_path, quality_reporter='pep8'):
+    def _check_console_report(self, git_diff_path, expected_console_path, tool_args):
         """
-        If `coverage_xml_paths` is not empty,
-        assert that given `git_diff_path`
-        and `coverage_xml_paths`, diff-cover
-        generates the expected console report.
+        Verify that the tool produces the expected console report.
 
-        If `coverage_xml_paths` is empty,
-        asserts that given `git_diff_path` and
-        `quality_reporter` generates the expected console report.
+        `git_diff_path` is a path to a fixture containing the (patched) output of
+        the call to `git diff`.
+
+        `expected_console_path` is a path to the fixture containing
+        the expected console output of the tool.
+
+        `tool_args` is a list of command line arguments to pass
+        to the tool.  You should include the name of the tool
+        as the first argument.
         """
 
         # Patch the output of `git diff`
@@ -103,14 +101,9 @@ class ToolsIntegrationBase(unittest.TestCase):
         self._capture_stdout(string_buffer)
 
         # Patch sys.argv
-        if len(coverage_xml_paths) > 0:
-            input_list = ['diff-cover'] + coverage_xml_paths
-            self._set_sys_args(input_list)
-        else:
-            self._set_sys_args(['diff-quality',
-                                '--violations', quality_reporter])
+        self._set_sys_args(tool_args)
 
-        # Run diff-cover or diff-quality, as specified
+        # Execute the tool
         main()
 
         # Check the console report
@@ -155,54 +148,74 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
     """
 
     def test_added_file_html(self):
-        self._check_html_report('git_diff_add.txt',
-                                ['coverage.xml'],
-                                'add_html_report.html')
+        self._check_html_report(
+            'git_diff_add.txt',
+            'add_html_report.html',
+            ['diff-cover', 'coverage.xml']
+        )
 
     def test_added_file_console(self):
-        self._check_console_report('git_diff_add.txt',
-                                   ['coverage.xml'],
-                                   'add_console_report.txt')
+        self._check_console_report(
+            'git_diff_add.txt',
+            'add_console_report.txt',
+            ['diff-cover', 'coverage.xml']
+        )
 
     def test_deleted_file_html(self):
-        self._check_html_report('git_diff_delete.txt',
-                                ['coverage.xml'],
-                                'delete_html_report.html')
+        self._check_html_report(
+            'git_diff_delete.txt',
+            'delete_html_report.html',
+            ['diff-cover', 'coverage.xml']
+        )
 
     def test_deleted_file_console(self):
-        self._check_console_report('git_diff_delete.txt',
-                                   ['coverage.xml'],
-                                   'delete_console_report.txt')
+        self._check_console_report(
+            'git_diff_delete.txt',
+            'delete_console_report.txt',
+            ['diff-cover', 'coverage.xml'],
+        )
 
     def test_changed_file_html(self):
-        self._check_html_report('git_diff_changed.txt',
-                                ['coverage.xml'],
-                                'changed_html_report.html')
+        self._check_html_report(
+            'git_diff_changed.txt',
+            'changed_html_report.html',
+            ['diff-cover', 'coverage.xml']
+        )
 
     def test_changed_file_console(self):
-        self._check_console_report('git_diff_changed.txt',
-                                   ['coverage.xml'],
-                                   'changed_console_report.txt')
+        self._check_console_report(
+            'git_diff_changed.txt',
+            'changed_console_report.txt',
+            ['diff-cover', 'coverage.xml']
+        )
 
     def test_moved_file_html(self):
-        self._check_html_report('git_diff_moved.txt',
-                                ['moved_coverage.xml'],
-                                'moved_html_report.html')
+        self._check_html_report(
+            'git_diff_moved.txt',
+            'moved_html_report.html',
+            ['diff-cover', 'moved_coverage.xml']
+        )
 
     def test_moved_file_console(self):
-        self._check_console_report('git_diff_moved.txt',
-                                   ['moved_coverage.xml'],
-                                   'moved_console_report.txt')
+        self._check_console_report(
+            'git_diff_moved.txt',
+            'moved_console_report.txt',
+            ['diff-cover', 'moved_coverage.xml']
+        )
 
     def test_mult_inputs_html(self):
-        self._check_html_report('git_diff_mult.txt',
-                                ['coverage1.xml', 'coverage2.xml'],
-                                'mult_inputs_html_report.html')
+        self._check_html_report(
+            'git_diff_mult.txt',
+            'mult_inputs_html_report.html',
+            ['diff-cover', 'coverage1.xml', 'coverage2.xml']
+        )
 
     def test_mult_inputs_console(self):
-        self._check_console_report('git_diff_mult.txt',
-                                   ['coverage1.xml', 'coverage2.xml'],
-                                   'mult_inputs_console_report.txt')
+        self._check_console_report(
+            'git_diff_mult.txt',
+            'mult_inputs_console_report.txt',
+            ['diff-cover', 'coverage1.xml', 'coverage2.xml']
+        )
 
     def test_git_diff_error(self):
 
@@ -235,25 +248,49 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             main()
 
     def test_added_file_pep8_html(self):
-        self._check_html_report('git_diff_violations.txt',
-                                [],
-                                'pep8_violations_report.html',
-                                'pep8')
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pep8_violations_report.html',
+            ['diff-quality', '--violations=pep8']
+        )
 
     def test_added_file_pylint_html(self):
-        self._check_html_report('git_diff_violations.txt',
-                                [],
-                                'pylint_violations_report.html',
-                                'pylint')
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.html',
+            ['diff-quality', '--violations=pylint']
+        )
 
     def test_added_file_pep8_console(self):
-        self._check_console_report('git_diff_violations.txt',
-                                   [],
-                                   'pep8_violations_report.txt',
-                                   'pep8')
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pep8_violations_report.txt',
+            ['diff-quality', '--violations=pep8']
+        )
 
     def test_added_file_pylint_console(self):
-        self._check_console_report('git_diff_violations.txt',
-                                   [],
-                                   'pylint_violations_report.txt',
-                                   'pylint')
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.txt',
+            ['diff-quality', '--violations=pylint'],
+        )
+
+    def test_pre_generated_pylint_report(self):
+
+        # Pass in a pre-generated pylint report instead of letting
+        # the tool call pylint itself.
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.txt',
+            ['diff-quality', '--violations=pylint', 'pylint_report.txt']
+        )
+
+    def test_pre_generated_pep8_report(self):
+
+        # Pass in a pre-generated pep8 report instead of letting
+        # the tool call pep8 itself.
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pep8_violations_report.txt',
+            ['diff-quality', '--violations=pep8', 'pep8_report.txt']
+        )
