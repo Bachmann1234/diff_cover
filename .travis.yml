@@ -4,14 +4,8 @@ python:
 before_install:
   - git fetch origin master:refs/remotes/origin/master
 install:
-  - "pip install -r test-requirements.txt --use-mirrors"
-  - "pip install coveralls"
-  - "python setup.py install"
+  - "pip install coveralls tox"
 script: 
-  - coverage run -m nose
-  - coverage xml
-  - diff-cover coverage.xml
-  - diff-quality --violation=pep8
-  - diff-quality --violation=pylint
+  - tox
 after_success:
   - coveralls

@@ -319,7 +319,7 @@ class GitDiffReporter(BaseDiffReporter):
         elif '--cc' in line:
             regex = self.MERGE_CONFLICT_RE
         else:
-            msg = "Do not recognize format of source in line '{}'".format(line)
+            msg = "Do not recognize format of source in line '{0}'".format(line)
             raise GitDiffError(msg)
 
         # Parse for the source file path
