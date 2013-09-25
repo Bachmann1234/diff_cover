@@ -4,7 +4,6 @@ python:
 before_install:
   - git fetch origin master:refs/remotes/origin/master
 install:
-  - "pip install -r requirements.txt --use-mirrors"
   - "pip install -r test-requirements.txt --use-mirrors"
   - "pip install coveralls"
   - "python setup.py install"
