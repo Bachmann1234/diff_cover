@@ -1,12 +1,10 @@
-import unittest
 from textwrap import dedent
 import os
 import tempfile
 from pygments.token import Token
 from diff_cover.snippets import Snippet
 from diff_cover.tests.helpers import load_fixture,\
-    fixture_path, assert_long_str_equal
-
+    fixture_path, assert_long_str_equal, unittest
 
 class SnippetTest(unittest.TestCase):
 

@@ -3,3 +3,4 @@ nose
 coverage
 pep8
 pylint<1.0
+-r requirements.txt
