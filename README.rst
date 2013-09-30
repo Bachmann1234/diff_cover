@@ -133,8 +133,11 @@ efficient than letting ``diff-quality`` re-run ``pylint`` or ``pep8``.
 
 .. code:: bash
 
-    pylint -f parseable > report.txt
-    diff-quality --violations=pylint report.txt
+    pylint -f parseable > pylint_report.txt
+    diff-quality --violations=pylint pylint_report.txt
+
+    pep8 > pep8_report.txt
+    diff-quality --violations=pep8 pep8_report.txt
 
 Note that you must use the ``-f parseable`` option to generate
 the ``pylint`` report.
