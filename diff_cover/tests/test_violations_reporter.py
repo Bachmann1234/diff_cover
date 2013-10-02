@@ -2,6 +2,7 @@ from lxml import etree
 from mock import patch
 from subprocess import Popen
 from textwrap import dedent
+from StringIO import StringIO
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PylintQualityReporter, QualityReporterError
 from diff_cover.tests.helpers import unittest
@@ -259,50 +260,44 @@ class Pep8QualityReporterTest(unittest.TestCase):
             """).strip() + '\n', ''
         )
 
-        violations = [
+        # Parse the report
+        quality = Pep8QualityReporter('pep8', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'pep8')
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
             Violation(1, 'E231 whitespace'),
             Violation(3, 'E225 whitespace'),
             Violation(7, 'E302 blank lines')
         ]
-        name = "pep8"
 
-        # Parse the report
-        quality = Pep8QualityReporter(name)
-
-        # Expect that the name is set
-        self.assertEqual(quality.name(), name)
-
-        # Measured_lines is undefined for
-        # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('file1.py'), None)
-
-        # By construction, each file has the same set
-        # of covered/uncovered lines
-        self.assertEqual(violations, quality.violations('file1.py'))
+        self.assertEqual(expected_violations, quality.violations('../new_file.py'))
 
     def test_no_quality_issues_newline(self):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('\n', '')
-        violations = []
-        name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name)
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = Pep8QualityReporter('pep8', [])
+        self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('', '')
-        violations = []
-        name = "pep8"
 
         # Parse the report
-        quality = Pep8QualityReporter(name)
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = Pep8QualityReporter('pep8', [])
+        self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
 
@@ -310,30 +305,71 @@ class Pep8QualityReporterTest(unittest.TestCase):
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ("", 'whoops')
 
-        name = "pep8"
-
         # Parse the report
-        quality = Pep8QualityReporter(name)
+        quality = Pep8QualityReporter('pep8', [])
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), name)
+        self.assertEqual(quality.name(), 'pep8')
 
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
     def test_no_such_file(self):
-        quality = Pep8QualityReporter('pep8')
+        quality = Pep8QualityReporter('pep8', [])
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = Pep8QualityReporter('pep8')
+        quality = Pep8QualityReporter('pep8', [])
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
             result = quality.violations(path)
             self.assertEqual(result, [])
+
+    def test_quality_pregenerated_report(self):
+
+        # Patch the output of `pep8`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = ('', '')
+
+        # When the user provides us with a pre-generated pep8 report
+        # then use that instead of calling pep8 directly.
+        pep8_reports = [
+            StringIO('\n' + dedent("""
+                path/to/file.py:1:17: E231 whitespace
+                path/to/file.py:3:13: E225 whitespace
+                another/file.py:7:1: E302 blank lines
+            """).strip() + '\n'),
+
+            StringIO('\n' + dedent(u"""
+                path/to/file.py:24:2: W123 \u9134\u1912
+                another/file.py:50:1: E302 blank lines
+            """).strip() + '\n'),
+        ]
+
+        # Parse the report
+        quality = Pep8QualityReporter('pep8', pep8_reports)
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u'E231 whitespace'),
+            Violation(3, u'E225 whitespace'),
+            Violation(24, u'W123 \u9134\u1912')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
 
 
 class PylintQualityReporterTest(unittest.TestCase):
@@ -345,14 +381,14 @@ class PylintQualityReporterTest(unittest.TestCase):
         patch.stopall()
 
     def test_no_such_file(self):
-        quality = PylintQualityReporter('pylint')
+        quality = PylintQualityReporter('pylint', [])
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = PylintQualityReporter('pylint')
+        quality = PylintQualityReporter('pylint', [])
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -365,59 +401,66 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         _mock_communicate.return_value = (
             dedent("""
-            ************* Module new_file
-            C0111:  1,0: Missing docstring
-            def func_1(apple,my_list):
-                            ^^
-            C0111:  1,0:func_1: Missing docstring
-
-            W0612:  2,4:func_1: Unused variable 'd'
-            W0511: 2,10: TODO: Not the real way we'll store usages!
-            F0401(import-error):579,0: Unable to import 'rooted_paths'
+            file1.py:1: [C0111] Missing docstring
+            file1.py:1: [C0111, func_1] Missing docstring
+            file1.py:2: [W0612, cls_name.func] Unused variable 'd'
+            file1.py:2: [W0511] TODO: Not the real way we'll store usages!
+            file1.py:579: [F0401] Unable to import 'rooted_paths'
+            file1.py:113: [W0613, cache_relation.clear_pk] Unused argument 'cls'
+            file1.py:150: [F0010] error while code parsing ([Errno 2] No such file or directory)
+            file1.py:149: [C0324, Foo.__dict__] Comma not followed by a space
+                self.peer_grading._find_corresponding_module_for_location(Location('i4x','a','b','c','d'))
+            file1.py:162: [R0801] Similar lines in 2 files
+            ==external_auth.views:1
+            ==student.views:4
+            import json
+            import logging
+            import random
+            path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
             """).strip(), ''
         )
 
-        violations = [
+        expected_violations = [
             Violation(1, 'C0111: Missing docstring'),
             Violation(1, 'C0111: func_1: Missing docstring'),
-            Violation(2, "W0612: func_1: Unused variable 'd'"),
+            Violation(2, "W0612: cls_name.func: Unused variable 'd'"),
             Violation(2, "W0511: TODO: Not the real way we'll store usages!"),
-            Violation(579, "F0401(import-error): Unable to import 'rooted_paths'"),
+            Violation(579, "F0401: Unable to import 'rooted_paths'"),
+            Violation(150, "F0010: error while code parsing ([Errno 2] No such file or directory)"),
+            Violation(149, "C0324: Foo.__dict__: Comma not followed by a space"),
+            Violation(162, "R0801: Similar lines in 2 files"),
+            Violation(113, "W0613: cache_relation.clear_pk: Unused argument 'cls'")
         ]
-        name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
+        quality = PylintQualityReporter('pylint', [])
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), name)
+        self.assertEqual(quality.name(), 'pylint')
 
         # Measured_lines is undefined for a
         # quality reporter since all lines are measured
         self.assertEqual(quality.measured_lines('file1.py'), None)
 
-        # By construction, each file has the same set
-        # of covered/uncovered lines
-        lines = quality.violations('file1.py')
-        print len(lines)
-        print lines
-
-        self.assertEqual(violations, quality.violations('file1.py'))
+        # Expect that we get violations for file1.py only
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('file1.py')
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
 
     def test_quality_error(self):
 
         # Patch the output of `pylint`
+        # to output to stderr
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ("", 'whoops')
 
-        name = "pylint"
-
         # Parse the report
-        quality = PylintQualityReporter(name)
+        quality = PylintQualityReporter('pylint', [])
 
-        # Expect that the name is set
-        self.assertEqual(quality.name(), name)
-
+        # Expect an error
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
     def test_no_quality_issues_newline(self):
@@ -425,21 +468,60 @@ class PylintQualityReporterTest(unittest.TestCase):
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('\n', '')
-        violations = []
-        name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = PylintQualityReporter('pylint', [])
+        self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         _mock_communicate.return_value = ('', '')
-        violations = []
-        name = "pylint"
 
         # Parse the report
-        quality = PylintQualityReporter(name)
-        self.assertEqual(violations, quality.violations('file1.py'))
+        quality = PylintQualityReporter('pylint', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_quality_pregenerated_report(self):
+
+        # Patch the output of `pylint`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = ('\n', '')
+
+        # When the user provides us with a pre-generated pylint report
+        # then use that instead of calling pylint directly.
+        pylint_reports = [
+            StringIO(dedent(u"""
+                path/to/file.py:1: [C0111] Missing docstring
+                path/to/file.py:57: [W0511] TODO the name of this method is a little bit confusing
+                another/file.py:41: [W1201, assign_default_role] Specify string format arguments as logging function parameters
+                another/file.py:175: [C0322, Foo.bar] Operator not preceded by a space
+                        x=2+3
+                          ^
+                        Unicode: \u9404 \u1239
+                another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
+            """).strip()),
+
+            StringIO(dedent(u"""
+            path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
+            another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
+            """).strip())
+        ]
+
+        # Generate the violation report
+        quality = PylintQualityReporter('pylint', pylint_reports)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u'C0111: Missing docstring'),
+            Violation(57, u'W0511: TODO the name of this method is a little bit confusing'),
+            Violation(183, u'C0103: Foo.bar.gettag: Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)

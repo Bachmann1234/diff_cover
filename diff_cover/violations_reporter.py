@@ -164,25 +164,74 @@ class BaseQualityReporter(BaseViolationReporter):
     # A list of filetypes to run on.
     EXTENSIONS = []
 
-    def __init__(self, name):
+    def __init__(self, name, input_reports):
+        """
+        Create a new quality reporter.
+
+        `name` is an identifier for the reporter
+        (usually the name of the tool used to generate
+        the report).
+
+        `input_reports` is an list of
+        file-like objects representing pre-generated
+        violation reports.  The list can be empty.
+
+        If these are provided, the reporter will
+        use the pre-generated reports instead of invoking
+        the tool directly.
+        """
         super(BaseQualityReporter, self).__init__(name)
         self._info_cache = defaultdict(list)
+
+        # If we've been given input report files, use those
+        # to get the source information
+        if len(input_reports) > 0:
+            self.use_tool = False
+            self._load_reports(input_reports)
+        else:
+            self.use_tool = True
 
     def violations(self, src_path):
         """
         See base class comments.
         """
-        if not any(src_path.endswith(ext) for ext in self.EXTENSIONS):
-            return []
-        if src_path not in self._info_cache:
-            output = self._run_command(src_path)
-            violations = [
-                Violation(*violation)
-                for violation in self._parse_output(output)
-            ]
-            self._info_cache[src_path] = violations
+        # If we've been given pre-generated pylint/pep8 reports,
+        # then we've already loaded everything we need into the cache.
+        # Otherwise, call pylint/pep8 ourselves
+        if self.use_tool:
+            if not any(src_path.endswith(ext) for ext in self.EXTENSIONS):
+                return []
+            if src_path not in self._info_cache:
+                output = self._run_command(src_path)
+                violations_dict = self._parse_output(output, src_path)
+                self._update_cache(violations_dict)
 
+        # Return the cached violation info
         return self._info_cache[src_path]
+
+    def _load_reports(self, report_files):
+        """
+        Load pre-generated pep8/pylint reports into
+        the cache.
+
+        `report_files` is a list of open file-like objects.
+        """
+        for file_handle in report_files:
+            contents = file_handle.read()
+            violations_dict = self._parse_output(contents)
+            self._update_cache(violations_dict)
+
+    def _update_cache(self, violations_dict):
+        """
+        Append violations in `violations_dict` to the cache.
+        `violations_dict` must have the form:
+
+            {
+                SRC_PATH: [Violation, ]
+            }
+        """
+        for src_path, violations in violations_dict.iteritems():
+            self._info_cache[src_path].extend(violations)
 
     def _run_command(self, src_path):
         """
@@ -190,6 +239,7 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         command = '{0} {1} {2}'.format(self.COMMAND, self.OPTIONS, src_path)
         command = [self.COMMAND] + self.OPTIONS + [src_path]
+
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
@@ -201,10 +251,21 @@ class BaseQualityReporter(BaseViolationReporter):
         return stdout.strip()
 
     @abstractmethod
-    def _parse_output(self, output):
+    def _parse_output(self, output, src_path=None):
         """
         Parse the output of this reporter
-        command into a list of (line, violation) pairs.
+        command into a dict of the form:
+
+            {
+                SRC_PATH: [Violation, ]
+            }
+
+        where `SRC_PATH` is the path to the source file
+        containing the violations, and the value is
+        a list of violations.
+
+        If `src_path` is provided, return information
+        just for that source.
         """
         pass
 
@@ -216,18 +277,29 @@ class Pep8QualityReporter(BaseQualityReporter):
     COMMAND = 'pep8'
 
     EXTENSIONS = ['py']
+    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EW]\d{3}.*)$')
 
-    def _parse_output(self, output):
-        lines = output.split('\n')
-        regex = re.compile(r'^.*\.py:(\d+).*([EW]\d{3}.*$)')
-        violations = []
-        for line in lines:
-            # Sometimes pep8 gives us a blank line
-            if line == '':
-                continue
-            line_number, message = regex.match(line).groups()
-            violations.append((int(line_number), message))
-        return violations
+    def _parse_output(self, output, src_path=None):
+        """
+        See base class docstring.
+        """
+        violations_dict = defaultdict(list)
+
+        for line in output.split('\n'):
+
+            match = self.VIOLATION_REGEX.match(line)
+
+            # Ignore any line that isn't a violation
+            if match is not None:
+                pep8_src, line_number, message = match.groups()
+
+                # If we're looking for a particular source,
+                # filter out all other sources
+                if src_path is None or src_path == pep8_src:
+                    violation = Violation(int(line_number), message)
+                    violations_dict[pep8_src].append(violation)
+
+        return violations_dict
 
 
 class PylintQualityReporter(BaseQualityReporter):
@@ -235,30 +307,43 @@ class PylintQualityReporter(BaseQualityReporter):
     Report Pylint violations.
     """
     COMMAND = 'pylint'
-    OPTIONS = ['--reports=no', '--include-ids=y']
+    OPTIONS = ['-f', 'parseable', '--reports=no', '--include-ids=y']
 
     EXTENSIONS = ['py']
 
-    def _parse_output(self, output):
-        # Take out the first line of the report, which specifies the
-        # module name
-        lines = output.split('\n')[1:]
-        error_regex = re.compile(r'^(\S*):\s*(\d+),\d*:(.*$)')
-        violations = []
-        for line in lines:
-            try:
-                error_match = error_regex.match(line)
-                error, line_number, message = error_match.groups()
-                violation_tuple = (
-                    int(line_number),
-                    '{0}: {1}'.format(error, message.strip())
-                )
-                violations.append(violation_tuple)
-            # Pylint prints out the offending source code for certain
-            # errors -- just skip them
-            except AttributeError:
-                continue
-        return violations
+    # Match lines of the form:
+    # path/to/file.py:123: [C0111] Missing docstring
+    # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
+    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
+
+    def _parse_output(self, output, src_path=None):
+        """
+        See base class docstring.
+        """
+        violations_dict = defaultdict(list)
+
+        for line in output.split('\n'):
+            match = self.VIOLATION_REGEX.match(line)
+
+            # Ignore any line that isn't matched
+            # (for example, snippets from the source code)
+            if match is not None:
+
+                pylint_src_path, line_number, pylint_code, function_name, message = match.groups()
+
+                # If we're looking for a particular source file,
+                # ignore any other source files.
+                if src_path is None or src_path == pylint_src_path:
+
+                    if function_name:
+                        error_str = u"{0}: {1}: {2}".format(pylint_code, function_name, message)
+                    else:
+                        error_str = u"{0}: {1}".format(pylint_code, message)
+
+                    violation = Violation(int(line_number), error_str)
+                    violations_dict[pylint_src_path].append(violation)
+
+        return violations_dict
 
 
 class QualityReporterError(Exception):

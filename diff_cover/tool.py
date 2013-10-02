@@ -16,11 +16,16 @@ from lxml import etree
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 VIOLATION_CMD_HELP = "Which code quality tool to use"
+INPUT_REPORTS_HELP = "Pep8 or pylint reports to use"
 
 QUALITY_REPORTERS = {
     'pep8': Pep8QualityReporter,
     'pylint': PylintQualityReporter
 }
+
+
+import logging
+LOGGER = logging.getLogger(__name__)
 
 
 def parse_coverage_args(argv):
@@ -86,6 +91,14 @@ def parse_quality_args(argv):
         help=HTML_REPORT_HELP
     )
 
+    parser.add_argument(
+        'input_reports',
+        type=str,
+        nargs="*",
+        default=[],
+        help=INPUT_REPORTS_HELP
+    )
+
     return vars(parser.parse_args(argv))
 
 
@@ -140,9 +153,30 @@ def main():
     elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(sys.argv[1:])
         tool = arg_dict['violations']
-        reporter = QUALITY_REPORTERS[tool](tool)
-        generate_quality_report(reporter, arg_dict['html_report'])
+        reporter_class = QUALITY_REPORTERS.get(tool)
 
+        if reporter_class is not None:
+            # If we've been given pre-generated reports,
+            # try to open the files
+            input_reports = []
+
+            for path in arg_dict['input_reports']:
+                try:
+                    input_reports.append(open(path))
+                except IOError:
+                    LOGGER.warning("Could not load '{0}'".format(path))
+
+            try:
+                reporter = reporter_class(tool, input_reports)
+                generate_quality_report(reporter, arg_dict['html_report'])
+
+            # Close any reports we opened
+            finally:
+                for file_handle in input_reports:
+                    file_handle.close()
+        else:
+            LOGGER.error("Quality tool not recognized: '{0}'".format(tool))
+            exit(1)
 
 if __name__ == "__main__":
     main()

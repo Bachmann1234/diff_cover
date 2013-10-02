@@ -127,6 +127,28 @@ Like ``diff-cover``, HTML reports can be generated with
 
     diff-quality --violations=<tool> --html-report report.html
 
+If you have already generated a report using ``pylint`` or ``pep8``,
+you can pass the report to ``diff-quality``.  This is more
+efficient than letting ``diff-quality`` re-run ``pylint`` or ``pep8``.
+
+.. code:: bash
+
+    pylint -f parseable > pylint_report.txt
+    diff-quality --violations=pylint pylint_report.txt
+
+    pep8 > pep8_report.txt
+    diff-quality --violations=pep8 pep8_report.txt
+
+Note that you must use the ``-f parseable`` option to generate
+the ``pylint`` report.
+
+``diff-quality`` will also accept multiple ``pylint`` or ``pep8`` reports:
+
+.. code:: bash
+
+    diff-quality --violations=pylint report_1.txt report_2.txt
+
+
 Troubleshooting
 ----------------------
 
