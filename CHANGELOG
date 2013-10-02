@@ -1,3 +1,11 @@
+10/2/2013 v0.2.5
+
+    * Added option to consume pylint/pep8 reports instead of
+      calling the tool directly.
+
+9/23/2013 v0.2.4
+
+    * Handle symbolic names in pylint output.
 
 9/4/2013 v0.2.3
 
