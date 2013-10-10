@@ -1,6 +1,5 @@
 -------------
 Diff Coverage
-Coverage Report(s) Used: coverage.xml
 Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
 test_src.txt (100%)

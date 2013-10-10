@@ -218,15 +218,17 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         The context is a dict of the form:
 
-        {'report_name': REPORT_NAME,
-         'diff_name': DIFF_NAME,
-         'src_stats': {SRC_PATH: {
+        {
+            'report_name': REPORT_NAME,
+            'diff_name': DIFF_NAME,
+            'src_stats': {SRC_PATH: {
                             'percent_covered': PERCENT_COVERED,
                             'violation_lines': [LINE_NUM, ...]
                             }, ... }
-         'total_num_lines': TOTAL_NUM_LINES,
-         'total_num_violations': TOTAL_NUM_VIOLATIONS,
-         'total_percent_covered': TOTAL_PERCENT_COVERED}
+            'total_num_lines': TOTAL_NUM_LINES,
+            'total_num_violations': TOTAL_NUM_VIOLATIONS,
+            'total_percent_covered': TOTAL_PERCENT_COVERED
+        }
         """
 
         # Calculate the information to pass to the template
@@ -242,7 +244,7 @@ class TemplateReportGenerator(BaseReportGenerator):
             snippet_style = None
 
         return {
-            'report_names': self.coverage_report_name(),
+            'report_name': self.coverage_report_name(),
             'diff_name': self.diff_report_name(),
             'src_stats': src_stats,
             'total_num_lines': self.total_num_lines(),

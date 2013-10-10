@@ -244,7 +244,6 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         -------------
         Diff Coverage
-        Coverage Report(s) Used: reports/coverage.xml
         Diff: master
         -------------
         file1.py (66.7%): Missing line(s) 10,11
@@ -272,7 +271,6 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         -------------
         Diff Coverage
-        Coverage Report(s) Used: reports/coverage.xml
         Diff: master
         -------------
         file.py (100%)
@@ -293,7 +291,6 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent("""
         -------------
         Diff Coverage
-        Coverage Report(s) Used: reports/coverage.xml
         Diff: master
         -------------
         No lines with coverage information in this diff.

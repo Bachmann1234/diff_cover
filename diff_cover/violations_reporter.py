@@ -47,11 +47,11 @@ class BaseViolationReporter(object):
 
     def name(self):
         """
-        Retrieve the name of the report, to be included in the generated
-        diff report.
+        Retrieve the name of the report, which may be
+        included in the generated diff coverage report.
 
         For example, `name()` could return the path to the coverage
-        report file.
+        report file or the type of reporter.
         """
         return self._name
 
@@ -61,15 +61,12 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_roots, name):
+    def __init__(self, xml_roots):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
-
-        `name` is a name used to identify the report, which will
-        be included in the generated diff coverage report.
         """
-        super(XmlCoverageReporter, self).__init__(name)
+        super(XmlCoverageReporter, self).__init__("XML")
         self._xml_roots = xml_roots
 
         # Create a dict to cache violations dict results
