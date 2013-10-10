@@ -210,7 +210,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
             # Write the report to the output file
             # (encode to a byte string)
-            output_file.write(report.encode())
+            output_file.write(report.encode('utf-8'))
 
     def _context(self):
         """
