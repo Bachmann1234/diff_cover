@@ -23,17 +23,16 @@ class XmlCoverageReporterTest(unittest.TestCase):
     def test_violations(self):
 
         # Construct the XML report
-        name = "subdir/coverage.xml"
         file_paths = ['file1.py', 'subdir/file2.py']
         violations = self.MANY_VIOLATIONS
         measured = self.FEW_MEASURED
         xml = self._coverage_xml(file_paths, violations, measured)
 
         # Parse the report
-        coverage = XmlCoverageReporter(xml, name)
+        coverage = XmlCoverageReporter(xml)
 
         # Expect that the name is set
-        self.assertEqual(coverage.name(), name)
+        self.assertEqual(coverage.name(), "XML")
 
         # By construction, each file has the same set
         # of covered/uncovered lines
@@ -51,7 +50,6 @@ class XmlCoverageReporterTest(unittest.TestCase):
     def test_two_inputs_first_violate(self):
 
         # Construct the XML report
-        name = "subdir/coverage.xml"
         file_paths = ['file1.py']
 
         violations1 = self.MANY_VIOLATIONS
@@ -64,7 +62,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml2 = self._coverage_xml(file_paths, violations2, measured2)
 
         # Parse the report
-        coverage = XmlCoverageReporter([xml, xml2], name)
+        coverage = XmlCoverageReporter([xml, xml2])
 
         # By construction, each file has the same set
         # of covered/uncovered lines
@@ -81,7 +79,6 @@ class XmlCoverageReporterTest(unittest.TestCase):
     def test_two_inputs_second_violate(self):
 
         # Construct the XML report
-        name = "subdir/coverage.xml"
         file_paths = ['file1.py']
 
         violations1 = self.MANY_VIOLATIONS
@@ -94,7 +91,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml2 = self._coverage_xml(file_paths, violations2, measured2)
 
         # Parse the report
-        coverage = XmlCoverageReporter([xml2, xml], name)
+        coverage = XmlCoverageReporter([xml2, xml])
 
         # By construction, each file has the same set
         # of covered/uncovered lines
@@ -111,7 +108,6 @@ class XmlCoverageReporterTest(unittest.TestCase):
     def test_three_inputs(self):
 
         # Construct the XML report
-        name = "subdir/coverage.xml"
         file_paths = ['file1.py']
 
         violations1 = self.MANY_VIOLATIONS
@@ -127,7 +123,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml3 = self._coverage_xml(file_paths, violations3, measured3)
 
         # Parse the report
-        coverage = XmlCoverageReporter([xml2, xml, xml3], name)
+        coverage = XmlCoverageReporter([xml2, xml, xml3])
 
         # By construction, each file has the same set
         # of covered/uncovered lines
@@ -150,7 +146,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        coverage = XmlCoverageReporter(xml_roots, 'coverage.xml')
+        coverage = XmlCoverageReporter(xml_roots)
 
         self.assertEqual(self.MANY_VIOLATIONS, coverage.violations('file.py'))
         self.assertEqual(self.FEW_VIOLATIONS, coverage.violations('other_file.py'))
@@ -161,7 +157,6 @@ class XmlCoverageReporterTest(unittest.TestCase):
         """
 
         # Construct the XML report
-        name = "subdir/coverage.xml"
         file_paths = ['file1.py']
 
         violations1 = self.MANY_VIOLATIONS
@@ -174,7 +169,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml2 = self._coverage_xml(file_paths, violations2, measured2)
 
         # Parse the report
-        coverage = XmlCoverageReporter([xml2, xml], name)
+        coverage = XmlCoverageReporter([xml2, xml])
 
         # By construction, each file has the same set
         # of covered/uncovered lines
@@ -194,7 +189,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         xml = self._coverage_xml([], [], [])
 
         # Parse the report
-        coverage = XmlCoverageReporter(xml, '')
+        coverage = XmlCoverageReporter(xml)
 
         # Expect that we get no results
         result = coverage.violations('file.py')
