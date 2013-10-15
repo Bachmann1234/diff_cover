@@ -180,7 +180,7 @@ __ http://travis-ci.org
 
 **Issue**: ``diff-quality`` reports "diff_cover.violations_reporter.QualityReporterError: No config file found, using default configuration"
 
-**Solution**: Your project needs a `pylintrc` file. Provide this file (it can be empty) and ``diff-quality`` should run wihtout issue.
+**Solution**: Your project needs a `pylintrc` file. Provide this file (it can be empty) and ``diff-quality`` should run without issue.
 
 License
 -------
