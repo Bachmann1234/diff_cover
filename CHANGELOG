@@ -1,3 +1,7 @@
+12/17/2013 v0.2.8
+
+    * Fix a unicode bug in diff-quality
+
 11/16/2013 v0.2.7
 
     * Update requirements to use Jinja 2.7.1

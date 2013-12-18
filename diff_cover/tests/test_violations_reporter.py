@@ -445,6 +445,47 @@ class PylintQualityReporterTest(unittest.TestCase):
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
 
+    def test_unicode(self):
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+
+        # Test non-ascii unicode characters in the filename, function name and message
+        _mock_communicate.return_value = (dedent(u"""
+            file_\u6729.py:616: [W1401] Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix.
+            file.py:2: [W0612, cls_name.func_\u9492] Unused variable '\u2920'
+        """).encode('utf-8'), '')
+
+        quality = PylintQualityReporter('pylint', [])
+        violations = quality.violations(u'file_\u6729.py')
+        self.assertEqual(violations, [
+            Violation(616, u"W1401: Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix."),
+        ])
+
+        violations = quality.violations(u'file.py')
+        self.assertEqual(violations, [Violation(2, u"W0612: cls_name.func_\u9492: Unused variable '\u2920'")])
+
+    def test_unicode_continuation_char(self):
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+
+        # Test a unicode continuation char, which pylint can produce (probably an encoding bug in pylint)
+        _mock_communicate.return_value = ("file.py:2: [W1401] Invalid char '\xc3'", '')
+
+        # Since we are replacing characters we can't interpet, this should
+        # return a valid string with the char replaced with '?'
+        quality = PylintQualityReporter('pylint', [])
+        violations = quality.violations(u'file.py')
+        self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
+
+    def test_non_integer_line_num(self):
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (dedent(u"""
+            file.py:not_a_number: C0111: Missing docstring
+            file.py:\u8911: C0111: Missing docstring
+        """).encode('utf-8'), '')
+
+        # None of the violations have a valid line number, so they should all be skipped
+        violations = PylintQualityReporter('pylint', []).violations(u'file.py')
+        self.assertEqual(violations, [])
+
     def test_quality_error(self):
 
         # Patch the output of `pylint`

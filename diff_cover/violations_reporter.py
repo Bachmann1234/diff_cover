@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
 import re
 import subprocess
+import sys
 
 
 Violation = namedtuple('Violation', 'line, message')
@@ -158,6 +159,10 @@ class BaseQualityReporter(BaseViolationReporter):
     COMMAND = ''
     OPTIONS = []
 
+    # Encoding of the stdout from the command
+    # This is application-dependent
+    STDOUT_ENCODING = 'utf-8'
+
     # A list of filetypes to run on.
     EXTENSIONS = []
 
@@ -232,10 +237,10 @@ class BaseQualityReporter(BaseViolationReporter):
 
     def _run_command(self, src_path):
         """
-        Run the quality command and return its output.
+        Run the quality command and return its output as a unicode string.
         """
-        command = '{0} {1} {2}'.format(self.COMMAND, self.OPTIONS, src_path)
-        command = [self.COMMAND] + self.OPTIONS + [src_path]
+        # Encode the path using the filesystem encoding, determined at runtime
+        command = [self.COMMAND] + self.OPTIONS + [src_path.encode(sys.getfilesystemencoding())]
 
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -245,7 +250,7 @@ class BaseQualityReporter(BaseViolationReporter):
         if stderr:
             raise QualityReporterError(stderr)
 
-        return stdout.strip()
+        return unicode(stdout.strip(), self.STDOUT_ENCODING, 'replace')
 
     @abstractmethod
     def _parse_output(self, output, src_path=None):
