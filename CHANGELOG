@@ -1,3 +1,7 @@
+12/24/2013 v0.2.9
+
+    * Fixed another unicode bug in diff-quality for pre-generated reports.
+
 12/17/2013 v0.2.8
 
     * Fix a unicode bug in diff-quality

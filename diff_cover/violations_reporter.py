@@ -219,7 +219,8 @@ class BaseQualityReporter(BaseViolationReporter):
         `report_files` is a list of open file-like objects.
         """
         for file_handle in report_files:
-            contents = file_handle.read()
+            # Convert to unicode, replacing unreadable chars
+            contents = unicode(file_handle.read(), self.STDOUT_ENCODING, 'replace')
             violations_dict = self._parse_output(contents)
             self._update_cache(violations_dict)
 
