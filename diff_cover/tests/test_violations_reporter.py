@@ -1,8 +1,8 @@
-from lxml import etree
 from mock import patch
 from subprocess import Popen
 from textwrap import dedent
 from StringIO import StringIO
+from lxml import etree
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PylintQualityReporter, QualityReporterError
 from diff_cover.tests.helpers import unittest
@@ -325,10 +325,6 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
     def test_quality_pregenerated_report(self):
 
-        # Patch the output of `pep8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ('', '')
-
         # When the user provides us with a pre-generated pep8 report
         # then use that instead of calling pep8 directly.
         pep8_reports = [
@@ -336,12 +332,12 @@ class Pep8QualityReporterTest(unittest.TestCase):
                 path/to/file.py:1:17: E231 whitespace
                 path/to/file.py:3:13: E225 whitespace
                 another/file.py:7:1: E302 blank lines
-            """).strip() + '\n'),
+            """.encode('utf-8')).strip() + '\n'),
 
             StringIO('\n' + dedent(u"""
                 path/to/file.py:24:2: W123 \u9134\u1912
                 another/file.py:50:1: E302 blank lines
-            """).strip() + '\n'),
+            """.encode('utf-8')).strip() + '\n'),
         ]
 
         # Parse the report
@@ -521,10 +517,6 @@ class PylintQualityReporterTest(unittest.TestCase):
 
     def test_quality_pregenerated_report(self):
 
-        # Patch the output of `pylint`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ('\n', '')
-
         # When the user provides us with a pre-generated pylint report
         # then use that instead of calling pylint directly.
         pylint_reports = [
@@ -537,12 +529,12 @@ class PylintQualityReporterTest(unittest.TestCase):
                           ^
                         Unicode: \u9404 \u1239
                 another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
-            """).strip()),
+            """.encode('utf-8')).strip()),
 
             StringIO(dedent(u"""
             path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
             another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
-            """).strip())
+            """.encode('utf-8')).strip())
         ]
 
         # Generate the violation report
@@ -561,3 +553,15 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(len(actual_violations), len(expected_violations))
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
+
+    def test_quality_pregenerated_report_continuation_char(self):
+
+        # The report contains a non-ASCII continuation char
+        pylint_reports = [StringIO("file.py:2: [W1401] Invalid char '\xc3'")]
+
+        # Generate the violation report
+        quality = PylintQualityReporter('pylint', pylint_reports)
+        violations = quality.violations('file.py')
+
+        # Expect that the char is replaced
+        self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
