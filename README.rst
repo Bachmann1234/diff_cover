@@ -1,5 +1,5 @@
-diff-cover
-==========
+diff-cover |build-status| |coverage-status|
+===========================================
 
 Automatically find diff lines that need test coverage.
 Also finds diff lines that have violations (according to tools such as pep8 or pylint).
@@ -212,3 +212,8 @@ You can discuss this code on the `edx-code Google Group`__ or in the
 ``edx-code`` IRC channel on Freenode.
 
 __ https://groups.google.com/forum/#!forum/edx-code
+
+.. |build-status| image:: https://travis-ci.org/edx/diff-cover.png  
+   :target: https://travis-ci.org/edx/diff-cover
+.. |coverage-status| image:: https://coveralls.io/repos/edx/diff-cover/badge.png
+   :target: https://coveralls.io/r/edx/diff-cover
