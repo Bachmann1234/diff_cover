@@ -1,4 +1,4 @@
-from mock import patch
+from mock import Mock, patch
 from subprocess import Popen
 from textwrap import dedent
 from StringIO import StringIO
@@ -565,3 +565,22 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Expect that the char is replaced
         self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
+
+
+class SubprocessErrorTestCase(unittest.TestCase):
+    def setUp(self):
+        # when you create a new subprocess.Popen() object and call .communicate()
+        # on it, raise an OSError
+        _mock_Popen = Mock()
+        _mock_Popen.return_value.communicate.side_effect = OSError
+        patcher = patch("diff_cover.violations_reporter.subprocess.Popen", _mock_Popen)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_quality_reporter(self, mock_stderr):
+        reporter = Pep8QualityReporter('pep8', [])
+        with self.assertRaises(OSError):
+            reporter.violations("path/to/file.py")
+
+        self.assertEqual(mock_stderr.getvalue(), "pep8 path/to/file.py")

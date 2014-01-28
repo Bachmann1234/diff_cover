@@ -243,10 +243,14 @@ class BaseQualityReporter(BaseViolationReporter):
         # Encode the path using the filesystem encoding, determined at runtime
         command = [self.COMMAND] + self.OPTIONS + [src_path.encode(sys.getfilesystemencoding())]
 
-        process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        stdout, stderr = process.communicate()
+        try:
+            process = subprocess.Popen(
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            stdout, stderr = process.communicate()
+        except OSError:
+            sys.stderr.write(" ".join(command))
+            raise
 
         if stderr:
             raise QualityReporterError(stderr)
