@@ -19,18 +19,25 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_name(self):
 
         # Expect that diff report is named after its compare branch
-        self.assertEqual(self.diff.name(),
-                         'origin/master...HEAD, staged, and unstaged changes')
+        self.assertEqual(
+            self.diff.name(), 'origin/master...HEAD, staged, and unstaged changes'
+        )
+
+    def test_name_compare_branch(self):
+        # Override the default branch
+        self.assertEqual(
+            GitDiffReporter(git_diff=self._git_diff, compare_branch='release').name(),
+            'release...HEAD, staged, and unstaged changes'
+        )
 
     def test_git_source_paths(self):
 
         # Configure the git diff output
         self._set_git_diff_output(
-            git_diff_output({'subdir/file1.py':
-                             line_numbers(3, 10) + line_numbers(34, 47)}),
-            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
-                             'file3.py': [0]}),
-            git_diff_output(dict(), deleted_files=['README.md']))
+            git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10), 'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md'])
+        )
 
         # Get the source paths in the diff
         source_paths = self.diff.src_paths_changed()
@@ -46,8 +53,7 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_duplicate_source_paths(self):
 
         # Duplicate the output for committed, staged, and unstaged changes
-        diff = git_diff_output({'subdir/file1.py':
-                                line_numbers(3, 10) + line_numbers(34, 47)})
+        diff = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
         self._set_git_diff_output(diff, diff, diff)
 
         # Get the source paths in the diff
@@ -61,18 +67,16 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Configure the git diff output
         self._set_git_diff_output(
-            git_diff_output({'subdir/file1.py':
-                             line_numbers(3, 10) + line_numbers(34, 47)}),
-            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
-                             'file3.py': [0]}),
-            git_diff_output(dict(), deleted_files=['README.md']))
+            git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10), 'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md'])
+        )
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed,
-                         line_numbers(3, 10) + line_numbers(34, 47))
+        self.assertEqual(lines_changed, line_numbers(3, 10) + line_numbers(34, 47))
 
     def test_ignore_lines_outside_src(self):
 
@@ -118,11 +122,10 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Configure the git diff output
         self._set_git_diff_output(
-            git_diff_output({'subdir/file1.py':
-                             line_numbers(3, 10) + line_numbers(34, 47)}),
-            git_diff_output({'subdir/file2.py': line_numbers(3, 10),
-                             'file3.py': [0]}),
-            git_diff_output(dict(), deleted_files=['README.md']))
+            git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10), 'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md'])
+        )
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('README.md')
@@ -153,25 +156,23 @@ class GitDiffReporterTest(unittest.TestCase):
         # Expect that three lines changed
         self.assertEqual(len(lines_changed), 3)
 
-
     def test_git_repeat_lines(self):
 
         # Same committed, staged, and unstaged lines
-        diff = git_diff_output({'subdir/file1.py':
-                                line_numbers(3, 10) + line_numbers(34, 47)})
+        diff = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
         self._set_git_diff_output(diff, diff, diff)
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed,
-                         line_numbers(3, 10) + line_numbers(34, 47))
+        self.assertEqual(lines_changed, line_numbers(3, 10) + line_numbers(34, 47))
 
     def test_git_overlapping_lines(self):
 
         master_diff = git_diff_output(
-            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)}
+        )
 
         # Overlap, extending the end of the hunk (lines 3 to 10)
         overlap_1 = git_diff_output({'subdir/file1.py': line_numbers(5, 14)})
@@ -186,13 +187,11 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed,
-                         line_numbers(3, 14) + line_numbers(32, 47))
+        self.assertEqual(lines_changed, line_numbers(3, 14) + line_numbers(32, 47))
 
     def test_git_line_within_hunk(self):
 
-        master_diff = git_diff_output(
-            {'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+        master_diff = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
 
         # Surround hunk in master (lines 3 to 10)
         surround = git_diff_output({'subdir/file1.py': line_numbers(2, 11)})
@@ -207,8 +206,7 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/file1.py')
 
         # Validate the lines changed
-        self.assertEqual(lines_changed,
-                         line_numbers(2, 11) + line_numbers(34, 47))
+        self.assertEqual(lines_changed, line_numbers(2, 11) + line_numbers(34, 47))
 
     def test_inter_diff_conflict(self):
 
@@ -257,9 +255,11 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_no_such_file(self):
 
-        diff = git_diff_output({'subdir/file1.py': [1],
-                                'subdir/file2.py': [2],
-                                'file3.py': [3]})
+        diff = git_diff_output({
+            'subdir/file1.py': [1],
+            'subdir/file2.py': [2],
+            'file3.py': [3]
+        })
 
         # Configure the git diff output
         self._set_git_diff_output(diff, "", "")
@@ -279,29 +279,31 @@ class GitDiffReporterTest(unittest.TestCase):
     def test_git_diff_error(self):
 
         invalid_hunk_str = dedent("""
-                           diff --git a/subdir/file1.py b/subdir/file1.py
-                           @@ invalid @@ Text
-                           """).strip()
+           diff --git a/subdir/file1.py b/subdir/file1.py
+           @@ invalid @@ Text
+        """).strip()
 
         no_src_line_str = "@@ -33,10 +34,13 @@ Text"
 
         non_numeric_lines = dedent("""
-                            diff --git a/subdir/file1.py b/subdir/file1.py
-                            @@ -1,2 +a,b @@
-                            """).strip()
+            diff --git a/subdir/file1.py b/subdir/file1.py
+            @@ -1,2 +a,b @@
+        """).strip()
 
         missing_line_num = dedent("""
-                            diff --git a/subdir/file1.py b/subdir/file1.py
-                            @@ -1,2 +  @@
-                            """).strip()
+            diff --git a/subdir/file1.py b/subdir/file1.py
+            @@ -1,2 +  @@
+        """).strip()
 
         missing_src_str = "diff --git "
 
         # List of (stdout, stderr) git diff pairs that should cause
         # a GitDiffError to be raised.
-        err_outputs = [invalid_hunk_str, no_src_line_str,
-                       non_numeric_lines, missing_line_num,
-                       missing_src_str]
+        err_outputs = [
+            invalid_hunk_str, no_src_line_str,
+            non_numeric_lines, missing_line_num,
+            missing_src_str
+        ]
 
         for diff_str in err_outputs:
 

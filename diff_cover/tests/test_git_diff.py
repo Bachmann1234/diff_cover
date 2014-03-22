@@ -26,9 +26,9 @@ class TestGitDiffTool(unittest.TestCase):
 
         # Expect that the correct command was executed
         expected = ['git', 'diff', 'origin/master...HEAD', '--no-ext-diff']
-        self.subprocess.Popen.assert_called_with(expected,
-                                                 stdout=self.subprocess.PIPE,
-                                                 stderr=self.subprocess.PIPE)
+        self.subprocess.Popen.assert_called_with(
+            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
+        )
 
     def test_diff_unstaged(self):
         self._set_git_diff_output('test output', '')
@@ -39,9 +39,9 @@ class TestGitDiffTool(unittest.TestCase):
 
         # Expect that the correct command was executed
         expected = ['git', 'diff', '--no-ext-diff']
-        self.subprocess.Popen.assert_called_with(expected,
-                                                 stdout=self.subprocess.PIPE,
-                                                 stderr=self.subprocess.PIPE)
+        self.subprocess.Popen.assert_called_with(
+            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
+        )
 
     def test_diff_staged(self):
         self._set_git_diff_output('test output', '')
@@ -52,9 +52,24 @@ class TestGitDiffTool(unittest.TestCase):
 
         # Expect that the correct command was executed
         expected = ['git', 'diff', '--cached', '--no-ext-diff']
-        self.subprocess.Popen.assert_called_with(expected,
-                                                 stdout=self.subprocess.PIPE,
-                                                 stderr=self.subprocess.PIPE)
+        self.subprocess.Popen.assert_called_with(
+            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
+        )
+
+    def test_diff_committed_compare_branch(self):
+
+        # Override the default compare branch
+        self._set_git_diff_output('test output', '')
+        output = self.tool.diff_committed(compare_branch='release')
+
+        # Expect that we get the correct output
+        self.assertEqual(output, 'test output')
+
+        # Expect that the correct command was executed
+        expected = ['git', 'diff', 'release...HEAD', '--no-ext-diff']
+        self.subprocess.Popen.assert_called_with(
+            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
+        )
 
     def test_errors(self):
         self._set_git_diff_output('test output', 'fatal error')
