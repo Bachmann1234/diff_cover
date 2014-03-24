@@ -23,7 +23,7 @@ class GitDiffTool(object):
         """
         self._subprocess = subprocess_mod
 
-    def diff_committed(self):
+    def diff_committed(self, compare_branch='origin/master'):
         """
         Returns the output of `git diff` for committed
         changes not yet in origin/master.
@@ -33,7 +33,8 @@ class GitDiffTool(object):
         """
         return self._execute([
             'git', 'diff',
-            'origin/master...HEAD', '--no-ext-diff'
+            "{branch}...HEAD".format(branch=compare_branch),
+            '--no-ext-diff'
         ])
 
     def diff_unstaged(self):

@@ -54,16 +54,16 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    NAME = 'origin/master...HEAD, staged, and unstaged changes'
-
-    def __init__(self, git_diff=None):
+    def __init__(self, compare_branch='origin/master', git_diff=None):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
-        as `git_diff.GitDiffTool`
+        as `git_diff.GitDiffTool`)
         """
-        super(GitDiffReporter, self).__init__(self.NAME)
+        name = "{branch}...HEAD, staged, and unstaged changes".format(branch=compare_branch)
+        super(GitDiffReporter, self).__init__(name)
 
+        self._compare_branch = compare_branch
         self._git_diff_tool = git_diff
 
         # Cache diff information as a dictionary
@@ -119,9 +119,11 @@ class GitDiffReporter(BaseDiffReporter):
 
             result_dict = dict()
 
-            for diff_str in [self._git_diff_tool.diff_committed(),
-                             self._git_diff_tool.diff_staged(),
-                             self._git_diff_tool.diff_unstaged()]:
+            for diff_str in [
+                self._git_diff_tool.diff_committed(self._compare_branch),
+                self._git_diff_tool.diff_staged(),
+                self._git_diff_tool.diff_unstaged()
+            ]:
 
                 # Parse the output of the diff string
                 diff_dict = self._parse_diff_str(diff_str)

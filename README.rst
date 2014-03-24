@@ -149,6 +149,16 @@ the ``pylint`` report.
     diff-quality --violations=pylint report_1.txt report_2.txt
 
 
+Compare Branch
+--------------
+
+By default, ``diff-cover`` compares the current branch to ``origin/master``.  To specify a different compare branch:
+
+.. code:: bash
+
+    diff-cover coverage.xml --compare-branch=origin/release
+
+
 Troubleshooting
 ----------------------
 
