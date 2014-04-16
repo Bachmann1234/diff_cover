@@ -4,6 +4,7 @@ Classes for querying the information in a test coverage report.
 
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
+import os
 import re
 import subprocess
 import sys
@@ -62,7 +63,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_roots):
+    def __init__(self, xml_roots, git_root=None):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
@@ -74,6 +75,33 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
 
+        # If no git root is provided supose we are running the tool
+        # from the git root
+        self._git_root = git_root if git_root else os.getcwd()
+
+    def _get_src_path_line_nodes(self, xml_document, src_path):
+        """
+        Returns a list of nodes containing line information for `src_path`
+        in `xml_document`.
+
+        If file is not present in `xml_documet`, return None
+        """
+
+        # Remove from git_root from src_path
+        # If cwd is `/home/user/work/diff-cover/diff_cover`
+        # and src_path is `diff_cover/violations_reporter.py`
+        # search for `violations_reporter.py`
+        root_rel_path = os.path.relpath(os.getcwd(), self._git_root)
+        src_rel_path = os.path.relpath(src_path, root_rel_path)
+
+        xpath = ".//class[@filename='{0}']/lines/line".format(src_rel_path)
+        src_element_xpath = ".//class[@filename='{0}']".format(src_rel_path)
+
+        if xml_document.find(src_element_xpath) is None:
+            return None
+
+        return xml_document.findall(xpath)
+
     def _cache_file(self, src_path):
         """
         Load the data from `self._xml_roots`
@@ -81,10 +109,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         """
         # If we have not yet loaded this source file
         if src_path not in self._info_cache:
-
-            # Retrieve the <line> elements for this file
-            xpath = ".//class[@filename='{0}']/lines/line".format(src_path)
-
             # We only want to keep violations that show up in each xml source.
             # Thus, each time, we take the intersection.  However, to do this
             # we must treat the first time as a special case and just add all
@@ -97,33 +121,33 @@ class XmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for xml_document in self._xml_roots:
+                line_nodes = self._get_src_path_line_nodes(xml_document,
+                                                           src_path)
 
-                # Check that we've actually found a source file
-                src_element = xml_document.find(".//class[@filename='{0}']".format(src_path))
-                if src_element is not None:
-                    line_nodes = xml_document.findall(xpath)
+                if line_nodes is None:
+                    continue
 
-                    # First case, need to define violations initially
-                    if violations is None:
-                        violations = set(
-                            Violation(int(line.get('number')), None)
-                            for line in line_nodes
-                            if int(line.get('hits', 0)) == 0)
+                # First case, need to define violations initially
+                if violations is None:
+                    violations = set(
+                        Violation(int(line.get('number')), None)
+                        for line in line_nodes
+                        if int(line.get('hits', 0)) == 0)
 
-                    # If we already have a violations set,
-                    # take the intersection of the new
-                    # violations set and its old self
-                    else:
-                        violations = violations & set(
-                            Violation(int(line.get('number')), None)
-                            for line in line_nodes
-                            if int(line.get('hits', 0)) == 0
-                        )
-
-                    # Measured is the union of itself and the new measured
-                    measured = measured | set(
-                        int(line.get('number')) for line in line_nodes
+                # If we already have a violations set,
+                # take the intersection of the new
+                # violations set and its old self
+                else:
+                    violations = violations & set(
+                        Violation(int(line.get('number')), None)
+                        for line in line_nodes
+                        if int(line.get('hits', 0)) == 0
                     )
+
+                # Measured is the union of itself and the new measured
+                measured = measured | set(
+                    int(line.get('number')) for line in line_nodes
+                )
 
             # If we don't have any information about the source file,
             # don't report any violations

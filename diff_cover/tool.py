@@ -126,7 +126,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool())
 
     xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
-    coverage = XmlCoverageReporter(xml_roots)
+    coverage = XmlCoverageReporter(xml_roots, diff.git_root())
 
     # Build a report generator
     if html_report is not None:
