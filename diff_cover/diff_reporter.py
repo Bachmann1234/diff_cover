@@ -1,7 +1,7 @@
 """
 Classes for querying which lines have changed based on a diff.
 """
-
+from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from diff_cover.git_diff import GitDiffError
 import re
@@ -86,7 +86,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Return the changed file paths (dict keys)
         # in alphabetical order
-        return sorted(diff_dict.keys(), key=str.lower)
+        return sorted(diff_dict.keys(), key=lambda x: x.lower())
 
     def lines_changed(self, src_path):
         """

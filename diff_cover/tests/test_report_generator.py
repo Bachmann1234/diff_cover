@@ -1,5 +1,6 @@
+from __future__ import unicode_literals
 import mock
-import StringIO
+from six import StringIO
 from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.violations_reporter import BaseViolationReporter, Violation
@@ -140,7 +141,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         the string `expected`.
         """
         # Create a buffer for the output
-        output = StringIO.StringIO()
+        output = StringIO()
 
         # Generate the report
         self.report.generate_report(output)
@@ -259,9 +260,6 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
 
     def test_hundred_percent(self):
 
-        # Create a buffer for the output
-        output = StringIO.StringIO()
-
         # Have the dependencies return an empty report
         self.set_src_paths_changed(['file.py'])
         self.set_lines_changed('file.py', [line for line in range(0, 100)])
@@ -327,7 +325,8 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.set_num_snippets(1)
 
         # Verify that we got the expected string
-        expected = load_fixture('html_report_one_snippet.html').strip()
+        expected = load_fixture('html_report_one_snippet.html',
+                                encoding='utf-8').strip()
         self.assert_report(expected)
 
     def test_multiple_snippets(self):
@@ -339,5 +338,6 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.set_num_snippets(2)
 
         # Verify that we got the expected string
-        expected = load_fixture('html_report_two_snippets.html').strip()
+        expected = load_fixture('html_report_two_snippets.html',
+                                encoding='utf-8').strip()
         self.assert_report(expected)

@@ -1,12 +1,13 @@
 """
 Classes for querying the information in a test coverage report.
 """
-
+from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
 import re
 import subprocess
 import sys
+import six
 
 
 Violation = namedtuple('Violation', 'line, message')
@@ -252,7 +253,8 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         for file_handle in report_files:
             # Convert to unicode, replacing unreadable chars
-            contents = unicode(file_handle.read(), self.STDOUT_ENCODING, 'replace')
+            contents = file_handle.read().decode(self.STDOUT_ENCODING,
+                                                 'replace')
             violations_dict = self._parse_output(contents)
             self._update_cache(violations_dict)
 
@@ -265,7 +267,7 @@ class BaseQualityReporter(BaseViolationReporter):
                 SRC_PATH: [Violation, ]
             }
         """
-        for src_path, violations in violations_dict.iteritems():
+        for src_path, violations in six.iteritems(violations_dict):
             self._info_cache[src_path].extend(violations)
 
     def _run_command(self, src_path):
@@ -273,7 +275,8 @@ class BaseQualityReporter(BaseViolationReporter):
         Run the quality command and return its output as a unicode string.
         """
         # Encode the path using the filesystem encoding, determined at runtime
-        command = [self.COMMAND] + self.OPTIONS + [src_path.encode(sys.getfilesystemencoding())]
+        encoding = sys.getfilesystemencoding()
+        command = [self.COMMAND] + self.OPTIONS + [src_path.encode(encoding)]
 
         try:
             process = subprocess.Popen(
@@ -281,13 +284,15 @@ class BaseQualityReporter(BaseViolationReporter):
             )
             stdout, stderr = process.communicate()
         except OSError:
-            sys.stderr.write(" ".join(command))
+            sys.stderr.write(" ".join([cmd.decode(encoding)
+                                       if isinstance(cmd, bytes) else cmd
+                                       for cmd in command]))
             raise
 
         if stderr:
-            raise QualityReporterError(stderr)
+            raise QualityReporterError(stderr.decode(encoding))
 
-        return unicode(stdout.strip(), self.STDOUT_ENCODING, 'replace')
+        return stdout.strip().decode(self.STDOUT_ENCODING, 'replace')
 
     @abstractmethod
     def _parse_output(self, output, src_path=None):
@@ -401,4 +406,5 @@ class QualityReporterError(Exception):
     """
     A quality reporter command produced an error.
     """
-    pass
+    def __init__(self, message):
+        self.message = message

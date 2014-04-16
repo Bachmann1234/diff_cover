@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import mock
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
@@ -312,11 +313,12 @@ class GitDiffReporterTest(unittest.TestCase):
 
             # Expect that both methods that access git diff raise an error
             with self.assertRaises(GitDiffError):
-                print "src_paths_changed() should fail for {0}".format(diff_str)
+                print("src_paths_changed() "
+                      "should fail for {0}".format(diff_str))
                 self.diff.src_paths_changed()
 
             with self.assertRaises(GitDiffError):
-                print "lines_changed() should fail for {0}".format(diff_str)
+                print("lines_changed() should fail for {0}".format(diff_str))
                 self.diff.lines_changed('subdir/file1.py')
 
     def test_plus_sign_in_hunk_bug(self):

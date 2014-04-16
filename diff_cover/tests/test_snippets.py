@@ -1,10 +1,12 @@
-from textwrap import dedent
+from __future__ import unicode_literals
 import os
 import tempfile
 from pygments.token import Token
 from diff_cover.snippets import Snippet
 from diff_cover.tests.helpers import load_fixture,\
     fixture_path, assert_long_str_equal, unittest
+import six
+
 
 class SnippetTest(unittest.TestCase):
 
@@ -103,7 +105,7 @@ class SnippetTest(unittest.TestCase):
         expected_str = load_fixture(expected_fixture, encoding='utf-8')
 
         assert_long_str_equal(expected_str, result, strip=True)
-        self.assertTrue(isinstance(result, unicode))
+        self.assertTrue(isinstance(result, six.text_type))
 
 
 class SnippetLoaderTest(unittest.TestCase):
