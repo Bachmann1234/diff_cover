@@ -57,6 +57,16 @@ class GitDiffTool(object):
         """
         return self._execute(['git', 'diff', '--cached', '--no-ext-diff'])
 
+    def git_root(self):
+        """
+        Returns the output of `git rev-parse --show-toplevel`, which
+        is the absolute path for the git project root.
+
+        Raises a `GitDiffError` if `git diff` outputs anything
+        to stderr.
+        """
+        return self._execute(['git', 'rev-parse', '--show-toplevel']).strip()
+
     def _execute(self, command):
         """
         Execute `command` (list of command components)
