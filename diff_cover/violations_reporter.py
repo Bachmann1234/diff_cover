@@ -87,17 +87,30 @@ class XmlCoverageReporter(BaseViolationReporter):
         If file is not present in `xml_documet`, return None
         """
 
-        # Remove from git_root from src_path
+        # Remove git_root from src_path for searching the correct filename
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
         root_rel_path = os.path.relpath(os.getcwd(), self._git_root)
         src_rel_path = os.path.relpath(src_path, root_rel_path)
 
-        xpath = ".//class[@filename='{0}']/lines/line".format(src_rel_path)
-        src_element_xpath = ".//class[@filename='{0}']".format(src_rel_path)
+        # If cwd is `/home/user/work/diff-cover/diff_cover`
+        # and src_path is `other_package/some_file.py`
+        # search for `/home/user/work/diff-cover/other_package/some_file.py`
+        src_abs_path = os.path.join(self._git_root, src_path)
 
-        if xml_document.find(src_element_xpath) is None:
+        xpath_template = ".//class[@filename='{0}']/lines/line"
+        xpath = None
+
+        src_node_xpath = ".//class[@filename='{0}']".format(src_rel_path)
+        if xml_document.find(src_node_xpath) is not None:
+            xpath = xpath_template.format(src_rel_path)
+
+        src_node_xpath = ".//class[@filename='{0}']".format(src_abs_path)
+        if xml_document.find(src_node_xpath) is not None:
+            xpath = xpath_template.format(src_abs_path)
+
+        if xpath is None:
             return None
 
         return xml_document.findall(xpath)
