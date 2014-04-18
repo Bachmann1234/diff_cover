@@ -41,13 +41,6 @@ class BaseDiffReporter(object):
         """
         pass
 
-    @abstractmethod
-    def git_root(self):
-        """
-        Returns the root of the git project.
-        """
-        pass
-
     def name(self):
         """
         Return the name of the diff, which will be included
@@ -75,7 +68,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Cache diff information as a dictionary
         # with file path keys and line number list values
-        self._git_root = git_diff.git_root()
         self._diff_dict = None
 
     def clear_cache(self):
@@ -107,12 +99,6 @@ class GitDiffReporter(BaseDiffReporter):
         # Look up the modified lines for the source file
         # If no lines modified, return an empty list
         return diff_dict.get(src_path, [])
-
-    def git_root(self):
-        """
-        See base class docstring.
-        """
-        return self._git_root
 
     def _git_diff(self):
         """

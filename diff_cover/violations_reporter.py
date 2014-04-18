@@ -63,7 +63,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_roots, git_root=None):
+    def __init__(self, xml_roots, git_path):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
@@ -77,7 +77,7 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         # If no git root is provided supose we are running the tool
         # from the git root
-        self._git_root = git_root if git_root else os.getcwd()
+        self._git_path = git_path
 
     def _get_src_path_line_nodes(self, xml_document, src_path):
         """
@@ -91,13 +91,12 @@ class XmlCoverageReporter(BaseViolationReporter):
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
-        root_rel_path = os.path.relpath(os.getcwd(), self._git_root)
-        src_rel_path = os.path.relpath(src_path, root_rel_path)
+        src_rel_path = self._git_path.relative_path(src_path)
 
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
-        src_abs_path = os.path.join(self._git_root, src_path)
+        src_abs_path = self._git_path.absolute_path(src_path)
 
         xpath_template = ".//class[@filename='{0}']/lines/line"
         xpath = None
