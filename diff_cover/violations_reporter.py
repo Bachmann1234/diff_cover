@@ -84,7 +84,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         Returns a list of nodes containing line information for `src_path`
         in `xml_document`.
 
-        If file is not present in `xml_documet`, return None
+        If file is not present in `xml_document`, return None
         """
 
         # Remove git_root from src_path for searching the correct filename
