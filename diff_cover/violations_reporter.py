@@ -74,9 +74,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Create a dict to cache violations dict results
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
-
-        # If no git root is provided supose we are running the tool
-        # from the git root
         self._git_path = git_path
 
     def _get_src_path_line_nodes(self, xml_document, src_path):
