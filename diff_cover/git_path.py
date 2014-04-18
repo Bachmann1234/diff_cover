@@ -2,7 +2,7 @@
 Converter for `git diff` paths
 """
 import os
-from subprocess import PIPE, Popen
+import subprocess
 
 class GitPathTool(object):
     """
@@ -43,7 +43,9 @@ class GitPathTool(object):
         """
         command = ['git', 'rev-parse', '--show-toplevel']
 
-        process = Popen(command, stdout=PIPE, stderr=PIPE)
+        process = subprocess.Popen(command,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
 
         return stdout.strip()

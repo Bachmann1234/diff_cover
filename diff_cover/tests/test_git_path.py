@@ -8,10 +8,8 @@ class TestGitPathTool(unittest.TestCase):
     def setUp(self):
         # Create mock subprocess to simulate `git rev-parse`
         self.process = mock.Mock()
-
-        self.popen = mock.patch('diff_cover.git_path.Popen').start()
-        self.pipe = mock.patch('diff_cover.git_path.PIPE').start()
-        self.popen.return_value = self.process
+        self.subprocess = mock.patch('diff_cover.git_path.subprocess').start()
+        self.subprocess.Popen.return_value = self.process
 
     def tearDown(self):
         mock.patch.stopall()
@@ -23,8 +21,8 @@ class TestGitPathTool(unittest.TestCase):
 
         # Expect that the correct command was executed
         expected = ['git', 'rev-parse', '--show-toplevel']
-        self.popen.assert_called_with(
-            expected, stdout=self.pipe, stderr=self.pipe
+        self.subprocess.Popen.assert_called_with(
+            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
 
     def test_relative_path(self):
