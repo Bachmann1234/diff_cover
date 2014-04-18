@@ -42,7 +42,6 @@ class GitPathTool(object):
         is the absolute path for the git project root.
         """
         command = ['git', 'rev-parse', '--show-toplevel']
-
         process = subprocess.Popen(command,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
