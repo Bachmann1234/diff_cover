@@ -2,37 +2,19 @@
 Converter for `git diff` paths
 """
 import os
-import subprocess
+from subprocess import PIPE, Popen
 
 class GitPathTool(object):
     """
     Converts `git diff` paths to absolute paths or relative paths to cwd.
     """
 
-    def __init__(self, cwd, subprocess_mod=subprocess):
+    def __init__(self, cwd):
         """
-        Initialize the wrapper to use `subprocess_mod` to
-        execute subprocesses.
-
         Initialize the absolute path to the git project
         """
         self._cwd = cwd
-        self._subprocess = subprocess_mod
         self._root = self._git_root()
-
-    def _git_root(self):
-        """
-        Returns the output of `git rev-parse --show-toplevel`, which
-        is the absolute path for the git project root.
-        """
-        command = ['git', 'rev-parse', '--show-toplevel']
-
-        process = self._subprocess.Popen(command,
-                                         stdout=self._subprocess.PIPE,
-                                         stderr=self._subprocess.PIPE)
-        stdout, stderr = process.communicate()
-
-        return stdout.strip()
 
     def relative_path(self, git_diff_path):
         """
@@ -53,4 +35,16 @@ class GitPathTool(object):
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
         return os.path.join(self._root, src_path)
+
+    def _git_root(self):
+        """
+        Returns the output of `git rev-parse --show-toplevel`, which
+        is the absolute path for the git project root.
+        """
+        command = ['git', 'rev-parse', '--show-toplevel']
+
+        process = Popen(command, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate()
+
+        return stdout.strip()
 

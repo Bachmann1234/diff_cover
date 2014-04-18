@@ -6,23 +6,25 @@ from diff_cover.tests.helpers import unittest
 class TestGitPathTool(unittest.TestCase):
 
     def setUp(self):
-        # Create mock subprocess to simulate `git diff`
-        self.subprocess = mock.Mock()
+        # Create mock subprocess to simulate `git rev-parse`
         self.process = mock.Mock()
-        self.subprocess.Popen = mock.Mock(return_value=self.process)
-        self.process.communicate = mock.Mock()
+
+        self.popen = mock.patch('diff_cover.git_path.Popen').start()
+        self.pipe = mock.patch('diff_cover.git_path.PIPE').start()
+        self.popen.return_value = self.process
+
+    def tearDown(self):
+        mock.patch.stopall()
 
     def test_project_root_command(self):
         self._set_git_root('/phony/path')
 
-        GitPathTool('/phony/path', subprocess_mod=self.subprocess)
+        GitPathTool('/phony/path')
 
         # Expect that the correct command was executed
         expected = ['git', 'rev-parse', '--show-toplevel']
-        self.subprocess.Popen.assert_called_with(
-            expected,
-            stdout=self.subprocess.PIPE,
-            stderr=self.subprocess.PIPE
+        self.popen.assert_called_with(
+            expected, stdout=self.pipe, stderr=self.pipe
         )
 
     def test_relative_path(self):
@@ -30,7 +32,7 @@ class TestGitPathTool(unittest.TestCase):
         expected = 'violations_reporter.py'
         cwd = '/home/user/work/diff-cover/diff_cover'
 
-        tool = GitPathTool(cwd, subprocess_mod=self.subprocess)
+        tool = GitPathTool(cwd)
         path = tool.relative_path('diff_cover/violations_reporter.py')
 
         # Expect relative path from diff_cover
@@ -41,7 +43,7 @@ class TestGitPathTool(unittest.TestCase):
         expected = '/home/user/work/diff-cover/other_package/file.py'
         cwd = '/home/user/work/diff-cover/diff_cover'
 
-        tool = GitPathTool(cwd, subprocess_mod=self.subprocess)
+        tool = GitPathTool(cwd)
         path = tool.absolute_path('other_package/file.py')
 
         # Expect absolute path to file.py
