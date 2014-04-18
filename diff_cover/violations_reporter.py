@@ -4,7 +4,6 @@ Classes for querying the information in a test coverage report.
 
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple, defaultdict
-import os
 import re
 import subprocess
 import sys
