@@ -3,6 +3,7 @@ Classes for generating diff coverage reports.
 """
 
 from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
 from jinja2 import Environment, PackageLoader
 from lazy import lazy
 from diff_cover.snippets import Snippet
@@ -232,8 +233,8 @@ class TemplateReportGenerator(BaseReportGenerator):
         """
 
         # Calculate the information to pass to the template
-        src_stats = dict(
-            (src, self._src_path_stats(src)) for src in self.src_paths()
+        src_stats = OrderedDict(
+            (src, self._src_path_stats(src)) for src in sorted(self.src_paths())
         )
 
         # Include snippet style info if we're displaying
