@@ -2,10 +2,12 @@
 Implement the command-line tool interface.
 """
 import argparse
+import os
 import sys
 import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
+from diff_cover.git_path import GitPathTool
 from diff_cover.violations_reporter import (
     XmlCoverageReporter, Pep8QualityReporter, PylintQualityReporter
 )
@@ -126,7 +128,8 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool())
 
     xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
-    coverage = XmlCoverageReporter(xml_roots)
+    git_path = GitPathTool(os.getcwd())
+    coverage = XmlCoverageReporter(xml_roots, git_path)
 
     # Build a report generator
     if html_report is not None:

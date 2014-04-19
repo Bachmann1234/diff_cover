@@ -23,14 +23,18 @@ class ToolsIntegrationBase(unittest.TestCase):
 
     def setUp(self):
         """
-        Patch the output of `git diff` and set the cwd to the fixtures dir
+        Patch the output of `git` commands and `os.getcwd`
+        set the cwd to the fixtures dir
         """
-        self._mock_popen = patch('subprocess.Popen').start()
-        self._mock_sys = patch('diff_cover.tool.sys').start()
-
         # Set the CWD to the fixtures dir
         self._old_cwd = os.getcwd()
         os.chdir(fixture_path(''))
+
+        self._mock_popen = patch('subprocess.Popen').start()
+        self._mock_sys = patch('diff_cover.tool.sys').start()
+        self._mock_getcwd = patch('diff_cover.tool.os.getcwd').start()
+        self._git_root_path = '/project/path'
+        self._mock_getcwd.return_value = self._git_root_path
 
     def tearDown(self):
         """
@@ -129,11 +133,17 @@ class ToolsIntegrationBase(unittest.TestCase):
         """
         Patch the call to `git diff` to output `stdout`
         and `stderr`.
+        Patch the `git rev-parse` command to output
+        a phony directory.
         """
         def patch_diff(command, **kwargs):
-            if command[0] == 'git':
+            if command[0:2] == ['git', 'diff']:
                 mock = Mock()
                 mock.communicate.return_value = (stdout, stderr)
+                return mock
+            elif command[0:2] == ['git', 'rev-parse']:
+                mock = Mock()
+                mock.communicate.return_value = (self._git_root_path, '')
                 return mock
             else:
                 process = Popen(command, **kwargs)
