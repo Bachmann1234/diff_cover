@@ -30,7 +30,7 @@
                 <th>Diff Coverage (%)</th>
                 <th>Missing Line(s)</th>
             </tr>
-            {% for src_path, stats in src_stats.iteritems() %}
+            {% for src_path, stats in src_stats|dictsort %}
             {% if stats.percent_covered < 100 %}
             <tr>
                 <td>{{ src_path }}</td>
@@ -49,7 +49,7 @@
         {% else %}
         <p>No lines with coverage information in this diff.</p>
         {% endif %}
-        {% for src_path, stats in src_stats.iteritems() %}
+        {% for src_path, stats in src_stats|dictsort %}
         {% if stats.snippets_html %}
         <div class="src-snippet">
             <div class="src-name">{{ src_path }}</div>
