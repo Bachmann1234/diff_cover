@@ -68,7 +68,7 @@ disable=
 output-format=text
 
 # Include message's id in output
-include-ids=yes
+msg-template={msg_id}:{line:3d},{column}: {obj}: {msg}
 
 # Put messages in a separate file for each module / package specified on the
 # command line instead of printing them on stdout. Reports (if any) will be

@@ -346,7 +346,7 @@ class PylintQualityReporter(BaseQualityReporter):
     Report Pylint violations.
     """
     COMMAND = 'pylint'
-    OPTIONS = ['-f', 'parseable', '--reports=no', '--include-ids=y']
+    OPTIONS = ['--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
 
     EXTENSIONS = ['py']
 

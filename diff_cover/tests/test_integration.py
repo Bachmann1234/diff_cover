@@ -281,7 +281,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
     def test_added_file_pylint_console(self):
         self._check_console_report(
             'git_diff_violations.txt',
-            'pylint_violations_report.txt',
+            'pylint_violations_console_report.txt',
             ['diff-quality', '--violations=pylint'],
         )
 

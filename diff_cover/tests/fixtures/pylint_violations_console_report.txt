@@ -1,0 +1,14 @@
+-------------
+Diff Quality
+Quality Report: pylint
+Diff: origin/master...HEAD, staged, and unstaged changes
+-------------
+violations_test_file.py (75.0%):
+    1: C0111: (missing-docstring), : Missing module docstring
+    1: C0111: (missing-docstring), func_1: Missing function docstring
+    2: C0326: (bad-whitespace), : Exactly one space required around comparison
+-------------
+Total:   8 line(s)
+Violations: 2 line(s)
+% Quality: 75%
+-------------
