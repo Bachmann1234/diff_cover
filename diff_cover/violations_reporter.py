@@ -346,14 +346,26 @@ class PylintQualityReporter(BaseQualityReporter):
     Report Pylint violations.
     """
     COMMAND = 'pylint'
-    OPTIONS = ['--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
-
+    MODERN_OPTIONS = ['--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
+    LEGACY_OPTIONS = ['-f', 'parseable', '--reports=no', '--include-ids=y']
+    OPTIONS = MODERN_OPTIONS
     EXTENSIONS = ['py']
 
     # Match lines of the form:
     # path/to/file.py:123: [C0111] Missing docstring
     # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
     VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
+
+    def _run_command(self, src_path):
+        try:
+            return super(PylintQualityReporter, self)._run_command(src_path)
+        except QualityReporterError as report_error:
+            # Support earlier pylint version (< 1)
+            if "no such option: --msg-template" in report_error.message:
+                self.OPTIONS = self.LEGACY_OPTIONS
+                return super(PylintQualityReporter, self)._run_command(src_path)
+            else:
+                raise
 
     def _parse_output(self, output, src_path=None):
         """
