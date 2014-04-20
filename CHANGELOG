@@ -1,6 +1,9 @@
 
+4/19/2014 v0.3.0
 
+    * Fix relative paths
     * Specify compare branch in a command line arg
+    * If we get an OSError on calling subprocess, display the failing command
 
 12/24/2013 v0.2.9
 
