@@ -501,6 +501,43 @@ class PylintQualityReporterTest(unittest.TestCase):
         # Expect an error
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
+    def test_legacy_pylint_compatibility(self):
+        quality = PylintQualityReporter('pylint', [])
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        expected_options = [quality.MODERN_OPTIONS, quality.LEGACY_OPTIONS]
+
+        def side_effect():
+            """
+            Assure that the first time we use the modern options, return a failure
+            Then assert the legacy options were set, return ok
+            """
+            index = _mock_communicate.call_count-1
+            self.assertEqual(quality.OPTIONS, expected_options[index])
+
+            return [("", dedent("""
+            No config file found, using default configuration
+            Usage:  pylint [options] module_or_package
+
+              Check that a module satisfies a coding standard (and more !).
+
+                pylint --help
+
+              Display this help message and exit.
+
+                pylint --help-msg <msg-id>[,<msg-id>]
+
+              Display help messages about given message identifiers and exit.
+
+
+            pylint: error: no such option: --msg-template
+        """)), ('\n', '')][index]
+
+        _mock_communicate.side_effect = side_effect
+        quality.violations('file1.py')
+        self.assertEqual([], quality.violations('file1.py'))
+        self.assertEqual(quality.OPTIONS, quality.LEGACY_OPTIONS)
+        self.assertEqual(_mock_communicate.call_count, 2)
+
     def test_no_quality_issues_newline(self):
 
         # Patch the output of `pylint`
