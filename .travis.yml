@@ -1,11 +1,16 @@
 language: python
-python:
-  - "2.7"
-before_install:
-  - git fetch origin master:refs/remotes/origin/master
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py34
+matrix:
+  allow_failures:
+    - env: TOXENV=py34  # No support on Travis CI at this time; remove later
+  fast_finish: true
 install:
-  - "pip install coveralls tox"
-script: 
-  - tox
+  - travis_retry pip install coveralls tox==1.6.1
+script:
+  - travis_retry tox
 after_success:
   - coveralls
