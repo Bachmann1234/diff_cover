@@ -133,14 +133,22 @@ efficient than letting ``diff-quality`` re-run ``pylint`` or ``pep8``.
 
 .. code:: bash
 
+    # For pylint < 1.0
     pylint -f parseable > pylint_report.txt
+
+    # For pylint >= 1.0
+    pylint --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > pylint_report.txt
+
+    # Use the generated pylint report when running diff-quality
     diff-quality --violations=pylint pylint_report.txt
 
+    # Use a generated pep8 report when running diff-quality.
     pep8 > pep8_report.txt
     diff-quality --violations=pep8 pep8_report.txt
 
 Note that you must use the ``-f parseable`` option to generate
-the ``pylint`` report.
+the ``pylint`` report for pylint versions less than 1.0 and the
+``--msg-template`` option for versions >= 1.0.
 
 ``diff-quality`` will also accept multiple ``pylint`` or ``pep8`` reports:
 
