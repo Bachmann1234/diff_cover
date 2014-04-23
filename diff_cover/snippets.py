@@ -133,7 +133,7 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with open(cls.PATH_TOOL.absolute_path(src_path)) as src_file:
+        with open(cls.PATH_TOOL.relative_path(src_path)) as src_file:
             contents = src_file.read()
 
         # Construct a list of snippet ranges
