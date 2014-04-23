@@ -3,11 +3,13 @@ Load snippets from source files to show violation lines
 in HTML reports.
 """
 
+import os
 import pygments
 from pygments.lexers import TextLexer, guess_lexer_for_filename
 from pygments.formatters import HtmlFormatter
 from pygments.util import ClassNotFound
 
+from diff_cover.git_path import GitPathTool
 
 class Snippet(object):
     """
@@ -25,6 +27,8 @@ class Snippet(object):
     # a snippet.  If violations are further apart,
     # should split into two snippets.
     MAX_GAP_IN_SNIPPET = 4
+
+    PATH_TOOL = GitPathTool(os.getcwd())
 
     def __init__(self, src_tokens, src_filename,
                  start_line, violation_lines):
@@ -129,7 +133,7 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with open(src_path) as src_file:
+        with open(cls.PATH_TOOL.absolute_path(src_path)) as src_file:
             contents = src_file.read()
 
         # Construct a list of snippet ranges
