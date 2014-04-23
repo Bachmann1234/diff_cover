@@ -1,4 +1,4 @@
-from textwrap import dedent
+import mock
 import os
 import tempfile
 from pygments.token import Token
@@ -114,11 +114,17 @@ class SnippetLoaderTest(unittest.TestCase):
         """
         _, self._src_path = tempfile.mkstemp()
 
+        # Path tool should not be aware of testing command
+        path_mock = mock.patch('diff_cover.snippets.Snippet.PATH_TOOL').start()
+        path_mock.absolute_path = lambda path: path
+        path_mock.relative_path = lambda path: path
+
     def tearDown(self):
         """
         Delete the temporary source file.
         """
         os.remove(self._src_path)
+        mock.patch.stopall()
 
     def test_one_snippet(self):
         self._init_src_file(10)
