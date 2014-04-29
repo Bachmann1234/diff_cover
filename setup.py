@@ -5,7 +5,6 @@ from diff_cover import VERSION, DESCRIPTION
 
 REQUIREMENTS = [line.strip() for line in
                 open("requirements.txt").readlines()]
-
 setup(
     name='diff_cover',
     version=VERSION,
@@ -19,6 +18,7 @@ setup(
                  'License :: OSI Approved :: GNU Affero General Public License v3',
                  'Operating System :: OS Independent',
                  'Programming Language :: Python',
+                 "Programming Language :: Python :: 3",
                  'Topic :: Software Development :: Testing',
                  'Topic :: Software Development :: Quality Assurance'],
     packages=['diff_cover'],

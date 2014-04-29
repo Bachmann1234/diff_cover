@@ -1,8 +1,11 @@
 """
 Converter for `git diff` paths
 """
+from __future__ import unicode_literals
 import os
+import six
 import subprocess
+
 
 class GitPathTool(object):
     """
@@ -25,7 +28,12 @@ class GitPathTool(object):
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
         root_rel_path = os.path.relpath(self._cwd, self._root)
-        return os.path.relpath(git_diff_path, root_rel_path)
+        if isinstance(root_rel_path, six.binary_type):
+            root_rel_path = root_rel_path.decode()
+        rel_path = os.path.relpath(git_diff_path, root_rel_path)
+        if isinstance(rel_path, six.binary_type):
+            rel_path = rel_path.decode()
+        return rel_path
 
     def absolute_path(self, src_path):
         """

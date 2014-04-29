@@ -1,11 +1,12 @@
 """
 Classes for generating diff coverage reports.
 """
-
+from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from jinja2 import Environment, PackageLoader
 from lazy import lazy
 from diff_cover.snippets import Snippet
+import six
 
 
 class DiffViolations(object):
@@ -180,6 +181,7 @@ TEMPLATE_LOADER = PackageLoader(__package__)
 TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER,
                            trim_blocks=True,
                            lstrip_blocks=True)
+TEMPLATE_ENV.filters['iteritems'] = six.iteritems
 
 
 class TemplateReportGenerator(BaseReportGenerator):
@@ -208,9 +210,7 @@ class TemplateReportGenerator(BaseReportGenerator):
             # Render the template
             report = template.render(self._context())
 
-            # Write the report to the output file
-            # (encode to a byte string)
-            output_file.write(report.encode('utf-8'))
+            output_file.write(report)
 
     def _context(self):
         """

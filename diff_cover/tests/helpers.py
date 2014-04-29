@@ -1,9 +1,11 @@
 """
 Test helper functions.
 """
+from __future__ import unicode_literals
 import random
 import os.path
 import difflib
+import io
 from nose.tools import ok_
 import sys
 
@@ -56,11 +58,8 @@ def load_fixture(rel_path, encoding=None):
     If `encoding` is not None, attempts to decode
     the contents as `encoding` (e.g. 'utf-8').
     """
-    with open(fixture_path(rel_path)) as fixture_file:
+    with io.open(fixture_path(rel_path), encoding=encoding) as fixture_file:
         contents = fixture_file.read()
-
-    if encoding is not None:
-        contents = contents.decode(encoding)
 
     return contents
 

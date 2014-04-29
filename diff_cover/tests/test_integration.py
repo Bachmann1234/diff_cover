@@ -1,12 +1,12 @@
 """
 High-level integration tests of diff-cover tool.
 """
-
+from __future__ import unicode_literals
 from mock import patch, Mock
 import os
 import os.path
 from subprocess import Popen
-from StringIO import StringIO
+from six import StringIO
 import tempfile
 import shutil
 from diff_cover.tool import main
