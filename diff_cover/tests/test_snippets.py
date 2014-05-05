@@ -1,5 +1,5 @@
-import mock
 from __future__ import unicode_literals
+import mock
 import os
 import tempfile
 from pygments.token import Token
