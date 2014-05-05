@@ -12,8 +12,8 @@ from pygments.util import ClassNotFound
 import six
 import fnmatch
 
-
 from diff_cover.git_path import GitPathTool
+
 def guess_lexer_for_filename(_fn, _text, **options):
     """
     Ripped from the tip of pygments
