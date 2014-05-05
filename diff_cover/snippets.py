@@ -2,14 +2,56 @@
 Load snippets from source files to show violation lines
 in HTML reports.
 """
-
 import os
+from __future__ import unicode_literals
+from os.path import basename
 import pygments
-from pygments.lexers import TextLexer, guess_lexer_for_filename
+from pygments.lexers import TextLexer, _iter_lexerclasses
 from pygments.formatters import HtmlFormatter
 from pygments.util import ClassNotFound
+import six
+import fnmatch
+
 
 from diff_cover.git_path import GitPathTool
+def guess_lexer_for_filename(_fn, _text, **options):
+    """
+    Ripped from the tip of pygments
+    It is a version of this that supports python 2 and 3.
+    The 1.6 version has a python3 bug this resolves
+    """
+    # todo - When pygments releases a new version this should be removed.
+    fn = basename(_fn)
+    primary = None
+    matching_lexers = set()
+    for lexer in _iter_lexerclasses():
+        for filename in lexer.filenames:
+            if fnmatch.fnmatch(fn, filename):
+                matching_lexers.add(lexer)
+                primary = lexer
+        for filename in lexer.alias_filenames:
+            if fnmatch.fnmatch(fn, filename):
+                matching_lexers.add(lexer)
+    if not matching_lexers:
+        raise ClassNotFound('no lexer for filename %r found' % fn)
+    if len(matching_lexers) == 1:
+        return matching_lexers.pop()(**options)
+    result = []
+    for lexer in matching_lexers:
+        rv = lexer.analyse_text(_text)
+        if rv == 1.0:
+            return lexer(**options)
+        result.append((rv, lexer))
+
+    # since py3 can no longer sort by class name by default, here is the
+    # sorting function that works in both
+    def type_sort(type_):
+        return (type_[0], type_[1].__name__)
+    result.sort(key=type_sort)
+
+    if not result[-1][0] and primary is not None:
+        return primary(**options)
+    return result[-1][1](**options)
 
 class Snippet(object):
     """
@@ -148,7 +190,7 @@ class Snippet(object):
 
         return [
             Snippet(tokens, src_path, start, violation_lines)
-            for (start, _), tokens in token_groups.iteritems()
+            for (start, _), tokens in six.iteritems(token_groups)
         ]
 
     @classmethod
@@ -214,7 +256,7 @@ class Snippet(object):
                 val_lines = val.split('\n')
 
                 # Check if the tokens match each range
-                for (start, end), filtered_tokens in token_map.iteritems():
+                for (start, end), filtered_tokens in six.iteritems(token_map):
 
                     # Filter out lines that are not in this range
                     include_vals = [
@@ -236,7 +278,7 @@ class Snippet(object):
             # If we're in the line range, add it
             else:
                 # Check if the tokens match each range
-                for (start, end), filtered_tokens in token_map.iteritems():
+                for (start, end), filtered_tokens in six.iteritems(token_map):
 
                     # If we got a match, store the token
                     if line_num in range(start, end + 1):

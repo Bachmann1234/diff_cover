@@ -1,6 +1,7 @@
 """
 Implement the command-line tool interface.
 """
+from __future__ import unicode_literals
 import argparse
 import os
 import sys
@@ -185,7 +186,7 @@ def main():
 
             for path in arg_dict['input_reports']:
                 try:
-                    input_reports.append(open(path))
+                    input_reports.append(open(path, 'rb'))
                 except IOError:
                     LOGGER.warning("Could not load '{0}'".format(path))
 

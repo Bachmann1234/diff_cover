@@ -1,7 +1,8 @@
+from __future__ import unicode_literals
 from mock import Mock, patch
 from subprocess import Popen
 from textwrap import dedent
-from StringIO import StringIO
+from six import BytesIO, StringIO
 from lxml import etree
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PylintQualityReporter, QualityReporterError
@@ -253,13 +254,13 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (
-            '\n' + dedent("""
+        return_string = '\n' + dedent("""
                 ../new_file.py:1:17: E231 whitespace
                 ../new_file.py:3:13: E225 whitespace
                 ../new_file.py:7:1: E302 blank lines
-            """).strip() + '\n', ''
-        )
+            """).strip() + '\n'
+        _mock_communicate.return_value = (
+            (return_string.encode('utf-8'), b''))
 
         # Parse the report
         quality = Pep8QualityReporter('pep8', [])
@@ -284,7 +285,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ('\n', '')
+        _mock_communicate.return_value = (b'\n', b'')
 
         # Parse the report
         quality = Pep8QualityReporter('pep8', [])
@@ -294,7 +295,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ('', '')
+        _mock_communicate.return_value = (b'', b'')
 
         # Parse the report
         quality = Pep8QualityReporter('pep8', [])
@@ -304,7 +305,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ("", 'whoops')
+        _mock_communicate.return_value = (b"", b'whoops')
 
         # Parse the report
         quality = Pep8QualityReporter('pep8', [])
@@ -334,16 +335,16 @@ class Pep8QualityReporterTest(unittest.TestCase):
         # When the user provides us with a pre-generated pep8 report
         # then use that instead of calling pep8 directly.
         pep8_reports = [
-            StringIO('\n' + dedent("""
+            BytesIO(('\n' + dedent("""
                 path/to/file.py:1:17: E231 whitespace
                 path/to/file.py:3:13: E225 whitespace
                 another/file.py:7:1: E302 blank lines
-            """.encode('utf-8')).strip() + '\n'),
+            """).strip() + '\n').encode('utf-8')),
 
-            StringIO('\n' + dedent(u"""
+            BytesIO(('\n' + dedent(u"""
                 path/to/file.py:24:2: W123 \u9134\u1912
                 another/file.py:50:1: E302 blank lines
-            """.encode('utf-8')).strip() + '\n'),
+            """).strip() + '\n').encode('utf-8')),
         ]
 
         # Parse the report
@@ -414,7 +415,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             import logging
             import random
             path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
-            """).strip(), ''
+            """).strip().encode('ascii'), ''
         )
 
         expected_violations = [
@@ -454,7 +455,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (dedent(u"""
             file_\u6729.py:616: [W1401] Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix.
             file.py:2: [W0612, cls_name.func_\u9492] Unused variable '\u2920'
-        """).encode('utf-8'), '')
+        """).encode('utf-8'), b'')
 
         quality = PylintQualityReporter('pylint', [])
         violations = quality.violations(u'file_\u6729.py')
@@ -469,7 +470,8 @@ class PylintQualityReporterTest(unittest.TestCase):
         _mock_communicate = patch.object(Popen, 'communicate').start()
 
         # Test a unicode continuation char, which pylint can produce (probably an encoding bug in pylint)
-        _mock_communicate.return_value = ("file.py:2: [W1401] Invalid char '\xc3'", '')
+        _mock_communicate.return_value = (b"file.py:2: [W1401]"
+                                          b" Invalid char '\xc3'", '')
 
         # Since we are replacing characters we can't interpet, this should
         # return a valid string with the char replaced with '?'
@@ -493,7 +495,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         # Patch the output of `pylint`
         # to output to stderr
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ("", 'whoops')
+        _mock_communicate.return_value = (b"", b'whoops')
 
         # Parse the report
         quality = PylintQualityReporter('pylint', [])
@@ -514,7 +516,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             index = _mock_communicate.call_count-1
             self.assertEqual(quality.OPTIONS, expected_options[index])
 
-            return [("", dedent("""
+            return [(b"", dedent("""
             No config file found, using default configuration
             Usage:  pylint [options] module_or_package
 
@@ -530,7 +532,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
 
             pylint: error: no such option: --msg-template
-        """)), ('\n', '')][index]
+        """).encode('utf-8')), (b'\n', b'')][index]
 
         _mock_communicate.side_effect = side_effect
         quality.violations('file1.py')
@@ -542,7 +544,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ('\n', '')
+        _mock_communicate.return_value = (b'\n', b'')
 
         # Parse the report
         quality = PylintQualityReporter('pylint', [])
@@ -552,7 +554,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pylint`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = ('', '')
+        _mock_communicate.return_value = (b'', b'')
 
         # Parse the report
         quality = PylintQualityReporter('pylint', [])
@@ -563,7 +565,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         # When the user provides us with a pre-generated pylint report
         # then use that instead of calling pylint directly.
         pylint_reports = [
-            StringIO(dedent(u"""
+            BytesIO(dedent(u"""
                 path/to/file.py:1: [C0111] Missing docstring
                 path/to/file.py:57: [W0511] TODO the name of this method is a little bit confusing
                 another/file.py:41: [W1201, assign_default_role] Specify string format arguments as logging function parameters
@@ -572,12 +574,12 @@ class PylintQualityReporterTest(unittest.TestCase):
                           ^
                         Unicode: \u9404 \u1239
                 another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
-            """.encode('utf-8')).strip()),
+            """).strip().encode('utf-8')),
 
-            StringIO(dedent(u"""
+            BytesIO(dedent(u"""
             path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
             another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
-            """.encode('utf-8')).strip())
+            """).strip().encode('utf-8'))
         ]
 
         # Generate the violation report
@@ -600,7 +602,7 @@ class PylintQualityReporterTest(unittest.TestCase):
     def test_quality_pregenerated_report_continuation_char(self):
 
         # The report contains a non-ASCII continuation char
-        pylint_reports = [StringIO("file.py:2: [W1401] Invalid char '\xc3'")]
+        pylint_reports = [BytesIO(b"file.py:2: [W1401] Invalid char '\xc3'")]
 
         # Generate the violation report
         quality = PylintQualityReporter('pylint', pylint_reports)
