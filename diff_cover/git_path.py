@@ -16,6 +16,8 @@ class GitPathTool(object):
         """
         Initialize the absolute path to the git project
         """
+        if isinstance(cwd, six.binary_type):
+            cwd = cwd.decode()
         self._cwd = cwd
         self._root = self._git_root()
 
