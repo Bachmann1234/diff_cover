@@ -3,7 +3,6 @@ Load snippets from source files to show violation lines
 in HTML reports.
 """
 from __future__ import unicode_literals
-import os
 from os.path import basename
 import pygments
 from pygments.lexers import TextLexer, _iter_lexerclasses
@@ -179,10 +178,6 @@ class Snippet(object):
 
         Raises an `IOError` if the file could not be loaded.
         """
-        print(src_path)
-        print(os.getcwd())
-        print(cls.PATH_TOOL._root)
-        print(cls.PATH_TOOL.relative_path(src_path))
         # Load the contents of the file
         with open(cls.PATH_TOOL.relative_path(src_path)) as src_file:
             print(cls.PATH_TOOL.relative_path(src_path))
