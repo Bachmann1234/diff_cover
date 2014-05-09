@@ -83,7 +83,6 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         If file is not present in `xml_document`, return None
         """
-
         # Remove git_root from src_path for searching the correct filename
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
@@ -109,6 +108,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         if xpath is None:
             return None
 
+        print(xpath)
         return xml_document.findall(xpath)
 
     def _cache_file(self, src_path):

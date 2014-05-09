@@ -9,6 +9,7 @@ import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
+from diff_cover.snippets import Snippet
 from diff_cover.violations_reporter import (
     XmlCoverageReporter, Pep8QualityReporter, PylintQualityReporter
 )
@@ -130,6 +131,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
 
     xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
     git_path = GitPathTool(os.getcwd())
+    Snippet.init_path_tool(git_path)
     coverage = XmlCoverageReporter(xml_roots, git_path)
 
     # Build a report generator

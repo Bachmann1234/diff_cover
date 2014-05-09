@@ -31,6 +31,7 @@ class GitPathTool(object):
         root_rel_path = self._decode(root_rel_path)
         rel_path = os.path.relpath(git_diff_path, root_rel_path)
         rel_path = self._decode(rel_path)
+
         return rel_path
 
     def absolute_path(self, src_path):
