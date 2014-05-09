@@ -9,6 +9,7 @@ import subprocess
 import sys
 import six
 
+from diff_cover.git_path import GitPathTool
 
 Violation = namedtuple('Violation', 'line, message')
 
@@ -63,7 +64,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_roots, git_path):
+    def __init__(self, xml_roots):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
@@ -74,7 +75,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Create a dict to cache violations dict results
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
-        self._git_path = git_path
+        self._git_path = GitPathTool()
 
     def _get_src_path_line_nodes(self, xml_document, src_path):
         """

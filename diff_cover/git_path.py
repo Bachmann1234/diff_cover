@@ -10,12 +10,27 @@ import subprocess
 class GitPathTool(object):
     """
     Converts `git diff` paths to absolute paths or relative paths to cwd.
+    This class is a singleton because the same path will be used accross
+    the project
     """
+    _instance = None
 
-    def __init__(self, cwd):
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            if len(args) != 1:
+                raise TypeError(("First call to GitPathTool() must be done"
+                                 " with the `cwd` argument"))
+            cls._instance = super(GitPathTool, cls).__new__(cls)
+            cls._instance.__init__(*args, **kwargs)
+        return cls._instance
+
+    def __init__(self, cwd=None):
         """
         Initialize the absolute path to the git project
         """
+        if cwd is None:
+            return
+
         self._cwd = self._decode(cwd)
         self._root = self._decode(self._git_root())
 

@@ -13,7 +13,24 @@ class TestGitPathTool(unittest.TestCase):
         self.subprocess.Popen.return_value = self.process
 
     def tearDown(self):
+        # Reset the tool
+        GitPathTool._instance = None
         mock.patch.stopall()
+
+    def test_first_call_without_arg(self):
+        self._set_git_root('/phony/path')
+        try:
+            GitPathTool()
+        except TypeError:
+            self.assertRaises(TypeError, GitPathTool)
+
+    def test_git_path_is_singleton(self):
+        self._set_git_root('/phony/path')
+
+        GitPathTool('/some/path')
+        tool = GitPathTool()
+        self.assertEqual(tool._cwd, '/some/path')
+
 
     def test_project_root_command(self):
         self._set_git_root('/phony/path')

@@ -11,6 +11,8 @@ from pygments.util import ClassNotFound
 import six
 import fnmatch
 
+from diff_cover.git_path import GitPathTool
+
 def guess_lexer_for_filename(_fn, _text, **options):
     """
     Ripped from the tip of pygments
@@ -67,8 +69,6 @@ class Snippet(object):
     # should split into two snippets.
     MAX_GAP_IN_SNIPPET = 4
 
-    PATH_TOOL = None
-
     def __init__(self, src_tokens, src_filename,
                  start_line, violation_lines):
         """
@@ -97,13 +97,6 @@ class Snippet(object):
         self._src_filename = src_filename
         self._start_line = start_line
         self._violation_lines = violation_lines
-
-    @classmethod
-    def init_path_tool(cls, tool):
-        """
-        Initialize PATH_TOOL to the given tool
-        """
-        cls.PATH_TOOL = tool
 
     @classmethod
     def style_defs(cls):
@@ -179,8 +172,9 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with open(cls.PATH_TOOL.relative_path(src_path)) as src_file:
-            print(cls.PATH_TOOL.relative_path(src_path))
+        path_tool = GitPathTool()
+        with open(path_tool.relative_path(src_path)) as src_file:
+            print(path_tool.relative_path(src_path))
             contents = src_file.read()
 
         # Construct a list of snippet ranges
