@@ -174,7 +174,6 @@ class Snippet(object):
         # Load the contents of the file
         path_tool = GitPathTool()
         with open(path_tool.relative_path(src_path)) as src_file:
-            print(path_tool.relative_path(src_path))
             contents = src_file.read()
 
         # Construct a list of snippet ranges

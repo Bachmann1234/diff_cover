@@ -168,9 +168,6 @@ def main():
 
     # Init the path tool to work with the current directory
     GitPathTool(os.getcwd())
-    print(os.getcwd())
-    print(GitPathTool()._cwd)
-    print(GitPathTool._instance._cwd)
     if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(sys.argv[1:])
         generate_coverage_report(
