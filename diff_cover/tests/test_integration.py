@@ -228,8 +228,10 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         )
 
     def test_subdir_coverage_html(self):
-        """Assert that when diff-cover is ran from a subdirectory it
-        generates correct reports."""
+        """
+        Assert that when diff-cover is ran from a subdirectory it
+        generates correct reports.
+        """
         old_cwd = self._mock_getcwd.return_value
         self._mock_getcwd.return_value = os.path.join(old_cwd, 'sub')
         self._check_html_report(
