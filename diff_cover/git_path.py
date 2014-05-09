@@ -16,10 +16,8 @@ class GitPathTool(object):
         """
         Initialize the absolute path to the git project
         """
-        if isinstance(cwd, six.binary_type):
-            cwd = cwd.decode()
-        self._cwd = cwd
-        self._root = self._git_root()
+        self._cwd = self._decode(cwd)
+        self._root = self._decode(self._git_root())
 
     def relative_path(self, git_diff_path):
         """
@@ -30,11 +28,9 @@ class GitPathTool(object):
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
         root_rel_path = os.path.relpath(self._cwd, self._root)
-        if isinstance(root_rel_path, six.binary_type):
-            root_rel_path = root_rel_path.decode()
+        root_rel_path = self._decode(root_rel_path)
         rel_path = os.path.relpath(git_diff_path, root_rel_path)
-        if isinstance(rel_path, six.binary_type):
-            rel_path = rel_path.decode()
+        rel_path = self._decode(rel_path)
         return rel_path
 
     def absolute_path(self, src_path):
@@ -44,6 +40,7 @@ class GitPathTool(object):
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
+
         return os.path.join(self._root, src_path)
 
     def _git_root(self):
@@ -58,4 +55,10 @@ class GitPathTool(object):
         stdout, stderr = process.communicate()
 
         return stdout.strip()
+
+    @classmethod
+    def _decode(cls, string):
+        if isinstance(string, six.binary_type):
+            return string.decode()
+        return string
 
