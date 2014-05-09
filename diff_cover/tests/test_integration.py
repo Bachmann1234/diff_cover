@@ -241,6 +241,19 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         )
         self._mock_getcwd.return_value = old_cwd
 
+    def test_subdir_coverage_console(self):
+        """
+        Assert that when diff-cover is ran from a subdirectory it
+        generates correct reports.
+        """
+        old_cwd = self._mock_getcwd.return_value
+        self._mock_getcwd.return_value = os.path.join(old_cwd, 'sub')
+        self._check_console_report(
+            'git_diff_subdir.txt',
+            'subdir_coverage_console_report.txt',
+            ['diff-cover', 'coverage.xml']
+        )
+        self._mock_getcwd.return_value = old_cwd
 
     def test_git_diff_error(self):
 
