@@ -278,6 +278,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pep8']
         )
 
+    def test_added_file_pep8_console_exclude_file(self):
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'empty_pep8_violations.txt',
+            ['diff-quality', '--violations=pep8', '--options="--exclude=violations_test_file.py"']
+        )
+
     def test_added_file_pylint_console(self):
         self._check_console_report(
             'git_diff_violations.txt',

@@ -199,7 +199,7 @@ class BaseQualityReporter(BaseViolationReporter):
     # A list of filetypes to run on.
     EXTENSIONS = []
 
-    def __init__(self, name, input_reports):
+    def __init__(self, name, input_reports, user_options=""):
         """
         Create a new quality reporter.
 
@@ -217,6 +217,7 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         super(BaseQualityReporter, self).__init__(name)
         self._info_cache = defaultdict(list)
+        self.user_options = user_options
 
         # If we've been given input report files, use those
         # to get the source information
@@ -276,7 +277,8 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         # Encode the path using the filesystem encoding, determined at runtime
         encoding = sys.getfilesystemencoding()
-        command = [self.COMMAND] + self.OPTIONS + [src_path.encode(encoding)]
+        user_options = [self.user_options] if self.user_options else []
+        command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(encoding)]
 
         try:
             process = subprocess.Popen(
