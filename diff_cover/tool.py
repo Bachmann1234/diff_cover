@@ -124,7 +124,7 @@ def parse_quality_args(argv):
         '--options',
         type=str,
         nargs='?',
-        default='',
+        default=None,
         help=OPTIONS_HELP
     )
 
@@ -186,7 +186,9 @@ def main():
     elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(sys.argv[1:])
         tool = arg_dict['violations']
-        user_options = arg_dict.get('options')[1:-1]
+        user_options = arg_dict.get('options')
+        if user_options:
+            user_options = user_options[1:-1]  # Strip quotes
         reporter_class = QUALITY_REPORTERS.get(tool)
 
         if reporter_class is not None:

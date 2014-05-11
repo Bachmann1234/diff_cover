@@ -199,7 +199,7 @@ class BaseQualityReporter(BaseViolationReporter):
     # A list of filetypes to run on.
     EXTENSIONS = []
 
-    def __init__(self, name, input_reports, user_options=""):
+    def __init__(self, name, input_reports, user_options=None):
         """
         Create a new quality reporter.
 
@@ -214,6 +214,10 @@ class BaseQualityReporter(BaseViolationReporter):
         If these are provided, the reporter will
         use the pre-generated reports instead of invoking
         the tool directly.
+
+        'user_options' is a string of options passed in.
+        This string contains options that are passed forward
+        to the reporter being used
         """
         super(BaseQualityReporter, self).__init__(name)
         self._info_cache = defaultdict(list)
@@ -277,7 +281,7 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         # Encode the path using the filesystem encoding, determined at runtime
         encoding = sys.getfilesystemencoding()
-        user_options = [self.user_options] if self.user_options else []
+        user_options = [self.user_options] if self.user_options is not None else []
         command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(encoding)]
 
         try:
