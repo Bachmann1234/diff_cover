@@ -5,7 +5,7 @@ from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.violations_reporter import BaseViolationReporter, Violation
 from diff_cover.report_generator import BaseReportGenerator, \
-    HtmlReportGenerator, StringReportGenerator
+    HtmlReportGenerator, StringReportGenerator, TemplateReportGenerator
 from diff_cover.tests.helpers import load_fixture, \
     assert_long_str_equal, unittest
 
@@ -232,6 +232,21 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         self.assertEqual(self.report.total_percent_covered(), 66)
 
 
+class TemplateReportGeneratorTest(BaseReportGeneratorTest):
+    REPORT_GENERATOR_CLASS = TemplateReportGenerator
+
+    def test_combine_adjacent_lines_no_adjacent(self):
+        self.assertEqual(["1", "5", "7", "10"],
+                         TemplateReportGenerator.combine_adjacent_lines([1, 5, 7, 10]))
+
+    def test_combine_adjacent_lines(self):
+        in_out = [([1, 2, 3, 4, 5, 8, 10, 12, 13, 14, 15], ["1-5", "8", "10", "12-15"]),
+                  ([1, 4, 5, 6, 10], ["1", "4-6", "10"])]
+        for test_input, expected_output in in_out:
+            self.assertEqual(expected_output,
+                             TemplateReportGenerator.combine_adjacent_lines(test_input))
+
+
 class StringReportGeneratorTest(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = StringReportGenerator
@@ -247,8 +262,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Diff Coverage
         Diff: master
         -------------
-        file1.py (66.7%): Missing line(s) 10,11
-        subdir/file2.py (66.7%): Missing line(s) 10,11
+        file1.py (66.7%): Missing line(s) 10-11
+        subdir/file2.py (66.7%): Missing line(s) 10-11
         -------------
         Total:   12 line(s)
         Missing: 4 line(s)

@@ -253,6 +253,37 @@ class TemplateReportGenerator(BaseReportGenerator):
             'snippet_style': snippet_style
         }
 
+    @staticmethod
+    def combine_adjacent_lines(line_numbers):
+        """
+        Given a sorted collection of line numbers this will
+        turn them to strings and combine adjacent values
+
+        [1, 2, 5, 6, 100] -> ["1-2", "5-6", "100"]
+        """
+        combine_template = "{0}-{1}"
+        combined_set = []
+        start = None
+        end = None
+
+        def _add_to_combined_set():
+            if start:
+                if start == end:
+                    combined_set.append(str(start))
+                else:
+                    combined_set.append(combine_template.format(start, end))
+
+        for line_number in line_numbers:
+            if not start or line_number != end + 1:
+                _add_to_combined_set()
+                start = line_number
+                end = line_number
+            else:
+                end = line_number
+
+        _add_to_combined_set()
+        return combined_set
+
     def _src_path_stats(self, src_path):
         """
         Return a dict of statistics for the source file at `src_path`.
@@ -274,7 +305,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         return {
             'percent_covered': self.percent_covered(src_path),
-            'violation_lines': [str(line) for line in violation_lines],
+            'violation_lines': TemplateReportGenerator.combine_adjacent_lines(violation_lines),
             'violations': violations,
             'snippets_html': snippets
         }
