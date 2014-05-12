@@ -78,6 +78,17 @@ class ParseQualityArgsTest(unittest.TestCase):
             ['pylint_report_1.txt', 'pylint_report_2.txt']
         )
 
+    def test_parse_with_options(self):
+        argv = [
+            '--violations', 'pep8',
+            '--options="--exclude=\'*/migrations*\'"'
+        ]
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(
+            arg_dict.get('options'),
+            '"--exclude=\'*/migrations*\'"'
+        )
+
     def test_parse_invalid_arg(self):
         # No code quality test provided
         invalid_argv = [[], ['--html-report', 'diff_cover.html']]

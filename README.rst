@@ -156,6 +156,11 @@ the ``pylint`` report for pylint versions less than 1.0 and the
 
     diff-quality --violations=pylint report_1.txt report_2.txt
 
+If you need to pass in additional options you can with the ``options`` flag
+
+.. code:: bash
+
+    diff-quality --violations=pep8 --options="--exclude='*/migrations*' --statistics" pep8_report.txt
 
 Compare Branch
 --------------
