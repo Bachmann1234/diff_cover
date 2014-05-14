@@ -235,16 +235,27 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
 class TemplateReportGeneratorTest(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = TemplateReportGenerator
 
+    def _test_input_expected_output(self, input_with_expected_output):
+        for test_input, expected_output in input_with_expected_output:
+            self.assertEqual(expected_output,
+                             TemplateReportGenerator.combine_adjacent_lines(test_input))
+
     def test_combine_adjacent_lines_no_adjacent(self):
-        self.assertEqual(["1", "5", "7", "10"],
-                         TemplateReportGenerator.combine_adjacent_lines([1, 5, 7, 10]))
+        in_out = [([1, 3], ["1", "3"]),
+                  ([1, 5, 7, 10], ["1", "5", "7", "10"])]
+        self._test_input_expected_output(in_out)
 
     def test_combine_adjacent_lines(self):
         in_out = [([1, 2, 3, 4, 5, 8, 10, 12, 13, 14, 15], ["1-5", "8", "10", "12-15"]),
-                  ([1, 4, 5, 6, 10], ["1", "4-6", "10"])]
-        for test_input, expected_output in in_out:
-            self.assertEqual(expected_output,
-                             TemplateReportGenerator.combine_adjacent_lines(test_input))
+                  ([1, 4, 5, 6, 10], ["1", "4-6", "10"]),
+                  ([402, 403], ["402-403"])]
+        self._test_input_expected_output(in_out)
+
+    def test_empty_list(self):
+        self.assertEqual([], TemplateReportGenerator.combine_adjacent_lines([]))
+
+    def test_one_number(self):
+        self.assertEqual(["1"], TemplateReportGenerator.combine_adjacent_lines([1]))
 
 
 class StringReportGeneratorTest(BaseReportGeneratorTest):
