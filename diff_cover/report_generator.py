@@ -262,27 +262,25 @@ class TemplateReportGenerator(BaseReportGenerator):
         [1, 2, 5, 6, 100] -> ["1-2", "5-6", "100"]
         """
         combine_template = "{0}-{1}"
-        combined_set = []
-        start = None
+        combined_list = []
+
+        # Add a terminating value of `None` to list
+        line_numbers.append(None)
+        start = line_numbers[0]
         end = None
 
-        def _add_to_combined_set():
-            if start:
-                if start == end:
-                    combined_set.append(str(start))
-                else:
-                    combined_set.append(combine_template.format(start, end))
-
-        for line_number in line_numbers:
-            if not start or line_number != end + 1:
-                _add_to_combined_set()
-                start = line_number
+        for line_number in line_numbers[1:]:
+            # If the current number is adjacent to the previous number
+            if (end if end else start) + 1 == line_number:
                 end = line_number
             else:
-                end = line_number
-
-        _add_to_combined_set()
-        return combined_set
+                if end:
+                    combined_list.append(combine_template.format(start, end))
+                else:
+                    combined_list.append(str(start))
+                start = line_number
+                end = None
+        return combined_list
 
     def _src_path_stats(self, src_path):
         """
