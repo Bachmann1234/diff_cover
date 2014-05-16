@@ -174,31 +174,42 @@ class SnippetLoaderTest(unittest.TestCase):
         expected_ranges = [(24, 37)]
         self._assert_line_range(violations, expected_ranges)
 
-    def test_load_snippets_html(self):
-
+    def _compare_snippets_html_output(self, filename, violations, expected_out_filename):
         # Need to be in the fixture directory
         # so the source path is displayed correctly
         old_cwd = os.getcwd()
         self.addCleanup(lambda: os.chdir(old_cwd))
         os.chdir(fixture_path(''))
 
-        src_path = fixture_path('snippet_src.py')
-        self._init_src_file(100, src_path)
-
         # One higher-level test to make sure
         # the snippets are being rendered correctly
-        violations = [10, 12, 13, 50, 51, 54, 55, 57]
         snippets_html = '\n\n'.join(
-            Snippet.load_snippets_html('snippet_src.py', violations)
+            Snippet.load_snippets_html(filename, violations)
         )
-
         # Load the fixture for the expected contents
-        expected_path = fixture_path('snippet_list.html')
+        expected_path = fixture_path(expected_out_filename)
         with open(expected_path) as fixture_file:
             expected = fixture_file.read()
+            if isinstance(expected, six.binary_type):
+                expected = expected.decode('utf-8')
 
         # Check that we got what we expected
         assert_long_str_equal(expected, snippets_html, strip=True)
+
+    def test_load_snippets_html(self):
+        self._compare_snippets_html_output('snippet_src.py',
+                                           [10, 12, 13, 50, 51, 54, 55, 57],
+                                           'snippet_list.html')
+
+    def test_load_utf8_snippets(self):
+        self._compare_snippets_html_output('snippet_unicode.py',
+                                           [10, 12, 13, 50, 51, 54, 55, 57],
+                                           'snippet_unicode_html_output.html')
+
+    def test_load_declared_arabic(self):
+        self._compare_snippets_html_output('snippet_8859.py',
+                                           [7],
+                                           'snippet_arabic_output.html')
 
     def _assert_line_range(self, violation_lines, expected_ranges):
         """
