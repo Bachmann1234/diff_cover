@@ -5,7 +5,7 @@ from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.violations_reporter import BaseViolationReporter, Violation
 from diff_cover.report_generator import BaseReportGenerator, \
-    HtmlReportGenerator, StringReportGenerator
+    HtmlReportGenerator, StringReportGenerator, TemplateReportGenerator
 from diff_cover.tests.helpers import load_fixture, \
     assert_long_str_equal, unittest
 
@@ -232,6 +232,32 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         self.assertEqual(self.report.total_percent_covered(), 66)
 
 
+class TemplateReportGeneratorTest(BaseReportGeneratorTest):
+    REPORT_GENERATOR_CLASS = TemplateReportGenerator
+
+    def _test_input_expected_output(self, input_with_expected_output):
+        for test_input, expected_output in input_with_expected_output:
+            self.assertEqual(expected_output,
+                             TemplateReportGenerator.combine_adjacent_lines(test_input))
+
+    def test_combine_adjacent_lines_no_adjacent(self):
+        in_out = [([1, 3], ["1", "3"]),
+                  ([1, 5, 7, 10], ["1", "5", "7", "10"])]
+        self._test_input_expected_output(in_out)
+
+    def test_combine_adjacent_lines(self):
+        in_out = [([1, 2, 3, 4, 5, 8, 10, 12, 13, 14, 15], ["1-5", "8", "10", "12-15"]),
+                  ([1, 4, 5, 6, 10], ["1", "4-6", "10"]),
+                  ([402, 403], ["402-403"])]
+        self._test_input_expected_output(in_out)
+
+    def test_empty_list(self):
+        self.assertEqual([], TemplateReportGenerator.combine_adjacent_lines([]))
+
+    def test_one_number(self):
+        self.assertEqual(["1"], TemplateReportGenerator.combine_adjacent_lines([1]))
+
+
 class StringReportGeneratorTest(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = StringReportGenerator
@@ -247,8 +273,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Diff Coverage
         Diff: master
         -------------
-        file1.py (66.7%): Missing line(s) 10,11
-        subdir/file2.py (66.7%): Missing line(s) 10,11
+        file1.py (66.7%): Missing line(s) 10-11
+        subdir/file2.py (66.7%): Missing line(s) 10-11
         -------------
         Total:   12 line(s)
         Missing: 4 line(s)
