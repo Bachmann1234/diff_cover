@@ -2,6 +2,7 @@
 Classes for generating diff coverage reports.
 """
 from __future__ import unicode_literals
+import sys
 from abc import ABCMeta, abstractmethod
 from jinja2 import Environment, PackageLoader
 from lazy import lazy
@@ -210,6 +211,11 @@ class TemplateReportGenerator(BaseReportGenerator):
             # Render the template
             report = template.render(self._context())
 
+            # Encode the output as a bytestring (Python < 3)
+            if sys.version_info[:2] < (3, 0):
+                report = report.encode('utf-8')
+
+            # Write the output file
             output_file.write(report)
 
     def _context(self):

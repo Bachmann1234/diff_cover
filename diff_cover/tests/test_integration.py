@@ -227,6 +227,20 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             ['diff-cover', 'coverage1.xml', 'coverage2.xml']
         )
 
+    def test_unicode_console(self):
+        self._check_console_report(
+            'git_diff_unicode.txt',
+            'unicode_console_report.txt',
+            ['diff-cover', 'unicode_coverage.xml']
+        )
+
+    def test_unicode_html(self):
+        self._check_html_report(
+            'git_diff_unicode.txt',
+            'unicode_html_report.html',
+            ['diff-cover', 'unicode_coverage.xml']
+        )
+
     def test_git_diff_error(self):
 
         # Patch sys.argv
