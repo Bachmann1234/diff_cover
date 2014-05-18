@@ -3,7 +3,6 @@ Load snippets from source files to show violation lines
 in HTML reports.
 """
 from __future__ import unicode_literals
-import sys
 from os.path import basename
 import pygments
 from pygments.lexers import TextLexer, _iter_lexerclasses
@@ -177,7 +176,7 @@ class Snippet(object):
             contents = src_file.read()
 
         # Convert the source file to unicode (Python < 3)
-        if sys.version_info[:2] < (3, 0):
+        if isinstance(contents, six.binary_type):
             contents = contents.decode('utf-8', 'replace')
 
         # Construct a list of snippet ranges

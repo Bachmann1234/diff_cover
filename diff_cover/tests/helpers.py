@@ -2,10 +2,11 @@
 Test helper functions.
 """
 import random
+import sys
+import six
 import os.path
 import difflib
 from nose.tools import ok_
-import sys
 
 if sys.version_info[:2] <= (2, 6):
     import unittest2 as unittest
@@ -24,6 +25,14 @@ def assert_long_str_equal(expected, actual, strip=False):
 
     If `strip` is True, strip both strings before comparing.
     """
+    # If we've been given a byte string, we need to convert
+    # it back to unicode.  Otherwise, Python3 won't
+    # let us use string methods!
+    if isinstance(expected, six.binary_type):
+        expected = expected.decode('utf-8')
+    if isinstance(actual, six.binary_type):
+        actual = actual.decode('utf-8')
+
     if strip:
         expected = expected.strip()
         actual = actual.strip()
@@ -59,9 +68,8 @@ def load_fixture(rel_path, encoding=None):
     with open(fixture_path(rel_path)) as fixture_file:
         contents = fixture_file.read()
 
-    if sys.version_info[:2] < (3, 0):
-        if encoding is not None:
-            contents = contents.decode('utf-8')
+    if encoding is not None and isinstance(contents, six.binary_type):
+        contents = contents.decode('utf-8')
 
     return contents
 

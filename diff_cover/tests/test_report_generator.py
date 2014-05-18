@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import mock
-from six import StringIO
+from io import BytesIO
 from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.violations_reporter import BaseViolationReporter, Violation
@@ -144,7 +144,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         the string `expected`.
         """
         # Create a buffer for the output
-        output = StringIO()
+        output = BytesIO()
 
         # Generate the report
         self.report.generate_report(output)

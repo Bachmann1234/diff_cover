@@ -6,7 +6,7 @@ from mock import patch, Mock
 import os
 import os.path
 from subprocess import Popen
-from six import StringIO
+from io import BytesIO
 import tempfile
 import shutil
 from diff_cover.tool import main
@@ -101,7 +101,7 @@ class ToolsIntegrationBase(unittest.TestCase):
             self._set_git_diff_output(git_diff_file.read(), "")
 
         # Capture stdout to a string buffer
-        string_buffer = StringIO()
+        string_buffer = BytesIO()
         self._capture_stdout(string_buffer)
 
         # Patch sys.argv
@@ -124,7 +124,7 @@ class ToolsIntegrationBase(unittest.TestCase):
 
     def _capture_stdout(self, string_buffer):
         """
-        Redirect output sent to `sys.stdout` to the StringIO buffer
+        Redirect output sent to `sys.stdout` to the BytesIO buffer
         `string_buffer`.
         """
         self._mock_sys.stdout = string_buffer

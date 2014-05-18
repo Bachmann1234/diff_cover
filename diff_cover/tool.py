@@ -144,7 +144,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     # Build a report generator
     if html_report is not None:
         reporter = HtmlReportGenerator(coverage, diff)
-        output_file = open(html_report, "w")
+        output_file = open(html_report, "wb")
     else:
         reporter = StringReportGenerator(coverage, diff)
         output_file = sys.stdout
@@ -161,7 +161,7 @@ def generate_quality_report(tool, compare_branch, html_report=None):
 
     if html_report is not None:
         reporter = HtmlQualityReportGenerator(tool, diff)
-        output_file = open(html_report, "w")
+        output_file = open(html_report, "wb")
     else:
         reporter = StringQualityReportGenerator(tool, diff)
         output_file = sys.stdout

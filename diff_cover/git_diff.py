@@ -2,7 +2,7 @@
 Wrapper for `git diff` command.
 """
 from __future__ import unicode_literals
-import sys
+import six
 import subprocess
 
 
@@ -79,7 +79,7 @@ class GitDiffTool(object):
             raise GitDiffError(stderr)
 
         # Convert the output to unicode (Python < 3)
-        if sys.version_info[:2] < (3, 0):
+        if isinstance(stdout, six.binary_type):
             return stdout.decode('utf-8', 'replace')
         else:
             return stdout
