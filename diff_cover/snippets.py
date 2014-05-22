@@ -51,6 +51,7 @@ def guess_lexer_for_filename(_fn, _text, **options):
         return primary(**options)
     return result[-1][1](**options)
 
+
 class Snippet(object):
     """
     A source code snippet.
@@ -173,6 +174,10 @@ class Snippet(object):
         # Load the contents of the file
         with open(src_path) as src_file:
             contents = src_file.read()
+
+        # Convert the source file to unicode (Python < 3)
+        if isinstance(contents, six.binary_type):
+            contents = contents.decode('utf-8', 'replace')
 
         # Construct a list of snippet ranges
         src_lines = contents.split('\n')

@@ -1,13 +1,16 @@
 from __future__ import unicode_literals
 import mock
-from six import StringIO
+from io import BytesIO
 from textwrap import dedent
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.violations_reporter import BaseViolationReporter, Violation
-from diff_cover.report_generator import BaseReportGenerator, \
-    HtmlReportGenerator, StringReportGenerator, TemplateReportGenerator
-from diff_cover.tests.helpers import load_fixture, \
-    assert_long_str_equal, unittest
+from diff_cover.report_generator import (
+    BaseReportGenerator, HtmlReportGenerator,
+    StringReportGenerator, TemplateReportGenerator
+)
+from diff_cover.tests.helpers import (
+    load_fixture, assert_long_str_equal, unittest
+)
 
 
 class SimpleReportGenerator(BaseReportGenerator):
@@ -141,7 +144,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         the string `expected`.
         """
         # Create a buffer for the output
-        output = StringIO()
+        output = BytesIO()
 
         # Generate the report
         self.report.generate_report(output)
@@ -351,8 +354,7 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.set_num_snippets(1)
 
         # Verify that we got the expected string
-        expected = load_fixture('html_report_one_snippet.html',
-                                encoding='utf-8').strip()
+        expected = load_fixture('html_report_one_snippet.html').strip()
         self.assert_report(expected)
 
     def test_multiple_snippets(self):
@@ -364,6 +366,5 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.set_num_snippets(2)
 
         # Verify that we got the expected string
-        expected = load_fixture('html_report_two_snippets.html',
-                                encoding='utf-8').strip()
+        expected = load_fixture('html_report_two_snippets.html').strip()
         self.assert_report(expected)

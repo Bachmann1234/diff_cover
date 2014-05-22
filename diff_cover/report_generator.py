@@ -210,6 +210,11 @@ class TemplateReportGenerator(BaseReportGenerator):
             # Render the template
             report = template.render(self._context())
 
+            # Encode the output as a bytestring (Python < 3)
+            if not isinstance(report, six.binary_type):
+                report = report.encode('utf-8')
+
+            # Write the output file
             output_file.write(report)
 
     def _context(self):
