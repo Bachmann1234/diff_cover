@@ -5,7 +5,8 @@ from textwrap import dedent
 from six import BytesIO, StringIO
 from lxml import etree
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
-    Pep8QualityReporter, PylintQualityReporter, QualityReporterError
+    Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
+    QualityReporterError
 from diff_cover.tests.helpers import unittest
 
 
@@ -359,6 +360,137 @@ class Pep8QualityReporterTest(unittest.TestCase):
             Violation(1, u'E231 whitespace'),
             Violation(3, u'E225 whitespace'),
             Violation(24, u'W123 \u9134\u1912')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
+
+
+class PyflakesQualityReporterTest(unittest.TestCase):
+    """
+    Tests for Pyflakes quality violations
+    """
+
+    def tearDown(self):
+        """
+        Undo all patches
+        """
+        patch.stopall()
+
+    def test_quality(self):
+
+        # Patch the output of `pyflakes`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        return_string = '\n' + dedent("""
+                ../new_file.py:328: undefined name '_thing'
+                ../new_file.py:418: 'random' imported but unused
+            """).strip() + '\n'
+        _mock_communicate.return_value = (
+            (return_string.encode('utf-8'), b''))
+
+        # Parse the report
+        quality = PyflakesQualityReporter('pyflakes', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'pyflakes')
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(328, "undefined name '_thing'"),
+            Violation(418, "'random' imported but unused")
+        ]
+
+        self.assertEqual(
+            expected_violations,
+            quality.violations('../new_file.py'))
+
+    def test_no_quality_issues_newline(self):
+
+        # Patch the output of `pyflakes`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b'\n', b'')
+
+        # Parse the report
+        quality = PyflakesQualityReporter('pyflakes', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_no_quality_issues_emptystring(self):
+
+        # Patch the output of `pyflakes`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b'', b'')
+
+        # Parse the report
+        quality = PyflakesQualityReporter('pyflakes', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_quality_error(self):
+
+        # Patch the output of `pyflakes`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b"", b'whoops')
+
+        # Parse the report
+        quality = PyflakesQualityReporter('pyflakes', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'pyflakes')
+
+        self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
+
+    def test_no_such_file(self):
+        quality = PyflakesQualityReporter('pyflakes', [])
+
+        # Expect that we get no results
+        result = quality.violations('')
+        self.assertEqual(result, [])
+
+    def test_no_python_file(self):
+        quality = PyflakesQualityReporter('pyflakes', [])
+        file_paths = ['file1.coffee', 'subdir/file2.js']
+        # Expect that we get no results because no Python files
+        for path in file_paths:
+            result = quality.violations(path)
+            self.assertEqual(result, [])
+
+    def test_quality_pregenerated_report(self):
+
+        # When the user provides us with a pre-generated pyflakes report
+        # then use that instead of calling pyflakes directly.
+        pyflakes_reports = [
+            BytesIO(('\n' + dedent("""
+                path/to/file.py:1: undefined name 'this'
+                path/to/file.py:3: 'random' imported but unused
+                another/file.py:7: 'os' imported but unused
+            """).strip() + '\n').encode('utf-8')),
+
+            BytesIO(('\n' + dedent(u"""
+                path/to/file.py:24: undefined name 'that'
+                another/file.py:50: undefined name 'another'
+            """).strip() + '\n').encode('utf-8')),
+        ]
+
+        # Parse the report
+        quality = PyflakesQualityReporter('pyflakes', pyflakes_reports)
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u"undefined name 'this'"),
+            Violation(3, u"'random' imported but unused"),
+            Violation(24, u"undefined name 'that'")
         ]
 
         # We're not guaranteed that the violations are returned
