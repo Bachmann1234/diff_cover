@@ -2,7 +2,7 @@ diff-cover |build-status| |coverage-status|
 ===========================================
 
 Automatically find diff lines that need test coverage.
-Also finds diff lines that have violations (according to tools such as pep8 or pylint).
+Also finds diff lines that have violations (according to tools such as pep8, pyflakes or pylint).
 This is used as a code quality metric during code reviews.
 
 Overview
@@ -118,8 +118,8 @@ You can use diff-cover to see quality reports on the diff as well by running
 
     diff-quality --violations=<tool>
 
-Where ``tool`` is the quality checker to use. Currently ``pylint`` and
-``pep8`` are supported, but more checkers can (and should!) be integrated.
+Where ``tool`` is the quality checker to use. Currently ``pep8``, ``pyflakes`` and 
+``pylint`` are supported, but more checkers can (and should!) be integrated.
 
 Like ``diff-cover``, HTML reports can be generated with
 
@@ -127,9 +127,9 @@ Like ``diff-cover``, HTML reports can be generated with
 
     diff-quality --violations=<tool> --html-report report.html
 
-If you have already generated a report using ``pylint`` or ``pep8``,
+If you have already generated a report using ``pep8``, ``pyflakes`` or ``pylint``
 you can pass the report to ``diff-quality``.  This is more
-efficient than letting ``diff-quality`` re-run ``pylint`` or ``pep8``.
+efficient than letting ``diff-quality`` re-run ``pep8``, ``pyflakes`` or ``pylint``.
 
 .. code:: bash
 
@@ -150,7 +150,7 @@ Note that you must use the ``-f parseable`` option to generate
 the ``pylint`` report for pylint versions less than 1.0 and the
 ``--msg-template`` option for versions >= 1.0.
 
-``diff-quality`` will also accept multiple ``pylint`` or ``pep8`` reports:
+``diff-quality`` will also accept multiple ``pep8``, ``pyflakes`` or ``pylint`` reports:
 
 .. code:: bash
 
