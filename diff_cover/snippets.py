@@ -4,13 +4,13 @@ in HTML reports.
 """
 from __future__ import unicode_literals
 from os.path import basename
+from IPython.utils import openpy
 import pygments
 from pygments.lexers import TextLexer, _iter_lexerclasses
 from pygments.formatters import HtmlFormatter
 from pygments.util import ClassNotFound
 import six
 import fnmatch
-
 
 def guess_lexer_for_filename(_fn, _text, **options):
     """
@@ -172,7 +172,7 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with open(src_path) as src_file:
+        with openpy.open(src_path) as src_file:
             contents = src_file.read()
 
         # Convert the source file to unicode (Python < 3)
