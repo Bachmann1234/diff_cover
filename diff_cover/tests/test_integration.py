@@ -278,6 +278,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pep8']
         )
 
+    def test_added_file_pyflakes_html(self):
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.html',
+            ['diff-quality', '--violations=pyflakes']
+        )
+
     def test_added_file_pylint_html(self):
         self._check_html_report(
             'git_diff_violations.txt',
