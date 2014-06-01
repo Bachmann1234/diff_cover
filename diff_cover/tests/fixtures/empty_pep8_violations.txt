@@ -5,7 +5,7 @@ Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
 violations_test_file.py (100%)
 -------------
-Total:   8 line(s)
+Total:   9 line(s)
 Violations: 0 line(s)
 % Quality: 100%
 -------------

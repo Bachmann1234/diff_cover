@@ -8,4 +8,5 @@ def func_2(spongebob, squarepants):
     for char in spongebob:
         if char in squarepants:
             return char
+    unused=1
     return None

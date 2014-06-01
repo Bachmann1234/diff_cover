@@ -278,6 +278,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pep8']
         )
 
+    def test_added_file_pyflakes_html(self):
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.html',
+            ['diff-quality', '--violations=pyflakes']
+        )
+
     def test_added_file_pylint_html(self):
         self._check_html_report(
             'git_diff_violations.txt',
@@ -299,21 +306,18 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pep8', '--options="--exclude=violations_test_file.py"']
         )
 
+    def test_added_file_pyflakes_console(self):
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.txt',
+            ['diff-quality', '--violations=pyflakes']
+        )
+
     def test_added_file_pylint_console(self):
         self._check_console_report(
             'git_diff_violations.txt',
             'pylint_violations_console_report.txt',
             ['diff-quality', '--violations=pylint'],
-        )
-
-    def test_pre_generated_pylint_report(self):
-
-        # Pass in a pre-generated pylint report instead of letting
-        # the tool call pylint itself.
-        self._check_console_report(
-            'git_diff_violations.txt',
-            'pylint_violations_report.txt',
-            ['diff-quality', '--violations=pylint', 'pylint_report.txt']
         )
 
     def test_pre_generated_pep8_report(self):
@@ -324,4 +328,24 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             'git_diff_violations.txt',
             'pep8_violations_report.txt',
             ['diff-quality', '--violations=pep8', 'pep8_report.txt']
+        )
+
+    def test_pre_generated_pyflakes_report(self):
+
+        # Pass in a pre-generated pyflakes report instead of letting
+        # the tool call pyflakes itself.
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.txt',
+            ['diff-quality', '--violations=pyflakes', 'pyflakes_report.txt']
+        )
+
+    def test_pre_generated_pylint_report(self):
+
+        # Pass in a pre-generated pylint report instead of letting
+        # the tool call pylint itself.
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.txt',
+            ['diff-quality', '--violations=pylint', 'pylint_report.txt']
         )

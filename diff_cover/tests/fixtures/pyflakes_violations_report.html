@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>Diff Quality</h1>
-        <p>Quality Report: pylint</p>
+        <p>Quality Report: pyflakes</p>
         <p>Diff: origin/master...HEAD, staged, and unstaged changes</p>
         <table border="1">
             <tr>
@@ -16,22 +16,18 @@
             </tr>
             <tr>
                 <td>violations_test_file.py</td>
-                <td>66.7%</td>
+                <td>88.9%</td>
                 <td>
                     <ul>
-                        <li>1: C0111: (missing-docstring), : Missing module docstring</li>
-                        <li>1: C0111: (missing-docstring), func_1: Missing function docstring</li>
-                        <li>2: C0326: (bad-whitespace), : Exactly one space required around comparison</li>
-                        <li>11: C0326: (bad-whitespace), : Exactly one space required around assignment</li>
-                        <li>11: W0612: (unused-variable), func_2: Unused variable 'unused'</li>
+                        <li>11: local variable 'unused' is assigned to but never used</li>
                     </ul>
                 </td>
             </tr>
         </table>
         <ul>
             <li><b>Total</b>: 9 line(s)</li>
-            <li><b>Violation</b>: 3 line(s)</li>
-            <li><b>% Quality</b>: 66%</li>
+            <li><b>Violation</b>: 1 line(s)</li>
+            <li><b>% Quality</b>: 88%</li>
         </ul>
     </body>
 </html>

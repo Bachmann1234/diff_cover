@@ -3,11 +3,12 @@ Diff Quality
 Quality Report: pep8
 Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
-violations_test_file.py (75.0%):
+violations_test_file.py (66.7%):
     2: E225 missing whitespace around operator
     6: E302 expected 2 blank lines, found 0
+    11: E225 missing whitespace around operator
 -------------
-Total:   8 line(s)
-Violations: 2 line(s)
-% Quality: 75%
+Total:   9 line(s)
+Violations: 3 line(s)
+% Quality: 66%
 -------------
