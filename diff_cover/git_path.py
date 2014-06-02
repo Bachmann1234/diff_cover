@@ -32,10 +32,8 @@ class GitPathTool(object):
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
         root_rel_path = os.path.relpath(cls._cwd, cls._root)
-        if root_rel_path == os.path.curdir:
-            return git_diff_path
-
         rel_path = os.path.relpath(git_diff_path, root_rel_path)
+
         return rel_path
 
     @classmethod

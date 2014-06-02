@@ -29,11 +29,12 @@ class ToolsIntegrationBase(unittest.TestCase):
         # Set the CWD to the fixtures dir
         self._old_cwd = os.getcwd()
         os.chdir(fixture_path(''))
+        cwd = os.getcwd()
 
         self._mock_popen = patch('subprocess.Popen').start()
         self._mock_sys = patch('diff_cover.tool.sys').start()
         self._mock_getcwd = patch('diff_cover.tool.os.getcwd').start()
-        self._git_root_path = '/project/path'
+        self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
     def tearDown(self):
