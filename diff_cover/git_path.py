@@ -10,8 +10,8 @@ import subprocess
 class GitPathTool(object):
     """
     Converts `git diff` paths to absolute paths or relative paths to cwd.
-    This class is a singleton because the same path will be used accross
-    the project
+    This class should be used throughout the project to change paths from
+    the paths yielded by `git diff` to correct project paths
     """
     _cwd = None
     _root = None
