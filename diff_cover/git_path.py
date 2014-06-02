@@ -1,9 +1,7 @@
 """
 Converter for `git diff` paths
 """
-from __future__ import unicode_literals
 import os
-import six
 import subprocess
 
 
@@ -21,8 +19,8 @@ class GitPathTool(object):
         """
         Set the cwd that is used to manipulate paths.
         """
-        cls._cwd = cls._decode(cwd)
-        cls._root = cls._decode(cls._git_root())
+        cls._cwd = cwd
+        cls._root = cls._git_root()
 
     @classmethod
     def relative_path(cls, git_diff_path):
@@ -34,9 +32,7 @@ class GitPathTool(object):
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
         root_rel_path = os.path.relpath(cls._cwd, cls._root)
-        root_rel_path = cls._decode(root_rel_path)
         rel_path = os.path.relpath(git_diff_path, root_rel_path)
-        rel_path = cls._decode(rel_path)
 
         return rel_path
 
@@ -64,10 +60,4 @@ class GitPathTool(object):
         stdout, stderr = process.communicate()
 
         return stdout.strip()
-
-    @classmethod
-    def _decode(cls, string):
-        if isinstance(string, six.binary_type):
-            return string.decode()
-        return string
 
