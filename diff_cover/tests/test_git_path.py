@@ -14,6 +14,9 @@ class TestGitPathTool(unittest.TestCase):
 
     def tearDown(self):
         mock.patch.stopall()
+        # Reset static class members
+        GitPathTool._root = None
+        GitPathTool._cwd = None
 
     def test_project_root_command(self):
         self._set_git_root('/phony/path')
