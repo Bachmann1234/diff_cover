@@ -13,7 +13,6 @@ class TestGitPathTool(unittest.TestCase):
         self.subprocess.Popen.return_value = self.process
 
     def tearDown(self):
-        # Reset the tool
         mock.patch.stopall()
 
     def test_project_root_command(self):
