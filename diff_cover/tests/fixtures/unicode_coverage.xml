@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<!DOCTYPE coverage
+  SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-03.dtd'>
+<coverage branch-rate="0" line-rate="0.8792" timestamp="1371471706873" version="3.6">
+	<packages>
+		<package branch-rate="0" complexity="0" line-rate="0.9915" name="">
+			<classes>
+                <class branch-rate="0" complexity="0" filename="unicode_test_src.txt" line-rate="0.9643" name="unicode_test_src.txt">
+					<methods/>
+					<lines>
+						<line hits="1" number="1"/>
+						<line hits="0" number="2"/>
+						<line hits="1" number="3"/>
+						<line hits="0" number="4"/>
+						<line hits="1" number="5"/>
+						<line hits="0" number="6"/>
+						<line hits="1" number="7"/>
+						<line hits="0" number="8"/>
+						<line hits="1" number="9"/>
+						<line hits="0" number="10"/>
+					</lines>
+				</class>
+			</classes>
+		</package>
+	</packages>
+</coverage>

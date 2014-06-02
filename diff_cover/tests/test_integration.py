@@ -6,7 +6,7 @@ from mock import patch, Mock
 import os
 import os.path
 from subprocess import Popen
-from six import StringIO
+from io import BytesIO
 import tempfile
 import shutil
 from diff_cover.tool import main
@@ -101,7 +101,7 @@ class ToolsIntegrationBase(unittest.TestCase):
             self._set_git_diff_output(git_diff_file.read(), "")
 
         # Capture stdout to a string buffer
-        string_buffer = StringIO()
+        string_buffer = BytesIO()
         self._capture_stdout(string_buffer)
 
         # Patch sys.argv
@@ -124,7 +124,7 @@ class ToolsIntegrationBase(unittest.TestCase):
 
     def _capture_stdout(self, string_buffer):
         """
-        Redirect output sent to `sys.stdout` to the StringIO buffer
+        Redirect output sent to `sys.stdout` to the BytesIO buffer
         `string_buffer`.
         """
         self._mock_sys.stdout = string_buffer
@@ -255,6 +255,20 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         )
         self._mock_getcwd.return_value = old_cwd
 
+    def test_unicode_console(self):
+        self._check_console_report(
+            'git_diff_unicode.txt',
+            'unicode_console_report.txt',
+            ['diff-cover', 'unicode_coverage.xml']
+        )
+
+    def test_unicode_html(self):
+        self._check_html_report(
+            'git_diff_unicode.txt',
+            'unicode_html_report.html',
+            ['diff-cover', 'unicode_coverage.xml']
+        )
+
     def test_git_diff_error(self):
 
         # Patch sys.argv
@@ -304,6 +318,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             'git_diff_violations.txt',
             'pep8_violations_report.txt',
             ['diff-quality', '--violations=pep8']
+        )
+
+    def test_added_file_pep8_console_exclude_file(self):
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'empty_pep8_violations.txt',
+            ['diff-quality', '--violations=pep8', '--options="--exclude=violations_test_file.py"']
         )
 
     def test_added_file_pylint_console(self):

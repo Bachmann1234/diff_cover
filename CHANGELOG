@@ -1,3 +1,9 @@
+5/21/2014 v0.4.1
+
+    * Unicode error fixes
+    * Pass command line options to quality tool
+    * Combine adjacent lines in reports
+
 4/30/2014 v0.4.0
 
     * Support Python 3.4

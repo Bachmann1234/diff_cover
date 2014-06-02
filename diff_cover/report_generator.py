@@ -210,6 +210,11 @@ class TemplateReportGenerator(BaseReportGenerator):
             # Render the template
             report = template.render(self._context())
 
+            # Encode the output as a bytestring (Python < 3)
+            if not isinstance(report, six.binary_type):
+                report = report.encode('utf-8')
+
+            # Write the output file
             output_file.write(report)
 
     def _context(self):
@@ -253,6 +258,35 @@ class TemplateReportGenerator(BaseReportGenerator):
             'snippet_style': snippet_style
         }
 
+    @staticmethod
+    def combine_adjacent_lines(line_numbers):
+        """
+        Given a sorted collection of line numbers this will
+        turn them to strings and combine adjacent values
+
+        [1, 2, 5, 6, 100] -> ["1-2", "5-6", "100"]
+        """
+        combine_template = "{0}-{1}"
+        combined_list = []
+
+        # Add a terminating value of `None` to list
+        line_numbers.append(None)
+        start = line_numbers[0]
+        end = None
+
+        for line_number in line_numbers[1:]:
+            # If the current number is adjacent to the previous number
+            if (end if end else start) + 1 == line_number:
+                end = line_number
+            else:
+                if end:
+                    combined_list.append(combine_template.format(start, end))
+                else:
+                    combined_list.append(str(start))
+                start = line_number
+                end = None
+        return combined_list
+
     def _src_path_stats(self, src_path):
         """
         Return a dict of statistics for the source file at `src_path`.
@@ -274,7 +308,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         return {
             'percent_covered': self.percent_covered(src_path),
-            'violation_lines': [str(line) for line in violation_lines],
+            'violation_lines': TemplateReportGenerator.combine_adjacent_lines(violation_lines),
             'violations': violations,
             'snippets_html': snippets
         }

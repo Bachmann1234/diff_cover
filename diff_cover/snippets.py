@@ -4,6 +4,7 @@ in HTML reports.
 """
 from __future__ import unicode_literals
 from os.path import basename
+from IPython.utils import openpy
 import pygments
 from pygments.lexers import TextLexer, _iter_lexerclasses
 from pygments.formatters import HtmlFormatter
@@ -51,6 +52,7 @@ def guess_lexer_for_filename(_fn, _text, **options):
     if not result[-1][0] and primary is not None:
         return primary(**options)
     return result[-1][1](**options)
+
 
 class Snippet(object):
     """
@@ -172,8 +174,12 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with open(GitPathTool.relative_path(src_path)) as src_file:
+        with openpy.open(GitPathTool.relative_path(src_path) as src_file:
             contents = src_file.read()
+
+        # Convert the source file to unicode (Python < 3)
+        if isinstance(contents, six.binary_type):
+            contents = contents.decode('utf-8', 'replace')
 
         # Construct a list of snippet ranges
         src_lines = contents.split('\n')
