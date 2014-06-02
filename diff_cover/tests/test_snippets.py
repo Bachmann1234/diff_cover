@@ -118,7 +118,7 @@ class SnippetLoaderTest(unittest.TestCase):
         _, self._src_path = tempfile.mkstemp()
 
         # Path tool should not be aware of testing command
-        path_mock = mock.patch('diff_cover.violations_reporter.GitPathTool._instance').start()
+        path_mock = mock.patch('diff_cover.violations_reporter.GitPathTool').start()
         path_mock.absolute_path = lambda path: path
         path_mock.relative_path = lambda path: path
 

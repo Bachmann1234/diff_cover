@@ -13,28 +13,19 @@ class GitPathTool(object):
     This class is a singleton because the same path will be used accross
     the project
     """
-    _instance = None
+    _cwd = None
+    _root = None
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            if len(args) != 1:
-                raise TypeError(("First call to GitPathTool() must be done"
-                                 " with the `cwd` argument"))
-            cls._instance = super(GitPathTool, cls).__new__(cls)
-            cls._instance.__init__(*args, **kwargs)
-        return cls._instance
-
-    def __init__(self, cwd=None):
+    @classmethod
+    def set_cwd(cls, cwd):
         """
-        Initialize the absolute path to the git project
+        Set the cwd that is used to manipulate paths.
         """
-        if cwd is None:
-            return
+        cls._cwd = cls._decode(cwd)
+        cls._root = cls._decode(cls._git_root())
 
-        self._cwd = self._decode(cwd)
-        self._root = self._decode(self._git_root())
-
-    def relative_path(self, git_diff_path):
+    @classmethod
+    def relative_path(cls, git_diff_path):
         """
         Returns git_diff_path relative to cwd.
         """
@@ -42,14 +33,15 @@ class GitPathTool(object):
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
-        root_rel_path = os.path.relpath(self._cwd, self._root)
-        root_rel_path = self._decode(root_rel_path)
+        root_rel_path = os.path.relpath(cls._cwd, cls._root)
+        root_rel_path = cls._decode(root_rel_path)
         rel_path = os.path.relpath(git_diff_path, root_rel_path)
-        rel_path = self._decode(rel_path)
+        rel_path = cls._decode(rel_path)
 
         return rel_path
 
-    def absolute_path(self, src_path):
+    @classmethod
+    def absolute_path(cls, src_path):
         """
         Returns absoloute git_diff_path
         """
@@ -57,9 +49,10 @@ class GitPathTool(object):
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
 
-        return os.path.join(self._root, src_path)
+        return os.path.join(cls._root, src_path)
 
-    def _git_root(self):
+    @classmethod
+    def _git_root(cls):
         """
         Returns the output of `git rev-parse --show-toplevel`, which
         is the absolute path for the git project root.

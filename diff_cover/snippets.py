@@ -172,8 +172,7 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        path_tool = GitPathTool()
-        with open(path_tool.relative_path(src_path)) as src_file:
+        with open(GitPathTool.relative_path(src_path)) as src_file:
             contents = src_file.read()
 
         # Construct a list of snippet ranges

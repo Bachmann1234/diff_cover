@@ -9,7 +9,6 @@ import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
-from diff_cover.snippets import Snippet
 from diff_cover.violations_reporter import (
     XmlCoverageReporter, Pep8QualityReporter, PylintQualityReporter
 )
@@ -167,7 +166,8 @@ def main():
     progname = sys.argv[0]
 
     # Init the path tool to work with the current directory
-    GitPathTool(os.getcwd())
+    GitPathTool.set_cwd(os.getcwd())
+
     if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(sys.argv[1:])
         generate_coverage_report(
