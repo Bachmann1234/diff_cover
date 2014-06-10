@@ -145,9 +145,10 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     if html_report is not None:
         reporter = HtmlReportGenerator(coverage, diff)
         output_file = open(html_report, "wb")
-    else:
-        reporter = StringReportGenerator(coverage, diff)
-        output_file = sys.stdout
+        reporter.generate_report(output_file)
+
+    reporter = StringReportGenerator(coverage, diff)
+    output_file = sys.stdout
 
     # Generate the report
     reporter.generate_report(output_file)
