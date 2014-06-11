@@ -1,3 +1,7 @@
+6/11/2014 v0.4.2
+
+    * Write report to stdout even with --html-report
+
 5/21/2014 v0.4.1
 
     * Unicode error fixes
