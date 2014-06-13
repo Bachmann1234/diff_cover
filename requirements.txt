@@ -5,4 +5,3 @@ pep8
 pylint
 six>=1.6.1
 pygments==1.6
-ipython==1.2.0
