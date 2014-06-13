@@ -1,3 +1,7 @@
+6/13/2014 v0.4.3
+
+    * Remove dependency on iPython
+
 6/11/2014 v0.4.2
 
     * Write report to stdout even with --html-report
