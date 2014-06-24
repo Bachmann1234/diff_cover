@@ -1,0 +1,12 @@
+-------------
+Diff Quality
+Quality Report: pyflakes
+Diff: origin/master...HEAD, staged, and unstaged changes
+-------------
+violations_test_file.py (88.9%):
+    11: local variable 'unused' is assigned to but never used
+-------------
+Total:   9 line(s)
+Violations: 1 line(s)
+% Quality: 88%
+-------------
