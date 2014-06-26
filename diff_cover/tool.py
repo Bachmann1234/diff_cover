@@ -10,7 +10,8 @@ from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.violations_reporter import (
-    XmlCoverageReporter, Pep8QualityReporter, PylintQualityReporter
+    XmlCoverageReporter, Pep8QualityReporter,
+    PyflakesQualityReporter, PylintQualityReporter
 )
 from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
@@ -22,11 +23,12 @@ COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 VIOLATION_CMD_HELP = "Which code quality tool to use"
-INPUT_REPORTS_HELP = "Pep8 or pylint reports to use"
+INPUT_REPORTS_HELP = "Pep8, pyflakes or pylint reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 
 QUALITY_REPORTERS = {
     'pep8': Pep8QualityReporter,
+    'pyflakes': PyflakesQualityReporter,
     'pylint': PylintQualityReporter
 }
 
@@ -81,7 +83,7 @@ def parse_quality_args(argv):
     valid options:
 
         {
-            'violations': pep8 | pylint
+            'violations': pep8 | pyflakes | pylint
             'html_report': None | HTML_REPORT
         }
 
@@ -143,10 +145,11 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     # Build a report generator
     if html_report is not None:
         reporter = HtmlReportGenerator(coverage, diff)
-        output_file = open(html_report, "wb")
-    else:
-        reporter = StringReportGenerator(coverage, diff)
-        output_file = sys.stdout
+        with open(html_report, "wb") as output_file:
+            reporter.generate_report(output_file)
+
+    reporter = StringReportGenerator(coverage, diff)
+    output_file = sys.stdout
 
     # Generate the report
     reporter.generate_report(output_file)

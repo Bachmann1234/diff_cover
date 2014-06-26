@@ -4,7 +4,6 @@ in HTML reports.
 """
 from __future__ import unicode_literals
 from os.path import basename
-from IPython.utils import openpy
 import pygments
 from pygments.lexers import TextLexer, _iter_lexerclasses
 from pygments.formatters import HtmlFormatter
@@ -13,6 +12,24 @@ import six
 import fnmatch
 
 from diff_cover.git_path import GitPathTool
+# If tokenize.open (Python>=3.2) is available, use that to open python files.
+# Otherwise, use detect_encoding from lib2to3 (2.6, 2.7) wrapped the same way
+# that tokenize.open would have.
+try:
+    from tokenize import open as openpy
+except ImportError:
+    def openpy(filename):
+        from lib2to3.pgen2.tokenize import detect_encoding
+        import io
+
+        # The following is copied from tokenize.py in Python 3.2,
+        # Copyright (c) 2001-2014 Python Software Foundation; All Rights Reserved
+        buffer = io.open(filename, 'rb')
+        encoding, lines = detect_encoding(buffer.readline)
+        buffer.seek(0)
+        text = io.TextIOWrapper(buffer, encoding, line_buffering=True)
+        text.mode = 'r'
+        return text
 
 def guess_lexer_for_filename(_fn, _text, **options):
     """

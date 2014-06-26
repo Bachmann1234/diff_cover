@@ -16,4 +16,5 @@ index 8bf3de7..4e4b0df 100644
 +    for char in spongebob:
 +        if char in squarepants:
 +            return char
++    unused=1
 +    return None

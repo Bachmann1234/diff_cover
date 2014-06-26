@@ -352,6 +352,41 @@ class Pep8QualityReporter(BaseQualityReporter):
         return violations_dict
 
 
+class PyflakesQualityReporter(BaseQualityReporter):
+    """
+    Report Pyflakes violations.
+    """
+    COMMAND = 'pyflakes'
+
+    EXTENSIONS = ['py']
+    # Match lines of the form:
+    # path/to/file.py:328: undefined name '_thing'
+    # path/to/file.py:418: 'random' imported but unused
+    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): (.*)$')
+
+    def _parse_output(self, output, src_path=None):
+        """
+        See base class docstring.
+        """
+        violations_dict = defaultdict(list)
+
+        for line in output.split('\n'):
+
+            match = self.VIOLATION_REGEX.match(line)
+
+            # Ignore any line that isn't a violation
+            if match is not None:
+                pyflakes_src, line_number, message = match.groups()
+
+                # If we're looking for a particular source,
+                # filter out all other sources
+                if src_path is None or src_path == pyflakes_src:
+                    violation = Violation(int(line_number), message)
+                    violations_dict[pyflakes_src].append(violation)
+
+        return violations_dict
+
+
 class PylintQualityReporter(BaseQualityReporter):
     """
     Report Pylint violations.
