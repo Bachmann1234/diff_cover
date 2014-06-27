@@ -11,6 +11,7 @@ from pygments.util import ClassNotFound
 import six
 import fnmatch
 
+from diff_cover.git_path import GitPathTool
 # If tokenize.open (Python>=3.2) is available, use that to open python files.
 # Otherwise, use detect_encoding from lib2to3 (2.6, 2.7) wrapped the same way
 # that tokenize.open would have.
@@ -190,7 +191,7 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with openpy(src_path) as src_file:
+        with openpy(GitPathTool.relative_path(src_path)) as src_file:
             contents = src_file.read()
 
         # Convert the source file to unicode (Python < 3)

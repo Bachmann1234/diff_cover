@@ -140,8 +140,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool())
 
     xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
-    git_path = GitPathTool(os.getcwd())
-    coverage = XmlCoverageReporter(xml_roots, git_path)
+    coverage = XmlCoverageReporter(xml_roots)
 
     # Build a report generator
     if html_report is not None:
@@ -177,6 +176,9 @@ def main():
     Main entry point for the tool, used by setup.py
     """
     progname = sys.argv[0]
+
+    # Init the path tool to work with the current directory
+    GitPathTool.set_cwd(os.getcwd())
 
     if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(sys.argv[1:])

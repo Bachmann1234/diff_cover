@@ -29,11 +29,12 @@ class ToolsIntegrationBase(unittest.TestCase):
         # Set the CWD to the fixtures dir
         self._old_cwd = os.getcwd()
         os.chdir(fixture_path(''))
+        cwd = os.getcwd()
 
         self._mock_popen = patch('subprocess.Popen').start()
         self._mock_sys = patch('diff_cover.tool.sys').start()
         self._mock_getcwd = patch('diff_cover.tool.os.getcwd').start()
-        self._git_root_path = '/project/path'
+        self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
     def tearDown(self):
@@ -226,6 +227,34 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             'mult_inputs_console_report.txt',
             ['diff-cover', 'coverage1.xml', 'coverage2.xml']
         )
+
+    def test_subdir_coverage_html(self):
+        """
+        Assert that when diff-cover is ran from a subdirectory it
+        generates correct reports.
+        """
+        old_cwd = self._mock_getcwd.return_value
+        self._mock_getcwd.return_value = os.path.join(old_cwd, 'sub')
+        self._check_html_report(
+            'git_diff_subdir.txt',
+            'subdir_coverage_html_report.html',
+            ['diff-cover', 'coverage.xml']
+        )
+        self._mock_getcwd.return_value = old_cwd
+
+    def test_subdir_coverage_console(self):
+        """
+        Assert that when diff-cover is ran from a subdirectory it
+        generates correct reports.
+        """
+        old_cwd = self._mock_getcwd.return_value
+        self._mock_getcwd.return_value = os.path.join(old_cwd, 'sub')
+        self._check_console_report(
+            'git_diff_subdir.txt',
+            'subdir_coverage_console_report.txt',
+            ['diff-cover', 'coverage.xml']
+        )
+        self._mock_getcwd.return_value = old_cwd
 
     def test_unicode_console(self):
         self._check_console_report(

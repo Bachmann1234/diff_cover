@@ -9,6 +9,7 @@ import subprocess
 import sys
 import six
 
+from diff_cover.git_path import GitPathTool
 
 Violation = namedtuple('Violation', 'line, message')
 
@@ -63,7 +64,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura XML coverage report.
     """
 
-    def __init__(self, xml_roots, git_path):
+    def __init__(self, xml_roots):
         """
         Load the Cobertura XML coverage report represented
         by the lxml.etree with root element `xml_root`.
@@ -74,7 +75,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Create a dict to cache violations dict results
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
-        self._git_path = git_path
 
     def _get_src_path_line_nodes(self, xml_document, src_path):
         """
@@ -88,12 +88,12 @@ class XmlCoverageReporter(BaseViolationReporter):
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
-        src_rel_path = self._git_path.relative_path(src_path)
+        src_rel_path = GitPathTool.relative_path(src_path)
 
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
-        src_abs_path = self._git_path.absolute_path(src_path)
+        src_abs_path = GitPathTool.absolute_path(src_path)
 
         xpath_template = ".//class[@filename='{0}']/lines/line"
         xpath = None
