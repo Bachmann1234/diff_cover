@@ -1,3 +1,7 @@
+6/27/2014 v0.5.1
+
+    * Fix snippets relative path
+
 6/24/2014 v0.5.0
 
     * Add support for Pyflakes
