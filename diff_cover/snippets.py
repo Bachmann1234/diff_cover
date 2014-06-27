@@ -191,7 +191,7 @@ class Snippet(object):
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with openpy.open(GitPathTool.relative_path(src_path)) as src_file:
+        with openpy(GitPathTool.relative_path(src_path)) as src_file:
             contents = src_file.read()
 
         # Convert the source file to unicode (Python < 3)
