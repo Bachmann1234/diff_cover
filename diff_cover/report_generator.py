@@ -341,3 +341,4 @@ class HtmlQualityReportGenerator(TemplateReportGenerator):
     Generate an HTML formatted diff quality report.
     """
     TEMPLATE_NAME = "html_quality_report.html"
+    INCLUDE_SNIPPETS = True

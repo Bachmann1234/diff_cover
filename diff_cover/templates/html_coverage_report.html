@@ -3,17 +3,7 @@
     <head>
         <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
         <title>Diff Coverage</title>
-        {% if snippet_style %}
-        <style>
-            .src-snippet { margin-top: 2em; }
-            .src-name { font-weight: bold; }
-            .snippets {
-                border-top: 1px solid #bdbdbd;
-                border-bottom: 1px solid #bdbdbd;
-            }
-            {{ snippet_style }}
-        </style>
-        {% endif %}
+        {% include 'snippet_style.html' %}
     </head>
     <body>
         <h1>Diff Coverage</h1>
@@ -49,17 +39,6 @@
         {% else %}
         <p>No lines with coverage information in this diff.</p>
         {% endif %}
-        {% for src_path, stats in src_stats|dictsort %}
-        {% if stats.snippets_html %}
-        <div class="src-snippet">
-            <div class="src-name">{{ src_path }}</div>
-            <div class="snippets">
-            {% for snippet in stats.snippets_html %}
-            {{ snippet }}
-            {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        {% endfor %}
+        {% include 'snippet_content.html' %}
     </body>
 </html>
