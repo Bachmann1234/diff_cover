@@ -6,3 +6,4 @@ pyflakes
 pylint
 six>=1.6.1
 pygments==1.6
+jinja2_pluralize

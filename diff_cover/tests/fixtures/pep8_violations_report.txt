@@ -8,7 +8,7 @@ violations_test_file.py (66.7%):
     6: E302 expected 2 blank lines, found 0
     11: E225 missing whitespace around operator
 -------------
-Total:   9 line(s)
-Violations: 3 line(s)
+Total:   9 lines
+Violations: 3 lines
 % Quality: 66%
 -------------

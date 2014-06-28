@@ -4,6 +4,7 @@ Classes for generating diff coverage reports.
 from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from jinja2 import Environment, PackageLoader
+from jinja2_pluralize import pluralize_dj
 from lazy import lazy
 from diff_cover.snippets import Snippet
 import six
@@ -182,6 +183,7 @@ TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER,
                            trim_blocks=True,
                            lstrip_blocks=True)
 TEMPLATE_ENV.filters['iteritems'] = six.iteritems
+TEMPLATE_ENV.filters['pluralize'] = pluralize_dj
 
 
 class TemplateReportGenerator(BaseReportGenerator):

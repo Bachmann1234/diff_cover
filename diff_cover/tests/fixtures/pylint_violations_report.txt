@@ -8,7 +8,7 @@ violations_test_file.py (77.8%):
     1: C0111: func_1: Missing docstring
     2: C0322: func_1: Operator not preceded by a space
 -------------
-Total:   9 line(s)
-Violations: 2 line(s)
+Total:   9 lines
+Violations: 2 lines
 % Quality: 77%
 -------------

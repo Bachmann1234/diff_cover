@@ -276,11 +276,11 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         Diff Coverage
         Diff: master
         -------------
-        file1.py (66.7%): Missing line(s) 10-11
-        subdir/file2.py (66.7%): Missing line(s) 10-11
+        file1.py (66.7%): Missing lines 10-11
+        subdir/file2.py (66.7%): Missing lines 10-11
         -------------
-        Total:   12 line(s)
-        Missing: 4 line(s)
+        Total:   12 lines
+        Missing: 4 lines
         Coverage: 66%
         -------------
         """).strip()
@@ -302,8 +302,8 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         -------------
         file.py (100%)
         -------------
-        Total:   1 line(s)
-        Missing: 0 line(s)
+        Total:   1 line
+        Missing: 0 lines
         Coverage: 100%
         -------------
         """).strip()

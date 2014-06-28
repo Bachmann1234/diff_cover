@@ -2,9 +2,9 @@
 Diff Coverage
 Diff: origin/master...HEAD, staged, and unstaged changes
 -------------
-sub/test_src.txt (50.0%): Missing line(s) 2,4,6,8,10
+sub/test_src.txt (50.0%): Missing lines 2,4,6,8,10
 -------------
-Total:   10 line(s)
-Missing: 5 line(s)
+Total:   10 lines
+Missing: 5 lines
 Coverage: 50%
 -------------
