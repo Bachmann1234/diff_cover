@@ -3,6 +3,8 @@ Converter for `git diff` paths
 """
 import os
 import subprocess
+import six
+import sys
 
 
 class GitPathTool(object):
@@ -19,6 +21,8 @@ class GitPathTool(object):
         """
         Set the cwd that is used to manipulate paths.
         """
+        if isinstance(cwd, six.binary_type):
+            cwd = cwd.decode(sys.getdefaultencoding())
         cls._cwd = cwd
         cls._root = cls._git_root()
 
@@ -53,11 +57,15 @@ class GitPathTool(object):
         Returns the output of `git rev-parse --show-toplevel`, which
         is the absolute path for the git project root.
         """
-        command = ['git', 'rev-parse', '--show-toplevel']
+        command = ['git', 'rev-parse', '--show-toplevel', '--encoding=utf-8']
         process = subprocess.Popen(command,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-
-        return stdout.strip()
-
+        # Git likes to add the encoding to the end of the command for some reason
+        stdout = stdout.strip()
+        git_root = stdout.split()[0] if stdout else u''
+        try:
+            return git_root.decode('utf-8')
+        except AttributeError:
+            return git_root
