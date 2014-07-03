@@ -10,7 +10,7 @@ violations_test_file.py (66.7%):
     11: C0326: (bad-whitespace), : Exactly one space required around assignment
     11: W0612: (unused-variable), func_2: Unused variable 'unused'
 -------------
-Total:   9 line(s)
-Violations: 3 line(s)
+Total:   9 lines
+Violations: 3 lines
 % Quality: 66%
 -------------
