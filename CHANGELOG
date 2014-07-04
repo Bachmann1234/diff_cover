@@ -1,3 +1,8 @@
+7/4/2014 v0.5.3
+
+    * Pluralize report output
+    * Bugfixes around git_path and unicode
+
 6/28/2014 v0.5.2
 
     * Add snippets to quality html reports
