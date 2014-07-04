@@ -178,7 +178,12 @@ def main():
     progname = sys.argv[0]
 
     # Init the path tool to work with the current directory
-    GitPathTool.set_cwd(os.getcwd())
+    try:
+        cwd = os.getcwdu()
+    except AttributeError:
+        cwd = os.getcwd()
+
+    GitPathTool.set_cwd(cwd)
 
     if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(sys.argv[1:])
