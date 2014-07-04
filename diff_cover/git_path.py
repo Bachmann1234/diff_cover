@@ -1,6 +1,7 @@
 """
 Converter for `git diff` paths
 """
+from __future__ import unicode_literals
 import os
 import subprocess
 import six
