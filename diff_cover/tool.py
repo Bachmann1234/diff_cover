@@ -18,6 +18,7 @@ from diff_cover.report_generator import (
     HtmlQualityReportGenerator, StringQualityReportGenerator
 )
 from lxml import etree
+import six
 
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
@@ -149,7 +150,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
             reporter.generate_report(output_file)
 
     reporter = StringReportGenerator(coverage, diff)
-    output_file = sys.stdout
+    output_file = sys.stdout if six.PY2 else sys.stdout.buffer
 
     # Generate the report
     reporter.generate_report(output_file)
@@ -166,7 +167,7 @@ def generate_quality_report(tool, compare_branch, html_report=None):
         output_file = open(html_report, "wb")
     else:
         reporter = StringQualityReportGenerator(tool, diff)
-        output_file = sys.stdout
+        output_file = sys.stdout if six.PY2 else sys.stdout.buffer
 
     reporter.generate_report(output_file)
 

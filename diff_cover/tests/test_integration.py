@@ -7,6 +7,7 @@ import os
 import os.path
 from subprocess import Popen
 from io import BytesIO
+import six
 import tempfile
 import shutil
 from diff_cover.tool import main
@@ -128,7 +129,10 @@ class ToolsIntegrationBase(unittest.TestCase):
         Redirect output sent to `sys.stdout` to the BytesIO buffer
         `string_buffer`.
         """
-        self._mock_sys.stdout = string_buffer
+        if six.PY3:
+            self._mock_sys.stdout.buffer = string_buffer
+        else:
+            self._mock_sys.stdout = string_buffer
 
     def _set_git_diff_output(self, stdout, stderr):
         """

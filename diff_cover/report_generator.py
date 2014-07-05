@@ -202,21 +202,16 @@ class TemplateReportGenerator(BaseReportGenerator):
     def generate_report(self, output_file):
         """
         See base class.
+        output_file must be a file handler that takes in bytes!
         """
 
         if self.TEMPLATE_NAME is not None:
-
-            # Find the template
             template = TEMPLATE_ENV.get_template(self.TEMPLATE_NAME)
-
-            # Render the template
             report = template.render(self._context())
 
-            # Encode the output as a bytestring (Python < 3)
-            if not isinstance(report, six.binary_type):
+            if isinstance(report, six.string_types):
                 report = report.encode('utf-8')
 
-            # Write the output file
             output_file.write(report)
 
     def _context(self):
