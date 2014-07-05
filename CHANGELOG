@@ -1,3 +1,8 @@
+7/5/2014 v0.5.4
+	
+    * Fix bug when writing report to stdout. Ensure that all file like objects that get passed into the report generator take bytes
+    * Run diff cover over the code in each language
+
 7/4/2014 v0.5.3
 
     * Pluralize report output
