@@ -1,5 +1,5 @@
-diff-cover |build-status| |coverage-status|
-===========================================
+diff-cover |build-status| |coverage-status| |requirements-status|
+=================================================================
 
 Automatically find diff lines that need test coverage.
 Also finds diff lines that have violations (according to tools such as pep8, pyflakes or pylint).
@@ -8,9 +8,9 @@ This is used as a code quality metric during code reviews.
 Overview
 --------
 
-Diff coverage is the percentage of new or modified 
-lines that are covered by tests.  This provides a clear 
-and achievable standard for code review: If you touch a line 
+Diff coverage is the percentage of new or modified
+lines that are covered by tests.  This provides a clear
+and achievable standard for code review: If you touch a line
 of code, that line should be covered.  Code coverage
 is *every* developer's responsibility!
 
@@ -63,7 +63,7 @@ Getting Started
 ---------------
 
 1. Set the current working directory to a ``git`` repository.
-   
+
 2. Run your test suite under coverage and generate a Cobertura XML report.
    For example, if you are using `nosetests`__ and `coverage.py`__:
 
@@ -99,15 +99,15 @@ You can also generate an HTML version of the report:
 Multiple XML Coverage Reports
 -------------------------------
 
-In the case that one has multiple xml reports form multiple test suites, you 
-can get a combined coverage report (a line is counted  as covered if it is 
-covered in ANY of the xml reports) by running ``diff-cover`` with multiple 
-coverage reports as arguments. You may specify any arbitrary number of coverage 
+In the case that one has multiple xml reports form multiple test suites, you
+can get a combined coverage report (a line is counted  as covered if it is
+covered in ANY of the xml reports) by running ``diff-cover`` with multiple
+coverage reports as arguments. You may specify any arbitrary number of coverage
 reports:
 
 .. code:: bash
 
-	diff-cover coverage1.xml coverage2.xml 
+	diff-cover coverage1.xml coverage2.xml
 
 Quality Coverage
 -----------------
@@ -118,7 +118,7 @@ You can use diff-cover to see quality reports on the diff as well by running
 
     diff-quality --violations=<tool>
 
-Where ``tool`` is the quality checker to use. Currently ``pep8``, ``pyflakes`` and 
+Where ``tool`` is the quality checker to use. Currently ``pep8``, ``pyflakes`` and
 ``pylint`` are supported, but more checkers can (and should!) be integrated.
 
 Like ``diff-cover``, HTML reports can be generated with
@@ -185,7 +185,7 @@ to generate the coverage XML report, then make sure you run
 
 __ http://nedbatchelder.com/code/coverage/
 
-**Issue**: ``GitDiffTool._execute()`` raises the error: 
+**Issue**: ``GitDiffTool._execute()`` raises the error:
 
 .. code:: bash
 
@@ -236,7 +236,12 @@ You can discuss this code on the `edx-code Google Group`__ or in the
 
 __ https://groups.google.com/forum/#!forum/edx-code
 
-.. |build-status| image:: https://travis-ci.org/edx/diff-cover.png  
-   :target: https://travis-ci.org/edx/diff-cover
+.. |build-status| image:: https://travis-ci.org/edx/diff-cover.png
+    :target: https://travis-ci.org/edx/diff-cover
+    :alt: Build Status
 .. |coverage-status| image:: https://coveralls.io/repos/edx/diff-cover/badge.png
-   :target: https://coveralls.io/r/edx/diff-cover
+    :target: https://coveralls.io/r/edx/diff-cover
+    :alt: Coverage Status
+.. |requirements-status| image:: https://requires.io/github/edx/diff-cover/requirements.png?branch=master
+    :target: https://requires.io/github/edx/diff-cover/requirements/?branch=master
+    :alt: Requirements Status
