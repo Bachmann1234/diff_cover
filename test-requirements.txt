@@ -1,4 +1,7 @@
 mock
 nose
 coverage
+pep8
+pyflakes
+pylint
 -r requirements.txt

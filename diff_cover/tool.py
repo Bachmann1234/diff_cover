@@ -175,6 +175,10 @@ def generate_quality_report(tool, compare_branch, html_report=None):
 def main():
     """
     Main entry point for the tool, used by setup.py
+    Returns a value that can be passed into exit() specifying
+    the exit code.
+    1 is an error
+    0 is successful run
     """
     progname = sys.argv[0]
 
@@ -193,6 +197,7 @@ def main():
             arg_dict['compare_branch'],
             html_report=arg_dict['html_report'],
         )
+        return 0
 
     elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(sys.argv[1:])
@@ -221,13 +226,20 @@ def main():
                     arg_dict['html_report']
                 )
 
+            except ImportError:
+                LOGGER.error(
+                    "Quality tool not installed: '{0}'".format(tool)
+                )
+                return 1
             # Close any reports we opened
             finally:
                 for file_handle in input_reports:
                     file_handle.close()
         else:
             LOGGER.error("Quality tool not recognized: '{0}'".format(tool))
-            exit(1)
+            return 1
+
+        return 0
 
 if __name__ == "__main__":
-    main()
+    exit(main())
