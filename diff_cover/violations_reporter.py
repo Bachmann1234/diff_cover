@@ -218,8 +218,15 @@ class BaseQualityReporter(BaseViolationReporter):
         'user_options' is a string of options passed in.
         This string contains options that are passed forward
         to the reporter being used
+
+        This raises an ImportError if the tool being created
+        is not installed.
         """
         super(BaseQualityReporter, self).__init__(name)
+        # Test if the tool requested is installed
+        # Assumes in can be imported with the same name.
+        # This applies to all our tools so far
+        __import__(self._name)
         self._info_cache = defaultdict(list)
         self.user_options = user_options
 

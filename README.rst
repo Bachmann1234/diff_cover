@@ -205,6 +205,11 @@ __ http://travis-ci.org
 
 **Solution**: Your project needs a `pylintrc` file. Provide this file (it can be empty) and ``diff-quality`` should run without issue.
 
+**Issue**: ``diff-quality`` reports "Quality tool not installed"
+
+**Solution**: ``diff-quality`` assumes you have the tool you wish to run against your diff installed. If you do not have it
+then install it with your favorite package manager.
+
 License
 -------
 

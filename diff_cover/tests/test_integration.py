@@ -2,18 +2,19 @@
 High-level integration tests of diff-cover tool.
 """
 from __future__ import unicode_literals
-from mock import patch, Mock
 import os
 import os.path
 from subprocess import Popen
 from io import BytesIO
-import six
 import tempfile
 import shutil
-from diff_cover.tool import main
+from mock import patch, Mock
+import six
+from diff_cover.tool import main, QUALITY_REPORTERS
 from diff_cover.diff_reporter import GitDiffError
 from diff_cover.tests.helpers import fixture_path, \
     assert_long_str_equal, unittest
+from diff_cover.violations_reporter import BaseQualityReporter
 
 
 class ToolsIntegrationBase(unittest.TestCase):
@@ -74,7 +75,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         self._set_sys_args(tool_args + ['--html-report', html_report_path])
 
         # Execute the tool
-        main()
+        code = main()
+        self.assertEquals(code, 0)
 
         # Check the HTML report
         with open(expected_html_path) as expected_file:
@@ -110,7 +112,9 @@ class ToolsIntegrationBase(unittest.TestCase):
         self._set_sys_args(tool_args)
 
         # Execute the tool
-        main()
+        code = main()
+
+        self.assertEquals(code, 0)
 
         # Check the console report
         with open(expected_console_path) as expected_file:
@@ -382,3 +386,62 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             'pylint_violations_report.txt',
             ['diff-quality', '--violations=pylint', 'pylint_report.txt']
         )
+
+    def _call_quality_expecting_error(self, tool_name, expected_error):
+        """
+        Makes calls to diff_quality that should fail to ensure
+        we get back the correct failure.
+        Takes in a string which is a tool to call and
+        an string which is the error you expect to see
+        """
+        self._set_git_diff_output("does/not/matter", "")
+        self._set_sys_args(
+            ['diff-quality',
+             '--violations={0}'.format(tool_name),
+             'pylint_report.txt']
+        )
+
+        with patch('diff_cover.tool.LOGGER') as logger:
+            exit_value = main()
+            logger.error.assert_called_with(expected_error)
+            self.assertEqual(exit_value, 1)
+
+    def test_tool_not_recognized(self):
+        self._call_quality_expecting_error(
+            'garbage',
+            "Quality tool not recognized: "
+            "'garbage'"
+        )
+
+    def test_tool_not_installed(self):
+        # Pretend we support a tool named not_installed
+        QUALITY_REPORTERS['not_installed'] = DoNothingReporter
+        try:
+            self._call_quality_expecting_error(
+                'not_installed',
+                "Quality tool not installed: "
+                "'not_installed'"
+            )
+        finally:
+            # Cleaning is good for the soul... and other tests
+            del QUALITY_REPORTERS['not_installed']
+
+    def test_do_nothing_reporter(self):
+        # Pedantic, but really. This reporter
+        # should not do anything
+        # Does demonstrate a reporter can take in any tool
+        # name though which is cool
+        reporter = DoNothingReporter('pep8', [], [])
+        self.assertEqual(reporter.violations(''), {})
+
+
+class DoNothingReporter(BaseQualityReporter):
+    """
+    Dummy class that implements necessary abstract
+    function
+    """
+    def _parse_output(self, output, src_path=None):
+        return {}
+
+    def violations(self, src_path):
+        return self._parse_output('', src_path)
