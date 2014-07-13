@@ -1,3 +1,7 @@
+7/12/2014 v0.5.5
+
+    * Diff quality no longer requires every potential quality tool to be installed
+
 7/5/2014 v0.5.4
 	
     * Fix bug when writing report to stdout. Ensure that all file like objects that get passed into the report generator take bytes
