@@ -35,6 +35,7 @@ QUALITY_REPORTERS = {
 
 
 import logging
+logging.basicConfig(format='%(message)s')
 LOGGER = logging.getLogger(__name__)
 
 
