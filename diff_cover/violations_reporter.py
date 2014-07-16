@@ -8,7 +8,7 @@ import re
 import subprocess
 import sys
 import six
-
+import itertools
 from diff_cover.git_path import GitPathTool
 
 Violation = namedtuple('Violation', 'line, message')
@@ -67,7 +67,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     def __init__(self, xml_roots):
         """
         Load the Cobertura XML coverage report represented
-        by the lxml.etree with root element `xml_root`.
+        by the cElementTree with root element `xml_root`.
         """
         super(XmlCoverageReporter, self).__init__("XML")
         self._xml_roots = xml_roots
@@ -95,21 +95,19 @@ class XmlCoverageReporter(BaseViolationReporter):
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
         src_abs_path = GitPathTool.absolute_path(src_path)
 
-        xpath_template = ".//class[@filename='{0}']/lines/line"
-        xpath = None
-
-        src_node_xpath = ".//class[@filename='{0}']".format(src_rel_path)
-        if xml_document.find(src_node_xpath) is not None:
-            xpath = xpath_template.format(src_rel_path)
-
-        src_node_xpath = ".//class[@filename='{0}']".format(src_abs_path)
-        if xml_document.find(src_node_xpath) is not None:
-            xpath = xpath_template.format(src_abs_path)
-
-        if xpath is None:
+        xpath = ".//class"
+        classes = [class_tree for class_tree in xml_document.findall(xpath)
+                   or []]
+        classes = ([clazz for clazz in classes
+                    if clazz.get('filename') == src_abs_path]
+                   or
+                   [clazz for clazz in classes
+                    if clazz.get('filename') == src_rel_path])
+        if not classes:
             return None
 
-        return xml_document.findall(xpath)
+        lines = [clazz.findall('./lines/line') for clazz in classes]
+        return [elem for elem in itertools.chain(*lines)]
 
     def _cache_file(self, src_path):
         """

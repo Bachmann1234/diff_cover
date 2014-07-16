@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 from mock import Mock, patch
 from subprocess import Popen
 from textwrap import dedent
+import xml.etree.cElementTree as etree
 from six import BytesIO, StringIO
-from lxml import etree
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
     QualityReporterError

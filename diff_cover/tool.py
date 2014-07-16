@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import argparse
 import os
 import sys
+from xml.etree import cElementTree
 import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
@@ -17,7 +18,6 @@ from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
     HtmlQualityReportGenerator, StringQualityReportGenerator
 )
-from lxml import etree
 import six
 
 COVERAGE_XML_HELP = "XML coverage report"
@@ -141,7 +141,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     """
     diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool())
 
-    xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
+    xml_roots = [cElementTree.parse(xml_root) for xml_root in coverage_xml]
     coverage = XmlCoverageReporter(xml_roots)
 
     # Build a report generator
