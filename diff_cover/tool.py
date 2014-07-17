@@ -26,6 +26,7 @@ COMPARE_BRANCH_HELP = "Branch to compare"
 VIOLATION_CMD_HELP = "Which code quality tool to use"
 INPUT_REPORTS_HELP = "Pep8, pyflakes or pylint reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
+FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
 
 QUALITY_REPORTERS = {
     'pep8': Pep8QualityReporter,
@@ -74,6 +75,13 @@ def parse_coverage_args(argv):
         type=str,
         default='origin/master',
         help=COMPARE_BRANCH_HELP
+    )
+
+    parser.add_argument(
+        '--fail-under',
+        type=float,
+        default='0',
+        help=FAIL_UNDER_HELP
     )
 
     return vars(parser.parse_args(argv))
@@ -132,6 +140,13 @@ def parse_quality_args(argv):
         help=OPTIONS_HELP
     )
 
+    parser.add_argument(
+        '--fail-under',
+        type=float,
+        default='0',
+        help=FAIL_UNDER_HELP
+    )
+
     return vars(parser.parse_args(argv))
 
 
@@ -155,6 +170,7 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
 
     # Generate the report
     reporter.generate_report(output_file)
+    return reporter.total_percent_covered()
 
 
 def generate_quality_report(tool, compare_branch, html_report=None):
@@ -171,6 +187,7 @@ def generate_quality_report(tool, compare_branch, html_report=None):
         output_file = sys.stdout if six.PY2 else sys.stdout.buffer
 
     reporter.generate_report(output_file)
+    return reporter.total_percent_covered()
 
 
 def main():
@@ -193,12 +210,16 @@ def main():
 
     if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(sys.argv[1:])
-        generate_coverage_report(
+        percent_covered = generate_coverage_report(
             arg_dict['coverage_xml'],
             arg_dict['compare_branch'],
             html_report=arg_dict['html_report'],
         )
-        return 0
+
+        if percent_covered >= arg_dict.get('fail_under'):
+            return 0
+        else:
+            return 1
 
     elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(sys.argv[1:])
@@ -218,14 +239,17 @@ def main():
                     input_reports.append(open(path, 'rb'))
                 except IOError:
                     LOGGER.warning("Could not load '{0}'".format(path))
-
             try:
                 reporter = reporter_class(tool, input_reports, user_options=user_options)
-                generate_quality_report(
+                percent_passing = generate_quality_report(
                     reporter,
                     arg_dict['compare_branch'],
                     arg_dict['html_report']
                 )
+                if percent_passing >= arg_dict.get('fail_under'):
+                    return 0
+                else:
+                    return 1
 
             except ImportError:
                 LOGGER.error(
@@ -236,11 +260,10 @@ def main():
             finally:
                 for file_handle in input_reports:
                     file_handle.close()
+
         else:
             LOGGER.error("Quality tool not recognized: '{0}'".format(tool))
             return 1
-
-        return 0
 
 if __name__ == "__main__":
     exit(main())
