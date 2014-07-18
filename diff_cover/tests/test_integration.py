@@ -188,6 +188,14 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             expected_status=1
         )
 
+    def test_fail_under_pass_console(self):
+        self._check_console_report(
+            'git_diff_add.txt',
+            'add_console_report.txt',
+            ['diff-cover', 'coverage.xml', '--fail-under=5'],
+            expected_status=0
+        )
+
     def test_deleted_file_html(self):
         self._check_html_report(
             'git_diff_delete.txt',
@@ -215,6 +223,14 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             'changed_html_report.html',
             ['diff-cover', 'coverage.xml', '--fail-under=100.1'],
             expected_status=1
+        )
+
+    def test_fail_under_pass_html(self):
+        self._check_html_report(
+            'git_diff_changed.txt',
+            'changed_html_report.html',
+            ['diff-cover', 'coverage.xml', '--fail-under=100'],
+            expected_status=0
         )
 
     def test_changed_file_console(self):
@@ -353,6 +369,14 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             expected_status=1
         )
 
+    def test_fail_under_pass_html(self):
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.html',
+            ['diff-quality', '--violations=pylint', '--fail-under=40'],
+            expected_status=0
+        )
+
     def test_added_file_pep8_console(self):
         self._check_console_report(
             'git_diff_violations.txt',
@@ -374,6 +398,15 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pyflakes',
             '--fail-under=90'],
             expected_status=1
+        )
+
+    def test_fail_under_pass_console(self):
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.txt',
+            ['diff-quality', '--violations=pyflakes',
+            '--fail-under=30'],
+            expected_status=0
         )
 
     def test_added_file_pyflakes_console(self):
