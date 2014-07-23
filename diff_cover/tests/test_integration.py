@@ -46,7 +46,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         patch.stopall()
         os.chdir(self._old_cwd)
 
-    def _check_html_report(self, git_diff_path, expected_html_path, tool_args):
+    def _check_html_report(self, git_diff_path, expected_html_path, tool_args, expected_status=0):
         """
         Verify that the tool produces the expected HTML report.
 
@@ -76,7 +76,7 @@ class ToolsIntegrationBase(unittest.TestCase):
 
         # Execute the tool
         code = main()
-        self.assertEquals(code, 0)
+        self.assertEquals(code, expected_status)
 
         # Check the HTML report
         with open(expected_html_path) as expected_file:
@@ -85,7 +85,7 @@ class ToolsIntegrationBase(unittest.TestCase):
                 expected = expected_file.read()
                 assert_long_str_equal(expected, html, strip=True)
 
-    def _check_console_report(self, git_diff_path, expected_console_path, tool_args):
+    def _check_console_report(self, git_diff_path, expected_console_path, tool_args, expected_status=0):
         """
         Verify that the tool produces the expected console report.
 
@@ -114,7 +114,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         # Execute the tool
         code = main()
 
-        self.assertEquals(code, 0)
+        self.assertEquals(code, expected_status)
 
         # Check the console report
         with open(expected_console_path) as expected_file:
@@ -180,6 +180,22 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             ['diff-cover', 'coverage.xml']
         )
 
+    def test_fail_under_console(self):
+        self._check_console_report(
+            'git_diff_add.txt',
+            'add_console_report.txt',
+            ['diff-cover', 'coverage.xml', '--fail-under=90'],
+            expected_status=1
+        )
+
+    def test_fail_under_pass_console(self):
+        self._check_console_report(
+            'git_diff_add.txt',
+            'add_console_report.txt',
+            ['diff-cover', 'coverage.xml', '--fail-under=5'],
+            expected_status=0
+        )
+
     def test_deleted_file_html(self):
         self._check_html_report(
             'git_diff_delete.txt',
@@ -199,6 +215,22 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             'git_diff_changed.txt',
             'changed_html_report.html',
             ['diff-cover', 'coverage.xml']
+        )
+
+    def test_fail_under_html(self):
+        self._check_html_report(
+            'git_diff_changed.txt',
+            'changed_html_report.html',
+            ['diff-cover', 'coverage.xml', '--fail-under=100.1'],
+            expected_status=1
+        )
+
+    def test_fail_under_pass_html(self):
+        self._check_html_report(
+            'git_diff_changed.txt',
+            'changed_html_report.html',
+            ['diff-cover', 'coverage.xml', '--fail-under=100'],
+            expected_status=0
         )
 
     def test_changed_file_console(self):
@@ -329,6 +361,22 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pylint']
         )
 
+    def test_fail_under_html(self):
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.html',
+            ['diff-quality', '--violations=pylint', '--fail-under=70'],
+            expected_status=1
+        )
+
+    def test_fail_under_pass_html(self):
+        self._check_html_report(
+            'git_diff_violations.txt',
+            'pylint_violations_report.html',
+            ['diff-quality', '--violations=pylint', '--fail-under=40'],
+            expected_status=0
+        )
+
     def test_added_file_pep8_console(self):
         self._check_console_report(
             'git_diff_violations.txt',
@@ -341,6 +389,24 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             'git_diff_violations.txt',
             'empty_pep8_violations.txt',
             ['diff-quality', '--violations=pep8', '--options="--exclude=violations_test_file.py"']
+        )
+
+    def test_fail_under_console(self):
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.txt',
+            ['diff-quality', '--violations=pyflakes',
+            '--fail-under=90'],
+            expected_status=1
+        )
+
+    def test_fail_under_pass_console(self):
+        self._check_console_report(
+            'git_diff_violations.txt',
+            'pyflakes_violations_report.txt',
+            ['diff-quality', '--violations=pyflakes',
+            '--fail-under=30'],
+            expected_status=0
         )
 
     def test_added_file_pyflakes_console(self):

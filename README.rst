@@ -171,6 +171,18 @@ By default, ``diff-cover`` compares the current branch to ``origin/master``.  To
 
     diff-cover coverage.xml --compare-branch=origin/release
 
+Fail Under
+----------
+
+To have ``diff-cover`` and ``diff-quality`` return a non zero status code if the report quality/coverage percentage is
+below a certain threshold specify the fail-under parameter
+
+.. code:: bash
+
+    diff-cover coverage.xml --fail-under=80
+    diff-quality --violations=pep8 --fail-under=80
+
+The above will return a non zero status if the coverage or quality score was below 80%
 
 Troubleshooting
 ----------------------
