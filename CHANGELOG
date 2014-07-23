@@ -1,3 +1,7 @@
+7/22/2014 v0.6.0
+
+    * Add --fail-under option
+
 7/16/2014 v0.5.7
 
     * Remove lxml requirement speeding up builds by roughly 50%
