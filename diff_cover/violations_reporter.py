@@ -412,7 +412,7 @@ class PylintQualityReporter(BaseQualityReporter):
             return super(PylintQualityReporter, self)._run_command(src_path)
         except QualityReporterError as report_error:
             # Support earlier pylint version (< 1)
-            if "no such option: --msg-template" in report_error.message:
+            if "no such option: --msg-template" in six.text_type(report_error):
                 self.OPTIONS = self.LEGACY_OPTIONS
                 return super(PylintQualityReporter, self)._run_command(src_path)
             else:
@@ -452,5 +452,4 @@ class QualityReporterError(Exception):
     """
     A quality reporter command produced an error.
     """
-    def __init__(self, message):
-        self.message = message
+    pass

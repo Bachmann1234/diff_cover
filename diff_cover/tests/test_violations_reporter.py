@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from mock import Mock, patch
 from subprocess import Popen
 from textwrap import dedent
 import xml.etree.cElementTree as etree
 from six import BytesIO, StringIO
+import six
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
     QualityReporterError
@@ -309,15 +311,16 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b"", b'whoops')
+        _mock_communicate.return_value = (b"", 'whoops Ƕئ'.encode('utf-8'))
 
         # Parse the report
         quality = Pep8QualityReporter('pep8', [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pep8')
-
-        self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
+        with self.assertRaises(QualityReporterError) as ex:
+            quality.violations('file1.py')
+        self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = Pep8QualityReporter('pep8', [])
@@ -652,6 +655,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             self.assertEqual(quality.OPTIONS, expected_options[index])
 
             return [(b"", dedent("""
+            Adding some unicode to ensure we parse this correctly: ȼȼȼȼȼȼȼȼȼȼȼ
             No config file found, using default configuration
             Usage:  pylint [options] module_or_package
 
