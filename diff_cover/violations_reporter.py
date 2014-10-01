@@ -300,7 +300,7 @@ class BaseQualityReporter(BaseViolationReporter):
                                        for cmd in command]))
             raise
 
-        if stderr:
+        if stderr and (process.returncode != 0):
             raise QualityReporterError(stderr.decode(encoding))
 
         return stdout.strip().decode(self.STDOUT_ENCODING, 'replace')

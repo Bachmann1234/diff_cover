@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from mock import Mock, patch
+from mock import Mock, patch, MagicMock
+import subprocess
 from subprocess import Popen
 from textwrap import dedent
 import xml.etree.cElementTree as etree
@@ -628,12 +629,38 @@ class PylintQualityReporterTest(unittest.TestCase):
         violations = PylintQualityReporter('pylint', []).violations(u'file.py')
         self.assertEqual(violations, [])
 
+    def test_quality_deprecation_warning(self):
+
+        # Patch the output stderr/stdout and returncode of `pylint`
+        _mock_communicate = patch.object(subprocess, 'Popen').start()
+        subproc_mock = MagicMock()
+        # Pylint may raise deprecation warnings on pylint usage itself (such
+        # as pylintrc configuration), but continue evaluating for violations.
+        # Diff-quality, likewise, will continue.
+        subproc_mock.returncode = 0
+        subproc_mock.communicate.return_value = (
+                b'file1.py:1: [C0111] Missing docstring\n'
+                b'file1.py:1: [C0111, func_1] Missing docstring',
+                b'Foobar: pylintrc deprecation warning'
+        )
+        _mock_communicate.return_value = subproc_mock
+
+        # Parse the report
+        quality = PylintQualityReporter('pylint', [])
+        actual_violations = quality.violations('file1.py')
+
+        # Assert that pylint successfully runs and finds 2 violations
+        self.assertEqual(len(actual_violations), 2)
+
     def test_quality_error(self):
 
-        # Patch the output of `pylint`
-        # to output to stderr
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b"", b'whoops')
+        # Patch the output stderr/stdout and returncode of `pylint`
+
+        _mock_communicate = patch.object(subprocess, 'Popen').start()
+        subproc_mock = MagicMock()
+        subproc_mock.returncode = 1
+        subproc_mock.communicate.return_value = (b'file1.py:1: [C0111] Missing docstring', b'oops')
+        _mock_communicate.return_value = subproc_mock
 
         # Parse the report
         quality = PylintQualityReporter('pylint', [])
