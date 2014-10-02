@@ -1,0 +1,15 @@
+diff --git a/SampleApp/Sample.cs b/SampleApp/Sample.cs
+index 19dcc51..7382baa 100644
+--- a/SampleApp/Sample.cs
++++ b/SampleApp/Sample.cs
+@@ -18,10 +18,5 @@ namespace SampleApp
+                 Console.WriteLine(ex.Message);
+             }
+         }
++
++        public static int DoSomethingNew(int a,int b)
++        {
++            return a + b;
++        }
+     }
+ }
