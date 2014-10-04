@@ -210,19 +210,22 @@ def main():
 
     if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(sys.argv[1:])
+        fail_under = arg_dict.get('fail_under')
         percent_covered = generate_coverage_report(
             arg_dict['coverage_xml'],
             arg_dict['compare_branch'],
             html_report=arg_dict['html_report'],
         )
 
-        if percent_covered >= arg_dict.get('fail_under'):
+        if percent_covered >= fail_under:
             return 0
         else:
+            LOGGER.error("Failure. Coverage is below {0}%.".format(fail_under))
             return 1
 
     elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(sys.argv[1:])
+        fail_under = arg_dict.get('fail_under')
         tool = arg_dict['violations']
         user_options = arg_dict.get('options')
         if user_options:
@@ -246,9 +249,10 @@ def main():
                     arg_dict['compare_branch'],
                     arg_dict['html_report']
                 )
-                if percent_passing >= arg_dict.get('fail_under'):
+                if percent_passing >= fail_under:
                     return 0
                 else:
+                    LOGGER.error("Failure. Quality is below {0}%.".format(fail_under))
                     return 1
 
             except ImportError:
