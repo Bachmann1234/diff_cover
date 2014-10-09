@@ -1,3 +1,7 @@
+10/9/2014 v0.6.2
+
+    * Added log line for when diff-cover fails due to coverage being lower than the fail-under condition
+
 10/1/2014 v0.6.1
 
     * Fixed issue where error message was not being returned after diff-quality errors
