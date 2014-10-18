@@ -8,6 +8,7 @@ from subprocess import Popen
 from io import BytesIO
 import tempfile
 import shutil
+from diff_cover.git_path import GitPathTool
 from mock import patch, Mock
 import six
 from diff_cover.tool import main, QUALITY_REPORTERS
@@ -35,7 +36,10 @@ class ToolsIntegrationBase(unittest.TestCase):
 
         self._mock_popen = patch('subprocess.Popen').start()
         self._mock_sys = patch('diff_cover.tool.sys').start()
-        self._mock_getcwd = patch('diff_cover.tool.os.getcwd').start()
+        try:
+            self._mock_getcwd = patch('diff_cover.tool.os.getcwdu').start()
+        except AttributeError:
+            self._mock_getcwd = patch('diff_cover.tool.os.getcwd').start()
         self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
@@ -302,6 +306,16 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             'unicode_console_report.txt',
             ['diff-cover', 'unicode_coverage.xml']
         )
+
+    def test_dot_net_diff(self):
+        mock_path = '/code/samplediff/'
+        self._mock_getcwd.return_value = mock_path
+        with patch.object(GitPathTool, '_git_root', return_value=mock_path):
+            self._check_console_report(
+                'git_diff_dotnet.txt',
+                'dotnet_coverage_console_report.txt',
+                ['diff-cover', 'dotnet_coverage.xml']
+            )
 
     def test_unicode_html(self):
         self._check_html_report(

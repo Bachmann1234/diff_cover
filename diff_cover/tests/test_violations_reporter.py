@@ -61,6 +61,43 @@ class XmlCoverageReporterTest(unittest.TestCase):
         result = coverage.violations('file1.py')
         self.assertEqual(result, violations)
 
+    def test_non_python_violations(self):
+        """
+        Non python projects often just have a file name specified while
+         the full path can be acquired from a sources tag in the XML.
+
+         This test checks that flow by requesting violation info from a path
+         that can only be constructed by using the path provided in the sources
+         tag
+        """
+        fancy_path = 'superFancyPath'
+        file_paths = ['file1.java']
+        source_paths = [fancy_path]
+        violations = self.MANY_VIOLATIONS
+        measured = self.FEW_MEASURED
+
+        xml = self._coverage_xml(
+            file_paths,
+            violations,
+            measured,
+            source_paths=source_paths
+        )
+        coverage = XmlCoverageReporter([xml])
+
+        self.assertEqual(
+            violations,
+            coverage.violations(
+                '{0}/{1}'.format(fancy_path, file_paths[0])
+            )
+        )
+
+        self.assertEqual(
+            measured,
+            coverage.measured_lines(
+                '{0}/{1}'.format(fancy_path, file_paths[0])
+            )
+        )
+
     def test_two_inputs_first_violate(self):
 
         # Construct the XML report
@@ -209,7 +246,13 @@ class XmlCoverageReporterTest(unittest.TestCase):
         result = coverage.violations('file.py')
         self.assertEqual(result, set([]))
 
-    def _coverage_xml(self, file_paths, violations, measured):
+    def _coverage_xml(
+            self,
+            file_paths,
+            violations,
+            measured,
+            source_paths=None
+    ):
         """
         Build an XML tree with source files specified by `file_paths`.
         Each source fill will have the same set of covered and
@@ -224,6 +267,12 @@ class XmlCoverageReporterTest(unittest.TestCase):
         but includes all the elements.
         """
         root = etree.Element('coverage')
+        if source_paths:
+            sources = etree.SubElement(root, 'sources')
+            for path in source_paths:
+                source = etree.SubElement(sources, 'source')
+                source.text = path
+
         packages = etree.SubElement(root, 'packages')
         classes = etree.SubElement(packages, 'classes')
 

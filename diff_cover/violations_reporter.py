@@ -7,9 +7,11 @@ from collections import namedtuple, defaultdict
 import re
 import subprocess
 import sys
+import os
 import six
 import itertools
 from diff_cover.git_path import GitPathTool
+
 
 Violation = namedtuple('Violation', 'line, message')
 
@@ -76,14 +78,20 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
 
-    def _get_src_path_line_nodes(self, xml_document, src_path):
+    def _get_classes(self, xml_document, src_path):
         """
-        Returns a list of nodes containing line information for `src_path`
-        in `xml_document`.
+        Given a path and parsed xml_document provides class nodes
+        with the relevant lines
 
-        If file is not present in `xml_document`, return None
+        First, we look to see if xml_document contains a source
+        node providing paths to search for
+
+        If we don't have that we check each nodes filename attribute
+        matches an absolute path
+
+        Finally, if we found no nodes, we check the filename attribute
+        for the relative path
         """
-
         # Remove git_root from src_path for searching the correct filename
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
@@ -95,19 +103,45 @@ class XmlCoverageReporter(BaseViolationReporter):
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
         src_abs_path = GitPathTool.absolute_path(src_path)
 
-        xpath = ".//class"
-        classes = [class_tree for class_tree in xml_document.findall(xpath)
+        # cobertura sometimes provides the sources for the measurements
+        # within it. If we have that we outta use it
+        sources = xml_document.findall('sources')
+        sources = [source.find('source').text for source in sources]
+        classes = [class_tree
+                   for class_tree in xml_document.findall(".//class")
                    or []]
-        classes = ([clazz for clazz in classes
-                    if clazz.get('filename') == src_abs_path]
-                   or
-                   [clazz for clazz in classes
-                    if clazz.get('filename') == src_rel_path])
+
+        classes = (
+            [clazz for clazz in classes if
+             src_abs_path in [
+                 os.path.join(
+                     source,
+                     clazz.get('filename')
+                 ) for source in sources]]
+            or
+            [clazz for clazz in classes if
+             clazz.get('filename') == src_abs_path]
+            or
+            [clazz for clazz in classes if
+             clazz.get('filename') == src_rel_path]
+        )
+        return classes
+
+    def _get_src_path_line_nodes(self, xml_document, src_path):
+        """
+        Returns a list of nodes containing line information for `src_path`
+        in `xml_document`.
+
+        If file is not present in `xml_document`, return None
+        """
+
+        classes = self._get_classes(xml_document, src_path)
+
         if not classes:
             return None
-
-        lines = [clazz.findall('./lines/line') for clazz in classes]
-        return [elem for elem in itertools.chain(*lines)]
+        else:
+            lines = [clazz.findall('./lines/line') for clazz in classes]
+            return [elem for elem in itertools.chain(*lines)]
 
     def _cache_file(self, src_path):
         """
