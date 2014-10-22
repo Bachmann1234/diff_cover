@@ -181,10 +181,12 @@ def generate_quality_report(tool, compare_branch, html_report=None):
 
     if html_report is not None:
         reporter = HtmlQualityReportGenerator(tool, diff)
-        output_file = open(html_report, "wb")
-    else:
-        reporter = StringQualityReportGenerator(tool, diff)
-        output_file = sys.stdout if six.PY2 else sys.stdout.buffer
+        with open(html_report, "wb") as output_file:
+            reporter.generate_report(output_file)
+
+    # Generate the report for stdout
+    reporter = StringQualityReportGenerator(tool, diff)
+    output_file = sys.stdout if six.PY2 else sys.stdout.buffer
 
     reporter.generate_report(output_file)
     return reporter.total_percent_covered()
