@@ -1,3 +1,7 @@
+10/21/2014 v0.7.1
+
+    * Generating HTML report still allows STDOUT to print the regular report
+
 10/17/2014 v0.7.0
 
     * Incorporate sources tag in corbetura reports improving diff-cover's behavior in non python codebases
