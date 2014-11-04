@@ -320,7 +320,7 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         # Encode the path using the filesystem encoding, determined at runtime
         encoding = sys.getfilesystemencoding()
-        user_options = [self.user_options] if self.user_options is not None else []
+        user_options = [self.user_options] if self.user_options else []
         command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(encoding)]
 
         try:
