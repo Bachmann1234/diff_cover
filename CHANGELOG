@@ -1,3 +1,7 @@
+11/6/2014 v0.7.2
+
+    * bugfix around parsing of options
+
 10/21/2014 v0.7.1
 
     * Generating HTML report still allows STDOUT to print the regular report
