@@ -75,11 +75,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         self.addCleanup(lambda: shutil.rmtree(temp_dir))
         html_report_path = os.path.join(temp_dir, 'diff_coverage.html')
 
-        # Patch the command-line arguments
-        self._set_sys_args(tool_args + ['--html-report', html_report_path])
-
         # Execute the tool
-        code = main()
+        code = main(tool_args + ['--html-report', html_report_path])
         self.assertEquals(code, expected_status)
 
         # Check the HTML report
@@ -112,11 +109,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         string_buffer = BytesIO()
         self._capture_stdout(string_buffer)
 
-        # Patch sys.argv
-        self._set_sys_args(tool_args)
-
         # Execute the tool
-        code = main()
+        code = main(tool_args)
 
         self.assertEquals(code, expected_status)
 
@@ -125,12 +119,6 @@ class ToolsIntegrationBase(unittest.TestCase):
             report = string_buffer.getvalue()
             expected = expected_file.read()
             assert_long_str_equal(expected, report, strip=True)
-
-    def _set_sys_args(self, argv):
-        """
-        Patch sys.argv with the argument array `argv`.
-        """
-        self._mock_sys.argv = argv
 
     def _capture_stdout(self, string_buffer):
         """
@@ -326,15 +314,12 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
 
     def test_git_diff_error(self):
 
-        # Patch sys.argv
-        self._set_sys_args(['diff-cover', 'coverage.xml'])
-
         # Patch the output of `git diff` to return an error
         self._set_git_diff_output('', 'fatal error')
 
         # Expect an error
         with self.assertRaises(GitDiffError):
-            main()
+            main(['diff-cover', 'coverage.xml'])
 
 
 class DiffQualityIntegrationTest(ToolsIntegrationBase):
@@ -344,15 +329,12 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
 
     def test_git_diff_error_diff_quality(self):
 
-        # Patch sys.argv
-        self._set_sys_args(['diff-quality', '--violations', 'pep8'])
-
         # Patch the output of `git diff` to return an error
         self._set_git_diff_output('', 'fatal error')
 
         # Expect an error
         with self.assertRaises(GitDiffError):
-            main()
+            main(['diff-quality', '--violations', 'pep8'])
 
     def test_added_file_pep8_html(self):
         self._check_html_report(
@@ -475,14 +457,12 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         an string which is the error you expect to see
         """
         self._set_git_diff_output("does/not/matter", "")
-        self._set_sys_args(
-            ['diff-quality',
-             '--violations={0}'.format(tool_name),
-             'pylint_report.txt']
-        )
+        argv = ['diff-quality',
+                '--violations={0}'.format(tool_name),
+                'pylint_report.txt']
 
         with patch('diff_cover.tool.LOGGER') as logger:
-            exit_value = main()
+            exit_value = main(argv)
             logger.error.assert_called_with(expected_error)
             self.assertEqual(exit_value, 1)
 

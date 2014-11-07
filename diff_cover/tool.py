@@ -192,7 +192,7 @@ def generate_quality_report(tool, compare_branch, html_report=None):
     return reporter.total_percent_covered()
 
 
-def main():
+def main(argv=None, directory=None):
     """
     Main entry point for the tool, used by setup.py
     Returns a value that can be passed into exit() specifying
@@ -200,18 +200,21 @@ def main():
     1 is an error
     0 is successful run
     """
-    progname = sys.argv[0]
+    argv = argv or sys.argv
+    # Init the path tool to work with the specified directory,
+    # or the current directory if it isn't set.
+    if not directory:
+        try:
+            directory = os.getcwdu()
+        except AttributeError:
+            directory = os.getcwd()
 
-    # Init the path tool to work with the current directory
-    try:
-        cwd = os.getcwdu()
-    except AttributeError:
-        cwd = os.getcwd()
+    progname = argv[0]
 
-    GitPathTool.set_cwd(cwd)
+    GitPathTool.set_cwd(directory)
 
     if progname.endswith('diff-cover'):
-        arg_dict = parse_coverage_args(sys.argv[1:])
+        arg_dict = parse_coverage_args(argv[1:])
         fail_under = arg_dict.get('fail_under')
         percent_covered = generate_coverage_report(
             arg_dict['coverage_xml'],
@@ -226,12 +229,16 @@ def main():
             return 1
 
     elif progname.endswith('diff-quality'):
-        arg_dict = parse_quality_args(sys.argv[1:])
+        arg_dict = parse_quality_args(argv[1:])
         fail_under = arg_dict.get('fail_under')
         tool = arg_dict['violations']
         user_options = arg_dict.get('options')
         if user_options:
-            user_options = user_options[1:-1]  # Strip quotes
+            # strip quotes if present
+            first_char = user_options[0]
+            last_char = user_options[-1]
+            if first_char == last_char and first_char in ('"', "'"):
+                user_options = user_options[1:-1]
         reporter_class = QUALITY_REPORTERS.get(tool)
 
         if reporter_class is not None:

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
-from diff_cover.tool import parse_coverage_args, parse_quality_args
+from mock import Mock, patch
+from diff_cover.tool import parse_coverage_args, parse_quality_args, main
 from diff_cover.tests.helpers import unittest
 
 
@@ -97,3 +98,52 @@ class ParseQualityArgsTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 print("args = {0}".format(argv))
                 parse_quality_args(argv)
+
+
+class MainTest(unittest.TestCase):
+    "Tests for the main() function in tool.py"
+
+    def setUp(self):
+        patch1 = patch("diff_cover.tool.GitPathTool")
+        self.fake_GitPathTool = patch1.start()  # pylint: disable=invalid-name
+        self.addCleanup(patch1.stop)
+
+    def test_parse_options(self):
+        argv = [
+            "diff-quality",
+            "--violations", "pylint",
+            '--options="--foobar"',
+        ]
+        fake_pylint_reporter = Mock()
+        reporter_patch = patch.dict("diff_cover.tool.QUALITY_REPORTERS",
+                                    {"pylint": fake_pylint_reporter})
+        gen_report_patch = patch("diff_cover.tool.generate_quality_report",
+                                 return_value=100)
+        with reporter_patch:
+            with gen_report_patch:
+                main(argv)
+
+        self.assertTrue(fake_pylint_reporter.called)
+        call = fake_pylint_reporter.call_args
+        user_options = call[1]["user_options"]
+        self.assertEqual(user_options, "--foobar")
+
+    def test_parse_options_without_quotes(self):
+        argv = [
+            "diff-quality",
+            "--violations", "pylint",
+            '--options=--foobar',
+        ]
+        fake_pylint_reporter = Mock()
+        reporter_patch = patch.dict("diff_cover.tool.QUALITY_REPORTERS",
+                                    {"pylint": fake_pylint_reporter})
+        gen_report_patch = patch("diff_cover.tool.generate_quality_report",
+                                 return_value=100)
+        with reporter_patch:
+            with gen_report_patch:
+                main(argv)
+
+        self.assertTrue(fake_pylint_reporter.called)
+        call = fake_pylint_reporter.call_args
+        user_options = call[1]["user_options"]
+        self.assertEqual(user_options, "--foobar")
