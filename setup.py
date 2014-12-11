@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+import os
 from setuptools import setup
 from diff_cover import VERSION, DESCRIPTION
 
 REQUIREMENTS = [line.strip() for line in
-                open("requirements.txt").readlines()]
+                open(os.path.join("requirements", "requirements.txt")).readlines()]
 setup(
     name='diff_cover',
     version=VERSION,
