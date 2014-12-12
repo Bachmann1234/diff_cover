@@ -1,3 +1,9 @@
+12/11/2014 v0.7.3
+
+   * Added pylint support!
+   * Fixed bug around python 1.6 and pyflakes
+   * Update Pygments allowing us to remove code we grabbed from the development branch of the project used to support python3 correctly
+
 11/6/2014 v0.7.2
 
     * bugfix around parsing of options
