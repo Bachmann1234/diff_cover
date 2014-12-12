@@ -12,7 +12,8 @@ from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.violations_reporter import (
     XmlCoverageReporter, Pep8QualityReporter,
-    PyflakesQualityReporter, PylintQualityReporter
+    PyflakesQualityReporter, PylintQualityReporter,
+    Flake8QualityReporter
 )
 from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
@@ -24,14 +25,15 @@ COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 VIOLATION_CMD_HELP = "Which code quality tool to use"
-INPUT_REPORTS_HELP = "Pep8, pyflakes or pylint reports to use"
+INPUT_REPORTS_HELP = "Pep8, pyflakes, flake8, or pylint reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
 
 QUALITY_REPORTERS = {
     'pep8': Pep8QualityReporter,
     'pyflakes': PyflakesQualityReporter,
-    'pylint': PylintQualityReporter
+    'pylint': PylintQualityReporter,
+    'flake8': Flake8QualityReporter,
 }
 
 
@@ -93,7 +95,7 @@ def parse_quality_args(argv):
     valid options:
 
         {
-            'violations': pep8 | pyflakes | pylint
+            'violations': pep8 | pyflakes | flake8 | pylint
             'html_report': None | HTML_REPORT
         }
 

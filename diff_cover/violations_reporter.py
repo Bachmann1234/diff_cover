@@ -339,7 +339,6 @@ class BaseQualityReporter(BaseViolationReporter):
 
         return stdout.strip().decode(self.STDOUT_ENCODING, 'replace')
 
-    @abstractmethod
     def _parse_output(self, output, src_path=None):
         """
         Parse the output of this reporter
@@ -356,7 +355,23 @@ class BaseQualityReporter(BaseViolationReporter):
         If `src_path` is provided, return information
         just for that source.
         """
-        pass
+        violations_dict = defaultdict(list)
+
+        for line in output.split('\n'):
+
+            match = self.VIOLATION_REGEX.match(line)
+
+            # Ignore any line that isn't a violation
+            if match is not None:
+                src, line_number, message = match.groups()
+
+                # If we're looking for a particular source,
+                # filter out all other sources
+                if src_path is None or src_path == src:
+                    violation = Violation(int(line_number), message)
+                    violations_dict[src].append(violation)
+
+        return violations_dict
 
 
 class Pep8QualityReporter(BaseQualityReporter):
@@ -364,31 +379,8 @@ class Pep8QualityReporter(BaseQualityReporter):
     Report PEP8 violations.
     """
     COMMAND = 'pep8'
-
     EXTENSIONS = ['py']
     VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EW]\d{3}.*)$')
-
-    def _parse_output(self, output, src_path=None):
-        """
-        See base class docstring.
-        """
-        violations_dict = defaultdict(list)
-
-        for line in output.split('\n'):
-
-            match = self.VIOLATION_REGEX.match(line)
-
-            # Ignore any line that isn't a violation
-            if match is not None:
-                pep8_src, line_number, message = match.groups()
-
-                # If we're looking for a particular source,
-                # filter out all other sources
-                if src_path is None or src_path == pep8_src:
-                    violation = Violation(int(line_number), message)
-                    violations_dict[pep8_src].append(violation)
-
-        return violations_dict
 
 
 class PyflakesQualityReporter(BaseQualityReporter):
@@ -396,34 +388,29 @@ class PyflakesQualityReporter(BaseQualityReporter):
     Report Pyflakes violations.
     """
     COMMAND = 'pyflakes'
-
     EXTENSIONS = ['py']
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
     VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): (.*)$')
 
-    def _parse_output(self, output, src_path=None):
-        """
-        See base class docstring.
-        """
-        violations_dict = defaultdict(list)
 
-        for line in output.split('\n'):
-
-            match = self.VIOLATION_REGEX.match(line)
-
-            # Ignore any line that isn't a violation
-            if match is not None:
-                pyflakes_src, line_number, message = match.groups()
-
-                # If we're looking for a particular source,
-                # filter out all other sources
-                if src_path is None or src_path == pyflakes_src:
-                    violation = Violation(int(line_number), message)
-                    violations_dict[pyflakes_src].append(violation)
-
-        return violations_dict
+class Flake8QualityReporter(BaseQualityReporter):
+    """
+    Report Flake8 violations.
+    
+    Flake8 warning/error codes:
+        E***/W***: pep8 errors and warnings
+        F***: pyflakes codes
+        C9**: mccabe complexity plugin
+        N8**: pep8-naming plugin
+        T000: flake8-todo plugin
+    
+    http://flake8.readthedocs.org/en/latest/warnings.html
+    """
+    COMMAND = 'flake8'
+    EXTENSIONS = ['py']
+    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EWFCNT]\d{3}.*)$')
 
 
 class PylintQualityReporter(BaseQualityReporter):

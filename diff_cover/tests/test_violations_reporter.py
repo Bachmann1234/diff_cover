@@ -9,7 +9,7 @@ from six import BytesIO, StringIO
 import six
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
-    QualityReporterError
+    QualityReporterError, Flake8QualityReporter
 from diff_cover.tests.helpers import unittest
 
 
@@ -558,6 +558,145 @@ class PyflakesQualityReporterTest(unittest.TestCase):
             self.assertIn(expected, actual_violations)
 
 
+class Flake8QualityReporterTest(unittest.TestCase):
+
+    def tearDown(self):
+        """
+        Undo all patches
+        """
+        patch.stopall()
+
+    def test_quality(self):
+
+        # Patch the output of `flake8`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        return_string = '\n' + dedent("""
+                ../new_file.py:1:17: E231 whitespace
+                ../new_file.py:3:13: E225 whitespace
+                ../new_file.py:7:1: E302 blank lines
+                ../new_file.py:8:1: W191 indentation contains tabs
+                ../new_file.py:10:1: F841 local variable name is assigned to but never used
+                ../new_file.py:20:1: C901 'MyModel.mymethod' is too complex (14)
+                ../new_file.py:50:1: N801 class names should use CapWords convention
+                ../new_file.py:60:10: T000 Todo note found.
+            """).strip() + '\n'
+        _mock_communicate.return_value = (
+            (return_string.encode('utf-8'), b''))
+
+        # Parse the report
+        quality = Flake8QualityReporter('flake8', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'flake8')
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, 'E231 whitespace'),
+            Violation(3, 'E225 whitespace'),
+            Violation(7, 'E302 blank lines'),
+            Violation(8, 'W191 indentation contains tabs'),
+            Violation(10, 'F841 local variable name is assigned to but never used'),
+            Violation(20, "C901 'MyModel.mymethod' is too complex (14)"),
+            Violation(50, 'N801 class names should use CapWords convention'),
+            Violation(60, 'T000 Todo note found.')
+        ]
+
+        self.assertEqual(expected_violations, quality.violations('../new_file.py'))
+
+    def test_no_quality_issues_newline(self):
+
+        # Patch the output of `flake8`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b'\n', b'')
+
+        # Parse the report
+        quality = Flake8QualityReporter('flake8', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_no_quality_issues_emptystring(self):
+
+        # Patch the output of `flake8`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b'', b'')
+
+        # Parse the report
+        quality = Flake8QualityReporter('flake8', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_quality_error(self):
+
+        # Patch the output of `flake8`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b"", 'whoops Ƕئ'.encode('utf-8'))
+
+        # Parse the report
+        quality = Flake8QualityReporter('flake8', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'flake8')
+        with self.assertRaises(QualityReporterError) as ex:
+            quality.violations('file1.py')
+        self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+
+    def test_no_such_file(self):
+        quality = Flake8QualityReporter('flake8', [])
+
+        # Expect that we get no results
+        result = quality.violations('')
+        self.assertEqual(result, [])
+
+    def test_no_python_file(self):
+        quality = Flake8QualityReporter('flake8', [])
+        file_paths = ['file1.coffee', 'subdir/file2.js']
+        # Expect that we get no results because no Python files
+        for path in file_paths:
+            result = quality.violations(path)
+            self.assertEqual(result, [])
+
+    def test_quality_pregenerated_report(self):
+
+        # When the user provides us with a pre-generated flake8 report
+        # then use that instead of calling flake8 directly.
+        flake8_reports = [
+            BytesIO(('\n' + dedent("""
+                path/to/file.py:1:17: E231 whitespace
+                path/to/file.py:3:13: E225 whitespace
+                another/file.py:7:1: E302 blank lines
+            """).strip() + '\n').encode('utf-8')),
+
+            BytesIO(('\n' + dedent(u"""
+                path/to/file.py:24:2: W123 \u9134\u1912
+                another/file.py:50:1: E302 blank lines
+            """).strip() + '\n').encode('utf-8')),
+        ]
+
+        # Parse the report
+        quality = Flake8QualityReporter('flake8', flake8_reports)
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u'E231 whitespace'),
+            Violation(3, u'E225 whitespace'),
+            Violation(24, u'W123 \u9134\u1912')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
+
+
 class PylintQualityReporterTest(unittest.TestCase):
 
     def tearDown(self):
@@ -688,9 +827,9 @@ class PylintQualityReporterTest(unittest.TestCase):
         # Diff-quality, likewise, will continue.
         subproc_mock.returncode = 0
         subproc_mock.communicate.return_value = (
-                b'file1.py:1: [C0111] Missing docstring\n'
-                b'file1.py:1: [C0111, func_1] Missing docstring',
-                b'Foobar: pylintrc deprecation warning'
+            b'file1.py:1: [C0111] Missing docstring\n'
+            b'file1.py:1: [C0111, func_1] Missing docstring',
+            b'Foobar: pylintrc deprecation warning'
         )
         _mock_communicate.return_value = subproc_mock
 
@@ -727,7 +866,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             Assure that the first time we use the modern options, return a failure
             Then assert the legacy options were set, return ok
             """
-            index = _mock_communicate.call_count-1
+            index = _mock_communicate.call_count - 1
             self.assertEqual(quality.OPTIONS, expected_options[index])
 
             return [(b"", dedent("""
