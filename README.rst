@@ -242,6 +242,31 @@ Contributions are very welcome. The easiest way is to fork this repo, and then
 make a pull request from your fork. The first time you make a pull request, you
 may be asked to sign a Contributor Agreement.
 
+Setting Up For Development
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+diff-cover is written to support many versions of python. The best way to set
+your machine up for development is to make sure you have ``tox`` installed which
+can be installed using ``pip``.
+
+.. code:: bash
+
+    pip install tox
+
+Now by simply running ``tox`` from the project root you will have environments
+for all the supported python versions. These will be in the ``.tox`` directory.
+
+To create a specific python dev environment just make a virtualenv for your python
+version and then install the appropriate test-requirements file.
+
+For example, setting up python 3:
+
+.. code:: bash
+
+    pyvenv venv
+    source venv/bin/activate
+    pip install -r test-requirements-py27-py3.txt
+
 
 Reporting Security Issues
 -------------------------
