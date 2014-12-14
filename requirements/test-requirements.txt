@@ -1,3 +1,4 @@
+# Common requirements for developing on all supported python versions
 mock
 nose
 coverage

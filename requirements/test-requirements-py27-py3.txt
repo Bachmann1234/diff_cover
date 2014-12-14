@@ -1,2 +1,3 @@
+# Requirements for developing on python 2.7 though python 3.4
 pylint
 -r test-requirements.txt
