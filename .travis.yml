@@ -4,6 +4,7 @@ env:
   - TOXENV=py27
   - TOXENV=py33
   - TOXENV=py34
+  - TOXENV=pypy
 install:
   - travis_retry pip install coveralls tox==1.6.1
 script:
