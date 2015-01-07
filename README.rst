@@ -266,26 +266,23 @@ For example, setting up python 3:
     pip install -r test-requirements-py27-py3.txt
 
 
-Reporting Security Issues
+Special Thanks
 -------------------------
 
-Please do not report security issues in public. Please email security@edx.org
+Shout out to the original author of diff-cover `Will Daly 
+<https://github.com/wedaly>`_ and the original author of diff-quality `Sarina Canelake 
+<https://github.com/sarina>`_. 
+
+Originally created with the support of `edX 
+<https://github.com/edx>`_.
 
 
-Mailing List and IRC Channel
-----------------------------
-
-You can discuss this code on the `edx-code Google Group`__ or in the
-``edx-code`` IRC channel on Freenode.
-
-__ https://groups.google.com/forum/#!forum/edx-code
-
-.. |build-status| image:: https://travis-ci.org/edx/diff-cover.png
-    :target: https://travis-ci.org/edx/diff-cover
+.. |build-status| image:: https://travis-ci.org/Bachmann1234/diff-cover.png
+    :target: https://travis-ci.org/Bachmann1234/diff-cover
     :alt: Build Status
-.. |coverage-status| image:: https://coveralls.io/repos/edx/diff-cover/badge.png
-    :target: https://coveralls.io/r/edx/diff-cover
+.. |coverage-status| image:: https://coveralls.io/repos/Bachmann1234/diff-cover/badge.png
+    :target: https://coveralls.io/r/Bachmann1234/diff-cover
     :alt: Coverage Status
-.. |requirements-status| image:: https://requires.io/github/edx/diff-cover/requirements.png?branch=master
-    :target: https://requires.io/github/edx/diff-cover/requirements/?branch=master
+.. |requirements-status| image:: https://requires.io/github/Bachmann1234/diff-cover/requirements.png?branch=master
+    :target: https://requires.io/github/Bachmann1234/diff-cover/requirements/?branch=master
     :alt: Requirements Status
