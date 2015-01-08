@@ -229,9 +229,7 @@ then install it with your favorite package manager.
 License
 -------
 
-The code in this repository is licensed under version 3 of the AGPL unless
-otherwise noted.
-
+The code in this repository is licensed under the Apache 2.0 license.
 Please see ``LICENSE.txt`` for details.
 
 
