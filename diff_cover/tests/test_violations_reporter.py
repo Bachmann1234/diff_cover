@@ -736,7 +736,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             file1.py:149: [C0324, Foo.__dict__] Comma not followed by a space
                 self.peer_grading._find_corresponding_module_for_location(Location('i4x','a','b','c','d'))
             file1.py:162: [R0801] Similar lines in 2 files
-            ==external_auth.views:1
+            ==file1:162
             ==student.views:4
             import json
             import logging
