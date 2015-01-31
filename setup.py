@@ -9,8 +9,8 @@ REQUIREMENTS = [line.strip() for line in
 setup(
     name='diff_cover',
     version=VERSION,
-    author='edX',
-    url='http://github.com/edx/diff-cover',
+    author='Matt Bachmann',
+    url='https://github.com/Bachmann1234/diff-cover',
     description=DESCRIPTION,
     license='Apache 2.0',
     classifiers=['Development Status :: 3 - Alpha',

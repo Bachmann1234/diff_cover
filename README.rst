@@ -55,7 +55,7 @@ To install the development version:
 
 .. code:: bash
 
-    git clone https://github.com/edx/diff-cover.git
+    git clone https://github.com/Bachmann1234/diff-cover.git
     cd diff-cover
     python setup.py install
 
