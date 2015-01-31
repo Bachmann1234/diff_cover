@@ -449,6 +449,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pylint', 'pylint_report.txt']
         )
 
+    def test_pylint_report_with_dup_code_violation(self):
+        self._check_console_report(
+            'git_diff_code_dupe.txt',
+            'pylint_dupe_violations_report.txt',
+            ['diff-quality', '--violations=pylint', 'pylint_dupe.txt']
+        )
+
     def _call_quality_expecting_error(self, tool_name, expected_error):
         """
         Makes calls to diff_quality that should fail to ensure

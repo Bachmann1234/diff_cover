@@ -1,0 +1,21 @@
+diff --git a/fileone.py b/fileone.py
+index e69de29..3952627 100644
+--- a/fileone.py
++++ b/fileone.py
+@@ -0,0 +1,16 @@
++"""
++Fileone
++"""
++def selection_sort(to_sort):
++    """
++    The greatest sorting algorithm?
++    """
++    new_list = []
++    final_size = len(to_sort)
++    while len(new_list) < final_size:
++        candidate_index = 0
++        for index in xrange(len(to_sort)):
++            if to_sort[index] <= to_sort[candidate_index]:
++                candidate_index = index
++        new_list.append(to_sort.pop(candidate_index))
++    return new_list

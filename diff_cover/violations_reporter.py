@@ -398,14 +398,14 @@ class PyflakesQualityReporter(BaseQualityReporter):
 class Flake8QualityReporter(BaseQualityReporter):
     """
     Report Flake8 violations.
-    
+
     Flake8 warning/error codes:
         E***/W***: pep8 errors and warnings
         F***: pyflakes codes
         C9**: mccabe complexity plugin
         N8**: pep8-naming plugin
         T000: flake8-todo plugin
-    
+
     http://flake8.readthedocs.org/en/latest/warnings.html
     """
     COMMAND = 'flake8'
@@ -422,11 +422,14 @@ class PylintQualityReporter(BaseQualityReporter):
     LEGACY_OPTIONS = ['-f', 'parseable', '--reports=no', '--include-ids=y']
     OPTIONS = MODERN_OPTIONS
     EXTENSIONS = ['py']
+    DUPE_CODE_VIOLATION = 'R0801'
 
     # Match lines of the form:
     # path/to/file.py:123: [C0111] Missing docstring
     # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
     VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
+    MULTI_LINE_VIOLATION_REGEX = re.compile(r'==(\w|.+):(.*)')
+    DUPE_CODE_MESSAGE_REGEX = re.compile(r'Similar lines in (\d+) files')
 
     def _run_command(self, src_path):
         try:
@@ -439,32 +442,65 @@ class PylintQualityReporter(BaseQualityReporter):
             else:
                 raise
 
+    def _process_dupe_code_violation(self, lines, current_line, message):
+        """
+        The duplicate code violation is a multi line error. This pulls out
+        all the relevant files
+        """
+        src_paths = []
+        message_match = self.DUPE_CODE_MESSAGE_REGEX.match(message)
+        if message_match:
+            for _ in range(int(message_match.group(1))):
+                current_line += 1
+                match = self.MULTI_LINE_VIOLATION_REGEX.match(
+                    lines[current_line]
+                )
+                src_path, l_number = match.groups()
+                src_paths.append(('%s.py' % src_path, l_number))
+        return src_paths
+
     def _parse_output(self, output, src_path=None):
         """
         See base class docstring.
         """
         violations_dict = defaultdict(list)
 
-        for line in output.split('\n'):
+        output_lines = output.split('\n')
+
+        for output_line_number, line in enumerate(output_lines):
             match = self.VIOLATION_REGEX.match(line)
 
             # Ignore any line that isn't matched
             # (for example, snippets from the source code)
             if match is not None:
 
-                pylint_src_path, line_number, pylint_code, function_name, message = match.groups()
+                (pylint_src_path,
+                 line_number,
+                 pylint_code,
+                 function_name,
+                 message) = match.groups()
+                if pylint_code == self.DUPE_CODE_VIOLATION:
+                    files_involved = self._process_dupe_code_violation(
+                        output_lines,
+                        output_line_number,
+                        message
+                    )
+                else:
+                    files_involved = [(pylint_src_path, line_number)]
 
-                # If we're looking for a particular source file,
-                # ignore any other source files.
-                if src_path is None or src_path == pylint_src_path:
+                for violation in files_involved:
+                    pylint_src_path, line_number = violation
+                    # If we're looking for a particular source file,
+                    # ignore any other source files.
+                    if src_path is None or src_path == pylint_src_path:
 
-                    if function_name:
-                        error_str = u"{0}: {1}: {2}".format(pylint_code, function_name, message)
-                    else:
-                        error_str = u"{0}: {1}".format(pylint_code, message)
+                        if function_name:
+                            error_str = u"{0}: {1}: {2}".format(pylint_code, function_name, message)
+                        else:
+                            error_str = u"{0}: {1}".format(pylint_code, message)
 
-                    violation = Violation(int(line_number), error_str)
-                    violations_dict[pylint_src_path].append(violation)
+                        violation = Violation(int(line_number), error_str)
+                        violations_dict[pylint_src_path].append(violation)
 
         return violations_dict
 
