@@ -1,3 +1,11 @@
+2/4/2014 v0.7.4
+
+   * Fixed bug in pylint support around duplciate code issues
+   * Added ability to ignore unstaged changes Thanks DanCardin
+   * License change! We are now Apache 2.0
+   * PyPy Support now verified in tests
+   * Fix for python 2.6 support
+
 12/11/2014 v0.7.3
 
    * Added pylint support!
