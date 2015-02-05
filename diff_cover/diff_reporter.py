@@ -54,7 +54,7 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch='origin/master', git_diff=None):
+    def __init__(self, compare_branch='origin/master', git_diff=None, ignore_unstaged=None):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
@@ -65,6 +65,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         self._compare_branch = compare_branch
         self._git_diff_tool = git_diff
+        self._ignore_unstaged = ignore_unstaged
 
         # Cache diff information as a dictionary
         # with file path keys and line number list values
@@ -100,6 +101,18 @@ class GitDiffReporter(BaseDiffReporter):
         # If no lines modified, return an empty list
         return diff_dict.get(src_path, [])
 
+    def _get_included_diff_results(self):
+        """
+        Return a list of stages to be included in the diff results.
+        """
+        included = [self._git_diff_tool.diff_committed(self._compare_branch),
+                    self._git_diff_tool.diff_staged()]
+        if not self._ignore_unstaged:
+            included.append(self._git_diff_tool.diff_unstaged())
+
+        return included
+
+
     def _git_diff(self):
         """
         Run `git diff` and returns a dict in which the keys
@@ -119,12 +132,7 @@ class GitDiffReporter(BaseDiffReporter):
 
             result_dict = dict()
 
-            for diff_str in [
-                self._git_diff_tool.diff_committed(self._compare_branch),
-                self._git_diff_tool.diff_staged(),
-                self._git_diff_tool.diff_unstaged()
-            ]:
-
+            for diff_str in self._get_included_diff_results():
                 # Parse the output of the diff string
                 diff_dict = self._parse_diff_str(diff_str)
 

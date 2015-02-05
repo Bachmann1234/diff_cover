@@ -21,6 +21,7 @@ class ParseArgsTest(unittest.TestCase):
             arg_dict.get('html_report'),
             'diff_cover.html'
         )
+        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
 
     def test_parse_with_no_html_report(self):
         argv = ['reports/coverage.xml']
@@ -30,6 +31,13 @@ class ParseArgsTest(unittest.TestCase):
             arg_dict.get('coverage_xml'),
             ['reports/coverage.xml']
         )
+        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+
+    def test_parse_with_ignored_unstaged(self):
+        argv = ['reports/coverage.xml', '--ignore-unstaged']
+
+        arg_dict = parse_coverage_args(argv)
+        self.assertEqual(arg_dict.get('ignore_unstaged'), True)
 
     def test_parse_invalid_arg(self):
 
@@ -53,6 +61,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get('violations'), 'pep8')
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
         self.assertEqual(arg_dict.get('input_reports'), [])
+        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
 
     def test_parse_with_no_html_report(self):
         argv = ['--violations', 'pylint']
@@ -60,6 +69,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         arg_dict = parse_quality_args(argv)
         self.assertEqual(arg_dict.get('violations'), 'pylint')
         self.assertEqual(arg_dict.get('input_reports'), [])
+        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
 
     def test_parse_with_one_input_report(self):
         argv = ['--violations', 'pylint', 'pylint_report.txt']
@@ -89,6 +99,12 @@ class ParseQualityArgsTest(unittest.TestCase):
             arg_dict.get('options'),
             '"--exclude=\'*/migrations*\'"'
         )
+
+    def test_parse_with_ignored_unstaged(self):
+        argv = ['--violations', 'pylint', '--ignore-unstaged']
+
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(arg_dict.get('ignore_unstaged'), True)
 
     def test_parse_invalid_arg(self):
         # No code quality test provided

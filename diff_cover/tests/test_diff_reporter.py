@@ -379,6 +379,22 @@ class GitDiffReporterTest(unittest.TestCase):
         lines_changed = self.diff.lines_changed('subdir/src.py')
         self.assertEqual(lines_changed, [16, 17, 18, 19])
 
+    def test_inclusion_list(self):
+        unstaged_input = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output('', '', unstaged_input)
+
+        self.assertEqual(3, len(self.diff._get_included_diff_results()))
+        self.assertEqual(['', '', unstaged_input], self.diff._get_included_diff_results())
+
+    def test_ignore_unstaged_inclusion(self):
+        self.diff = GitDiffReporter(git_diff=self._git_diff, ignore_unstaged=True)
+
+        unstaged_input = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output('', '', unstaged_input)
+
+        self.assertEqual(2, len(self.diff._get_included_diff_results()))
+        self.assertEqual(['', ''], self.diff._get_included_diff_results())
+
     def _set_git_diff_output(self, committed_diff,
                              staged_diff, unstaged_diff):
         """

@@ -28,6 +28,7 @@ VIOLATION_CMD_HELP = "Which code quality tool to use"
 INPUT_REPORTS_HELP = "Pep8, pyflakes, flake8, or pylint reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
+IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 
 QUALITY_REPORTERS = {
     'pep8': Pep8QualityReporter,
@@ -84,6 +85,13 @@ def parse_coverage_args(argv):
         type=float,
         default='0',
         help=FAIL_UNDER_HELP
+    )
+
+    parser.add_argument(
+        '--ignore-unstaged',
+        action='store_true',
+        default=False,
+        help=IGNORE_UNSTAGED_HELP
     )
 
     return vars(parser.parse_args(argv))
@@ -149,14 +157,21 @@ def parse_quality_args(argv):
         help=FAIL_UNDER_HELP
     )
 
+    parser.add_argument(
+        '--ignore-unstaged',
+        action='store_true',
+        default=False,
+        help=IGNORE_UNSTAGED_HELP
+    )
+
     return vars(parser.parse_args(argv))
 
 
-def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
+def generate_coverage_report(coverage_xml, compare_branch, html_report=None, ignore_unstaged=False):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
-    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool())
+    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool(), ignore_unstaged=ignore_unstaged)
 
     xml_roots = [cElementTree.parse(xml_root) for xml_root in coverage_xml]
     coverage = XmlCoverageReporter(xml_roots)
@@ -175,11 +190,11 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None):
     return reporter.total_percent_covered()
 
 
-def generate_quality_report(tool, compare_branch, html_report=None):
+def generate_quality_report(tool, compare_branch, html_report=None, ignore_unstaged=False):
     """
     Generate the quality report, using kwargs from `parse_args()`.
     """
-    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool())
+    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool(), ignore_unstaged=ignore_unstaged)
 
     if html_report is not None:
         reporter = HtmlQualityReportGenerator(tool, diff)
@@ -222,6 +237,7 @@ def main(argv=None, directory=None):
             arg_dict['coverage_xml'],
             arg_dict['compare_branch'],
             html_report=arg_dict['html_report'],
+            ignore_unstaged=arg_dict['ignore_unstaged'],
         )
 
         if percent_covered >= fail_under:
@@ -258,7 +274,8 @@ def main(argv=None, directory=None):
                 percent_passing = generate_quality_report(
                     reporter,
                     arg_dict['compare_branch'],
-                    arg_dict['html_report']
+                    arg_dict['html_report'],
+                    arg_dict['ignore_unstaged'],
                 )
                 if percent_passing >= fail_under:
                     return 0
