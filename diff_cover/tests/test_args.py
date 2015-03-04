@@ -1,7 +1,30 @@
 from __future__ import unicode_literals
+import contextlib
+import sys
 from mock import Mock, patch
 from diff_cover.tool import parse_coverage_args, parse_quality_args, main
 from diff_cover.tests.helpers import unittest
+
+
+@contextlib.contextmanager
+def nostderr():
+    """
+    Context manager to suppress standard error
+    http://stackoverflow.com/questions/1809958/hide-stderr-output-in-unit-tests
+    """
+    savestderr = sys.stderr
+
+    class Devnull(object):
+        """
+        Mock class to suppress stderr
+        """
+        def write(self, _):
+            pass
+    sys.stderr = Devnull()
+    try:
+        yield
+    finally:
+        sys.stderr = savestderr
 
 
 class ParseArgsTest(unittest.TestCase):
@@ -46,8 +69,8 @@ class ParseArgsTest(unittest.TestCase):
 
         for argv in invalid_argv:
             with self.assertRaises(SystemExit):
-                print("args = {0}".format(argv))
-                parse_coverage_args(argv)
+                with nostderr():
+                    parse_coverage_args(argv)
 
 
 class ParseQualityArgsTest(unittest.TestCase):
