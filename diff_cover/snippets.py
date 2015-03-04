@@ -170,7 +170,7 @@ class Snippet(object):
 
         return [
             Snippet(tokens, src_path, start, violation_lines)
-            for (start, _), tokens in six.iteritems(token_groups)
+            for (start, _), tokens in sorted(token_groups.items())
         ]
 
     @classmethod
