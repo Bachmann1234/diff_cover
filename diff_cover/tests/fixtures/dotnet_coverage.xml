@@ -2,6 +2,7 @@
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
 <coverage line-rate="0.75" branch-rate="1" lines-covered="9" lines-valid="12" branches-covered="0" branches-valid="0" complexity="0" version="0" timestamp="1410969572">
   <sources>
+    <source>--source</source>
     <source>/code/samplediff/SampleApp</source>
   </sources>
   <packages>
