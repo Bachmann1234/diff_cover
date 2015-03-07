@@ -1,4 +1,10 @@
-2/4/2014 v0.7.4
+3/7/2015 v0.7.5
+
+   * Ensure all sources are captured when dealing with non python cobertura files. Thanks @jfairley
+   * Suppress error output on tests when that output is expected
+   * Adds posargs to allow you to configure test runs more easily. Thanks @nedbat
+
+2/4/2015 v0.7.4
 
    * Fixed bug in pylint support around duplciate code issues
    * Added ability to ignore unstaged changes Thanks DanCardin
