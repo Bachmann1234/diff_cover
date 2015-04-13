@@ -286,7 +286,7 @@ Originally created with the support of `edX
 .. |requirements-status| image:: https://requires.io/github/Bachmann1234/diff-cover/requirements.png?branch=master
     :target: https://requires.io/github/Bachmann1234/diff-cover/requirements/?branch=master
     :alt: Requirements Status
-.. |docs| image:: https://readthedocs.org/projects/docs/badge/
+.. |docs| image:: https://readthedocs.org/projects/diff-cover/badge/
     :alt: Documentation Status
     :scale: 100%
-    :target: https://readthedocs.org/projects/docs/badge/
+    :target: https://readthedocs.org/projects/diff-cover/badge/
