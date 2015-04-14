@@ -1,4 +1,4 @@
-diff-cover |build-status| |coverage-status| |requirements-status|
+diff-cover |build-status| |coverage-status| |requirements-status| |docs-status|
 =================================================================
 
 Automatically find diff lines that need test coverage.
@@ -286,7 +286,7 @@ Originally created with the support of `edX
 .. |requirements-status| image:: https://requires.io/github/Bachmann1234/diff-cover/requirements.png?branch=master
     :target: https://requires.io/github/Bachmann1234/diff-cover/requirements/?branch=master
     :alt: Requirements Status
-.. |docs| image:: https://readthedocs.org/projects/diff-cover/badge/
+.. |docs-status| image:: https://readthedocs.org/projects/diff-cover/badge/
     :alt: Documentation Status
     :scale: 100%
     :target: https://readthedocs.org/projects/diff-cover/badge/
