@@ -289,4 +289,4 @@ Originally created with the support of `edX
 .. |docs-status| image:: https://readthedocs.org/projects/diff-cover/badge/
     :alt: Documentation Status
     :scale: 100%
-    :target: https://readthedocs.org/projects/diff-cover/badge/
+    :target: http://diff-cover.readthedocs.org/en/latest/
