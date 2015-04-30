@@ -579,6 +579,11 @@ class Flake8QualityReporterTest(unittest.TestCase):
                 ../new_file.py:20:1: C901 'MyModel.mymethod' is too complex (14)
                 ../new_file.py:50:1: N801 class names should use CapWords convention
                 ../new_file.py:60:10: T000 Todo note found.
+                ../new_file.py:70:0: I100 statements are in the wrong order.
+                ../new_file.py:80:0: B901 blind except: statement
+                ../new_file.py:90:0: D207 Docstring is under-indented
+                ../new_file.py:100:0: S100 Snippet found
+                ../new_file.py:110:0: Q000 Remove Single quotes
             """).strip() + '\n'
         _mock_communicate.return_value = (
             (return_string.encode('utf-8'), b''))
@@ -602,7 +607,12 @@ class Flake8QualityReporterTest(unittest.TestCase):
             Violation(10, 'F841 local variable name is assigned to but never used'),
             Violation(20, "C901 'MyModel.mymethod' is too complex (14)"),
             Violation(50, 'N801 class names should use CapWords convention'),
-            Violation(60, 'T000 Todo note found.')
+            Violation(60, 'T000 Todo note found.'),
+            Violation(70, 'I100 statements are in the wrong order.'),
+            Violation(80, 'B901 blind except: statement'),
+            Violation(90, 'D207 Docstring is under-indented'),
+            Violation(100, 'S100 Snippet found'),
+            Violation(110, 'Q000 Remove Single quotes'),
         ]
 
         self.assertEqual(expected_violations, quality.violations('../new_file.py'))
