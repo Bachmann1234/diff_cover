@@ -410,7 +410,7 @@ class Flake8QualityReporter(BaseQualityReporter):
     """
     COMMAND = 'flake8'
     EXTENSIONS = ['py']
-    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EWFCNT]\d{3}.*)$')
+    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$')
 
 
 class PylintQualityReporter(BaseQualityReporter):
