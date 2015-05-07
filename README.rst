@@ -1,5 +1,5 @@
 diff-cover |build-status| |coverage-status| |requirements-status| |docs-status|
-=================================================================
+===============================================================================
 
 Automatically find diff lines that need test coverage.
 Also finds diff lines that have violations (according to tools such as pep8,
