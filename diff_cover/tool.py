@@ -13,7 +13,7 @@ from diff_cover.git_path import GitPathTool
 from diff_cover.violations_reporter import (
     XmlCoverageReporter, Pep8QualityReporter,
     PyflakesQualityReporter, PylintQualityReporter,
-    Flake8QualityReporter
+    Flake8QualityReporter, JsHintQualityReporter
 )
 from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
@@ -35,6 +35,7 @@ QUALITY_REPORTERS = {
     'pyflakes': PyflakesQualityReporter,
     'pylint': PylintQualityReporter,
     'flake8': Flake8QualityReporter,
+    'jshint': JsHintQualityReporter,
 }
 
 

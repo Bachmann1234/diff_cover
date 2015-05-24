@@ -505,6 +505,15 @@ class PylintQualityReporter(BaseQualityReporter):
         return violations_dict
 
 
+class JsHintQualityReporter(BaseQualityReporter):
+    """
+    Report JSHint violations.
+    """
+    COMMAND = 'jshint'
+    EXTENSIONS = ['js']
+    VIOLATION_REGEX = re.compile(r'^([^:]+): line (\d+), col (\d+), (.*)$')
+
+
 class QualityReporterError(Exception):
     """
     A quality reporter command produced an error.
