@@ -9,7 +9,8 @@ from six import BytesIO, StringIO
 import six
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
-    QualityReporterError, Flake8QualityReporter
+    QualityReporterError, Flake8QualityReporter, JsHintQualityReporter, \
+    BaseQualityReporter
 from diff_cover.tests.helpers import unittest
 
 
@@ -976,7 +977,191 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
 
 
+class JsHintQualityReporterTest(unittest.TestCase):
+    """
+    JsHintQualityReporter tests. Assumes JsHint is not available as a python library,
+    but is available on the commandline.
+    """
+
+    def setUp(self):
+        # Mock patch the installation of jshint
+        self._mock_command_simple = patch.object(JsHintQualityReporter, '_run_command_simple').start()
+        self._mock_command_simple.return_value = 0
+        # Mock patch the jshint results
+        self._mock_communicate = patch.object(subprocess, 'Popen').start()
+        self.subproc_mock = MagicMock()
+        self.subproc_mock.returncode = 0
+
+    def tearDown(self):
+        """
+        Undo all patches
+        """
+        patch.stopall()
+
+    def test_quality(self):
+        """
+        Test basic scenarios, including special characters that would appear in JavaScript and mixed quotation marks
+        """
+
+        # Patch the output of `jshint`
+        return_string = '\n' + dedent("""
+                ../test_file.js: line 3, col 9, Missing "use strict" statement.
+                ../test_file.js: line 10, col 17, '$hi' is defined but never used.
+            """).strip() + '\n'
+        self.subproc_mock.communicate.return_value = (
+            (return_string.encode('utf-8'), b''))
+        self._mock_communicate.return_value = self.subproc_mock
+
+        # Parse the report
+        quality = JsHintQualityReporter('jshint', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'jshint')
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('../blah.js'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(3, 'Missing "use strict" statement.'),
+            Violation(10, "'$hi' is defined but never used."),
+        ]
+
+        self.assertEqual(expected_violations, quality.violations('../test_file.js'))
+
+    def test_no_quality_issues_newline(self):
+
+        # Patch the output of `jshint`
+        self.subproc_mock.communicate.return_value = (b'\n', b'')
+        self._mock_communicate.return_value = self.subproc_mock
+
+        # Parse the report
+        quality = JsHintQualityReporter('jshint', [])
+        self.assertEqual([], quality.violations('test-file.js'))
+
+    def test_no_quality_issues_emptystring(self):
+
+        # Patch the output of `jshint`
+        self.subproc_mock.communicate.return_value = (b'', b'')
+        self._mock_communicate.return_value = self.subproc_mock
+
+        # Parse the report
+        quality = JsHintQualityReporter('jshint', [])
+        self.assertEqual([], quality.violations('file1.js'))
+
+    def test_quality_error(self):
+
+        # Override the subprocess return code to a failure
+        self.subproc_mock.returncode = 1
+
+        # Patch the output of `jshint`
+        self.subproc_mock.communicate.return_value = (b"", 'whoops Ƕئ'.encode('utf-8'))
+        self._mock_communicate.return_value = self.subproc_mock
+
+        # Parse the report
+        quality = JsHintQualityReporter('jshint', [])
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'jshint')
+        with self.assertRaises(QualityReporterError) as ex:
+            quality.violations('file1.js')
+        self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+
+    def test_no_such_file(self):
+        quality = JsHintQualityReporter('jshint', [])
+
+        # Expect that we get no results
+        result = quality.violations('')
+        self.assertEqual(result, [])
+
+    def test_no_js_file(self):
+        quality = JsHintQualityReporter('jshint', [])
+        file_paths = ['file1.py', 'subdir/file2.java']
+        # Expect that we get no results because no JS files
+        for path in file_paths:
+            result = quality.violations(path)
+            self.assertEqual(result, [])
+
+    def test_quality_pregenerated_report(self):
+
+        # When the user provides us with a pre-generated jshint report
+        # then use that instead of calling jshint directly.
+        jshint_reports = [
+            BytesIO(('\n' + dedent("""
+                path/to/file.js: line 3, col 9, Missing "use strict" statement.
+                path/to/file.js: line 10, col 130, Line is too long.
+                another/file.js: line 1, col 1, 'require' is not defined.
+            """).strip() + '\n').encode('utf-8')),
+
+            BytesIO(('\n' + dedent(u"""
+                path/to/file.js: line 12, col 14, \u9134\u1912
+                path/to/file.js: line 10, col 17, '$hi' is defined but never used.
+            """).strip() + '\n').encode('utf-8')),
+        ]
+
+        # Parse the report
+        quality = JsHintQualityReporter('jshint', jshint_reports)
+
+        # Measured_lines is undefined for
+        # a quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('path/to/file.js'), None)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(3, u'Missing "use strict" statement.'),
+            Violation(10, u"Line is too long."),
+            Violation(10, u"'$hi' is defined but never used."),
+            Violation(12, u"\u9134\u1912")
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.js')
+
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
+
+    def test_not_installed(self):
+        """
+        If jshint is not available via commandline, it should raise an EnvironmentError
+        """
+        self._mock_command_simple = patch.object(JsHintQualityReporter, '_run_command_simple').start()
+        self._mock_command_simple.return_value = 1
+        with self.assertRaises(EnvironmentError):
+            JsHintQualityReporter('jshint', [])
+
+
+class SimpleCommandTestCase(unittest.TestCase):
+    """
+    Tests that the exit code detected by the method is passed as the return value of the method.
+    """
+
+    def setUp(self):
+        self._mock_communicate = patch.object(subprocess, 'Popen').start()
+        self.subproc_mock = MagicMock()
+
+    def test_run_simple_failure(self):
+        # command_simple should fail
+        self.subproc_mock.returncode = 127
+        self._mock_communicate.return_value = self.subproc_mock
+        # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
+        bad_command = BaseQualityReporter('collections', [])._run_command_simple('foo')  # pylint: disable=protected-access
+        self.assertEquals(bad_command, 127)
+
+    def test_run_simple_success(self):
+        self.subproc_mock.returncode = 0
+        self._mock_communicate.return_value = self.subproc_mock
+        # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
+        good_command = BaseQualityReporter('collections', [])._run_command_simple('foo')  # pylint: disable=protected-access
+        self.assertEquals(good_command, 0)
+
+
 class SubprocessErrorTestCase(unittest.TestCase):
+    """
+    Error in subprocess call(s)
+    """
     def setUp(self):
         # when you create a new subprocess.Popen() object and call .communicate()
         # on it, raise an OSError

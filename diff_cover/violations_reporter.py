@@ -222,6 +222,7 @@ class BaseQualityReporter(BaseViolationReporter):
     (provided by subclasses).
     """
     COMMAND = ''
+    DISCOVERY_COMMAND = ''
     OPTIONS = []
 
     # Encoding of the stdout from the command
@@ -256,9 +257,7 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         super(BaseQualityReporter, self).__init__(name)
         # Test if the tool requested is installed
-        # Assumes in can be imported with the same name.
-        # This applies to all our tools so far
-        __import__(self._name)
+        self._confirm_installed(name)
         self._info_cache = defaultdict(list)
         self.user_options = user_options
 
@@ -314,6 +313,13 @@ class BaseQualityReporter(BaseViolationReporter):
         for src_path, violations in six.iteritems(violations_dict):
             self._info_cache[src_path].extend(violations)
 
+    def _confirm_installed(self, name):
+        """
+        Assumes it can be imported with the same name.
+        This applies to all python tools so far
+        """
+        __import__(name)
+
     def _run_command(self, src_path):
         """
         Run the quality command and return its output as a unicode string.
@@ -322,7 +328,6 @@ class BaseQualityReporter(BaseViolationReporter):
         encoding = sys.getfilesystemencoding()
         user_options = [self.user_options] if self.user_options else []
         command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(encoding)]
-
         try:
             process = subprocess.Popen(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -338,6 +343,17 @@ class BaseQualityReporter(BaseViolationReporter):
             raise QualityReporterError(stderr.decode(encoding))
 
         return stdout.strip().decode(self.STDOUT_ENCODING, 'replace')
+
+    def _run_command_simple(self, command):
+        """
+        Returns command's exit code.
+        """
+        process = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+        )
+        process.communicate()
+        exit_code = process.returncode
+        return exit_code
 
     def _parse_output(self, output, src_path=None):
         """
@@ -503,6 +519,26 @@ class PylintQualityReporter(BaseQualityReporter):
                         violations_dict[pylint_src_path].append(violation)
 
         return violations_dict
+
+
+class JsHintQualityReporter(BaseQualityReporter):
+    """
+    Report JSHint violations.
+    """
+    COMMAND = 'jshint'
+    # The following command can confirm jshint is installed
+    DISCOVERY_COMMAND = 'jshint -v'
+    EXTENSIONS = ['js']
+    VIOLATION_REGEX = re.compile(r'^([^:]+): line (\d+), col \d+, (.*)$')
+
+    def _confirm_installed(self, name):
+        """
+        Override base method. Confirm the tool is installed by running this command and
+        getting exit 0. Otherwise, raise an Environment Error.
+        """
+        if self._run_command_simple(self.DISCOVERY_COMMAND) == 0:
+            return
+        raise EnvironmentError
 
 
 class QualityReporterError(Exception):
