@@ -1,3 +1,7 @@
+9/12/2015 v0.8.1
+
+   * Fix the main method to still execute in windows. Thanks to @evanunderscore for catching this bug
+
 6/1/2015 v0.8.0
 
    * Add JSHint to diff-quality. Thanks @benpatterson
