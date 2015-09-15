@@ -172,6 +172,17 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             ['diff-cover', 'coverage.xml']
         )
 
+    def test_lua_coverage(self):
+        """
+        coverage report shows that diff-cover needs to normalize
+        paths read in
+        """
+        self._check_console_report(
+            'git_diff_lua.txt',
+            'lua_console_report.txt',
+            ['diff-cover', 'luacoverage.xml']
+        )
+
     def test_fail_under_console(self):
         self._check_console_report(
             'git_diff_add.txt',

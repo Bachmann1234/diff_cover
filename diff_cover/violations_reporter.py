@@ -10,6 +10,7 @@ import sys
 import os
 import six
 import itertools
+import posixpath
 from diff_cover.git_path import GitPathTool
 
 
@@ -78,6 +79,21 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
 
+    @staticmethod
+    def _to_unix_path(path):
+        """
+        Tries to ensure tha the path is a normalized unix path.
+        This seems to be the solution cobertura used....
+        https://github.com/cobertura/cobertura/blob/642a46eb17e14f51272c6962e64e56e0960918af/cobertura/src/main/java/net/sourceforge/cobertura/instrument/ClassPattern.java#L84
+
+        I know of at least one case where this will fail (\\) is allowed in unix paths.
+        But I am taking the bet that this is not common. We deal with source code.
+
+        :param path: string of the path to convert
+        :return: the unix version of that path
+        """
+        return posixpath.normpath(path.replace("\\", '/'))
+
     def _get_classes(self, xml_document, src_path):
         """
         Given a path and parsed xml_document provides class nodes
@@ -96,12 +112,12 @@ class XmlCoverageReporter(BaseViolationReporter):
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
         # search for `violations_reporter.py`
-        src_rel_path = GitPathTool.relative_path(src_path)
+        src_rel_path = self._to_unix_path(GitPathTool.relative_path(src_path))
 
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
-        src_abs_path = GitPathTool.absolute_path(src_path)
+        src_abs_path = self._to_unix_path(GitPathTool.absolute_path(src_path))
 
         # cobertura sometimes provides the sources for the measurements
         # within it. If we have that we outta use it
@@ -114,16 +130,18 @@ class XmlCoverageReporter(BaseViolationReporter):
         classes = (
             [clazz for clazz in classes if
              src_abs_path in [
-                 os.path.join(
-                     source,
-                     clazz.get('filename')
+                 self._to_unix_path(
+                     os.path.join(
+                         source,
+                         clazz.get('filename')
+                     )
                  ) for source in sources]]
             or
             [clazz for clazz in classes if
-             clazz.get('filename') == src_abs_path]
+             self._to_unix_path(clazz.get('filename')) == src_abs_path]
             or
             [clazz for clazz in classes if
-             clazz.get('filename') == src_rel_path]
+             self._to_unix_path(clazz.get('filename')) == src_rel_path]
         )
         return classes
 

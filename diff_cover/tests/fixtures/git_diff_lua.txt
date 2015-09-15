@@ -1,0 +1,13 @@
+diff --git a/scripts/maths.lua b/scripts/maths.lua
+index d31c441..bcd11a9 100644
+--- a/scripts/maths.lua
++++ b/scripts/maths.lua
+@@ -8,4 +8,8 @@ function maths.subber(a, b)
+    return a - b
+ end
+
++function maths.mult(a,b)
++   return a * b
++end
++
+ return maths
