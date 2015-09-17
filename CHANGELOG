@@ -1,3 +1,8 @@
+9/16/2015 v0.8.2
+
+   * Fix handling of windows paths in cobertura files. Thanks to @evanunderscore for catching and reviewing this bug
+      catching several flaws in my attempts to deal with this :-D
+
 9/12/2015 v0.8.1
 
    * Fix the main method to still execute in windows. Thanks to @evanunderscore for catching this bug
@@ -73,7 +78,7 @@
     * Diff quality no longer requires every potential quality tool to be installed
 
 7/5/2014 v0.5.4
-	
+
     * Fix bug when writing report to stdout. Ensure that all file like objects that get passed into the report generator take bytes
     * Run diff cover over the code in each language
 
@@ -154,7 +159,7 @@
 
 9/1/13 v0.2.2
 
-    * Fixed a bug that would cause multiple coverage reports to 
+    * Fixed a bug that would cause multiple coverage reports to
       always show 100% coverage.
 
     * Fixed bug when running diff cover during a merge conflict (Issue #41)
