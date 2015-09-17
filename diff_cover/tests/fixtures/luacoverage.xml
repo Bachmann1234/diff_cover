@@ -1,0 +1,34 @@
+<coverage line-rate="0.90909090909091" version="1.9" branch-rate="0" timestamp="1442271411000">
+    <packages>
+        <package line-rate="0.875" name="" branch-rate="0" complexity="0">
+            <classes>
+                <class line-rate="0.875" name=".\scripts\maths.lua" branch-rate="0" complexity="0" filename=".\scripts\maths.lua">
+                    <methods/>
+                    <lines>
+                        <line number="1" branch="false" hits="1"/>
+                        <line number="3" branch="false" hits="1"/>
+                        <line number="4" branch="false" hits="1"/>
+                        <line number="7" branch="false" hits="1"/>
+                        <line number="8" branch="false" hits="1"/>
+                        <line number="11" branch="false" hits="1"/>
+                        <line number="12" branch="false" hits="0"/>
+                        <line number="15" branch="false" hits="1"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+        <package line-rate="1" name="tests" branch-rate="0" complexity="0">
+            <classes>
+                <class line-rate="1" name="test.lua" branch-rate="0" complexity="0" filename="tests/test.lua">
+                    <methods/>
+                    <lines>
+                        <line number="1" branch="false" hits="1"/>
+                        <line number="3" branch="false" hits="1"/>
+                        <line number="4" branch="false" hits="1"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
+    <sources/>
+</coverage>

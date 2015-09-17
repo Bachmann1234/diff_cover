@@ -1,0 +1,10 @@
+-------------
+Diff Coverage
+Diff: origin/master...HEAD, staged, and unstaged changes
+-------------
+scripts/maths.lua (50.0%): Missing lines 12
+-------------
+Total:   2 lines
+Missing: 1 line
+Coverage: 50%
+-------------

@@ -112,7 +112,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         return included
 
-
     def _git_diff(self):
         """
         Run `git diff` and returns a dict in which the keys
@@ -137,7 +136,6 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path in diff_dict.keys():
-
                     added_lines, deleted_lines = diff_dict[src_path]
 
                     # Remove any lines from the dict that have been deleted
