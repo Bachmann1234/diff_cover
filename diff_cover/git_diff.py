@@ -33,10 +33,8 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute([
-            'git', 'diff',
-            "{branch}...HEAD".format(branch=compare_branch),
-            '--no-ext-diff'
+        return self._run_diff([
+            '{branch}...HEAD'.format(branch=compare_branch),
         ])
 
     def diff_unstaged(self):
@@ -47,7 +45,7 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', '--no-ext-diff'])
+        return self._run_diff([])
 
     def diff_staged(self):
         """
@@ -57,16 +55,17 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', '--cached', '--no-ext-diff'])
+        return self._run_diff(['--cached'])
 
-    def _execute(self, command):
+    def _run_diff(self, args):
         """
-        Execute `command` (list of command components)
-        and returns the output.
+        Execute `git diff` with `args` and returns the output.
 
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
+        command = ['git', '-c', 'diff.mnemonicprefix=no', 'diff',
+                   '--no-ext-diff'] + args
         stdout_pipe = self._subprocess.PIPE
         process = self._subprocess.Popen(
             command, stdout=stdout_pipe,
