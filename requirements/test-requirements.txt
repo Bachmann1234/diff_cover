@@ -5,4 +5,5 @@ coverage
 pep8
 flake8
 pyflakes
+prospector
 -r requirements.txt
