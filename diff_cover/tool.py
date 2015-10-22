@@ -231,7 +231,7 @@ def main(argv=None, directory=None):
 
     GitPathTool.set_cwd(directory)
 
-    if 'diff-cover' in progname:
+    if progname.endswith('diff-cover'):
         arg_dict = parse_coverage_args(argv[1:])
         fail_under = arg_dict.get('fail_under')
         percent_covered = generate_coverage_report(
@@ -247,7 +247,7 @@ def main(argv=None, directory=None):
             LOGGER.error("Failure. Coverage is below {0}%.".format(fail_under))
             return 1
 
-    elif 'diff-quality' in progname:
+    elif progname.endswith('diff-quality'):
         arg_dict = parse_quality_args(argv[1:])
         fail_under = arg_dict.get('fail_under')
         tool = arg_dict['violations']
