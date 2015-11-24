@@ -36,6 +36,7 @@ class GitDiffTool(object):
         return self._execute([
             'git', 'diff',
             "{branch}...HEAD".format(branch=compare_branch),
+            '--no-color',
             '--no-ext-diff'
         ])
 
@@ -47,7 +48,7 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', '--no-ext-diff'])
+        return self._execute(['git', 'diff', '--no-color', '--no-ext-diff'])
 
     def diff_staged(self):
         """
@@ -57,7 +58,7 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', '--cached', '--no-ext-diff'])
+        return self._execute(['git', 'diff', '--cached', '--no-color', '--no-ext-diff'])
 
     def _execute(self, command):
         """
