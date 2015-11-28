@@ -10,7 +10,7 @@ import six
 from diff_cover.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
     QualityReporterError, Flake8QualityReporter, JsHintQualityReporter, \
-    BaseQualityReporter
+    BaseQualityReporter, ProspectorQualityReporter
 from diff_cover.tests.helpers import unittest
 
 
@@ -708,7 +708,10 @@ class Flake8QualityReporterTest(unittest.TestCase):
             self.assertIn(expected, actual_violations)
 
 
-class PylintQualityReporterTest(unittest.TestCase):
+class PylintTestMixin(object):
+    """
+    Tests shared between pylint and prospector (using pylint output).
+    """
 
     def tearDown(self):
         """
@@ -717,14 +720,14 @@ class PylintQualityReporterTest(unittest.TestCase):
         patch.stopall()
 
     def test_no_such_file(self):
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -769,7 +772,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pylint')
@@ -795,7 +798,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             file.py:2: [W0612, cls_name.func_\u9492] Unused variable '\u2920'
         """).encode('utf-8'), b'')
 
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
         violations = quality.violations(u'file_\u6729.py')
         self.assertEqual(violations, [
             Violation(616, u"W1401: Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix."),
@@ -813,7 +816,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Since we are replacing characters we can't interpet, this should
         # return a valid string with the char replaced with '?'
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
         violations = quality.violations(u'file.py')
         self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
 
@@ -825,7 +828,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         """).encode('utf-8'), '')
 
         # None of the violations have a valid line number, so they should all be skipped
-        violations = PylintQualityReporter('pylint', []).violations(u'file.py')
+        violations = self.reporter('pylint', []).violations(u'file.py')
         self.assertEqual(violations, [])
 
     def test_quality_deprecation_warning(self):
@@ -845,7 +848,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = subproc_mock
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
         actual_violations = quality.violations('file1.py')
 
         # Assert that pylint successfully runs and finds 2 violations
@@ -862,13 +865,88 @@ class PylintQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = subproc_mock
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
 
         # Expect an error
         self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
 
+    def test_no_quality_issues_newline(self):
+
+        # Patch the output of `pylint`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b'\n', b'')
+
+        # Parse the report
+        quality = self.reporter('pylint', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_no_quality_issues_emptystring(self):
+
+        # Patch the output of `pylint`
+        _mock_communicate = patch.object(Popen, 'communicate').start()
+        _mock_communicate.return_value = (b'', b'')
+
+        # Parse the report
+        quality = self.reporter('pylint', [])
+        self.assertEqual([], quality.violations('file1.py'))
+
+    def test_quality_pregenerated_report(self):
+
+        # When the user provides us with a pre-generated pylint report
+        # then use that instead of calling pylint directly.
+        pylint_reports = [
+            BytesIO(dedent(u"""
+                path/to/file.py:1: [C0111] Missing docstring
+                path/to/file.py:57: [W0511] TODO the name of this method is a little bit confusing
+                another/file.py:41: [W1201, assign_default_role] Specify string format arguments as logging function parameters
+                another/file.py:175: [C0322, Foo.bar] Operator not preceded by a space
+                        x=2+3
+                          ^
+                        Unicode: \u9404 \u1239
+                another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
+            """).strip().encode('utf-8')),
+
+            BytesIO(dedent(u"""
+            path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
+            another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
+            """).strip().encode('utf-8'))
+        ]
+
+        # Generate the violation report
+        quality = self.reporter('pylint', pylint_reports)
+
+        # Expect that we get the right violations
+        expected_violations = [
+            Violation(1, u'C0111: Missing docstring'),
+            Violation(57, u'W0511: TODO the name of this method is a little bit confusing'),
+            Violation(183, u'C0103: Foo.bar.gettag: Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)')
+        ]
+
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('path/to/file.py')
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
+
+    def test_quality_pregenerated_report_continuation_char(self):
+
+        # The report contains a non-ASCII continuation char
+        pylint_reports = [BytesIO(b"file.py:2: [W1401] Invalid char '\xc3'")]
+
+        # Generate the violation report
+        quality = self.reporter('pylint', pylint_reports)
+        violations = quality.violations('file.py')
+
+        # Expect that the char is replaced
+        self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
+
+
+class PylintQualityReporterTest(PylintTestMixin, unittest.TestCase):
+    reporter = PylintQualityReporter
+
     def test_legacy_pylint_compatibility(self):
-        quality = PylintQualityReporter('pylint', [])
+        quality = self.reporter('pylint', [])
         _mock_communicate = patch.object(Popen, 'communicate').start()
         expected_options = [quality.MODERN_OPTIONS, quality.LEGACY_OPTIONS]
 
@@ -905,76 +983,13 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(quality.OPTIONS, quality.LEGACY_OPTIONS)
         self.assertEqual(_mock_communicate.call_count, 2)
 
-    def test_no_quality_issues_newline(self):
 
-        # Patch the output of `pylint`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'\n', b'')
-
-        # Parse the report
-        quality = PylintQualityReporter('pylint', [])
-        self.assertEqual([], quality.violations('file1.py'))
-
-    def test_no_quality_issues_emptystring(self):
-
-        # Patch the output of `pylint`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'', b'')
-
-        # Parse the report
-        quality = PylintQualityReporter('pylint', [])
-        self.assertEqual([], quality.violations('file1.py'))
-
-    def test_quality_pregenerated_report(self):
-
-        # When the user provides us with a pre-generated pylint report
-        # then use that instead of calling pylint directly.
-        pylint_reports = [
-            BytesIO(dedent(u"""
-                path/to/file.py:1: [C0111] Missing docstring
-                path/to/file.py:57: [W0511] TODO the name of this method is a little bit confusing
-                another/file.py:41: [W1201, assign_default_role] Specify string format arguments as logging function parameters
-                another/file.py:175: [C0322, Foo.bar] Operator not preceded by a space
-                        x=2+3
-                          ^
-                        Unicode: \u9404 \u1239
-                another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
-            """).strip().encode('utf-8')),
-
-            BytesIO(dedent(u"""
-            path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
-            another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
-            """).strip().encode('utf-8'))
-        ]
-
-        # Generate the violation report
-        quality = PylintQualityReporter('pylint', pylint_reports)
-
-        # Expect that we get the right violations
-        expected_violations = [
-            Violation(1, u'C0111: Missing docstring'),
-            Violation(57, u'W0511: TODO the name of this method is a little bit confusing'),
-            Violation(183, u'C0103: Foo.bar.gettag: Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)')
-        ]
-
-        # We're not guaranteed that the violations are returned
-        # in any particular order.
-        actual_violations = quality.violations('path/to/file.py')
-        self.assertEqual(len(actual_violations), len(expected_violations))
-        for expected in expected_violations:
-            self.assertIn(expected, actual_violations)
-
-    def test_quality_pregenerated_report_continuation_char(self):
-
-        # The report contains a non-ASCII continuation char
-        pylint_reports = [BytesIO(b"file.py:2: [W1401] Invalid char '\xc3'")]
-
-        # Generate the violation report
-        quality = PylintQualityReporter('pylint', pylint_reports)
-        violations = quality.violations('file.py')
-
-        # Expect that the char is replaced
-        self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
+class ProspectorQualityReporterTest(PylintTestMixin, unittest.TestCase):
+    """
+    Reuses the pylint tests since we're using pylint as the output format for
+    prospector.
+    """
+    reporter = ProspectorQualityReporter
 
 
 class JsHintQualityReporterTest(unittest.TestCase):

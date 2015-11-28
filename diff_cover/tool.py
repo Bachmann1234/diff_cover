@@ -13,7 +13,8 @@ from diff_cover.git_path import GitPathTool
 from diff_cover.violations_reporter import (
     XmlCoverageReporter, Pep8QualityReporter,
     PyflakesQualityReporter, PylintQualityReporter,
-    Flake8QualityReporter, JsHintQualityReporter
+    Flake8QualityReporter, JsHintQualityReporter,
+    ProspectorQualityReporter
 )
 from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
@@ -36,6 +37,7 @@ QUALITY_REPORTERS = {
     'pylint': PylintQualityReporter,
     'flake8': Flake8QualityReporter,
     'jshint': JsHintQualityReporter,
+    'prospector': ProspectorQualityReporter,
 }
 
 
@@ -104,7 +106,7 @@ def parse_quality_args(argv):
     valid options:
 
         {
-            'violations': pep8 | pyflakes | flake8 | pylint
+            'violations': pep8 | pyflakes | flake8 | pylint | prospector
             'html_report': None | HTML_REPORT
         }
 

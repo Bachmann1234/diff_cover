@@ -539,6 +539,14 @@ class PylintQualityReporter(BaseQualityReporter):
         return violations_dict
 
 
+class ProspectorQualityReporter(PylintQualityReporter):
+    """
+    Report Prospector violations.
+    """
+    COMMAND = 'prospector'
+    OPTIONS = ['-o', 'pylint']
+
+
 class JsHintQualityReporter(BaseQualityReporter):
     """
     Report JSHint violations.
