@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
-from lazy import lazy
 from diff_cover.snippets import Snippet
 import six
 
@@ -49,6 +48,7 @@ class BaseReportGenerator(object):
         """
         self._violations = violations_reporter
         self._diff = diff_reporter
+        self._diff_violations_dict = None
 
         self._cache_violations = None
 
@@ -80,7 +80,7 @@ class BaseReportGenerator(object):
         Return a list of source files in the diff
         for which we have coverage information.
         """
-        return set(src for src, summary in self._diff_violations.items()
+        return set(src for src, summary in self._diff_violations().items()
                    if len(summary.measured_lines) > 0)
 
     def percent_covered(self, src_path):
@@ -90,7 +90,7 @@ class BaseReportGenerator(object):
 
         If we have no coverage information for `src_path`, returns None
         """
-        diff_violations = self._diff_violations.get(src_path)
+        diff_violations = self._diff_violations().get(src_path)
 
         if diff_violations is None:
             return None
@@ -113,7 +113,7 @@ class BaseReportGenerator(object):
         `src_path`, returns an empty list.
         """
 
-        diff_violations = self._diff_violations.get(src_path)
+        diff_violations = self._diff_violations().get(src_path)
 
         if diff_violations is None:
             return []
@@ -127,7 +127,7 @@ class BaseReportGenerator(object):
         """
 
         return sum([len(summary.measured_lines) for summary
-                    in self._diff_violations.values()])
+                    in self._diff_violations().values()])
 
     def total_num_violations(self):
         """
@@ -138,7 +138,7 @@ class BaseReportGenerator(object):
         return sum(
             len(summary.lines)
             for summary
-            in self._diff_violations.values()
+            in self._diff_violations().values()
         )
 
     def total_percent_covered(self):
@@ -155,7 +155,6 @@ class BaseReportGenerator(object):
         else:
             return 100
 
-    @lazy
     def _diff_violations(self):
         """
         Returns a dictionary of the form:
@@ -166,15 +165,17 @@ class BaseReportGenerator(object):
 
         To make this efficient, we cache and reuse the result.
         """
-        return dict(
-            (
-                src_path, DiffViolations(
-                    self._violations.violations(src_path),
-                    self._violations.measured_lines(src_path),
-                    self._diff.lines_changed(src_path),
-                )
-            ) for src_path in self._diff.src_paths_changed()
-        )
+        if not self._diff_violations_dict:
+            self._diff_violations_dict = dict(
+                (
+                    src_path, DiffViolations(
+                        self._violations.violations(src_path),
+                        self._violations.measured_lines(src_path),
+                        self._diff.lines_changed(src_path),
+                    )
+                ) for src_path in self._diff.src_paths_changed()
+            )
+        return self._diff_violations_dict
 
 
 # Set up the template environment
@@ -291,7 +292,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         # Find violation lines
         violation_lines = self.violation_lines(src_path)
-        violations = sorted(self._diff_violations[src_path].violations)
+        violations = sorted(self._diff_violations()[src_path].violations)
 
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
