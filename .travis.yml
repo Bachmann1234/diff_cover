@@ -1,14 +1,14 @@
 language: python
+matrix:
+  include:
+    - python: 3.5
+      env: TOXENV=py35
 env:
   - TOXENV=py26
   - TOXENV=py27
   - TOXENV=py33
   - TOXENV=py34
   - TOXENV=pypy
-matrix:
- include:
-   - python: 3.5
-   env: TOXENV=py35
 install:
   - travis_retry pip install coveralls tox
 script:
