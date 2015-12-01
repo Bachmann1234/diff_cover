@@ -1,3 +1,7 @@
+12/01/2015 v0.8.5
+
+  * Drop lazy to fully support python 3.5 (Thanks @dashea for pointing out the issue)
+
 11/24/2015 v0.8.4
 
   * fix diff-cover when color.ui=always is set on git thanks @Dundee
