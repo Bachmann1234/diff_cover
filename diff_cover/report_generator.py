@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
-from lazy import lazy
 from diff_cover.snippets import Snippet
+import lazy
 import six
 
 
@@ -155,7 +155,7 @@ class BaseReportGenerator(object):
         else:
             return 100
 
-    @lazy
+    @lazy.lazy
     def _diff_violations(self):
         """
         Returns a dictionary of the form:

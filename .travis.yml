@@ -5,8 +5,12 @@ env:
   - TOXENV=py33
   - TOXENV=py34
   - TOXENV=pypy
+matrix:
+ include:
+   - python: 3.5
+   env: TOXENV=py35
 install:
-  - travis_retry pip install coveralls tox==1.6.1
+  - travis_retry pip install coveralls tox
 script:
   - travis_retry tox
 after_success:
