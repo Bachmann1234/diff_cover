@@ -228,10 +228,12 @@ def main(argv=None, directory=None):
             directory = os.getcwd()
 
     progname = argv[0]
+    filename = os.path.basename(progname)
+    name, _ = os.path.splitext(filename)
 
     GitPathTool.set_cwd(directory)
 
-    if progname.endswith('diff-cover'):
+    if 'diff-cover' in name:
         arg_dict = parse_coverage_args(argv[1:])
         fail_under = arg_dict.get('fail_under')
         percent_covered = generate_coverage_report(
@@ -247,7 +249,7 @@ def main(argv=None, directory=None):
             LOGGER.error("Failure. Coverage is below {0}%.".format(fail_under))
             return 1
 
-    elif progname.endswith('diff-quality'):
+    elif 'diff-quality' in name:
         arg_dict = parse_quality_args(argv[1:])
         fail_under = arg_dict.get('fail_under')
         tool = arg_dict['violations']
@@ -297,6 +299,9 @@ def main(argv=None, directory=None):
         else:
             LOGGER.error("Quality tool not recognized: '{0}'".format(tool))
             return 1
+
+    else:
+        assert False, 'Expect diff-cover or diff-quality in {0}'.format(name)
 
 if __name__ == "__main__":
     exit(main())
