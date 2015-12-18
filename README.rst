@@ -1,5 +1,5 @@
-diff-cover |build-status| |coverage-status| |requirements-status| |docs-status|
-===============================================================================
+diff-cover |build-status| |coverage-status| |docs-status|
+=========================================================
 
 Automatically find diff lines that need test coverage.
 Also finds diff lines that have violations (according to tools such as pep8,
@@ -283,9 +283,6 @@ Originally created with the support of `edX
 .. |coverage-status| image:: https://coveralls.io/repos/Bachmann1234/diff-cover/badge.png
     :target: https://coveralls.io/r/Bachmann1234/diff-cover
     :alt: Coverage Status
-.. |requirements-status| image:: https://requires.io/github/Bachmann1234/diff-cover/requirements.png?branch=master
-    :target: https://requires.io/github/Bachmann1234/diff-cover/requirements/?branch=master
-    :alt: Requirements Status
 .. |docs-status| image:: https://readthedocs.org/projects/diff-cover/badge/
     :alt: Documentation Status
     :scale: 100%
