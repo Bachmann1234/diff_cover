@@ -41,9 +41,9 @@ class TestGitPathTool(unittest.TestCase):
         self.assertEqual(path, expected)
 
     def test_absolute_path(self):
-        self._set_git_root(b'/home/user/work/diff-cover\n--encoding=utf-8\n')
-        expected = '/home/user/work/diff-cover/other_package/file.py'
-        cwd = '/home/user/work/diff-cover/diff_cover'
+        self._set_git_root(b'/home/user/work dir/diff-cover\n--encoding=utf-8\n')
+        expected = '/home/user/work dir/diff-cover/other_package/file.py'
+        cwd = '/home/user/work dir/diff-cover/diff_cover'
 
         GitPathTool.set_cwd(cwd)
         path = GitPathTool.absolute_path('other_package/file.py')

@@ -65,8 +65,8 @@ class GitPathTool(object):
         stdout, stderr = process.communicate()
         # Git likes to add the encoding to the end of the command for some reason
         stdout = stdout.strip()
-        git_root = stdout.split()[0] if stdout else u''
         try:
-            return git_root.decode('utf-8')
+            git_root = stdout.decode('utf-8')
         except AttributeError:
-            return git_root
+            git_root = stdout
+        return git_root.split('\n')[0] if stdout else u''
