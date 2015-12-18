@@ -1,3 +1,8 @@
+12/17/2015 v0.8.6
+
+  * Fix for windows users trying to run app (thanks @evanunderscore)
+  * Fix handing source paths that contain spaces (thanks @backupproject for pointing out the bug)
+
 12/01/2015 v0.8.5
 
   * Drop lazy to fully support python 3.5 (Thanks @dashea for pointing out the issue)
