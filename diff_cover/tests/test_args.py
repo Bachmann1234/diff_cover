@@ -140,7 +140,7 @@ class ParseQualityArgsTest(unittest.TestCase):
 
 
 class MainTest(unittest.TestCase):
-    "Tests for the main() function in tool.py"
+    """Tests for the main() function in tool.py"""
 
     def setUp(self):
         patch1 = patch("diff_cover.tool.GitPathTool")
@@ -153,19 +153,7 @@ class MainTest(unittest.TestCase):
             "--violations", "pylint",
             '--options="--foobar"',
         ]
-        fake_pylint_reporter = Mock()
-        reporter_patch = patch.dict("diff_cover.tool.QUALITY_REPORTERS",
-                                    {"pylint": fake_pylint_reporter})
-        gen_report_patch = patch("diff_cover.tool.generate_quality_report",
-                                 return_value=100)
-        with reporter_patch:
-            with gen_report_patch:
-                main(argv)
-
-        self.assertTrue(fake_pylint_reporter.called)
-        call = fake_pylint_reporter.call_args
-        user_options = call[1]["user_options"]
-        self.assertEqual(user_options, "--foobar")
+        self._run_main(argv)
 
     def test_parse_options_without_quotes(self):
         argv = [
@@ -173,6 +161,23 @@ class MainTest(unittest.TestCase):
             "--violations", "pylint",
             '--options=--foobar',
         ]
+        self._run_main(argv)
+
+    def test_parse_prog_name(self):
+        # Windows will give the full path to the tool.
+        argv = [
+            # Using forward slashes so the tests work everywhere.
+            'C:/diff-cover/diff-quality-script.py',
+            '--violations', 'pylint',
+            '--options=--foobar',
+        ]
+        self._run_main(argv)
+
+        # No silent failures if the tool name is unrecognized.
+        with self.assertRaises(AssertionError):
+            main(['diff-foobar'])
+
+    def _run_main(self, argv):
         fake_pylint_reporter = Mock()
         reporter_patch = patch.dict("diff_cover.tool.QUALITY_REPORTERS",
                                     {"pylint": fake_pylint_reporter})
