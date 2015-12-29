@@ -2,20 +2,23 @@
 High-level integration tests of diff-cover tool.
 """
 from __future__ import unicode_literals
+
 import os
 import os.path
-from subprocess import Popen
-from io import BytesIO
-import tempfile
 import shutil
-from diff_cover.git_path import GitPathTool
-from mock import patch, Mock
+import tempfile
+from io import BytesIO
+from subprocess import Popen
+
 import six
-from diff_cover.tool import main, QUALITY_REPORTERS
+from mock import patch, Mock
+
 from diff_cover.diff_reporter import GitDiffError
+from diff_cover.git_path import GitPathTool
 from diff_cover.tests.helpers import fixture_path, \
     assert_long_str_equal, unittest
-from diff_cover.violations_reporter import BaseQualityReporter
+from diff_cover.tool import main, QUALITY_REPORTERS
+from diff_cover.violationsreporters.violations_reporter import BaseQualityReporter
 
 
 class ToolsIntegrationBase(unittest.TestCase):

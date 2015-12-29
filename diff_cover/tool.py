@@ -2,24 +2,27 @@
 Implement the command-line tool interface.
 """
 from __future__ import unicode_literals
+
 import argparse
 import os
 import sys
 from xml.etree import cElementTree
+
+import six
+
 import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
-from diff_cover.violations_reporter import (
-    XmlCoverageReporter, Pep8QualityReporter,
-    PyflakesQualityReporter, PylintQualityReporter,
-    Flake8QualityReporter, JsHintQualityReporter
-)
 from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
     HtmlQualityReportGenerator, StringQualityReportGenerator
 )
-import six
+from diff_cover.violationsreporters.violations_reporter import (
+    XmlCoverageReporter, Pep8QualityReporter,
+    PyflakesQualityReporter, PylintQualityReporter,
+    Flake8QualityReporter, JsHintQualityReporter
+)
 
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"

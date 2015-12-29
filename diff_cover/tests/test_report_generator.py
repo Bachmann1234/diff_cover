@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
-import mock
+
 from io import BytesIO
 from textwrap import dedent
+
+import mock
+
 from diff_cover.diff_reporter import BaseDiffReporter
-from diff_cover.violations_reporter import BaseViolationReporter, Violation
 from diff_cover.report_generator import (
     BaseReportGenerator, HtmlReportGenerator,
     StringReportGenerator, TemplateReportGenerator
@@ -11,6 +13,7 @@ from diff_cover.report_generator import (
 from diff_cover.tests.helpers import (
     load_fixture, assert_long_str_equal, unittest
 )
+from diff_cover.violationsreporters.violations_reporter import BaseViolationReporter, Violation
 
 
 class SimpleReportGenerator(BaseReportGenerator):
