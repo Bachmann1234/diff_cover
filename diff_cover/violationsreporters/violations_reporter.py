@@ -8,6 +8,8 @@ import os
 import six
 import itertools
 import posixpath
+
+from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import BaseViolationReporter, BaseQualityReporter, Violation, \
     QualityReporterError
@@ -184,7 +186,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         return self._info_cache[src_path][1]
 
 
-
 class Pep8QualityReporter(BaseQualityReporter):
     """
     Report PEP8 violations.
@@ -230,7 +231,6 @@ class PylintQualityReporter(BaseQualityReporter):
     """
     COMMAND = 'pylint'
     MODERN_OPTIONS = ['--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
-    LEGACY_OPTIONS = ['-f', 'parseable', '--reports=no', '--include-ids=y']
     OPTIONS = MODERN_OPTIONS
     EXTENSIONS = ['py']
     DUPE_CODE_VIOLATION = 'R0801'
@@ -241,17 +241,6 @@ class PylintQualityReporter(BaseQualityReporter):
     VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
     MULTI_LINE_VIOLATION_REGEX = re.compile(r'==(\w|.+):(.*)')
     DUPE_CODE_MESSAGE_REGEX = re.compile(r'Similar lines in (\d+) files')
-
-    def _run_command(self, src_path):
-        try:
-            return super(PylintQualityReporter, self)._run_command(src_path)
-        except QualityReporterError as report_error:
-            # Support earlier pylint version (< 1)
-            if "no such option: --msg-template" in six.text_type(report_error):
-                self.OPTIONS = self.LEGACY_OPTIONS
-                return super(PylintQualityReporter, self)._run_command(src_path)
-            else:
-                raise
 
     def _process_dupe_code_violation(self, lines, current_line, message):
         """
@@ -331,6 +320,6 @@ class JsHintQualityReporter(BaseQualityReporter):
         Override base method. Confirm the tool is installed by running this command and
         getting exit 0. Otherwise, raise an Environment Error.
         """
-        if self._run_command_simple(self.DISCOVERY_COMMAND) == 0:
+        if run_command_for_code(self.DISCOVERY_COMMAND) == 0:
             return
         raise EnvironmentError

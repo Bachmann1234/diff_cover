@@ -7,6 +7,8 @@ import subprocess
 import six
 import sys
 
+from diff_cover.command_runner import execute
+
 
 class GitPathTool(object):
     """
@@ -59,14 +61,5 @@ class GitPathTool(object):
         is the absolute path for the git project root.
         """
         command = ['git', 'rev-parse', '--show-toplevel', '--encoding=utf-8']
-        process = subprocess.Popen(command,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        # Git likes to add the encoding to the end of the command for some reason
-        stdout = stdout.strip()
-        try:
-            git_root = stdout.decode('utf-8')
-        except AttributeError:
-            git_root = stdout
-        return git_root.split('\n')[0] if stdout else u''
+        git_root = execute(command)[0]
+        return git_root.split('\n')[0] if git_root else u''

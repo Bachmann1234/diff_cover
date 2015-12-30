@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 import mock
+
+from diff_cover.command_runner import CommandError
 from diff_cover.git_diff import GitDiffTool, GitDiffError
 from diff_cover.tests.helpers import unittest
 
@@ -9,13 +11,11 @@ class TestGitDiffTool(unittest.TestCase):
     def setUp(self):
 
         # Create mock subprocess to simulate `git diff`
-        self.subprocess = mock.Mock()
         self.process = mock.Mock()
-        self.subprocess.Popen = mock.Mock(return_value=self.process)
-        self.process.communicate = mock.Mock()
-
+        self.subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
+        self.subprocess.Popen.return_value = self.process
         # Create the git diff tool
-        self.tool = GitDiffTool(subprocess_mod=self.subprocess)
+        self.tool = GitDiffTool()
 
     def test_diff_committed(self):
 
@@ -75,13 +75,13 @@ class TestGitDiffTool(unittest.TestCase):
     def test_errors(self):
         self._set_git_diff_output('test output', 'fatal error')
 
-        with self.assertRaises(GitDiffError):
+        with self.assertRaises(CommandError):
             self.tool.diff_unstaged()
 
-        with self.assertRaises(GitDiffError):
+        with self.assertRaises(CommandError):
             self.tool.diff_staged()
 
-        with self.assertRaises(GitDiffError):
+        with self.assertRaises(CommandError):
             self.tool.diff_unstaged()
 
     def _set_git_diff_output(self, stdout, stderr):

@@ -8,6 +8,7 @@ import sys
 
 import six
 
+from diff_cover.command_runner import execute
 
 Violation = namedtuple('Violation', 'line, message')
 
@@ -74,10 +75,6 @@ class BaseQualityReporter(BaseViolationReporter):
     DISCOVERY_COMMAND = ''
     OPTIONS = []
 
-    # Encoding of the stdout from the command
-    # This is application-dependent
-    STDOUT_ENCODING = 'utf-8'
-
     # A list of filetypes to run on.
     EXTENSIONS = []
 
@@ -129,7 +126,9 @@ class BaseQualityReporter(BaseViolationReporter):
             if not any(src_path.endswith(ext) for ext in self.EXTENSIONS):
                 return []
             if src_path not in self._info_cache:
-                output = self._run_command(src_path)
+                user_options = [self.user_options] if self.user_options else []
+                command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(sys.getfilesystemencoding())]
+                output, _ = execute(command)
                 violations_dict = self._parse_output(output, src_path)
                 self._update_cache(violations_dict)
 
@@ -145,7 +144,7 @@ class BaseQualityReporter(BaseViolationReporter):
         """
         for file_handle in report_files:
             # Convert to unicode, replacing unreadable chars
-            contents = file_handle.read().decode(self.STDOUT_ENCODING,
+            contents = file_handle.read().decode('utf-8',
                                                  'replace')
             violations_dict = self._parse_output(contents)
             self._update_cache(violations_dict)
@@ -168,41 +167,6 @@ class BaseQualityReporter(BaseViolationReporter):
         This applies to all python tools so far
         """
         __import__(name)
-
-    def _run_command(self, src_path):
-        """
-        Run the quality command and return its output as a unicode string.
-        """
-        # Encode the path using the filesystem encoding, determined at runtime
-        encoding = sys.getfilesystemencoding()
-        user_options = [self.user_options] if self.user_options else []
-        command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(encoding)]
-        try:
-            process = subprocess.Popen(
-                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
-            stdout, stderr = process.communicate()
-        except OSError:
-            sys.stderr.write(" ".join([cmd.decode(encoding)
-                                       if isinstance(cmd, bytes) else cmd
-                                       for cmd in command]))
-            raise
-
-        if stderr and (process.returncode != 0):
-            raise QualityReporterError(stderr.decode(encoding))
-
-        return stdout.strip().decode(self.STDOUT_ENCODING, 'replace')
-
-    def _run_command_simple(self, command):
-        """
-        Returns command's exit code.
-        """
-        process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
-        process.communicate()
-        exit_code = process.returncode
-        return exit_code
 
     def _parse_output(self, output, src_path=None):
         """

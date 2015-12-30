@@ -5,17 +5,25 @@ import subprocess
 import xml.etree.cElementTree as etree
 from subprocess import Popen
 from textwrap import dedent
+import mock
 
 import six
 from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
+from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.tests.helpers import unittest
-from diff_cover.violationsreporters.base import QualityReporterError
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, Violation, \
     Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
-    Flake8QualityReporter, JsHintQualityReporter, \
-    BaseQualityReporter
+    Flake8QualityReporter, JsHintQualityReporter
+
+
+def _setup_patch(return_value, status_code=0):
+    mocked_process = mock.Mock()
+    mocked_process.returncode = status_code
+    mocked_process.communicate.return_value = return_value
+    mocked_subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
+    mocked_subprocess.Popen.return_value = mocked_process
 
 
 class XmlCoverageReporterTest(unittest.TestCase):
@@ -365,15 +373,14 @@ class Pep8QualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output of `pep8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b"", 'whoops Ƕئ'.encode('utf-8'))
+        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
         quality = Pep8QualityReporter('pep8', [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pep8')
-        with self.assertRaises(QualityReporterError) as ex:
+        with self.assertRaises(CommandError) as ex:
             quality.violations('file1.py')
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
@@ -497,8 +504,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output of `pyflakes`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b"", b'whoops')
+        _setup_patch((b"", b'whoops'), status_code=1)
 
         # Parse the report
         quality = PyflakesQualityReporter('pyflakes', [])
@@ -506,7 +512,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pyflakes')
 
-        self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
+        self.assertRaises(CommandError, quality.violations, 'file1.py')
 
     def test_no_such_file(self):
         quality = PyflakesQualityReporter('pyflakes', [])
@@ -645,15 +651,14 @@ class Flake8QualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output of `flake8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b"", 'whoops Ƕئ'.encode('utf-8'))
+        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
         quality = Flake8QualityReporter('flake8', [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'flake8')
-        with self.assertRaises(QualityReporterError) as ex:
+        with self.assertRaises(CommandError) as ex:
             quality.violations('file1.py')
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
@@ -737,9 +742,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
     def test_quality(self):
         # Patch the output of `pylint`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-
-        _mock_communicate.return_value = (
+        _setup_patch((
             dedent("""
             file1.py:1: [C0111] Missing docstring
             file1.py:1: [C0111, func_1] Missing docstring
@@ -758,7 +761,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             import random
             path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
             """).strip().encode('ascii'), ''
-        )
+        ))
 
         expected_violations = [
             Violation(1, 'C0111: Missing docstring'),
@@ -835,18 +838,11 @@ class PylintQualityReporterTest(unittest.TestCase):
     def test_quality_deprecation_warning(self):
 
         # Patch the output stderr/stdout and returncode of `pylint`
-        _mock_communicate = patch.object(subprocess, 'Popen').start()
-        subproc_mock = MagicMock()
-        # Pylint may raise deprecation warnings on pylint usage itself (such
-        # as pylintrc configuration), but continue evaluating for violations.
-        # Diff-quality, likewise, will continue.
-        subproc_mock.returncode = 0
-        subproc_mock.communicate.return_value = (
+        _setup_patch((
             b'file1.py:1: [C0111] Missing docstring\n'
             b'file1.py:1: [C0111, func_1] Missing docstring',
             b'Foobar: pylintrc deprecation warning'
-        )
-        _mock_communicate.return_value = subproc_mock
+        ), 0)
 
         # Parse the report
         quality = PylintQualityReporter('pylint', [])
@@ -858,56 +854,13 @@ class PylintQualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output stderr/stdout and returncode of `pylint`
-
-        _mock_communicate = patch.object(subprocess, 'Popen').start()
-        subproc_mock = MagicMock()
-        subproc_mock.returncode = 1
-        subproc_mock.communicate.return_value = (b'file1.py:1: [C0111] Missing docstring', b'oops')
-        _mock_communicate.return_value = subproc_mock
+        _setup_patch((b'file1.py:1: [C0111] Missing docstring', b'oops'), status_code=1)
 
         # Parse the report
         quality = PylintQualityReporter('pylint', [])
 
         # Expect an error
-        self.assertRaises(QualityReporterError, quality.violations, 'file1.py')
-
-    def test_legacy_pylint_compatibility(self):
-        quality = PylintQualityReporter('pylint', [])
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        expected_options = [quality.MODERN_OPTIONS, quality.LEGACY_OPTIONS]
-
-        def side_effect():
-            """
-            Assure that the first time we use the modern options, return a failure
-            Then assert the legacy options were set, return ok
-            """
-            index = _mock_communicate.call_count - 1
-            self.assertEqual(quality.OPTIONS, expected_options[index])
-
-            return [(b"", dedent("""
-            Adding some unicode to ensure we parse this correctly: ȼȼȼȼȼȼȼȼȼȼȼ
-            No config file found, using default configuration
-            Usage:  pylint [options] module_or_package
-
-              Check that a module satisfies a coding standard (and more !).
-
-                pylint --help
-
-              Display this help message and exit.
-
-                pylint --help-msg <msg-id>[,<msg-id>]
-
-              Display help messages about given message identifiers and exit.
-
-
-            pylint: error: no such option: --msg-template
-        """).encode('utf-8')), (b'\n', b'')][index]
-
-        _mock_communicate.side_effect = side_effect
-        quality.violations('file1.py')
-        self.assertEqual([], quality.violations('file1.py'))
-        self.assertEqual(quality.OPTIONS, quality.LEGACY_OPTIONS)
-        self.assertEqual(_mock_communicate.call_count, 2)
+        self.assertRaises(CommandError, quality.violations, 'file1.py')
 
     def test_no_quality_issues_newline(self):
 
@@ -989,7 +942,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
 
     def setUp(self):
         # Mock patch the installation of jshint
-        self._mock_command_simple = patch.object(JsHintQualityReporter, '_run_command_simple').start()
+        self._mock_command_simple = patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code').start()
         self._mock_command_simple.return_value = 0
         # Mock patch the jshint results
         self._mock_communicate = patch.object(subprocess, 'Popen').start()
@@ -1056,19 +1009,14 @@ class JsHintQualityReporterTest(unittest.TestCase):
 
     def test_quality_error(self):
 
-        # Override the subprocess return code to a failure
-        self.subproc_mock.returncode = 1
-
-        # Patch the output of `jshint`
-        self.subproc_mock.communicate.return_value = (b"", 'whoops Ƕئ'.encode('utf-8'))
-        self._mock_communicate.return_value = self.subproc_mock
+        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
         quality = JsHintQualityReporter('jshint', [])
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'jshint')
-        with self.assertRaises(QualityReporterError) as ex:
+        with self.assertRaises(CommandError) as ex:
             quality.violations('file1.js')
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
@@ -1131,7 +1079,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         """
         If jshint is not available via commandline, it should raise an EnvironmentError
         """
-        self._mock_command_simple = patch.object(JsHintQualityReporter, '_run_command_simple').start()
+        self._mock_command_simple = patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code').start()
         self._mock_command_simple.return_value = 1
         with self.assertRaises(EnvironmentError):
             JsHintQualityReporter('jshint', [])
@@ -1151,14 +1099,14 @@ class SimpleCommandTestCase(unittest.TestCase):
         self.subproc_mock.returncode = 127
         self._mock_communicate.return_value = self.subproc_mock
         # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
-        bad_command = BaseQualityReporter('collections', [])._run_command_simple('foo')  # pylint: disable=protected-access
+        bad_command = run_command_for_code('foo')  # pylint: disable=protected-access
         self.assertEquals(bad_command, 127)
 
     def test_run_simple_success(self):
         self.subproc_mock.returncode = 0
         self._mock_communicate.return_value = self.subproc_mock
         # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
-        good_command = BaseQualityReporter('collections', [])._run_command_simple('foo')  # pylint: disable=protected-access
+        good_command = run_command_for_code('foo')  # pylint: disable=protected-access
         self.assertEquals(good_command, 0)
 
 
@@ -1171,7 +1119,7 @@ class SubprocessErrorTestCase(unittest.TestCase):
         # on it, raise an OSError
         _mock_Popen = Mock()
         _mock_Popen.return_value.communicate.side_effect = OSError
-        patcher = patch("diff_cover.violationsreporters.base.subprocess.Popen", _mock_Popen)
+        patcher = patch("diff_cover.command_runner.subprocess.Popen", _mock_Popen)
         patcher.start()
         self.addCleanup(patcher.stop)
 

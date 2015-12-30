@@ -10,9 +10,11 @@ import tempfile
 from io import BytesIO
 from subprocess import Popen
 
+import io
 import six
 from mock import patch, Mock
 
+from diff_cover.command_runner import CommandError
 from diff_cover.diff_reporter import GitDiffError
 from diff_cover.git_path import GitPathTool
 from diff_cover.tests.helpers import fixture_path, \
@@ -69,7 +71,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         """
 
         # Patch the output of `git diff`
-        with open(git_diff_path) as git_diff_file:
+        with io.open(git_diff_path, encoding='utf-8') as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
 
         # Create a temporary directory to hold the output HTML report
@@ -83,8 +85,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         self.assertEquals(code, expected_status)
 
         # Check the HTML report
-        with open(expected_html_path) as expected_file:
-            with open(html_report_path) as html_report:
+        with io.open(expected_html_path, encoding='utf-8') as expected_file:
+            with io.open(html_report_path, encoding='utf-8') as html_report:
                 html = html_report.read()
                 expected = expected_file.read()
                 assert_long_str_equal(expected, html, strip=True)
@@ -105,7 +107,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         """
 
         # Patch the output of `git diff`
-        with open(git_diff_path) as git_diff_file:
+        with io.open(git_diff_path, encoding='utf-8') as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
 
         # Capture stdout to a string buffer
@@ -332,7 +334,7 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         self._set_git_diff_output('', 'fatal error')
 
         # Expect an error
-        with self.assertRaises(GitDiffError):
+        with self.assertRaises(CommandError):
             main(['diff-cover', 'coverage.xml'])
 
 
@@ -347,7 +349,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         self._set_git_diff_output('', 'fatal error')
 
         # Expect an error
-        with self.assertRaises(GitDiffError):
+        with self.assertRaises(CommandError):
             main(['diff-quality', '--violations', 'pep8'])
 
     def test_added_file_pep8_html(self):
