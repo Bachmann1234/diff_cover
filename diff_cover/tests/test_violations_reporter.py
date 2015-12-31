@@ -13,9 +13,11 @@ from six import BytesIO, StringIO
 
 from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.tests.helpers import unittest
-from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, Violation, \
-    Pep8QualityReporter, PyflakesQualityReporter, PylintQualityReporter, \
-    Flake8QualityReporter, JsHintQualityReporter
+from diff_cover.violationsreporters.base import QualityReporter
+from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, Violation, pep8_driver, \
+    pyflakes_driver, flake8_driver, JsHintDriver, PylintDriver
+from mock import Mock, patch, MagicMock
+from six import BytesIO, StringIO
 
 
 def _setup_patch(return_value, status_code=0):
@@ -332,7 +334,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
             (return_string.encode('utf-8'), b''))
 
         # Parse the report
-        quality = Pep8QualityReporter('pep8', [])
+        quality = QualityReporter(pep8_driver)
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pep8')
@@ -357,7 +359,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'\n', b'')
 
         # Parse the report
-        quality = Pep8QualityReporter('pep8', [])
+        quality = QualityReporter(pep8_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
@@ -367,7 +369,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'', b'')
 
         # Parse the report
-        quality = Pep8QualityReporter('pep8', [])
+        quality = QualityReporter(pep8_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
@@ -376,7 +378,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
-        quality = Pep8QualityReporter('pep8', [])
+        quality = QualityReporter(pep8_driver)
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pep8')
@@ -385,14 +387,14 @@ class Pep8QualityReporterTest(unittest.TestCase):
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
-        quality = Pep8QualityReporter('pep8', [])
+        quality = QualityReporter(pep8_driver)
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = Pep8QualityReporter('pep8', [])
+        quality = QualityReporter(pep8_driver)
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -417,7 +419,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = Pep8QualityReporter('pep8', pep8_reports)
+        quality = QualityReporter(pep8_driver, reports=pep8_reports)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -462,7 +464,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
             (return_string.encode('utf-8'), b''))
 
         # Parse the report
-        quality = PyflakesQualityReporter('pyflakes', [])
+        quality = QualityReporter(pyflakes_driver)
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pyflakes')
@@ -488,7 +490,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'\n', b'')
 
         # Parse the report
-        quality = PyflakesQualityReporter('pyflakes', [])
+        quality = QualityReporter(pyflakes_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
@@ -498,7 +500,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'', b'')
 
         # Parse the report
-        quality = PyflakesQualityReporter('pyflakes', [])
+        quality = QualityReporter(pyflakes_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
@@ -507,7 +509,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         _setup_patch((b"", b'whoops'), status_code=1)
 
         # Parse the report
-        quality = PyflakesQualityReporter('pyflakes', [])
+        quality = QualityReporter(pyflakes_driver)
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pyflakes')
@@ -515,14 +517,14 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         self.assertRaises(CommandError, quality.violations, 'file1.py')
 
     def test_no_such_file(self):
-        quality = PyflakesQualityReporter('pyflakes', [])
+        quality = QualityReporter(pyflakes_driver)
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = PyflakesQualityReporter('pyflakes', [])
+        quality = QualityReporter(pyflakes_driver)
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -547,7 +549,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = PyflakesQualityReporter('pyflakes', pyflakes_reports)
+        quality = QualityReporter(pyflakes_driver, reports=pyflakes_reports)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -600,7 +602,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
             (return_string.encode('utf-8'), b''))
 
         # Parse the report
-        quality = Flake8QualityReporter('flake8', [])
+        quality = QualityReporter(flake8_driver)
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'flake8')
@@ -635,7 +637,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'\n', b'')
 
         # Parse the report
-        quality = Flake8QualityReporter('flake8', [])
+        quality = QualityReporter(flake8_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
@@ -645,7 +647,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'', b'')
 
         # Parse the report
-        quality = Flake8QualityReporter('flake8', [])
+        quality = QualityReporter(flake8_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
@@ -654,7 +656,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
-        quality = Flake8QualityReporter('flake8', [])
+        quality = QualityReporter(flake8_driver)
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'flake8')
@@ -663,14 +665,14 @@ class Flake8QualityReporterTest(unittest.TestCase):
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
-        quality = Flake8QualityReporter('flake8', [])
+        quality = QualityReporter(flake8_driver)
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = Flake8QualityReporter('flake8', [])
+        quality = QualityReporter(flake8_driver)
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -695,7 +697,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = Flake8QualityReporter('flake8', flake8_reports)
+        quality = QualityReporter(flake8_driver, reports=flake8_reports)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -726,14 +728,14 @@ class PylintQualityReporterTest(unittest.TestCase):
         patch.stopall()
 
     def test_no_such_file(self):
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -776,7 +778,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'pylint')
@@ -802,7 +804,7 @@ class PylintQualityReporterTest(unittest.TestCase):
             file.py:2: [W0612, cls_name.func_\u9492] Unused variable '\u2920'
         """).encode('utf-8'), b'')
 
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
         violations = quality.violations(u'file_\u6729.py')
         self.assertEqual(violations, [
             Violation(616, u"W1401: Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix."),
@@ -820,7 +822,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Since we are replacing characters we can't interpet, this should
         # return a valid string with the char replaced with '?'
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
         violations = quality.violations(u'file.py')
         self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
 
@@ -832,7 +834,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         """).encode('utf-8'), '')
 
         # None of the violations have a valid line number, so they should all be skipped
-        violations = PylintQualityReporter('pylint', []).violations(u'file.py')
+        violations = QualityReporter(PylintDriver()).violations(u'file.py')
         self.assertEqual(violations, [])
 
     def test_quality_deprecation_warning(self):
@@ -845,7 +847,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         ), 0)
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
         actual_violations = quality.violations('file1.py')
 
         # Assert that pylint successfully runs and finds 2 violations
@@ -857,7 +859,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         _setup_patch((b'file1.py:1: [C0111] Missing docstring', b'oops'), status_code=1)
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
 
         # Expect an error
         self.assertRaises(CommandError, quality.violations, 'file1.py')
@@ -869,7 +871,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'\n', b'')
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
@@ -879,7 +881,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         _mock_communicate.return_value = (b'', b'')
 
         # Parse the report
-        quality = PylintQualityReporter('pylint', [])
+        quality = QualityReporter(PylintDriver())
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_pregenerated_report(self):
@@ -905,7 +907,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         ]
 
         # Generate the violation report
-        quality = PylintQualityReporter('pylint', pylint_reports)
+        quality = QualityReporter(PylintDriver(), reports=pylint_reports)
 
         # Expect that we get the right violations
         expected_violations = [
@@ -927,7 +929,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         pylint_reports = [BytesIO(b"file.py:2: [W1401] Invalid char '\xc3'")]
 
         # Generate the violation report
-        quality = PylintQualityReporter('pylint', pylint_reports)
+        quality = QualityReporter(PylintDriver(), reports=pylint_reports)
         violations = quality.violations('file.py')
 
         # Expect that the char is replaced
@@ -970,7 +972,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         self._mock_communicate.return_value = self.subproc_mock
 
         # Parse the report
-        quality = JsHintQualityReporter('jshint', [])
+        quality = QualityReporter(JsHintDriver())
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'jshint')
@@ -994,7 +996,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         self._mock_communicate.return_value = self.subproc_mock
 
         # Parse the report
-        quality = JsHintQualityReporter('jshint', [])
+        quality = QualityReporter(JsHintDriver())
         self.assertEqual([], quality.violations('test-file.js'))
 
     def test_no_quality_issues_emptystring(self):
@@ -1004,7 +1006,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         self._mock_communicate.return_value = self.subproc_mock
 
         # Parse the report
-        quality = JsHintQualityReporter('jshint', [])
+        quality = QualityReporter(JsHintDriver())
         self.assertEqual([], quality.violations('file1.js'))
 
     def test_quality_error(self):
@@ -1012,7 +1014,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
-        quality = JsHintQualityReporter('jshint', [])
+        quality = QualityReporter(JsHintDriver())
 
         # Expect that the name is set
         self.assertEqual(quality.name(), 'jshint')
@@ -1021,14 +1023,14 @@ class JsHintQualityReporterTest(unittest.TestCase):
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
-        quality = JsHintQualityReporter('jshint', [])
+        quality = QualityReporter(JsHintDriver())
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_js_file(self):
-        quality = JsHintQualityReporter('jshint', [])
+        quality = QualityReporter(JsHintDriver())
         file_paths = ['file1.py', 'subdir/file2.java']
         # Expect that we get no results because no JS files
         for path in file_paths:
@@ -1053,7 +1055,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = JsHintQualityReporter('jshint', jshint_reports)
+        quality = QualityReporter(JsHintDriver(), reports=jshint_reports)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -1082,7 +1084,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         self._mock_command_simple = patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code').start()
         self._mock_command_simple.return_value = 1
         with self.assertRaises(EnvironmentError):
-            JsHintQualityReporter('jshint', [])
+            QualityReporter(JsHintDriver()).violations('test.js')
 
 
 class SimpleCommandTestCase(unittest.TestCase):
@@ -1125,7 +1127,7 @@ class SubprocessErrorTestCase(unittest.TestCase):
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_quality_reporter(self, mock_stderr):
-        reporter = Pep8QualityReporter('pep8', [])
+        reporter = QualityReporter(pep8_driver)
         with self.assertRaises(OSError):
             reporter.violations("path/to/file.py")
 

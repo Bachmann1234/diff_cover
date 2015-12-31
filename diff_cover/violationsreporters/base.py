@@ -4,6 +4,9 @@ from collections import defaultdict, namedtuple
 
 import subprocess
 
+import copy
+
+import re
 import sys
 
 import six
@@ -65,139 +68,149 @@ class BaseViolationReporter(object):
         return self._name
 
 
-class BaseQualityReporter(BaseViolationReporter):
-    """
-    Abstract class to report code quality
-    information, using `COMMAND`
-    (provided by subclasses).
-    """
-    COMMAND = ''
-    DISCOVERY_COMMAND = ''
-    OPTIONS = []
+class QualityDriver(object):
+    __metaclass__ = ABCMeta
 
-    # A list of filetypes to run on.
-    EXTENSIONS = []
-
-    def __init__(self, name, input_reports, user_options=None):
+    def __init__(self, name, supported_extensions, command):
         """
-        Create a new quality reporter.
-
-        `name` is an identifier for the reporter
-        (usually the name of the tool used to generate
-        the report).
-
-        `input_reports` is an list of
-        file-like objects representing pre-generated
-        violation reports.  The list can be empty.
-
-        If these are provided, the reporter will
-        use the pre-generated reports instead of invoking
-        the tool directly.
-
-        'user_options' is a string of options passed in.
-        This string contains options that are passed forward
-        to the reporter being used
-
-        This raises an ImportError if the tool being created
-        is not installed.
+        Args:
+            name: (str) name of the driver
+            supported_extensions: (list[str]) list of file extensions this driver supports
+                Example: py, js
+            command: (list[str]) list of tokens that are the command to be executed
+                to create a report
         """
-        super(BaseQualityReporter, self).__init__(name)
-        # Test if the tool requested is installed
-        self._confirm_installed(name)
-        self._info_cache = defaultdict(list)
-        self.user_options = user_options
+        self.name = name
+        self.supported_extensions = supported_extensions
+        self.command = command
 
-        # If we've been given input report files, use those
-        # to get the source information
-        if len(input_reports) > 0:
-            self.use_tool = False
-            self._load_reports(input_reports)
-        else:
-            self.use_tool = True
-
-    def violations(self, src_path):
+    @abstractmethod
+    def parse_reports(self, reports):
         """
-        See base class comments.
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
         """
-        # If we've been given pre-generated pylint/pep8 reports,
-        # then we've already loaded everything we need into the cache.
-        # Otherwise, call pylint/pep8 ourselves
-        if self.use_tool:
-            if not any(src_path.endswith(ext) for ext in self.EXTENSIONS):
-                return []
-            if src_path not in self._info_cache:
-                user_options = [self.user_options] if self.user_options else []
-                command = [self.COMMAND] + self.OPTIONS + user_options + [src_path.encode(sys.getfilesystemencoding())]
-                output, _ = execute(command)
-                violations_dict = self._parse_output(output, src_path)
-                self._update_cache(violations_dict)
+        pass
 
-        # Return the cached violation info
-        return self._info_cache[src_path]
+    @abstractmethod
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        pass
+
+
+class QualityReporter(BaseViolationReporter):
+
+    def __init__(self, driver, reports=None, options=None):
+        """
+        Args:
+            driver (QualityDriver) object that works with the underlying quality tool
+            reports (list[file]) pre-generated reports. If not provided the tool will be run instead.
+            options (str) options to be passed into the command
+        """
+        super(QualityReporter, self).__init__(driver.name)
+        self.reports = self._load_reports(reports) if reports else None
+        self.violations_dict = {}
+        self.driver = driver
+        self.options = options
+        self.driver_tool_installed = None
 
     def _load_reports(self, report_files):
         """
-        Load pre-generated pep8/pylint reports into
-        the cache.
-
-        `report_files` is a list of open file-like objects.
+        Args:
+            report_files: list[file] reports to read in
         """
+        contents = []
         for file_handle in report_files:
             # Convert to unicode, replacing unreadable chars
-            contents = file_handle.read().decode('utf-8',
-                                                 'replace')
-            violations_dict = self._parse_output(contents)
-            self._update_cache(violations_dict)
+            contents.append(
+                file_handle.read().decode(
+                    'utf-8',
+                    'replace'
+                )
+            )
+        return contents
 
-    def _update_cache(self, violations_dict):
+    def violations(self, src_path):
         """
-        Append violations in `violations_dict` to the cache.
-        `violations_dict` must have the form:
-
-            {
-                SRC_PATH: [Violation, ]
-            }
+        Return a list of Violations recorded in `src_path`.
         """
-        for src_path, violations in six.iteritems(violations_dict):
-            self._info_cache[src_path].extend(violations)
+        if not any(src_path.endswith(ext) for ext in self.driver.supported_extensions):
+            return []
+        if src_path not in self.violations_dict:
+            if not self.reports:
+                if self.driver_tool_installed is None:
+                    self.driver_tool_installed = self.driver.installed()
+                if not self.driver_tool_installed:
+                    raise EnvironmentError("{0} is not installed".format(self.driver.name))
+                command = copy.deepcopy(self.driver.command)
+                if self.options:
+                    command.append(self.options)
+                command.append(src_path.encode(sys.getfilesystemencoding()))
+                output, _ = execute(command)
+                self.reports = [output]
+            self.violations_dict = self.driver.parse_reports(self.reports)
+        return self.violations_dict[src_path]
 
-    def _confirm_installed(self, name):
+    def measured_lines(self, src_path):
         """
-        Assumes it can be imported with the same name.
-        This applies to all python tools so far
+        Quality Reports Consider all lines measured
         """
-        __import__(name)
+        return None
 
-    def _parse_output(self, output, src_path=None):
+    def name(self):
         """
-        Parse the output of this reporter
-        command into a dict of the form:
+        Retrieve the name of the report, which may be
+        included in the generated diff coverage report.
 
-            {
-                SRC_PATH: [Violation, ]
-            }
+        For example, `name()` could return the path to the coverage
+        report file or the type of reporter.
+        """
+        return self._name
 
-        where `SRC_PATH` is the path to the source file
-        containing the violations, and the value is
-        a list of violations.
 
-        If `src_path` is provided, return information
-        just for that source.
+class RegexBasedDriver(QualityDriver):
+    def __init__(self, name, supported_extensions, command, expression):
+        """
+        args:
+            expression: regex used to parse report
+        See super for other args
+        """
+        super(RegexBasedDriver, self).__init__(name, supported_extensions, command)
+        self.expression = re.compile(expression)
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
         """
         violations_dict = defaultdict(list)
-
-        for line in output.split('\n'):
-
-            match = self.VIOLATION_REGEX.match(line)
-
-            # Ignore any line that isn't a violation
-            if match is not None:
-                src, line_number, message = match.groups()
-
-                # If we're looking for a particular source,
-                # filter out all other sources
-                if src_path is None or src_path == src:
+        for report in reports:
+            for line in report.split('\n'):
+                match = self.expression.match(line)
+                # Ignore any line that isn't a violation
+                if match is not None:
+                    src, line_number, message = match.groups()
                     violation = Violation(int(line_number), message)
                     violations_dict[src].append(violation)
 
         return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        try:
+            __import__(self.name)
+            return True
+        except ImportError:
+            return False

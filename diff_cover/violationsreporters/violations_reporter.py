@@ -2,17 +2,16 @@
 Classes for querying the information in a test coverage report.
 """
 from __future__ import unicode_literals
-from collections import namedtuple, defaultdict
+
 import re
+from collections import defaultdict
+
 import os
-import six
 import itertools
 import posixpath
-
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
-from diff_cover.violationsreporters.base import BaseViolationReporter, BaseQualityReporter, Violation, \
-    QualityReporterError
+from diff_cover.violationsreporters.base import BaseViolationReporter, Violation, RegexBasedDriver, QualityDriver
 
 
 class XmlCoverageReporter(BaseViolationReporter):
@@ -185,30 +184,24 @@ class XmlCoverageReporter(BaseViolationReporter):
         self._cache_file(src_path)
         return self._info_cache[src_path][1]
 
+pep8_driver = RegexBasedDriver(
+    name='pep8',
+    supported_extensions=['py'],
+    command=['pep8'],
+    expression=r'^([^:]+):(\d+).*([EW]\d{3}.*)$'
+)
 
-class Pep8QualityReporter(BaseQualityReporter):
-    """
-    Report PEP8 violations.
-    """
-    COMMAND = 'pep8'
-    EXTENSIONS = ['py']
-    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EW]\d{3}.*)$')
-
-
-class PyflakesQualityReporter(BaseQualityReporter):
-    """
-    Report Pyflakes violations.
-    """
-    COMMAND = 'pyflakes'
-    EXTENSIONS = ['py']
+pyflakes_driver = RegexBasedDriver(
+    name='pyflakes',
+    supported_extensions=['py'],
+    command=['pyflakes'],
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
-    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): (.*)$')
+    expression=r'^([^:]+):(\d+): (.*)$'
+)
 
-
-class Flake8QualityReporter(BaseQualityReporter):
-    """
+"""
     Report Flake8 violations.
 
     Flake8 warning/error codes:
@@ -219,28 +212,38 @@ class Flake8QualityReporter(BaseQualityReporter):
         T000: flake8-todo plugin
 
     http://flake8.readthedocs.org/en/latest/warnings.html
-    """
-    COMMAND = 'flake8'
-    EXTENSIONS = ['py']
-    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$')
-
-
-class PylintQualityReporter(BaseQualityReporter):
-    """
-    Report Pylint violations.
-    """
-    COMMAND = 'pylint'
-    MODERN_OPTIONS = ['--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
-    OPTIONS = MODERN_OPTIONS
-    EXTENSIONS = ['py']
-    DUPE_CODE_VIOLATION = 'R0801'
-
+"""
+flake8_driver = RegexBasedDriver(
+    name='flake8',
+    supported_extensions=['py'],
+    command=['pyflakes'],
     # Match lines of the form:
-    # path/to/file.py:123: [C0111] Missing docstring
-    # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
-    VIOLATION_REGEX = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
-    MULTI_LINE_VIOLATION_REGEX = re.compile(r'==(\w|.+):(.*)')
-    DUPE_CODE_MESSAGE_REGEX = re.compile(r'Similar lines in (\d+) files')
+    # path/to/file.py:328: undefined name '_thing'
+    # path/to/file.py:418: 'random' imported but unused
+    expression=r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$'
+)
+
+
+class PylintDriver(QualityDriver):
+    def __init__(self):
+        """
+        args:
+            expression: regex used to parse report
+        See super for other args
+        """
+        super(PylintDriver, self).__init__(
+                'pylint',
+                ['py'],
+                ['pylint', '--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
+        )
+        self.pylint_expression = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
+        self.dupe_code_violation = 'R0801'
+
+        # Match lines of the form:
+        # path/to/file.py:123: [C0111] Missing docstring
+        # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
+        self.multi_line_violation_regex = re.compile(r'==(\w|.+):(.*)')
+        self.dupe_code_violation_regex = re.compile(r'Similar lines in (\d+) files')
 
     def _process_dupe_code_violation(self, lines, current_line, message):
         """
@@ -248,52 +251,54 @@ class PylintQualityReporter(BaseQualityReporter):
         all the relevant files
         """
         src_paths = []
-        message_match = self.DUPE_CODE_MESSAGE_REGEX.match(message)
+        message_match = self.dupe_code_violation_regex.match(message)
         if message_match:
             for _ in range(int(message_match.group(1))):
                 current_line += 1
-                match = self.MULTI_LINE_VIOLATION_REGEX.match(
+                match = self.multi_line_violation_regex.match(
                     lines[current_line]
                 )
                 src_path, l_number = match.groups()
                 src_paths.append(('%s.py' % src_path, l_number))
         return src_paths
 
-    def _parse_output(self, output, src_path=None):
+    def parse_reports(self, reports):
         """
-        See base class docstring.
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
         """
         violations_dict = defaultdict(list)
+        for report in reports:
+            output_lines = report.split('\n')
 
-        output_lines = output.split('\n')
+            for output_line_number, line in enumerate(output_lines):
+                match = self.pylint_expression.match(line)
 
-        for output_line_number, line in enumerate(output_lines):
-            match = self.VIOLATION_REGEX.match(line)
+                # Ignore any line that isn't matched
+                # (for example, snippets from the source code)
+                if match is not None:
 
-            # Ignore any line that isn't matched
-            # (for example, snippets from the source code)
-            if match is not None:
+                    (pylint_src_path,
+                     line_number,
+                     pylint_code,
+                     function_name,
+                     message) = match.groups()
+                    if pylint_code == self.dupe_code_violation:
+                        files_involved = self._process_dupe_code_violation(
+                            output_lines,
+                            output_line_number,
+                            message
+                        )
+                    else:
+                        files_involved = [(pylint_src_path, line_number)]
 
-                (pylint_src_path,
-                 line_number,
-                 pylint_code,
-                 function_name,
-                 message) = match.groups()
-                if pylint_code == self.DUPE_CODE_VIOLATION:
-                    files_involved = self._process_dupe_code_violation(
-                        output_lines,
-                        output_line_number,
-                        message
-                    )
-                else:
-                    files_involved = [(pylint_src_path, line_number)]
-
-                for violation in files_involved:
-                    pylint_src_path, line_number = violation
-                    # If we're looking for a particular source file,
-                    # ignore any other source files.
-                    if src_path is None or src_path == pylint_src_path:
-
+                    for violation in files_involved:
+                        pylint_src_path, line_number = violation
+                        # If we're looking for a particular source file,
+                        # ignore any other source files.
                         if function_name:
                             error_str = u"{0}: {1}: {2}".format(pylint_code, function_name, message)
                         else:
@@ -304,22 +309,32 @@ class PylintQualityReporter(BaseQualityReporter):
 
         return violations_dict
 
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        try:
+            __import__(self.name)
+            return True
+        except ImportError:
+            return False
 
-class JsHintQualityReporter(BaseQualityReporter):
+class JsHintDriver(RegexBasedDriver):
     """
     Report JSHint violations.
     """
-    COMMAND = 'jshint'
-    # The following command can confirm jshint is installed
-    DISCOVERY_COMMAND = 'jshint -v'
-    EXTENSIONS = ['js']
-    VIOLATION_REGEX = re.compile(r'^([^:]+): line (\d+), col \d+, (.*)$')
+    def __init__(self):
+        super(JsHintDriver, self).__init__(
+                'jshint',
+                ['js'],
+                ['jshint'],
+                r'^([^:]+): line (\d+), col \d+, (.*)$'
+        )
 
-    def _confirm_installed(self, name):
+    def installed(self):
         """
         Override base method. Confirm the tool is installed by running this command and
         getting exit 0. Otherwise, raise an Environment Error.
         """
-        if run_command_for_code(self.DISCOVERY_COMMAND) == 0:
-            return
-        raise EnvironmentError
+        return run_command_for_code(['jshint', '-v']) == 0
