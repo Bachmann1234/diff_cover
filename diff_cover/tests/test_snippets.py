@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+
+import io
 import mock
 import os
 import tempfile
@@ -118,7 +120,7 @@ class SnippetLoaderTest(unittest.TestCase):
         _, self._src_path = tempfile.mkstemp()
 
         # Path tool should not be aware of testing command
-        path_mock = mock.patch('diff_cover.violations_reporter.GitPathTool').start()
+        path_mock = mock.patch('diff_cover.violationsreporters.violations_reporter.GitPathTool').start()
         path_mock.absolute_path = lambda path: path
         path_mock.relative_path = lambda path: path
 
@@ -195,7 +197,7 @@ class SnippetLoaderTest(unittest.TestCase):
         )
         # Load the fixture for the expected contents
         expected_path = fixture_path(expected_out_filename)
-        with open(expected_path) as fixture_file:
+        with io.open(expected_path, encoding='utf-8') as fixture_file:
             expected = fixture_file.read()
             if isinstance(expected, six.binary_type):
                 expected = expected.decode('utf-8')

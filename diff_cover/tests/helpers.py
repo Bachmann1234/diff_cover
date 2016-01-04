@@ -3,6 +3,8 @@ Test helper functions.
 """
 import random
 import sys
+
+import io
 import six
 import os.path
 import difflib
@@ -65,11 +67,11 @@ def load_fixture(rel_path, encoding=None):
     If `encoding` is not None, attempts to decode
     the contents as `encoding` (e.g. 'utf-8').
     """
-    with open(fixture_path(rel_path)) as fixture_file:
+    with io.open(fixture_path(rel_path), encoding=encoding or 'utf-8') as fixture_file:
         contents = fixture_file.read()
 
     if encoding is not None and isinstance(contents, six.binary_type):
-        contents = contents.decode('utf-8')
+        contents = contents.decode(encoding)
 
     return contents
 

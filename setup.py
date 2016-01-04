@@ -22,7 +22,7 @@ setup(
                  "Programming Language :: Python :: 3",
                  'Topic :: Software Development :: Testing',
                  'Topic :: Software Development :: Quality Assurance'],
-    packages=['diff_cover'],
+    packages=['diff_cover', 'diff_cover/violationsreporters'],
     package_data={'diff_cover': ['templates/*.txt', 'templates/*.html']},
     install_requires=REQUIREMENTS,
     entry_points={

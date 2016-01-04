@@ -1,0 +1,216 @@
+from __future__ import unicode_literals, absolute_import
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict, namedtuple
+
+import subprocess
+
+import copy
+
+import re
+import sys
+
+import six
+
+from diff_cover.command_runner import execute
+
+Violation = namedtuple('Violation', 'line, message')
+
+
+class QualityReporterError(Exception):
+    """
+    A quality reporter command produced an error.
+    """
+    pass
+
+
+class BaseViolationReporter(object):
+    """
+    Query information from a coverage report.
+    """
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, name):
+        """
+        Provide a name for the coverage report, which will be included
+        in the generated diff report.
+        """
+        self._name = name
+
+    @abstractmethod
+    def violations(self, src_path):
+        """
+        Return a list of Violations recorded in `src_path`.
+        """
+        pass
+
+    def measured_lines(self, src_path):
+        """
+        Return a list of the lines in src_path that were measured
+        by this reporter.
+
+        Some reporters will always consider all lines in the file "measured".
+        As an optimization, such violation reporters
+        can return `None` to indicate that all lines are measured.
+        The diff reporter generator will then use all changed lines
+        provided by the diff.
+        """
+        return None
+
+    def name(self):
+        """
+        Retrieve the name of the report, which may be
+        included in the generated diff coverage report.
+
+        For example, `name()` could return the path to the coverage
+        report file or the type of reporter.
+        """
+        return self._name
+
+
+class QualityDriver(object):
+    __metaclass__ = ABCMeta
+
+    def __init__(self, name, supported_extensions, command):
+        """
+        Args:
+            name: (str) name of the driver
+            supported_extensions: (list[str]) list of file extensions this driver supports
+                Example: py, js
+            command: (list[str]) list of tokens that are the command to be executed
+                to create a report
+        """
+        self.name = name
+        self.supported_extensions = supported_extensions
+        self.command = command
+
+    @abstractmethod
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        pass
+
+    @abstractmethod
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        pass
+
+
+class QualityReporter(BaseViolationReporter):
+
+    def __init__(self, driver, reports=None, options=None):
+        """
+        Args:
+            driver (QualityDriver) object that works with the underlying quality tool
+            reports (list[file]) pre-generated reports. If not provided the tool will be run instead.
+            options (str) options to be passed into the command
+        """
+        super(QualityReporter, self).__init__(driver.name)
+        self.reports = self._load_reports(reports) if reports else None
+        self.violations_dict = {}
+        self.driver = driver
+        self.options = options
+        self.driver_tool_installed = None
+
+    def _load_reports(self, report_files):
+        """
+        Args:
+            report_files: list[file] reports to read in
+        """
+        contents = []
+        for file_handle in report_files:
+            # Convert to unicode, replacing unreadable chars
+            contents.append(
+                file_handle.read().decode(
+                    'utf-8',
+                    'replace'
+                )
+            )
+        return contents
+
+    def violations(self, src_path):
+        """
+        Return a list of Violations recorded in `src_path`.
+        """
+        if not any(src_path.endswith(ext) for ext in self.driver.supported_extensions):
+            return []
+        if src_path not in self.violations_dict:
+            if not self.reports:
+                if self.driver_tool_installed is None:
+                    self.driver_tool_installed = self.driver.installed()
+                if not self.driver_tool_installed:
+                    raise EnvironmentError("{0} is not installed".format(self.driver.name))
+                command = copy.deepcopy(self.driver.command)
+                if self.options:
+                    command.append(self.options)
+                command.append(src_path.encode(sys.getfilesystemencoding()))
+                output, _ = execute(command)
+                self.reports = [output]
+            self.violations_dict = self.driver.parse_reports(self.reports)
+        return self.violations_dict[src_path]
+
+    def measured_lines(self, src_path):
+        """
+        Quality Reports Consider all lines measured
+        """
+        return None
+
+    def name(self):
+        """
+        Retrieve the name of the report, which may be
+        included in the generated diff coverage report.
+
+        For example, `name()` could return the path to the coverage
+        report file or the type of reporter.
+        """
+        return self._name
+
+
+class RegexBasedDriver(QualityDriver):
+    def __init__(self, name, supported_extensions, command, expression):
+        """
+        args:
+            expression: regex used to parse report
+        See super for other args
+        """
+        super(RegexBasedDriver, self).__init__(name, supported_extensions, command)
+        self.expression = re.compile(expression)
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        violations_dict = defaultdict(list)
+        for report in reports:
+            for line in report.split('\n'):
+                match = self.expression.match(line)
+                # Ignore any line that isn't a violation
+                if match is not None:
+                    src, line_number, message = match.groups()
+                    violation = Violation(int(line_number), message)
+                    violations_dict[src].append(violation)
+
+        return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        try:
+            __import__(self.name)
+            return True
+        except ImportError:
+            return False

@@ -2,40 +2,42 @@
 Implement the command-line tool interface.
 """
 from __future__ import unicode_literals
+
 import argparse
 import os
 import sys
 from xml.etree import cElementTree
+
+import six
+
 import diff_cover
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
-from diff_cover.violations_reporter import (
-    XmlCoverageReporter, Pep8QualityReporter,
-    PyflakesQualityReporter, PylintQualityReporter,
-    Flake8QualityReporter, JsHintQualityReporter
-)
 from diff_cover.report_generator import (
     HtmlReportGenerator, StringReportGenerator,
     HtmlQualityReportGenerator, StringQualityReportGenerator
 )
-import six
+from diff_cover.violationsreporters.base import QualityReporter
+from diff_cover.violationsreporters.violations_reporter import (
+    XmlCoverageReporter,
+    JsHintDriver, flake8_driver, pyflakes_driver, pep8_driver, PylintDriver)
 
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 VIOLATION_CMD_HELP = "Which code quality tool to use"
-INPUT_REPORTS_HELP = "Pep8, pyflakes, flake8, or pylint reports to use"
+INPUT_REPORTS_HELP = "Which reports reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 
-QUALITY_REPORTERS = {
-    'pep8': Pep8QualityReporter,
-    'pyflakes': PyflakesQualityReporter,
-    'pylint': PylintQualityReporter,
-    'flake8': Flake8QualityReporter,
-    'jshint': JsHintQualityReporter,
+QUALITY_DRIVERS = {
+    'pep8': pep8_driver,
+    'pyflakes': pyflakes_driver,
+    'pylint': PylintDriver(),
+    'flake8': flake8_driver,
+    'jshint': JsHintDriver(),
 }
 
 
@@ -260,9 +262,9 @@ def main(argv=None, directory=None):
             last_char = user_options[-1]
             if first_char == last_char and first_char in ('"', "'"):
                 user_options = user_options[1:-1]
-        reporter_class = QUALITY_REPORTERS.get(tool)
+        driver = QUALITY_DRIVERS.get(tool)
 
-        if reporter_class is not None:
+        if driver is not None:
             # If we've been given pre-generated reports,
             # try to open the files
             input_reports = []
@@ -273,7 +275,7 @@ def main(argv=None, directory=None):
                 except IOError:
                     LOGGER.warning("Could not load '{0}'".format(path))
             try:
-                reporter = reporter_class(tool, input_reports, user_options=user_options)
+                reporter = QualityReporter(driver, input_reports, user_options)
                 percent_passing = generate_quality_report(
                     reporter,
                     arg_dict['compare_branch'],

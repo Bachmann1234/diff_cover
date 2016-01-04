@@ -2,8 +2,8 @@
 Wrapper for `git diff` command.
 """
 from __future__ import unicode_literals
-import six
-import subprocess
+
+from diff_cover.command_runner import execute
 
 
 class GitDiffError(Exception):
@@ -18,13 +18,6 @@ class GitDiffTool(object):
     Thin wrapper for a subset of the `git diff` command.
     """
 
-    def __init__(self, subprocess_mod=subprocess):
-        """
-        Initialize the wrapper to use `subprocess_mod` to
-        execute subprocesses.
-        """
-        self._subprocess = subprocess_mod
-
     def diff_committed(self, compare_branch='origin/master'):
         """
         Returns the output of `git diff` for committed
@@ -33,12 +26,12 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute([
+        return execute([
             'git', 'diff',
             "{branch}...HEAD".format(branch=compare_branch),
             '--no-color',
             '--no-ext-diff'
-        ])
+        ])[0]
 
     def diff_unstaged(self):
         """
@@ -48,7 +41,7 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', '--no-color', '--no-ext-diff'])
+        return execute(['git', 'diff', '--no-color', '--no-ext-diff'])[0]
 
     def diff_staged(self):
         """
@@ -58,29 +51,4 @@ class GitDiffTool(object):
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return self._execute(['git', 'diff', '--cached', '--no-color', '--no-ext-diff'])
-
-    def _execute(self, command):
-        """
-        Execute `command` (list of command components)
-        and returns the output.
-
-        Raises a `GitDiffError` if `git diff` outputs anything
-        to stderr.
-        """
-        stdout_pipe = self._subprocess.PIPE
-        process = self._subprocess.Popen(
-            command, stdout=stdout_pipe,
-            stderr=stdout_pipe
-        )
-        stdout, stderr = process.communicate()
-
-        # If we get a non-empty output to stderr, raise an exception
-        if bool(stderr):
-            raise GitDiffError(stderr)
-
-        # Convert the output to unicode (Python < 3)
-        if isinstance(stdout, six.binary_type):
-            return stdout.decode('utf-8', 'replace')
-        else:
-            return stdout
+        return execute(['git', 'diff', '--cached', '--no-color', '--no-ext-diff'])[0]

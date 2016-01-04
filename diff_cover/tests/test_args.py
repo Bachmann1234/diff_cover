@@ -178,16 +178,10 @@ class MainTest(unittest.TestCase):
             main(['diff-foobar'])
 
     def _run_main(self, argv):
-        fake_pylint_reporter = Mock()
-        reporter_patch = patch.dict("diff_cover.tool.QUALITY_REPORTERS",
-                                    {"pylint": fake_pylint_reporter})
         gen_report_patch = patch("diff_cover.tool.generate_quality_report",
                                  return_value=100)
-        with reporter_patch:
-            with gen_report_patch:
-                main(argv)
-
-        self.assertTrue(fake_pylint_reporter.called)
-        call = fake_pylint_reporter.call_args
-        user_options = call[1]["user_options"]
-        self.assertEqual(user_options, "--foobar")
+        with gen_report_patch as p:
+            main(argv)
+            quality_reporter = p.call_args[0][0]
+            assert quality_reporter.driver.name == 'pylint'
+            assert quality_reporter.options == '--foobar'
