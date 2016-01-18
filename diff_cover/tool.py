@@ -21,7 +21,8 @@ from diff_cover.report_generator import (
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
-    JsHintDriver, flake8_driver, pyflakes_driver, pep8_driver, PylintDriver)
+    JsHintDriver, flake8_driver, pyflakes_driver, pep8_driver, PylintDriver,
+    EsLintDriver)
 
 COVERAGE_XML_HELP = "XML coverage report"
 HTML_REPORT_HELP = "Diff coverage HTML output"
@@ -38,6 +39,7 @@ QUALITY_DRIVERS = {
     'pylint': PylintDriver(),
     'flake8': flake8_driver,
     'jshint': JsHintDriver(),
+    'eslint': EsLintDriver(),
 }
 
 
