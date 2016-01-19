@@ -358,4 +358,4 @@ class EsLintDriver(RegexBasedDriver):
         Override base method. Confirm the tool is installed by running this command and
         getting exit 0. Otherwise, raise an Environment Error.
         """
-        return run_command_for_code([self.command, '-v']) == 0
+        return run_command_for_code([self.command[0], '-v']) == 0
