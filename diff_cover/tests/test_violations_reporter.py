@@ -15,7 +15,7 @@ from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.tests.helpers import unittest
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, Violation, pep8_driver, \
-    pyflakes_driver, flake8_driver, JsHintDriver, PylintDriver
+    pyflakes_driver, flake8_driver, JsHintDriver, PylintDriver, EsLintDriver
 from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
@@ -936,17 +936,17 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
 
 
-class JsHintQualityReporterTest(unittest.TestCase):
+class JsQualityBaseReporterMixin(object):
     """
-    JsHintQualityReporter tests. Assumes JsHint is not available as a python library,
-    but is available on the commandline.
+    Generic JS linter tests. Assumes the linter is not available as a python
+    library, but is available on the commandline.
     """
 
     def setUp(self):
-        # Mock patch the installation of jshint
+        # Mock patch the installation of the linter
         self._mock_command_simple = patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code').start()
         self._mock_command_simple.return_value = 0
-        # Mock patch the jshint results
+        # Mock patch the linter results
         self._mock_communicate = patch.object(subprocess, 'Popen').start()
         self.subproc_mock = MagicMock()
         self.subproc_mock.returncode = 0
@@ -957,12 +957,18 @@ class JsHintQualityReporterTest(unittest.TestCase):
         """
         patch.stopall()
 
+    def _get_out(self):
+        """
+        get Object Under Test
+        """
+        return None  # pragma: no cover
+
     def test_quality(self):
         """
         Test basic scenarios, including special characters that would appear in JavaScript and mixed quotation marks
         """
 
-        # Patch the output of `jshint`
+        # Patch the output of the linter cmd
         return_string = '\n' + dedent("""
                 ../test_file.js: line 3, col 9, Missing "use strict" statement.
                 ../test_file.js: line 10, col 17, '$hi' is defined but never used.
@@ -972,10 +978,10 @@ class JsHintQualityReporterTest(unittest.TestCase):
         self._mock_communicate.return_value = self.subproc_mock
 
         # Parse the report
-        quality = QualityReporter(JsHintDriver())
+        quality = QualityReporter(self._get_out())
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), 'jshint')
+        self.assertEqual(quality.name(), self.quality_name)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -991,22 +997,22 @@ class JsHintQualityReporterTest(unittest.TestCase):
 
     def test_no_quality_issues_newline(self):
 
-        # Patch the output of `jshint`
+        # Patch the output of the linter cmd
         self.subproc_mock.communicate.return_value = (b'\n', b'')
         self._mock_communicate.return_value = self.subproc_mock
 
         # Parse the report
-        quality = QualityReporter(JsHintDriver())
+        quality = QualityReporter(self._get_out())
         self.assertEqual([], quality.violations('test-file.js'))
 
     def test_no_quality_issues_emptystring(self):
 
-        # Patch the output of `jshint`
+        # Patch the output of the linter cmd
         self.subproc_mock.communicate.return_value = (b'', b'')
         self._mock_communicate.return_value = self.subproc_mock
 
         # Parse the report
-        quality = QualityReporter(JsHintDriver())
+        quality = QualityReporter(self._get_out())
         self.assertEqual([], quality.violations('file1.js'))
 
     def test_quality_error(self):
@@ -1014,23 +1020,23 @@ class JsHintQualityReporterTest(unittest.TestCase):
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
-        quality = QualityReporter(JsHintDriver())
+        quality = QualityReporter(self._get_out())
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), 'jshint')
+        self.assertEqual(quality.name(), self.quality_name)
         with self.assertRaises(CommandError) as ex:
             quality.violations('file1.js')
         self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
-        quality = QualityReporter(JsHintDriver())
+        quality = QualityReporter(self._get_out())
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_js_file(self):
-        quality = QualityReporter(JsHintDriver())
+        quality = QualityReporter(self._get_out())
         file_paths = ['file1.py', 'subdir/file2.java']
         # Expect that we get no results because no JS files
         for path in file_paths:
@@ -1039,9 +1045,9 @@ class JsHintQualityReporterTest(unittest.TestCase):
 
     def test_quality_pregenerated_report(self):
 
-        # When the user provides us with a pre-generated jshint report
-        # then use that instead of calling jshint directly.
-        jshint_reports = [
+        # When the user provides us with a pre-generated linter report
+        # then use that instead of calling linter directly.
+        reports = [
             BytesIO(('\n' + dedent("""
                 path/to/file.js: line 3, col 9, Missing "use strict" statement.
                 path/to/file.js: line 10, col 130, Line is too long.
@@ -1055,7 +1061,7 @@ class JsHintQualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = QualityReporter(JsHintDriver(), reports=jshint_reports)
+        quality = QualityReporter(self._get_out(), reports=reports)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -1079,12 +1085,37 @@ class JsHintQualityReporterTest(unittest.TestCase):
 
     def test_not_installed(self):
         """
-        If jshint is not available via commandline, it should raise an EnvironmentError
+        If linter is not available via commandline, it should raise
+        an EnvironmentError
         """
         self._mock_command_simple = patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code').start()
         self._mock_command_simple.return_value = 1
         with self.assertRaises(EnvironmentError):
-            QualityReporter(JsHintDriver()).violations('test.js')
+            QualityReporter(self._get_out()).violations('test.js')
+
+
+class JsHintQualityReporterTest(JsQualityBaseReporterMixin, unittest.TestCase):
+    """
+    JsHintQualityReporter tests. Assumes JsHint is not available as a python
+    library, but is available on the commandline.
+    """
+
+    quality_name = 'jshint'
+
+    def _get_out(self):
+        return JsHintDriver()
+
+
+class ESLintQualityReporterTest(JsQualityBaseReporterMixin, unittest.TestCase):
+    """
+    ESLintQualityReporter tests. Assumes ESLint is not available as a python
+    library, but is available on the commandline.
+    """
+
+    quality_name = 'eslint'
+
+    def _get_out(self):
+        return EsLintDriver()
 
 
 class SimpleCommandTestCase(unittest.TestCase):

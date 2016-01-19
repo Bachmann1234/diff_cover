@@ -320,6 +320,7 @@ class PylintDriver(QualityDriver):
         except ImportError:
             return False
 
+
 class JsHintDriver(RegexBasedDriver):
     """
     Report JSHint violations.
@@ -338,3 +339,23 @@ class JsHintDriver(RegexBasedDriver):
         getting exit 0. Otherwise, raise an Environment Error.
         """
         return run_command_for_code(['jshint', '-v']) == 0
+
+
+class EsLintDriver(RegexBasedDriver):
+    """
+    Report ESLint violations.
+    """
+    def __init__(self):
+        super(EsLintDriver, self).__init__(
+                'eslint',
+                ['js'],
+                ['eslint', '--format compact'],
+                r'^([^:]+): line (\d+), col \d+, (.*)$'
+        )
+
+    def installed(self):
+        """
+        Override base method. Confirm the tool is installed by running this command and
+        getting exit 0. Otherwise, raise an Environment Error.
+        """
+        return run_command_for_code([self.command[0], '-v']) == 0
