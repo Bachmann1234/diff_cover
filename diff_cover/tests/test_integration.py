@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import os
 import os.path
+import re
 import shutil
 import tempfile
 from collections import defaultdict
@@ -55,6 +56,17 @@ class ToolsIntegrationBase(unittest.TestCase):
         patch.stopall()
         os.chdir(self._old_cwd)
 
+    def _clear_css(self, content):
+        """
+        The CCS is provided by pygments and changes fairly often.
+        Im ok with simply saying "There was css"
+
+        Perhaps I will eat these words
+        """
+        clean_content = re.sub("r'<style>.*</style>", content, '', re.DOTALL)
+        assert len(content) > len(clean_content)
+        return clean_content
+
     def _check_html_report(self, git_diff_path, expected_html_path, tool_args, expected_status=0):
         """
         Verify that the tool produces the expected HTML report.
@@ -87,8 +99,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         # Check the HTML report
         with io.open(expected_html_path, encoding='utf-8') as expected_file:
             with io.open(html_report_path, encoding='utf-8') as html_report:
-                html = html_report.read()
-                expected = expected_file.read()
+                html = self._clear_css(html_report.read())
+                expected = self._clear_css(expected_file.read())
                 assert_long_str_equal(expected, html, strip=True)
 
     def _check_console_report(self, git_diff_path, expected_console_path, tool_args, expected_status=0):

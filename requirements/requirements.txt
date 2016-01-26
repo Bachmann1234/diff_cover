@@ -2,5 +2,4 @@
 Jinja2>=2.7.1
 six>=1.6.1
 jinja2_pluralize
-pygments==2.0.1
-stevedore==1.9.0
+pygments
