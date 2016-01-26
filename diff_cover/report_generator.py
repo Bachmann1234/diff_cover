@@ -192,13 +192,18 @@ class TemplateReportGenerator(BaseReportGenerator):
     Reporter that uses a template to generate the report.
     """
 
-    # Subclasses override this to specify the name of the template
+    # Subclasses override this to specify the name of the templates
     # If not overridden, the template reporter will raise an exception
     TEMPLATE_NAME = None
+    CSS_TEMPLATE_NAME = None
 
     # Subclasses should set this to True to indicate
     # that they want to include source file snippets.
     INCLUDE_SNIPPETS = False
+
+    def __init__(self, violations_reporter, diff_reporter, css_url=None):
+        super(TemplateReportGenerator, self).__init__(violations_reporter, diff_reporter)
+        self.css_url = css_url
 
     def generate_report(self, output_file):
         """
@@ -215,6 +220,21 @@ class TemplateReportGenerator(BaseReportGenerator):
 
             output_file.write(report)
 
+    def generate_css(self, output_file):
+        """
+        Generate an external style sheet file.
+
+        output_file must be a file handler that takes in bytes!
+        """
+        if self.CSS_TEMPLATE_NAME is not None:
+            template = TEMPLATE_ENV.get_template(self.CSS_TEMPLATE_NAME)
+            style = template.render(self._context())
+
+        if isinstance(style, six.string_types):
+            style = style.encode('utf-8')
+
+        output_file.write(style)
+
     def _context(self):
         """
         Return the context to pass to the template.
@@ -222,6 +242,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         The context is a dict of the form:
 
         {
+            'css_url': CSS_URL,
             'report_name': REPORT_NAME,
             'diff_name': DIFF_NAME,
             'src_stats': {SRC_PATH: {
@@ -247,6 +268,7 @@ class TemplateReportGenerator(BaseReportGenerator):
             snippet_style = None
 
         return {
+            'css_url': self.css_url,
             'report_name': self.coverage_report_name(),
             'diff_name': self.diff_report_name(),
             'src_stats': src_stats,
@@ -324,6 +346,7 @@ class HtmlReportGenerator(TemplateReportGenerator):
     Generate an HTML formatted diff coverage report.
     """
     TEMPLATE_NAME = "html_coverage_report.html"
+    CSS_TEMPLATE_NAME = "external_style.css"
     INCLUDE_SNIPPETS = True
 
 
