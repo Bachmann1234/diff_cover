@@ -57,7 +57,7 @@ def parse_coverage_args(argv):
         {
             'coverage_xml': COVERAGE_XML,
             'html_report': None | HTML_REPORT,
-            'external_css_file': None | CSS_FILE
+            'external_css_file': None | CSS_FILE,
         }
 
     where `COVERAGE_XML`, `HTML_REPORT`, and `CSS_FILE` are paths.
@@ -121,9 +121,9 @@ def parse_quality_args(argv):
     valid options:
 
         {
-            'violations': pep8 | pyflakes | flake8 | pylint
+            'violations': pep8 | pyflakes | flake8 | pylint | ...,
             'html_report': None | HTML_REPORT,
-            'external_css_file': None | CSS_FILE
+            'external_css_file': None | CSS_FILE,
         }
 
     where `HTML_REPORT` and `CSS_FILE` are paths.
