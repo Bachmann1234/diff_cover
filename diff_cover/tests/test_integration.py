@@ -421,6 +421,15 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             expected_status=0
         )
 
+    def test_html_with_external_css(self):
+        temp_dir = self._check_html_report(
+            'git_diff_violations.txt',
+            'pep8_violations_report_external_css.html',
+            ['diff-quality', '--violations=pep8'],
+            css_file='external_style.css'
+        )
+        self.assertTrue(os.path.exists(os.path.join(temp_dir, 'external_style.css')))
+
     def test_added_file_pep8_console(self):
         self._check_console_report(
             'git_diff_violations.txt',
