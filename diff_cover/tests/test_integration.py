@@ -58,7 +58,7 @@ class ToolsIntegrationBase(unittest.TestCase):
 
     def _clear_css(self, content):
         """
-        The CCS is provided by pygments and changes fairly often.
+        The CSS is provided by pygments and changes fairly often.
         Im ok with simply saying "There was css"
 
         Perhaps I will eat these words
@@ -67,7 +67,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         assert len(content) > len(clean_content)
         return clean_content
 
-    def _check_html_report(self, git_diff_path, expected_html_path, tool_args, expected_status=0):
+    def _check_html_report(self, git_diff_path, expected_html_path, tool_args, expected_status=0, css_file=None):
         """
         Verify that the tool produces the expected HTML report.
 
@@ -92,16 +92,27 @@ class ToolsIntegrationBase(unittest.TestCase):
         self.addCleanup(lambda: shutil.rmtree(temp_dir))
         html_report_path = os.path.join(temp_dir, 'diff_coverage.html')
 
+        args = tool_args + ['--html-report', html_report_path]
+
+        if css_file:
+            css_file = os.path.join(temp_dir, css_file)
+            args += ['--external-css-file', css_file]
+
         # Execute the tool
-        code = main(tool_args + ['--html-report', html_report_path])
+        code = main(args)
         self.assertEquals(code, expected_status)
 
         # Check the HTML report
         with io.open(expected_html_path, encoding='utf-8') as expected_file:
             with io.open(html_report_path, encoding='utf-8') as html_report:
-                html = self._clear_css(html_report.read())
-                expected = self._clear_css(expected_file.read())
+                html = html_report.read()
+                expected = expected_file.read()
+                if css_file is None:
+                    html = self._clear_css(html)
+                    expected = self._clear_css(expected)
                 assert_long_str_equal(expected, html, strip=True)
+
+        return temp_dir
 
     def _check_console_report(self, git_diff_path, expected_console_path, tool_args, expected_status=0):
         """
@@ -340,6 +351,15 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             ['diff-cover', 'unicode_coverage.xml']
         )
 
+    def test_html_with_external_css(self):
+        temp_dir = self._check_html_report(
+            'git_diff_external_css.txt',
+            'external_css_html_report.html',
+            ['diff-cover', 'coverage.xml'],
+            css_file='external_style.css'
+        )
+        self.assertTrue(os.path.exists(os.path.join(temp_dir, 'external_style.css')))
+
     def test_git_diff_error(self):
 
         # Patch the output of `git diff` to return an error
@@ -400,6 +420,15 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pylint', '--fail-under=40'],
             expected_status=0
         )
+
+    def test_html_with_external_css(self):
+        temp_dir = self._check_html_report(
+            'git_diff_violations.txt',
+            'pep8_violations_report_external_css.html',
+            ['diff-quality', '--violations=pep8'],
+            css_file='external_style.css'
+        )
+        self.assertTrue(os.path.exists(os.path.join(temp_dir, 'external_style.css')))
 
     def test_added_file_pep8_console(self):
         self._check_console_report(
