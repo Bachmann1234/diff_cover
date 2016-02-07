@@ -1,3 +1,12 @@
+2/7/2016 v0.9.0
+
+  * Add support for specifying an external css file (thanks mgedmin)
+  * Add ESLint driver (thanks agroszer)
+  * Significant reworking of diff-quality to simplify the addition of drivers and potentially
+    allow a plugin system down the line. Something I would like to finish at some point but honestly I am just not seeing the time opening up in the short term. If anyone reading this wants to give it a go +1 to that.
+
+  Special thanks to Ben Patterson for taking some time to add some QA resources to this release
+
 12/17/2015 v0.8.6
 
   * Fix for windows users trying to run app (thanks @evanunderscore)
