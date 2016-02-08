@@ -216,7 +216,7 @@ pyflakes_driver = RegexBasedDriver(
 flake8_driver = RegexBasedDriver(
     name='flake8',
     supported_extensions=['py'],
-    command=['pyflakes'],
+    command=['flake8'],
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
