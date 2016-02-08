@@ -1,4 +1,10 @@
-include requirements/requirements.txt
+include requirements/*.txt
 include LICENSE
 include AUTHORS
 include README.rst
+include CHANGELOG
+include NOTICE
+include pylintrc
+include tox.ini
+include .coveragerc
+recursive-include diff_cover *.txt *.html *.css *.xml *.py pylintrc
