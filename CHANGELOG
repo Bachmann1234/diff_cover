@@ -1,3 +1,7 @@
+2/8/2016 v0.9.2
+
+  * CSS template was not being installed properly 
+
 2/8/2016 v0.9.1
 
   * Misc bugfixes. Thanks @davidkostyszak and @mgedmin
