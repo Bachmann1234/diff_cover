@@ -23,7 +23,7 @@ setup(
                  'Topic :: Software Development :: Testing',
                  'Topic :: Software Development :: Quality Assurance'],
     packages=['diff_cover', 'diff_cover/violationsreporters'],
-    package_data={'diff_cover': ['templates/*.txt', 'templates/*.html']},
+    package_data={'diff_cover': ['templates/*.txt', 'templates/*.html', 'templates/*.css']},
     install_requires=REQUIREMENTS,
     entry_points={
         'console_scripts': ['diff-cover = diff_cover.tool:main',
