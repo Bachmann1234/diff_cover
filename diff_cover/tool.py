@@ -273,10 +273,9 @@ def main(argv=None, directory=None):
     filename = os.path.basename(progname)
     name, _ = os.path.splitext(filename)
 
-    GitPathTool.set_cwd(directory)
-
     if 'diff-cover' in name:
         arg_dict = parse_coverage_args(argv[1:])
+        GitPathTool.set_cwd(directory)
         fail_under = arg_dict.get('fail_under')
         percent_covered = generate_coverage_report(
             arg_dict['coverage_xml'],
@@ -294,6 +293,7 @@ def main(argv=None, directory=None):
 
     elif 'diff-quality' in name:
         arg_dict = parse_quality_args(argv[1:])
+        GitPathTool.set_cwd(directory)
         fail_under = arg_dict.get('fail_under')
         tool = arg_dict['violations']
         user_options = arg_dict.get('options')
