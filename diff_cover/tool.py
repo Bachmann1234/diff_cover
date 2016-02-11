@@ -4,6 +4,7 @@ Implement the command-line tool interface.
 from __future__ import unicode_literals
 
 import argparse
+import logging
 import os
 import sys
 from xml.etree import cElementTree
@@ -44,8 +45,6 @@ FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below t
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 
 
-import logging
-logging.basicConfig(format='%(message)s')
 LOGGER = logging.getLogger(__name__)
 
 
@@ -348,4 +347,5 @@ def main(argv=None, directory=None):
         assert False, 'Expect diff-cover or diff-quality in {0}'.format(name)
 
 if __name__ == "__main__":
+    logging.basicConfig(format='%(message)s')
     exit(main())
