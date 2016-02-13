@@ -1,3 +1,7 @@
+2/12/2016 v0.9.5
+
+  * Fix git-diff with `mnemonicprefix` option Thanks @blueyed
+
 2/10/2016 v0.9.4
 
   * Move logging configuration to main for better integrations with people importing the tool. Thanks @agroszer for reporting the issue
