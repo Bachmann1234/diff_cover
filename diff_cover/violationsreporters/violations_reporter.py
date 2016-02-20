@@ -188,7 +188,8 @@ pep8_driver = RegexBasedDriver(
     name='pep8',
     supported_extensions=['py'],
     command=['pep8'],
-    expression=r'^([^:]+):(\d+).*([EW]\d{3}.*)$'
+    expression=r'^([^:]+):(\d+).*([EW]\d{3}.*)$',
+    command_to_check_install=['pep8', '--version']
 )
 
 pyflakes_driver = RegexBasedDriver(
@@ -198,7 +199,8 @@ pyflakes_driver = RegexBasedDriver(
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
-    expression=r'^([^:]+):(\d+): (.*)$'
+    expression=r'^([^:]+):(\d+): (.*)$',
+    command_to_check_install=['pyflakes', '--version']
 )
 
 """
@@ -220,7 +222,8 @@ flake8_driver = RegexBasedDriver(
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
-    expression=r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$'
+    expression=r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$',
+    command_to_check_install=['flake8', '--version']
 )
 
 
@@ -314,11 +317,7 @@ class PylintDriver(QualityDriver):
         Method checks if the provided tool is installed.
         Returns: boolean True if installed
         """
-        try:
-            __import__(self.name)
-            return True
-        except ImportError:
-            return False
+        return run_command_for_code(['pylint', '--version']) == 0
 
 
 class JsHintDriver(RegexBasedDriver):
@@ -330,7 +329,8 @@ class JsHintDriver(RegexBasedDriver):
                 'jshint',
                 ['js'],
                 ['jshint'],
-                r'^([^:]+): line (\d+), col \d+, (.*)$'
+                r'^([^:]+): line (\d+), col \d+, (.*)$',
+                ['jshint', '-v'],
         )
 
     def installed(self):
@@ -338,7 +338,7 @@ class JsHintDriver(RegexBasedDriver):
         Override base method. Confirm the tool is installed by running this command and
         getting exit 0. Otherwise, raise an Environment Error.
         """
-        return run_command_for_code(['jshint', '-v']) == 0
+        return run_command_for_code(self.command_to_check_install) == 0
 
 
 class EsLintDriver(RegexBasedDriver):
@@ -350,7 +350,8 @@ class EsLintDriver(RegexBasedDriver):
                 'eslint',
                 ['js'],
                 ['eslint', '--format compact'],
-                r'^([^:]+): line (\d+), col \d+, (.*)$'
+                r'^([^:]+): line (\d+), col \d+, (.*)$',
+                ['eslint', '-v'],
         )
 
     def installed(self):
@@ -358,4 +359,4 @@ class EsLintDriver(RegexBasedDriver):
         Override base method. Confirm the tool is installed by running this command and
         getting exit 0. Otherwise, raise an Environment Error.
         """
-        return run_command_for_code([self.command[0], '-v']) == 0
+        return run_command_for_code(self.command_to_check_install) == 0

@@ -20,12 +20,13 @@ from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
 
-def _setup_patch(return_value, status_code=0):
+def _setup_patch(return_value, status_code=0, side_effect=None):
     mocked_process = mock.Mock()
     mocked_process.returncode = status_code
     mocked_process.communicate.return_value = return_value
     mocked_subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
     mocked_subprocess.Popen.return_value = mocked_process
+    return mocked_process
 
 
 class XmlCoverageReporterTest(unittest.TestCase):
@@ -643,8 +644,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `flake8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'', b'')
+        _setup_patch((b'', b''), 0)
 
         # Parse the report
         quality = QualityReporter(flake8_driver)
@@ -796,14 +796,14 @@ class PylintQualityReporterTest(unittest.TestCase):
             self.assertIn(expected, actual_violations)
 
     def test_unicode(self):
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-
-        # Test non-ascii unicode characters in the filename, function name and message
-        _mock_communicate.return_value = (dedent(u"""
+        _setup_patch(
+            (dedent(u"""
             file_\u6729.py:616: [W1401] Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix.
             file.py:2: [W0612, cls_name.func_\u9492] Unused variable '\u2920'
-        """).encode('utf-8'), b'')
-
+            """).encode('utf-8'),
+             ''),
+            0
+        )
         quality = QualityReporter(PylintDriver())
         violations = quality.violations(u'file_\u6729.py')
         self.assertEqual(violations, [
@@ -814,12 +814,10 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(violations, [Violation(2, u"W0612: cls_name.func_\u9492: Unused variable '\u2920'")])
 
     def test_unicode_continuation_char(self):
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-
-        # Test a unicode continuation char, which pylint can produce (probably an encoding bug in pylint)
-        _mock_communicate.return_value = (b"file.py:2: [W1401]"
-                                          b" Invalid char '\xc3'", '')
-
+        _setup_patch(
+            (b"file.py:2: [W1401]"b" Invalid char '\xc3'", ''),
+            0
+        )
         # Since we are replacing characters we can't interpet, this should
         # return a valid string with the char replaced with '?'
         quality = QualityReporter(PylintDriver())
@@ -827,11 +825,10 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(violations, [Violation(2, u"W1401: Invalid char '\ufffd'")])
 
     def test_non_integer_line_num(self):
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (dedent(u"""
+        _setup_patch((dedent(u"""
             file.py:not_a_number: C0111: Missing docstring
             file.py:\u8911: C0111: Missing docstring
-        """).encode('utf-8'), '')
+        """).encode('utf-8'), ''), 0)
 
         # None of the violations have a valid line number, so they should all be skipped
         violations = QualityReporter(PylintDriver()).violations(u'file.py')
@@ -854,21 +851,20 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(len(actual_violations), 2)
 
     def test_quality_error(self):
-
         # Patch the output stderr/stdout and returncode of `pylint`
         _setup_patch((b'file1.py:1: [C0111] Missing docstring', b'oops'), status_code=1)
 
         # Parse the report
-        quality = QualityReporter(PylintDriver())
+        with patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code') as code:
+            code.return_value = 0
+            quality = QualityReporter(PylintDriver())
 
-        # Expect an error
-        self.assertRaises(CommandError, quality.violations, 'file1.py')
+            # Expect an error
+            self.assertRaises(CommandError, quality.violations, 'file1.py')
 
     def test_no_quality_issues_newline(self):
 
-        # Patch the output of `pylint`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'\n', b'')
+        _setup_patch((b'\n', b''), 0)
 
         # Parse the report
         quality = QualityReporter(PylintDriver())
@@ -877,8 +873,7 @@ class PylintQualityReporterTest(unittest.TestCase):
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pylint`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'', b'')
+        _setup_patch((b'', b''), 0)
 
         # Parse the report
         quality = QualityReporter(PylintDriver())

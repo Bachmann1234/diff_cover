@@ -2,16 +2,14 @@ from __future__ import unicode_literals, absolute_import
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict, namedtuple
 
-import subprocess
 
 import copy
 
 import re
 import sys
 
-import six
 
-from diff_cover.command_runner import execute
+from diff_cover.command_runner import execute, run_command_for_code
 
 Violation = namedtuple('Violation', 'line, message')
 
@@ -175,14 +173,25 @@ class QualityReporter(BaseViolationReporter):
 
 
 class RegexBasedDriver(QualityDriver):
-    def __init__(self, name, supported_extensions, command, expression):
+    def __init__(
+            self,
+            name,
+            supported_extensions,
+            command,
+            expression,
+            command_to_check_install
+    ):
         """
         args:
             expression: regex used to parse report
         See super for other args
+            command_to_check_install: (list[str]) command to run
+            to see if the tool is installed
         """
         super(RegexBasedDriver, self).__init__(name, supported_extensions, command)
         self.expression = re.compile(expression)
+        self.command_to_check_install = command_to_check_install
+        self.is_installed = None
 
     def parse_reports(self, reports):
         """
@@ -209,8 +218,6 @@ class RegexBasedDriver(QualityDriver):
         Method checks if the provided tool is installed.
         Returns: boolean True if installed
         """
-        try:
-            __import__(self.name)
-            return True
-        except ImportError:
-            return False
+        if self.is_installed is None:
+            self.is_installed = run_command_for_code(self.command_to_check_install) == 0
+        return self.is_installed
