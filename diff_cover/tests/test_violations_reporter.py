@@ -8,19 +8,17 @@ from textwrap import dedent
 import mock
 
 import six
-from mock import Mock, patch, MagicMock
-from six import BytesIO, StringIO
 
 from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.tests.helpers import unittest
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, Violation, pep8_driver, \
-    pyflakes_driver, flake8_driver, JsHintDriver, PylintDriver, EsLintDriver
+    pyflakes_driver, flake8_driver, PylintDriver, jshint_driver, eslint_driver
 from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
 
-def _setup_patch(return_value, status_code=0, side_effect=None):
+def _setup_patch(return_value, status_code=0):
     mocked_process = mock.Mock()
     mocked_process.returncode = status_code
     mocked_process.communicate.return_value = return_value
@@ -331,8 +329,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
                 ../new_file.py:3:13: E225 whitespace
                 ../new_file.py:7:1: E302 blank lines
             """).strip() + '\n'
-        _mock_communicate.return_value = (
-            (return_string.encode('utf-8'), b''))
+        _setup_patch((return_string.encode('utf-8'), b''))
 
         # Parse the report
         quality = QualityReporter(pep8_driver)
@@ -356,8 +353,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
     def test_no_quality_issues_newline(self):
 
         # Patch the output of `pep8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'\n', b'')
+        _setup_patch((b'\n', b''))
 
         # Parse the report
         quality = QualityReporter(pep8_driver)
@@ -366,8 +362,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pep8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'', b'')
+        _setup_patch((b'', b''))
 
         # Parse the report
         quality = QualityReporter(pep8_driver)
@@ -377,15 +372,16 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
         # Patch the output of `pep8`
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
+        with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
+            code.return_value = 0
+            # Parse the report
+            quality = QualityReporter(pep8_driver)
 
-        # Parse the report
-        quality = QualityReporter(pep8_driver)
-
-        # Expect that the name is set
-        self.assertEqual(quality.name(), 'pep8')
-        with self.assertRaises(CommandError) as ex:
-            quality.violations('file1.py')
-        self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+            # Expect that the name is set
+            self.assertEqual(quality.name(), 'pep8')
+            with self.assertRaises(CommandError) as ex:
+                quality.violations('file1.py')
+            self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = QualityReporter(pep8_driver)
@@ -456,13 +452,11 @@ class PyflakesQualityReporterTest(unittest.TestCase):
     def test_quality(self):
 
         # Patch the output of `pyflakes`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
         return_string = '\n' + dedent("""
                 ../new_file.py:328: undefined name '_thing'
                 ../new_file.py:418: 'random' imported but unused
             """).strip() + '\n'
-        _mock_communicate.return_value = (
-            (return_string.encode('utf-8'), b''))
+        _setup_patch((return_string.encode('utf-8'), b''))
 
         # Parse the report
         quality = QualityReporter(pyflakes_driver)
@@ -486,10 +480,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
 
     def test_no_quality_issues_newline(self):
 
-        # Patch the output of `pyflakes`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'\n', b'')
-
+        _setup_patch((b'\n', b''))
         # Parse the report
         quality = QualityReporter(pyflakes_driver)
         self.assertEqual([], quality.violations('file1.py'))
@@ -497,9 +488,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
     def test_no_quality_issues_emptystring(self):
 
         # Patch the output of `pyflakes`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'', b'')
-
+        _setup_patch((b'', b''))
         # Parse the report
         quality = QualityReporter(pyflakes_driver)
         self.assertEqual([], quality.violations('file1.py'))
@@ -509,13 +498,14 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         # Patch the output of `pyflakes`
         _setup_patch((b"", b'whoops'), status_code=1)
 
-        # Parse the report
-        quality = QualityReporter(pyflakes_driver)
+        with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
+            code.return_value = 0
+            quality = QualityReporter(pyflakes_driver)
 
-        # Expect that the name is set
-        self.assertEqual(quality.name(), 'pyflakes')
+            # Expect that the name is set
+            self.assertEqual(quality.name(), 'pyflakes')
 
-        self.assertRaises(CommandError, quality.violations, 'file1.py')
+            self.assertRaises(CommandError, quality.violations, 'file1.py')
 
     def test_no_such_file(self):
         quality = QualityReporter(pyflakes_driver)
@@ -583,7 +573,6 @@ class Flake8QualityReporterTest(unittest.TestCase):
     def test_quality(self):
 
         # Patch the output of `flake8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
         return_string = '\n' + dedent("""
                 ../new_file.py:1:17: E231 whitespace
                 ../new_file.py:3:13: E225 whitespace
@@ -599,8 +588,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
                 ../new_file.py:100:0: S100 Snippet found
                 ../new_file.py:110:0: Q000 Remove Single quotes
             """).strip() + '\n'
-        _mock_communicate.return_value = (
-            (return_string.encode('utf-8'), b''))
+        _setup_patch((return_string.encode('utf-8'), b''))
 
         # Parse the report
         quality = QualityReporter(flake8_driver)
@@ -633,11 +621,8 @@ class Flake8QualityReporterTest(unittest.TestCase):
 
     def test_no_quality_issues_newline(self):
 
-        # Patch the output of `flake8`
-        _mock_communicate = patch.object(Popen, 'communicate').start()
-        _mock_communicate.return_value = (b'\n', b'')
+        _setup_patch((b'\n', b''), 0)
 
-        # Parse the report
         quality = QualityReporter(flake8_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
@@ -656,13 +641,15 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
 
         # Parse the report
-        quality = QualityReporter(flake8_driver)
+        with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
+            code.return_value = 0
+            quality = QualityReporter(flake8_driver)
 
-        # Expect that the name is set
-        self.assertEqual(quality.name(), 'flake8')
-        with self.assertRaises(CommandError) as ex:
-            quality.violations('file1.py')
-        self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+            # Expect that the name is set
+            self.assertEqual(quality.name(), 'flake8')
+            with self.assertRaises(CommandError) as ex:
+                quality.violations('file1.py')
+            self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = QualityReporter(flake8_driver)
@@ -1013,15 +1000,16 @@ class JsQualityBaseReporterMixin(object):
     def test_quality_error(self):
 
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
+        with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
+            code.return_value = 0
+            # Parse the report
+            quality = QualityReporter(self._get_out())
 
-        # Parse the report
-        quality = QualityReporter(self._get_out())
-
-        # Expect that the name is set
-        self.assertEqual(quality.name(), self.quality_name)
-        with self.assertRaises(CommandError) as ex:
-            quality.violations('file1.js')
-        self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+            # Expect that the name is set
+            self.assertEqual(quality.name(), self.quality_name)
+            with self.assertRaises(CommandError) as ex:
+                quality.violations('file1.js')
+            self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = QualityReporter(self._get_out())
@@ -1098,7 +1086,7 @@ class JsHintQualityReporterTest(JsQualityBaseReporterMixin, unittest.TestCase):
     quality_name = 'jshint'
 
     def _get_out(self):
-        return JsHintDriver()
+        return jshint_driver
 
 
 class ESLintQualityReporterTest(JsQualityBaseReporterMixin, unittest.TestCase):
@@ -1110,7 +1098,7 @@ class ESLintQualityReporterTest(JsQualityBaseReporterMixin, unittest.TestCase):
     quality_name = 'eslint'
 
     def _get_out(self):
-        return EsLintDriver()
+        return eslint_driver
 
 
 class SimpleCommandTestCase(unittest.TestCase):
@@ -1153,8 +1141,10 @@ class SubprocessErrorTestCase(unittest.TestCase):
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_quality_reporter(self, mock_stderr):
-        reporter = QualityReporter(pep8_driver)
-        with self.assertRaises(OSError):
-            reporter.violations("path/to/file.py")
+        with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
+            code.return_value = 0
+            reporter = QualityReporter(pep8_driver)
+            with self.assertRaises(OSError):
+                reporter.violations("path/to/file.py")
 
-        self.assertEqual(mock_stderr.getvalue(), "pep8 path/to/file.py")
+            self.assertEqual(mock_stderr.getvalue(), "pep8 path/to/file.py")

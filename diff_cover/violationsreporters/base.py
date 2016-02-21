@@ -218,6 +218,4 @@ class RegexBasedDriver(QualityDriver):
         Method checks if the provided tool is installed.
         Returns: boolean True if installed
         """
-        if self.is_installed is None:
-            self.is_installed = run_command_for_code(self.command_to_check_install) == 0
-        return self.is_installed
+        return run_command_for_code(self.command_to_check_install) == 0

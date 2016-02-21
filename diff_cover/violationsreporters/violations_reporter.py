@@ -226,6 +226,22 @@ flake8_driver = RegexBasedDriver(
     command_to_check_install=['flake8', '--version']
 )
 
+jshint_driver = RegexBasedDriver(
+    name='jshint',
+    supported_extensions=['js'],
+    command=['jshint'],
+    expression=r'^([^:]+): line (\d+), col \d+, (.*)$',
+    command_to_check_install=['jshint', '-v']
+)
+
+eslint_driver = RegexBasedDriver(
+    name='eslint',
+    supported_extensions=['js'],
+    command=['eslint', '--format compact'],
+    expression=r'^([^:]+): line (\d+), col \d+, (.*)$',
+    command_to_check_install=['eslint', '-v'],
+)
+
 
 class PylintDriver(QualityDriver):
     def __init__(self):
@@ -317,47 +333,5 @@ class PylintDriver(QualityDriver):
         """
         Method checks if the provided tool is installed.
         Returns: boolean True if installed
-        """
-        return run_command_for_code(self.command_to_check_install) == 0
-
-
-class JsHintDriver(RegexBasedDriver):
-    """
-    Report JSHint violations.
-    """
-    def __init__(self):
-        super(JsHintDriver, self).__init__(
-                'jshint',
-                ['js'],
-                ['jshint'],
-                r'^([^:]+): line (\d+), col \d+, (.*)$',
-                ['jshint', '-v'],
-        )
-
-    def installed(self):
-        """
-        Override base method. Confirm the tool is installed by running this command and
-        getting exit 0. Otherwise, raise an Environment Error.
-        """
-        return run_command_for_code(self.command_to_check_install) == 0
-
-
-class EsLintDriver(RegexBasedDriver):
-    """
-    Report ESLint violations.
-    """
-    def __init__(self):
-        super(EsLintDriver, self).__init__(
-                'eslint',
-                ['js'],
-                ['eslint', '--format compact'],
-                r'^([^:]+): line (\d+), col \d+, (.*)$',
-                ['eslint', '-v'],
-        )
-
-    def installed(self):
-        """
-        Override base method. Confirm the tool is installed by running this command and
-        getting exit 0. Otherwise, raise an Environment Error.
         """
         return run_command_for_code(self.command_to_check_install) == 0
