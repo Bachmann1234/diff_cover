@@ -1,3 +1,7 @@
+2/21/2016 v0.9.6
+
+  * Now check for tool existence by trying to run the tool rather than trying to import it. Thanks for the idea @agroszer (issue 44)
+
 2/12/2016 v0.9.5
 
   * Fix git-diff with `mnemonicprefix` option Thanks @blueyed
