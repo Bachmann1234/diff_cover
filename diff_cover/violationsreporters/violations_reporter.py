@@ -241,6 +241,7 @@ class PylintDriver(QualityDriver):
         )
         self.pylint_expression = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
         self.dupe_code_violation = 'R0801'
+        self.command_to_check_install = ['pylint', '--version']
 
         # Match lines of the form:
         # path/to/file.py:123: [C0111] Missing docstring
@@ -317,7 +318,7 @@ class PylintDriver(QualityDriver):
         Method checks if the provided tool is installed.
         Returns: boolean True if installed
         """
-        return run_command_for_code(['pylint', '--version']) == 0
+        return run_command_for_code(self.command_to_check_install) == 0
 
 
 class JsHintDriver(RegexBasedDriver):
