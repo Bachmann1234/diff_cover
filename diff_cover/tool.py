@@ -260,6 +260,8 @@ def main(argv=None, directory=None):
     1 is an error
     0 is successful run
     """
+    logging.basicConfig(format='%(message)s')
+
     argv = argv or sys.argv
     # Init the path tool to work with the specified directory,
     # or the current directory if it isn't set.
@@ -348,5 +350,4 @@ def main(argv=None, directory=None):
         assert False, 'Expect diff-cover or diff-quality in {0}'.format(name)
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(message)s')
     exit(main())
