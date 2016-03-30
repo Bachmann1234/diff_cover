@@ -1,3 +1,7 @@
+3/29/2016 v0.9.7
+
+  * Move logging config to main method rather than __main__. Thanks @pkaleta (PR 45)   
+
 2/21/2016 v0.9.6
 
   * Now check for tool existence by trying to run the tool rather than trying to import it. Thanks for the idea @agroszer (issue 44)
