@@ -237,7 +237,7 @@ jshint_driver = RegexBasedDriver(
 eslint_driver = RegexBasedDriver(
     name='eslint',
     supported_extensions=['js'],
-    command=['eslint', '--format compact'],
+    command=['eslint', '--format=compact'],
     expression=r'^([^:]+): line (\d+), col \d+, (.*)$',
     command_to_check_install=['eslint', '-v'],
 )
