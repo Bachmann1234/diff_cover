@@ -7,6 +7,7 @@ import copy
 
 import re
 import sys
+import os
 
 
 from diff_cover.command_runner import execute, run_command_for_code
@@ -208,6 +209,8 @@ class RegexBasedDriver(QualityDriver):
                 # Ignore any line that isn't a violation
                 if match is not None:
                     src, line_number, message = match.groups()
+                    # Transform src to a relative path, if it isn't already
+                    src = os.path.relpath(src)
                     violation = Violation(int(line_number), message)
                     violations_dict[src].append(violation)
 
