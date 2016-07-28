@@ -1,3 +1,7 @@
+7/27/2016 v0.9.8
+
+  * Fixes to ESLINT to work with 2.13 THanks @bjacobel (PR 46)
+
 3/29/2016 v0.9.7
 
   * Move logging config to main method rather than __main__. Thanks @pkaleta (PR 45)   
