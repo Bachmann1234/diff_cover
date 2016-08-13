@@ -1,3 +1,8 @@
+8/12/2016 v0.9.9
+
+  * Fix bug where only one file was being checked in diff-quality (Issue 47) Thanks @fperrin
+  * Fix bug where diff-quality would attempt to read deleted files (Issue 48) Thanks @fperrin
+
 7/27/2016 v0.9.8
 
   * Fixes to ESLINT to work with 2.13 THanks @bjacobel (PR 46)
