@@ -152,9 +152,10 @@ class QualityReporter(BaseViolationReporter):
                 command = copy.deepcopy(self.driver.command)
                 if self.options:
                     command.append(self.options)
-                command.append(src_path.encode(sys.getfilesystemencoding()))
-                output, _ = execute(command)
-                self.violations_dict.update(self.driver.parse_reports([output]))
+                if os.path.exists(src_path):
+                    command.append(src_path.encode(sys.getfilesystemencoding()))
+                    output, _ = execute(command)
+                    self.violations_dict.update(self.driver.parse_reports([output]))
 
         return self.violations_dict[src_path]
 

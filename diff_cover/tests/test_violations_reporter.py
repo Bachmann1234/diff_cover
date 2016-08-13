@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import subprocess
 import xml.etree.cElementTree as etree
 from subprocess import Popen
@@ -8,6 +9,7 @@ from textwrap import dedent
 import mock
 
 import six
+from diff_cover.violationsreporters import base
 
 from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.tests.helpers import unittest
@@ -17,6 +19,10 @@ from diff_cover.violationsreporters.violations_reporter import XmlCoverageReport
 from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
+
+def _patch_so_all_files_exist():
+    _mock_exists = patch.object(base.os.path, 'exists').start()
+    _mock_exists.returnvalue = True
 
 def _setup_patch(return_value, status_code=0):
     mocked_process = mock.Mock()
@@ -314,6 +320,9 @@ class XmlCoverageReporterTest(unittest.TestCase):
 
 class Pep8QualityReporterTest(unittest.TestCase):
 
+    def setUp(self):
+        _patch_so_all_files_exist()
+
     def tearDown(self):
         """
         Undo all patches
@@ -450,6 +459,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         patch.stopall()
 
     def test_quality(self):
+        _patch_so_all_files_exist()
 
         # Patch the output of `pyflakes`
         return_string = '\n' + dedent("""
@@ -494,6 +504,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
+        _patch_so_all_files_exist()
 
         # Patch the output of `pyflakes`
         _setup_patch((b"", b'whoops'), status_code=1)
@@ -571,6 +582,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         patch.stopall()
 
     def test_quality(self):
+        _patch_so_all_files_exist()
 
         # Patch the output of `flake8`
         return_string = '\n' + dedent("""
@@ -636,6 +648,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
+        _patch_so_all_files_exist()
 
         # Patch the output of `flake8`
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
@@ -662,6 +675,14 @@ class Flake8QualityReporterTest(unittest.TestCase):
         quality = QualityReporter(flake8_driver)
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
+        for path in file_paths:
+            result = quality.violations(path)
+            self.assertEqual(result, [])
+
+    def test_file_does_not_exist(self):
+        quality = QualityReporter(flake8_driver)
+        file_paths = ['ajshdjlasdhajksdh.py']
+        # Expect that we get no results because that file does not exist
         for path in file_paths:
             result = quality.violations(path)
             self.assertEqual(result, [])
@@ -707,6 +728,9 @@ class Flake8QualityReporterTest(unittest.TestCase):
 
 
 class PylintQualityReporterTest(unittest.TestCase):
+
+    def setUp(self):
+        _patch_so_all_files_exist()
 
     def tearDown(self):
         """
@@ -949,7 +973,7 @@ class JsQualityBaseReporterMixin(object):
         """
         Test basic scenarios, including special characters that would appear in JavaScript and mixed quotation marks
         """
-
+        _patch_so_all_files_exist()
         # Patch the output of the linter cmd
         return_string = '\n' + dedent("""
                 ../test_file.js: line 3, col 9, Missing "use strict" statement.
@@ -998,7 +1022,7 @@ class JsQualityBaseReporterMixin(object):
         self.assertEqual([], quality.violations('file1.js'))
 
     def test_quality_error(self):
-
+        _patch_so_all_files_exist()
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
@@ -1141,6 +1165,7 @@ class SubprocessErrorTestCase(unittest.TestCase):
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_quality_reporter(self, mock_stderr):
+        _patch_so_all_files_exist()
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
             reporter = QualityReporter(pep8_driver)
