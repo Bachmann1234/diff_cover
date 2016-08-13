@@ -1,0 +1,14 @@
+-------------
+Diff Quality
+Quality Report: pyflakes
+Diff: origin/master...HEAD, staged, and unstaged changes
+-------------
+hello.py (0.0%):
+    2: undefined name 'unknown_var'
+hi.py (0.0%):
+    2: undefined name 'unknown_var'
+-------------
+Total:   2 lines
+Violations: 2 lines
+% Quality: 0%
+-------------

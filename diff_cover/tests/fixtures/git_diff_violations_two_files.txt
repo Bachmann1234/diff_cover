@@ -1,0 +1,14 @@
+diff --git a/hello.py b/hello.py
+index b732142..b2ba069 100644
+--- a/hello.py
++++ b/hello.py
+@@ -1 +1,2 @@
+ print "hello"
++print unknown_var
+diff --git a/hi.py b/hi.py
+index bae1109..151d05d 100644
+--- a/hi.py
++++ b/hi.py
+@@ -1 +1,2 @@
+ print "hi"
++print unknown_var
