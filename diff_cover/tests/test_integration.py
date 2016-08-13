@@ -469,6 +469,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ['diff-quality', '--violations=pyflakes']
         )
 
+    def test_added_file_pyflakes_console_two_files(self):
+        self._check_console_report(
+            'git_diff_violations_two_files.txt',
+            'pyflakes_two_files.txt',
+            ['diff-quality', '--violations=pyflakes']
+        )
+
     def test_added_file_pylint_console(self):
         self._check_console_report(
             'git_diff_violations.txt',

@@ -114,7 +114,7 @@ class QualityReporter(BaseViolationReporter):
         """
         super(QualityReporter, self).__init__(driver.name)
         self.reports = self._load_reports(reports) if reports else None
-        self.violations_dict = {}
+        self.violations_dict = defaultdict(list)
         self.driver = driver
         self.options = options
         self.driver_tool_installed = None
@@ -142,7 +142,9 @@ class QualityReporter(BaseViolationReporter):
         if not any(src_path.endswith(ext) for ext in self.driver.supported_extensions):
             return []
         if src_path not in self.violations_dict:
-            if not self.reports:
+            if self.reports:
+                self.violations_dict = self.driver.parse_reports(self.reports)
+            else:
                 if self.driver_tool_installed is None:
                     self.driver_tool_installed = self.driver.installed()
                 if not self.driver_tool_installed:
@@ -150,10 +152,11 @@ class QualityReporter(BaseViolationReporter):
                 command = copy.deepcopy(self.driver.command)
                 if self.options:
                     command.append(self.options)
-                command.append(src_path.encode(sys.getfilesystemencoding()))
-                output, _ = execute(command)
-                self.reports = [output]
-            self.violations_dict = self.driver.parse_reports(self.reports)
+                if os.path.exists(src_path):
+                    command.append(src_path.encode(sys.getfilesystemencoding()))
+                    output, _ = execute(command)
+                    self.violations_dict.update(self.driver.parse_reports([output]))
+
         return self.violations_dict[src_path]
 
     def measured_lines(self, src_path):
