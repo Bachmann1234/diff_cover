@@ -1,2 +1,2 @@
-print "hello"
-print unknown_var
+print("hello")
+print(unknown_var)
