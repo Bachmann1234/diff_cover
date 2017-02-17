@@ -64,6 +64,27 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(len(source_paths), 1)
         self.assertEqual('subdir/file1.py', source_paths[0])
 
+    def test_git_source_paths_with_supported_extensions(self):
+
+        # Configure the git diff output
+        self._set_git_diff_output(
+            git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir/file2.py': line_numbers(3, 10), 'file3.py': [0]}),
+            git_diff_output({'README.md': line_numbers(3, 10)})
+        )
+
+        # Set supported extensions
+        self.diff._supported_extensions = ['py']
+
+        # Get the source paths in the diff
+        source_paths = self.diff.src_paths_changed()
+
+        # Validate the source paths, README.md should be left out
+        self.assertEqual(len(source_paths), 3)
+        self.assertEqual('file3.py', source_paths[0])
+        self.assertEqual('subdir/file1.py', source_paths[1])
+        self.assertEqual('subdir/file2.py', source_paths[2])
+
     def test_git_lines_changed(self):
 
         # Configure the git diff output
