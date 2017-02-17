@@ -4,6 +4,7 @@ Classes for querying which lines have changed based on a diff.
 from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from diff_cover.git_diff import GitDiffError
+import os
 import re
 
 
@@ -54,7 +55,7 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch='origin/master', git_diff=None, ignore_unstaged=None):
+    def __init__(self, compare_branch='origin/master', git_diff=None, ignore_unstaged=None, supported_extensions=None):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
@@ -66,6 +67,7 @@ class GitDiffReporter(BaseDiffReporter):
         self._compare_branch = compare_branch
         self._git_diff_tool = git_diff
         self._ignore_unstaged = ignore_unstaged
+        self._supported_extensions = supported_extensions
 
         # Cache diff information as a dictionary
         # with file path keys and line number list values
@@ -136,14 +138,19 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path in diff_dict.keys():
-                    added_lines, deleted_lines = diff_dict[src_path]
+                    # If no _supported_extensions provided, or extension present: process
+                    root, extension = os.path.splitext(src_path)
+                    extension = extension[1:].lower()
+                    # 'not self._supported_extensions' tests for both None and empty list []
+                    if not self._supported_extensions or extension in self._supported_extensions:
+                        added_lines, deleted_lines = diff_dict[src_path]
 
-                    # Remove any lines from the dict that have been deleted
-                    # Include any lines that have been added
-                    result_dict[src_path] = [
-                        line for line in result_dict.get(src_path, [])
-                        if not line in deleted_lines
-                    ] + added_lines
+                        # Remove any lines from the dict that have been deleted
+                        # Include any lines that have been added
+                        result_dict[src_path] = [
+                            line for line in result_dict.get(src_path, [])
+                            if not line in deleted_lines
+                        ] + added_lines
 
             # Eliminate repeats and order line numbers
             for (src_path, lines) in result_dict.items():
