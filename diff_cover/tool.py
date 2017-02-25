@@ -231,7 +231,7 @@ def generate_quality_report(tool, compare_branch, html_report=None, css_file=Non
     """
     Generate the quality report, using kwargs from `parse_args()`.
     """
-    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool(), ignore_unstaged=ignore_unstaged)
+    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool(), ignore_unstaged=ignore_unstaged, supported_extensions=tool.driver.supported_extensions)
 
     if html_report is not None:
         css_url = css_file
