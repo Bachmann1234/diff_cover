@@ -74,7 +74,7 @@ class GitDiffReporter(BaseDiffReporter):
             for item in options[1:-1]:
                 name += ", " + item
             # Apply and + changes to the last option
-            name += ", and " + options[-1] + " changes"
+            name += " and " + options[-1] + " changes"
 
         super(GitDiffReporter, self).__init__(name)
 

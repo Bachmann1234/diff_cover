@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Diff: origin/master...HEAD, staged, and unstaged changes
+Diff: origin/master...HEAD, staged and unstaged changes
 -------------
 test_src.txt (60.0%): Missing lines 4,6,8,10
 -------------
