@@ -31,6 +31,27 @@ class GitDiffReporterTest(unittest.TestCase):
             'release...HEAD, staged, and unstaged changes'
         )
 
+    def test_name_ignore_staged(self):
+        # Override the default branch
+        self.assertEqual(
+            GitDiffReporter(git_diff=self._git_diff, ignore_staged=True).name(),
+            'origin/master...HEAD, and unstaged changes'
+        )
+
+    def test_name_ignore_unstaged(self):
+        # Override the default branch
+        self.assertEqual(
+            GitDiffReporter(git_diff=self._git_diff, ignore_unstaged=True).name(),
+            'origin/master...HEAD, and staged changes'
+        )
+
+    def test_name_ignore_staged_and_unstaged(self):
+        # Override the default branch
+        self.assertEqual(
+            GitDiffReporter(git_diff=self._git_diff, ignore_staged=True, ignore_unstaged=True).name(),
+            'origin/master...HEAD'
+        )
+
     def test_git_source_paths(self):
 
         # Configure the git diff output
@@ -407,6 +428,15 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(3, len(self.diff._get_included_diff_results()))
         self.assertEqual(['', '', unstaged_input], self.diff._get_included_diff_results())
 
+    def test_ignore_staged_inclusion(self):
+        self.diff = GitDiffReporter(git_diff=self._git_diff, ignore_staged=True)
+
+        staged_input = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output('', staged_input, '')
+
+        self.assertEqual(2, len(self.diff._get_included_diff_results()))
+        self.assertEqual(['', ''], self.diff._get_included_diff_results())
+
     def test_ignore_unstaged_inclusion(self):
         self.diff = GitDiffReporter(git_diff=self._git_diff, ignore_unstaged=True)
 
@@ -415,6 +445,17 @@ class GitDiffReporterTest(unittest.TestCase):
 
         self.assertEqual(2, len(self.diff._get_included_diff_results()))
         self.assertEqual(['', ''], self.diff._get_included_diff_results())
+
+
+    def test_ignore_staged_and_unstaged_inclusion(self):
+        self.diff = GitDiffReporter(git_diff=self._git_diff, ignore_staged=True, ignore_unstaged=True)
+
+        staged_input = git_diff_output({'subdir/file1.py': line_numbers(3, 10) + line_numbers(34, 47)})
+        unstaged_input = git_diff_output({'subdir/file2.py': line_numbers(3, 10) + line_numbers(34, 47)})
+        self._set_git_diff_output('', staged_input, unstaged_input)
+
+        self.assertEqual(1, len(self.diff._get_included_diff_results()))
+        self.assertEqual([''], self.diff._get_included_diff_results())
 
     def _set_git_diff_output(self, committed_diff,
                              staged_diff, unstaged_diff):
