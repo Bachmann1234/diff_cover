@@ -61,17 +61,17 @@ class GitDiffReporter(BaseDiffReporter):
         for the `git diff` tool.  (Should have same interface
         as `git_diff.GitDiffTool`)
         """
-        options = ["{0}...HEAD".format(compare_branch)]
+        options = list()
         if not ignore_staged:
             options.append("staged")
         if not ignore_unstaged:
             options.append("unstaged")
 
         # Branch is always present, so use as basis for name
-        name = options[0]
-        if len(options) > 1:
+        name = "{0}...HEAD".format(compare_branch)
+        if len(options) > 0:
             # If more options are present separate them by comma's, except the last one
-            for item in options[1:-1]:
+            for item in options[:-1]:
                 name += ", " + item
             # Apply and + changes to the last option
             name += " and " + options[-1] + " changes"
