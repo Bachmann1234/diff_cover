@@ -1,4 +1,8 @@
-2/25/2016 v0.9.10
+3/7/2017 v0.9.11
+
+ * Allow ignoring of staged files. Thanks @abmaonline!
+
+2/25/2017 v0.9.10
 
   * Deflate inflated style percentages by including files that were not supported by the linters. Thanks @abmaoline
 
