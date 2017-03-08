@@ -55,17 +55,32 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch='origin/master', git_diff=None, ignore_unstaged=None, supported_extensions=None):
+    def __init__(self, compare_branch='origin/master', git_diff=None, ignore_staged=None, ignore_unstaged=None, supported_extensions=None):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
         as `git_diff.GitDiffTool`)
         """
-        name = "{branch}...HEAD, staged, and unstaged changes".format(branch=compare_branch)
+        options = list()
+        if not ignore_staged:
+            options.append("staged")
+        if not ignore_unstaged:
+            options.append("unstaged")
+
+        # Branch is always present, so use as basis for name
+        name = "{0}...HEAD".format(compare_branch)
+        if len(options) > 0:
+            # If more options are present separate them by comma's, except the last one
+            for item in options[:-1]:
+                name += ", " + item
+            # Apply and + changes to the last option
+            name += " and " + options[-1] + " changes"
+
         super(GitDiffReporter, self).__init__(name)
 
         self._compare_branch = compare_branch
         self._git_diff_tool = git_diff
+        self._ignore_staged = ignore_staged
         self._ignore_unstaged = ignore_unstaged
         self._supported_extensions = supported_extensions
 
@@ -107,8 +122,9 @@ class GitDiffReporter(BaseDiffReporter):
         """
         Return a list of stages to be included in the diff results.
         """
-        included = [self._git_diff_tool.diff_committed(self._compare_branch),
-                    self._git_diff_tool.diff_staged()]
+        included = [self._git_diff_tool.diff_committed(self._compare_branch)]
+        if not self._ignore_staged:
+            included.append(self._git_diff_tool.diff_staged())
         if not self._ignore_unstaged:
             included.append(self._git_diff_tool.diff_unstaged())
 

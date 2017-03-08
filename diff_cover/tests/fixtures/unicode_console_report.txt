@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Diff: origin/master...HEAD, staged, and unstaged changes
+Diff: origin/master...HEAD, staged and unstaged changes
 -------------
 unicode_test_src.txt (50.0%): Missing lines 2,4,6,8,10
 -------------

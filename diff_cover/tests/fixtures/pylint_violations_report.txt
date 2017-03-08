@@ -1,7 +1,7 @@
 -------------
 Diff Quality
 Quality Report: pylint
-Diff: origin/master...HEAD, staged, and unstaged changes
+Diff: origin/master...HEAD, staged and unstaged changes
 -------------
 violations_test_file.py (77.8%):
     1: C0111: Missing docstring

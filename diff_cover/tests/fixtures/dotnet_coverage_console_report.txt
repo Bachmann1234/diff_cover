@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Diff: origin/master...HEAD, staged, and unstaged changes
+Diff: origin/master...HEAD, staged and unstaged changes
 -------------
 SampleApp/Sample.cs (0.0%): Missing lines 23-25
 -------------
