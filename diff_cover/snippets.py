@@ -9,6 +9,7 @@ from pygments.lexers import guess_lexer_for_filename
 from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
 import six
+import chardet
 
 from diff_cover.git_path import GitPathTool
 # If tokenize.open (Python>=3.2) is available, use that to open python files.
@@ -24,7 +25,9 @@ except ImportError:
         # The following is copied from tokenize.py in Python 3.2,
         # Copyright (c) 2001-2014 Python Software Foundation; All Rights Reserved
         buffer = io.open(filename, 'rb')
-        encoding, lines = detect_encoding(buffer.readline)
+        raw_data = buffer.read()
+        result = chardet.detect(raw_data)
+        encoding = result['encoding']
         buffer.seek(0)
         text = io.TextIOWrapper(buffer, encoding, line_buffering=True)
         text.mode = 'r'
