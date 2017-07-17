@@ -23,7 +23,7 @@ from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
     flake8_driver, pyflakes_driver, pep8_driver, PylintDriver,
-    jshint_driver, eslint_driver
+    jshint_driver, eslint_driver, pydocstyle_driver
 )
 
 QUALITY_DRIVERS = {
@@ -32,7 +32,8 @@ QUALITY_DRIVERS = {
     'pylint': PylintDriver(),
     'flake8': flake8_driver,
     'jshint': jshint_driver,
-    'eslint': eslint_driver
+    'eslint': eslint_driver,
+    'pydocstyle': pydocstyle_driver
 }
 
 COVERAGE_XML_HELP = "XML coverage report"

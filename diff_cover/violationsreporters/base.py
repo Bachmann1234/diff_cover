@@ -183,7 +183,8 @@ class RegexBasedDriver(QualityDriver):
             supported_extensions,
             command,
             expression,
-            command_to_check_install
+            command_to_check_install,
+            flags=0
     ):
         """
         args:
@@ -193,7 +194,7 @@ class RegexBasedDriver(QualityDriver):
             to see if the tool is installed
         """
         super(RegexBasedDriver, self).__init__(name, supported_extensions, command)
-        self.expression = re.compile(expression)
+        self.expression = re.compile(expression, flags)
         self.command_to_check_install = command_to_check_install
         self.is_installed = None
 
@@ -207,16 +208,19 @@ class RegexBasedDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            for line in report.split('\n'):
-                match = self.expression.match(line)
-                # Ignore any line that isn't a violation
+            if self.expression.flags & re.MULTILINE:
+                matches = (match for match in
+                           re.finditer(self.expression, report))
+            else:
+                matches = (self.expression.match(line) for line in
+                           report.split('\n'))
+            for match in matches:
                 if match is not None:
                     src, line_number, message = match.groups()
                     # Transform src to a relative path, if it isn't already
                     src = os.path.relpath(src)
                     violation = Violation(int(line_number), message)
                     violations_dict[src].append(violation)
-
         return violations_dict
 
     def installed(self):

@@ -242,6 +242,14 @@ eslint_driver = RegexBasedDriver(
     command_to_check_install=['eslint', '-v'],
 )
 
+pydocstyle_driver = RegexBasedDriver(
+    name='pydocstyle',
+    supported_extensions=['py'],
+    command=['eslint'],
+    expression=r'^(.+?):(\d+).*?$.+?^        (.*?)$',
+    command_to_check_install=['pydocstyle', '--version'],
+    flags=re.MULTILINE | re.DOTALL
+)
 
 class PylintDriver(QualityDriver):
     def __init__(self):
