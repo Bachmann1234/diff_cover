@@ -188,7 +188,9 @@ class RegexBasedDriver(QualityDriver):
     ):
         """
         args:
-            expression: regex used to parse report
+            expression: regex used to parse report, will be fed lines singly
+                        unless flags contain re.MULTILINE
+            flags: such as re.MULTILINE
         See super for other args
             command_to_check_install: (list[str]) command to run
             to see if the tool is installed
