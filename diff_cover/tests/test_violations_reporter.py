@@ -14,8 +14,10 @@ from diff_cover.violationsreporters import base
 from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.tests.helpers import unittest
 from diff_cover.violationsreporters.base import QualityReporter
-from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, Violation, pep8_driver, \
-    pyflakes_driver, flake8_driver, PylintDriver, jshint_driver, eslint_driver
+from diff_cover.violationsreporters.violations_reporter import (
+    XmlCoverageReporter, Violation, pep8_driver, pyflakes_driver,
+    flake8_driver, PylintDriver, jshint_driver, eslint_driver,
+    pydocstyle_driver)
 from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
@@ -726,6 +728,67 @@ class Flake8QualityReporterTest(unittest.TestCase):
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
 
+
+class PydocstlyeQualityReporterTest(unittest.TestCase):
+    """Tests for pydocstyle quality violations."""
+
+    def setUp(self):
+        """Set up required files."""
+        _patch_so_all_files_exist()
+
+    def tearDown(self):
+        """Undo all patches."""
+        patch.stopall()
+
+    def test_no_such_file(self):
+        """Expect that we get no results."""
+        quality = QualityReporter(pydocstyle_driver)
+
+        result = quality.violations('')
+        self.assertEqual(result, [])
+
+    def test_no_python_file(self):
+        """Expect that we get no results because no Python files."""
+        quality = QualityReporter(pydocstyle_driver)
+        file_paths = ['file1.coffee', 'subdir/file2.js']
+        for path in file_paths:
+            result = quality.violations(path)
+            self.assertEqual(result, [])
+
+    def test_quality(self):
+        """Integration test."""
+        # Patch the output of `pydocstye`
+        _setup_patch((
+            dedent("""
+            ../new_file.py:1 at module level:
+                    D100: Missing docstring in public module
+            ../new_file.py:13 in public function `gather`:
+                    D103: Missing docstring in public function
+            """).strip().encode('ascii'), ''
+        ))
+
+        expected_violations = [
+            Violation(1, 'D100: Missing docstring in public module'),
+            Violation(13, "D103: Missing docstring in public function"),
+        ]
+
+        # Parse the report
+        quality = QualityReporter(pydocstyle_driver)
+
+        # Expect that the name is set
+        self.assertEqual(quality.name(), 'pydocstyle')
+
+        # Measured_lines is undefined for a
+        # quality reporter since all lines are measured
+        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+
+        # Expect that we get violations for file1.py only
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations('../new_file.py')
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
 
 class PylintQualityReporterTest(unittest.TestCase):
 

@@ -242,6 +242,25 @@ eslint_driver = RegexBasedDriver(
     command_to_check_install=['eslint', '-v'],
 )
 
+"""
+    Report pydocstyle violations.
+
+    Warning/error codes:
+        D1**: Missing Docstrings
+        D2**: Whitespace Issues
+        D3**: Quotes Issues
+        D4**: Docstring Content Issues
+
+    http://www.pydocstyle.org/en/latest/error_codes.html
+"""
+pydocstyle_driver = RegexBasedDriver(
+    name='pydocstyle',
+    supported_extensions=['py'],
+    command=['pydocstyle'],
+    expression=r'^(.+?):(\d+).*?$.+?^        (.*?)$',
+    command_to_check_install=['pydocstyle', '--version'],
+    flags=re.MULTILINE | re.DOTALL
+)
 
 class PylintDriver(QualityDriver):
     def __init__(self):
