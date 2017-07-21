@@ -5,5 +5,4 @@ coverage
 pep8
 flake8
 pyflakes
-pydocstyle
 -r requirements.txt
