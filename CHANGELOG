@@ -1,3 +1,7 @@
+7/23/2017 v0.9.12
+
+ * Add pydocstyle support PR#64 thanks @mr-c
+
 3/7/2017 v0.9.11
 
  * Allow ignoring of staged files. Thanks @abmaonline!
