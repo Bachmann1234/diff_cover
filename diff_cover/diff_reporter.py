@@ -4,6 +4,7 @@ Classes for querying which lines have changed based on a diff.
 from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from diff_cover.git_diff import GitDiffError
+import fnmatch
 import os
 import re
 
@@ -14,13 +15,15 @@ class BaseDiffReporter(object):
     """
 
     __metaclass__ = ABCMeta
+    _exclude = None
 
-    def __init__(self, name):
+    def __init__(self, name, exclude=None):
         """
         Provide a `name` for the diff report, which will
         be included in the diff coverage report.
         """
         self._name = name
+        self._exclude = exclude
 
     @abstractmethod
     def src_paths_changed(self):
@@ -49,13 +52,54 @@ class BaseDiffReporter(object):
         """
         return self._name
 
+    def _fnmatch(self, filename, patterns, default=True):
+        """Wrap :func:`fnmatch.fnmatch` to add some functionality.
+
+        :param str filename:
+            Name of the file we're trying to match.
+        :param list patterns:
+            Patterns we're using to try to match the filename.
+        :param bool default:
+            The default value if patterns is empty
+        :returns:
+            True if a pattern matches the filename, False if it doesn't.
+            ``default`` if patterns is empty.
+        """
+        if not patterns:
+            return default
+        return any(fnmatch.fnmatch(filename, pattern) for pattern in patterns)
+
+    def _is_path_excluded(self, path):
+        """
+        Check if a path is excluded.
+
+        :param str path:
+            Path to check against the exclude patterns.
+        :returns:
+            True if there are exclude patterns and the path matches,
+            otherwise False.
+        """
+        exclude = self._exclude
+        if not exclude:
+            return False
+        basename = os.path.basename(path)
+        if self._fnmatch(basename, exclude):
+            return True
+
+        absolute_path = os.path.abspath(path)
+        match = self._fnmatch(absolute_path, exclude)
+        return match
+
 
 class GitDiffReporter(BaseDiffReporter):
     """
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch='origin/master', git_diff=None, ignore_staged=None, ignore_unstaged=None, supported_extensions=None):
+    def __init__(self, compare_branch='origin/master', git_diff=None,
+                 ignore_staged=None, ignore_unstaged=None,
+                 supported_extensions=None,
+                 exclude=None):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
@@ -76,7 +120,7 @@ class GitDiffReporter(BaseDiffReporter):
             # Apply and + changes to the last option
             name += " and " + options[-1] + " changes"
 
-        super(GitDiffReporter, self).__init__(name)
+        super(GitDiffReporter, self).__init__(name, exclude)
 
         self._compare_branch = compare_branch
         self._git_diff_tool = git_diff
@@ -154,6 +198,8 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path in diff_dict.keys():
+                    if self._is_path_excluded(src_path):
+                        continue
                     # If no _supported_extensions provided, or extension present: process
                     root, extension = os.path.splitext(src_path)
                     extension = extension[1:].lower()

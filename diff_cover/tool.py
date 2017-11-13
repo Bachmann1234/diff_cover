@@ -46,6 +46,7 @@ OPTIONS_HELP = "Options to be passed to the violations tool"
 FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
+EXCLUDE_HELP = "Exclude files, more patterns supported"
 
 
 LOGGER = logging.getLogger(__name__)
@@ -105,8 +106,8 @@ def parse_coverage_args(argv):
         type=float,
         default='0',
         help=FAIL_UNDER_HELP
-    )    
-    
+    )
+
     parser.add_argument(
         '--ignore-staged',
         action='store_true',
@@ -119,6 +120,14 @@ def parse_coverage_args(argv):
         action='store_true',
         default=False,
         help=IGNORE_UNSTAGED_HELP
+    )
+
+    parser.add_argument(
+        '--exclude',
+        metavar='EXCLUDE',
+        type=str,
+        nargs='+',
+        help=EXCLUDE_HELP
     )
 
     return vars(parser.parse_args(argv))
@@ -196,7 +205,7 @@ def parse_quality_args(argv):
         default='0',
         help=FAIL_UNDER_HELP
     )
-    
+
     parser.add_argument(
         '--ignore-staged',
         action='store_true',
@@ -211,14 +220,27 @@ def parse_quality_args(argv):
         help=IGNORE_UNSTAGED_HELP
     )
 
+    parser.add_argument(
+        '--exclude',
+        metavar='EXCLUDE',
+        type=str,
+        nargs='+',
+        help=EXCLUDE_HELP
+    )
+
     return vars(parser.parse_args(argv))
 
 
-def generate_coverage_report(coverage_xml, compare_branch, html_report=None, css_file=None, ignore_staged=False, ignore_unstaged=False):
+def generate_coverage_report(coverage_xml, compare_branch,
+                             html_report=None, css_file=None,
+                             ignore_staged=False, ignore_unstaged=False,
+                             exclude=None):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
-    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool(), ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged)
+    diff = GitDiffReporter(
+        compare_branch, git_diff=GitDiffTool(), ignore_staged=ignore_staged,
+        ignore_unstaged=ignore_unstaged, exclude=exclude)
 
     xml_roots = [cElementTree.parse(xml_root) for xml_root in coverage_xml]
     coverage = XmlCoverageReporter(xml_roots)
@@ -243,11 +265,18 @@ def generate_coverage_report(coverage_xml, compare_branch, html_report=None, css
     return reporter.total_percent_covered()
 
 
-def generate_quality_report(tool, compare_branch, html_report=None, css_file=None, ignore_staged=False, ignore_unstaged=False):
+def generate_quality_report(tool, compare_branch,
+                            html_report=None, css_file=None,
+                            ignore_staged=False, ignore_unstaged=False,
+                            exclude=None):
     """
     Generate the quality report, using kwargs from `parse_args()`.
     """
-    diff = GitDiffReporter(compare_branch, git_diff=GitDiffTool(), ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged, supported_extensions=tool.driver.supported_extensions)
+    diff = GitDiffReporter(
+        compare_branch, git_diff=GitDiffTool(),
+        ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged,
+        supported_extensions=tool.driver.supported_extensions,
+        exclude=exclude)
 
     if html_report is not None:
         css_url = css_file
@@ -302,6 +331,7 @@ def main(argv=None, directory=None):
             css_file=arg_dict['external_css_file'],
             ignore_staged=arg_dict['ignore_staged'],
             ignore_unstaged=arg_dict['ignore_unstaged'],
+            exclude=arg_dict['exclude'],
         )
 
         if percent_covered >= fail_under:
@@ -343,6 +373,7 @@ def main(argv=None, directory=None):
                     css_file=arg_dict['external_css_file'],
                     ignore_staged=arg_dict['ignore_staged'],
                     ignore_unstaged=arg_dict['ignore_unstaged'],
+                    exclude=arg_dict['exclude'],
                 )
                 if percent_passing >= fail_under:
                     return 0
