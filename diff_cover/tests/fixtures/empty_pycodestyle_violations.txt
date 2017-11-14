@@ -1,6 +1,6 @@
 -------------
 Diff Quality
-Quality Report: pep8
+Quality Report: pycodestyle
 Diff: origin/master...HEAD, staged and unstaged changes
 -------------
 violations_test_file.py (100%)

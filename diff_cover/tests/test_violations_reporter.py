@@ -12,10 +12,10 @@ import six
 from diff_cover.violationsreporters import base
 
 from diff_cover.command_runner import CommandError, run_command_for_code
-from diff_cover.tests.helpers import unittest
+import unittest
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
-    XmlCoverageReporter, Violation, pep8_driver, pyflakes_driver,
+    XmlCoverageReporter, Violation, pycodestyle_driver, pyflakes_driver,
     flake8_driver, PylintDriver, jshint_driver, eslint_driver,
     pydocstyle_driver)
 from mock import Mock, patch, MagicMock
@@ -320,7 +320,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         return root
 
 
-class Pep8QualityReporterTest(unittest.TestCase):
+class pycodestyleQualityReporterTest(unittest.TestCase):
 
     def setUp(self):
         _patch_so_all_files_exist()
@@ -333,7 +333,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
     def test_quality(self):
 
-        # Patch the output of `pep8`
+        # Patch the output of `pycodestyle`
         _mock_communicate = patch.object(Popen, 'communicate').start()
         return_string = '\n' + dedent("""
                 ../new_file.py:1:17: E231 whitespace
@@ -343,10 +343,10 @@ class Pep8QualityReporterTest(unittest.TestCase):
         _setup_patch((return_string.encode('utf-8'), b''))
 
         # Parse the report
-        quality = QualityReporter(pep8_driver)
+        quality = QualityReporter(pycodestyle_driver)
 
         # Expect that the name is set
-        self.assertEqual(quality.name(), 'pep8')
+        self.assertEqual(quality.name(), 'pycodestyle')
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -363,46 +363,46 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
     def test_no_quality_issues_newline(self):
 
-        # Patch the output of `pep8`
+        # Patch the output of `pycodestyle`
         _setup_patch((b'\n', b''))
 
         # Parse the report
-        quality = QualityReporter(pep8_driver)
+        quality = QualityReporter(pycodestyle_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_no_quality_issues_emptystring(self):
 
-        # Patch the output of `pep8`
+        # Patch the output of `pycodestyle`
         _setup_patch((b'', b''))
 
         # Parse the report
-        quality = QualityReporter(pep8_driver)
+        quality = QualityReporter(pycodestyle_driver)
         self.assertEqual([], quality.violations('file1.py'))
 
     def test_quality_error(self):
 
-        # Patch the output of `pep8`
+        # Patch the output of `pycodestyle`
         _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
             # Parse the report
-            quality = QualityReporter(pep8_driver)
+            quality = QualityReporter(pycodestyle_driver)
 
             # Expect that the name is set
-            self.assertEqual(quality.name(), 'pep8')
+            self.assertEqual(quality.name(), 'pycodestyle')
             with self.assertRaises(CommandError) as ex:
                 quality.violations('file1.py')
             self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
-        quality = QualityReporter(pep8_driver)
+        quality = QualityReporter(pycodestyle_driver)
 
         # Expect that we get no results
         result = quality.violations('')
         self.assertEqual(result, [])
 
     def test_no_python_file(self):
-        quality = QualityReporter(pep8_driver)
+        quality = QualityReporter(pycodestyle_driver)
         file_paths = ['file1.coffee', 'subdir/file2.js']
         # Expect that we get no results because no Python files
         for path in file_paths:
@@ -411,9 +411,9 @@ class Pep8QualityReporterTest(unittest.TestCase):
 
     def test_quality_pregenerated_report(self):
 
-        # When the user provides us with a pre-generated pep8 report
-        # then use that instead of calling pep8 directly.
-        pep8_reports = [
+        # When the user provides us with a pre-generated pycodestyle report
+        # then use that instead of calling pycodestyle directly.
+        pycodestyle_reports = [
             BytesIO(('\n' + dedent("""
                 path/to/file.py:1:17: E231 whitespace
                 path/to/file.py:3:13: E225 whitespace
@@ -427,7 +427,7 @@ class Pep8QualityReporterTest(unittest.TestCase):
         ]
 
         # Parse the report
-        quality = QualityReporter(pep8_driver, reports=pep8_reports)
+        quality = QualityReporter(pycodestyle_driver, reports=pycodestyle_reports)
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
@@ -1231,8 +1231,8 @@ class SubprocessErrorTestCase(unittest.TestCase):
         _patch_so_all_files_exist()
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
-            reporter = QualityReporter(pep8_driver)
+            reporter = QualityReporter(pycodestyle_driver)
             with self.assertRaises(OSError):
                 reporter.violations("path/to/file.py")
 
-            self.assertEqual(mock_stderr.getvalue(), "pep8 path/to/file.py")
+            self.assertEqual(mock_stderr.getvalue(), "pycodestyle path/to/file.py")

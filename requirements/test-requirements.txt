@@ -2,7 +2,9 @@
 mock
 nose
 coverage
-pep8
+pycodestyle
 flake8
 pyflakes
+pylint
+pydocstyle
 -r requirements.txt
