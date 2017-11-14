@@ -76,12 +76,12 @@ class ParseArgsTest(unittest.TestCase):
 class ParseQualityArgsTest(unittest.TestCase):
 
     def test_parse_with_html_report(self):
-        argv = ['--violations', 'pep8',
+        argv = ['--violations', 'pycodestyle',
                 '--html-report', 'diff_cover.html']
 
         arg_dict = parse_quality_args(argv)
 
-        self.assertEqual(arg_dict.get('violations'), 'pep8')
+        self.assertEqual(arg_dict.get('violations'), 'pycodestyle')
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
         self.assertEqual(arg_dict.get('input_reports'), [])
         self.assertEqual(arg_dict.get('ignore_unstaged'), False)
@@ -114,7 +114,7 @@ class ParseQualityArgsTest(unittest.TestCase):
 
     def test_parse_with_options(self):
         argv = [
-            '--violations', 'pep8',
+            '--violations', 'pycodestyle',
             '--options="--exclude=\'*/migrations*\'"'
         ]
         arg_dict = parse_quality_args(argv)
