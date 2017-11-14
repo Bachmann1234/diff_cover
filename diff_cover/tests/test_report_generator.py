@@ -11,8 +11,9 @@ from diff_cover.report_generator import (
     StringReportGenerator, TemplateReportGenerator
 )
 from diff_cover.tests.helpers import (
-    load_fixture, assert_long_str_equal, unittest
+    load_fixture, assert_long_str_equal
 )
+import unittest
 from diff_cover.violationsreporters.violations_reporter import BaseViolationReporter, Violation
 
 

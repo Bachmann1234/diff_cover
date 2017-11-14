@@ -2,7 +2,7 @@ diff-cover |build-status| |coverage-status| |docs-status|
 =========================================================
 
 Automatically find diff lines that need test coverage.
-Also finds diff lines that have violations (according to tools such as pep8,
+Also finds diff lines that have violations (according to tools such as pycodestyle,
 pyflakes, flake8, or pylint).
 This is used as a code quality metric during code reviews.
 
@@ -119,7 +119,7 @@ You can use diff-cover to see quality reports on the diff as well by running
 
     diff-quality --violations=<tool>
 
-Where ``tool`` is the quality checker to use. Currently ``pep8``, ``pyflakes``,
+Where ``tool`` is the quality checker to use. Currently ``pycodestyle``, ``pyflakes``,
 ``flake8``, and ``pylint`` are supported, but more checkers can (and should!)
 be integrated.
 
@@ -129,9 +129,9 @@ Like ``diff-cover``, HTML reports can be generated with
 
     diff-quality --violations=<tool> --html-report report.html
 
-If you have already generated a report using ``pep8``, ``pyflakes``, ``flake8``,
+If you have already generated a report using ``pycodestyle``, ``pyflakes``, ``flake8``,
 or ``pylint`` you can pass the report to ``diff-quality``.  This is more
-efficient than letting ``diff-quality`` re-run ``pep8``, ``pyflakes``,
+efficient than letting ``diff-quality`` re-run ``pycodestyle``, ``pyflakes``,
 ``flake8``, or ``pylint``.
 
 .. code:: bash
@@ -145,15 +145,15 @@ efficient than letting ``diff-quality`` re-run ``pep8``, ``pyflakes``,
     # Use the generated pylint report when running diff-quality
     diff-quality --violations=pylint pylint_report.txt
 
-    # Use a generated pep8 report when running diff-quality.
-    pep8 > pep8_report.txt
-    diff-quality --violations=pep8 pep8_report.txt
+    # Use a generated pycodestyle report when running diff-quality.
+    pycodestyle > pycodestyle_report.txt
+    diff-quality --violations=pycodestyle pycodestyle_report.txt
 
 Note that you must use the ``-f parseable`` option to generate
 the ``pylint`` report for pylint versions less than 1.0 and the
 ``--msg-template`` option for versions >= 1.0.
 
-``diff-quality`` will also accept multiple ``pep8``, ``pyflakes``, ``flake8``,
+``diff-quality`` will also accept multiple ``pycodestyle``, ``pyflakes``, ``flake8``,
 or ``pylint`` reports:
 
 .. code:: bash
@@ -164,7 +164,7 @@ If you need to pass in additional options you can with the ``options`` flag
 
 .. code:: bash
 
-    diff-quality --violations=pep8 --options="--exclude='*/migrations*' --statistics" pep8_report.txt
+    diff-quality --violations=pycodestyle --options="--exclude='*/migrations*' --statistics" pycodestyle_report.txt
 
 Compare Branch
 --------------
@@ -184,7 +184,7 @@ below a certain threshold specify the fail-under parameter
 .. code:: bash
 
     diff-cover coverage.xml --fail-under=80
-    diff-quality --violations=pep8 --fail-under=80
+    diff-quality --violations=pycodestyle --fail-under=80
 
 The above will return a non zero status if the coverage or quality score was below 80%
 
@@ -263,7 +263,7 @@ For example, setting up python 3:
 
     pyvenv venv
     source venv/bin/activate
-    pip install -r test-requirements-py27-py3.txt
+    pip install -r test-requirements.txt
 
 
 Special Thanks

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import mock
 from diff_cover.git_path import GitPathTool
-from diff_cover.tests.helpers import unittest
+import unittest
 
 
 class TestGitPathTool(unittest.TestCase):

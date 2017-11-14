@@ -2,18 +2,12 @@
 Test helper functions.
 """
 import random
-import sys
 
 import io
 import six
 import os.path
 import difflib
 from nose.tools import ok_
-
-if sys.version_info[:2] <= (2, 6):
-    import unittest2 as unittest
-else:
-    import unittest
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
