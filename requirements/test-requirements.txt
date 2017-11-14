@@ -5,4 +5,6 @@ coverage
 pycodestyle
 flake8
 pyflakes
+pylint
+pydocstyle
 -r requirements.txt

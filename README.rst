@@ -263,7 +263,7 @@ For example, setting up python 3:
 
     pyvenv venv
     source venv/bin/activate
-    pip install -r test-requirements-py27-py3.txt
+    pip install -r test-requirements.txt
 
 
 Special Thanks

@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 import mock
 
 from diff_cover.command_runner import CommandError
-from diff_cover.git_diff import GitDiffTool, GitDiffError
-from diff_cover.tests.helpers import unittest
+from diff_cover.git_diff import GitDiffTool
+import unittest
 
 
 class TestGitDiffTool(unittest.TestCase):

@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 import contextlib
 import sys
-from mock import Mock, patch
+from mock import patch
 from diff_cover.tool import parse_coverage_args, parse_quality_args, main
-from diff_cover.tests.helpers import unittest
+import unittest
 
 
 @contextlib.contextmanager

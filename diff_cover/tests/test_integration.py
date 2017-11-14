@@ -11,7 +11,7 @@ import tempfile
 from collections import defaultdict
 from io import BytesIO
 from subprocess import Popen
-from diff_cover.tests.helpers import unittest
+import unittest
 import io
 import six
 

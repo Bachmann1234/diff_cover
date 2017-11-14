@@ -12,7 +12,7 @@ import six
 from diff_cover.violationsreporters import base
 
 from diff_cover.command_runner import CommandError, run_command_for_code
-from diff_cover.tests.helpers import unittest
+import unittest
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter, Violation, pycodestyle_driver, pyflakes_driver,
