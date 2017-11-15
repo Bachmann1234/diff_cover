@@ -53,6 +53,26 @@ class GitDiffReporterTest(unittest.TestCase):
             'origin/master...HEAD'
         )
 
+    def test_git_exclude(self):
+        self.diff = GitDiffReporter(git_diff=self._git_diff, exclude=['file1.py'])
+
+        # Configure the git diff output
+        self._set_git_diff_output(
+            git_diff_output({'subdir1/file1.py': line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output({'subdir2/file2.py': line_numbers(3, 10), 'file3.py': [0]}),
+            git_diff_output(dict(), deleted_files=['README.md'])
+        )
+
+        # Get the source paths in the diff
+        source_paths = self.diff.src_paths_changed()
+
+        # Validate the source paths
+        # They should be in alphabetical order
+        self.assertEqual(len(source_paths), 3)
+        self.assertEqual('file3.py', source_paths[0])
+        self.assertEqual('README.md', source_paths[1])
+        self.assertEqual('subdir2/file2.py', source_paths[2])
+
     def test_git_source_paths(self):
 
         # Configure the git diff output
@@ -447,7 +467,6 @@ class GitDiffReporterTest(unittest.TestCase):
         self.assertEqual(2, len(self.diff._get_included_diff_results()))
         self.assertEqual(['', ''], self.diff._get_included_diff_results())
 
-
     def test_ignore_staged_and_unstaged_inclusion(self):
         self.diff = GitDiffReporter(git_diff=self._git_diff, ignore_staged=True, ignore_unstaged=True)
 
@@ -457,6 +476,21 @@ class GitDiffReporterTest(unittest.TestCase):
 
         self.assertEqual(1, len(self.diff._get_included_diff_results()))
         self.assertEqual([''], self.diff._get_included_diff_results())
+
+    def test_fnmatch(self):
+        """Verify that our fnmatch wrapper works as expected."""
+        self.assertEqual(self.diff._fnmatch('foo.py', []), True)
+        self.assertEqual(self.diff._fnmatch('foo.py', ['*.pyc']), False)
+        self.assertEqual(self.diff._fnmatch('foo.pyc', ['*.pyc']), True)
+        self.assertEqual(
+            self.diff._fnmatch('foo.pyc', ['*.swp', '*.pyc', '*.py']), True)
+
+    def test_fnmatch_returns_the_default_with_empty_default(self):
+        """The default parameter should be returned when no patterns are given.
+        """
+        sentinel = object()
+        self.assertTrue(
+            self.diff._fnmatch('file.py', [], default=sentinel) is sentinel)
 
     def _set_git_diff_output(self, committed_diff,
                              staged_diff, unstaged_diff):

@@ -72,6 +72,23 @@ class ParseArgsTest(unittest.TestCase):
                 with nostderr():
                     parse_coverage_args(argv)
 
+    def test_parse_with_exclude(self):
+        argv = ['reports/coverage.xml']
+        arg_dict = parse_coverage_args(argv)
+        self.assertEqual(arg_dict.get('exclude'), None)
+
+        argv = ['reports/coverage.xml', '--exclude', 'noneed/*.py']
+
+        arg_dict = parse_coverage_args(argv)
+        self.assertEqual(arg_dict.get('exclude'), ['noneed/*.py'])
+
+        argv = ['reports/coverage.xml', '--exclude', 'noneed/*.py',
+                'other/**/*.py']
+
+        arg_dict = parse_coverage_args(argv)
+        self.assertEqual(arg_dict.get('exclude'),
+                         ['noneed/*.py', 'other/**/*.py'])
+
 
 class ParseQualityArgsTest(unittest.TestCase):
 
@@ -137,6 +154,23 @@ class ParseQualityArgsTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 print("args = {0}".format(argv))
                 parse_quality_args(argv)
+
+    def test_parse_with_exclude(self):
+        argv = ['--violations', 'pep8']
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(arg_dict.get('exclude'), None)
+
+        argv = ['--violations', 'pep8', '--exclude', 'noneed/*.py']
+
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(arg_dict.get('exclude'), ['noneed/*.py'])
+
+        argv = ['--violations', 'pep8', '--exclude', 'noneed/*.py',
+                'other/**/*.py']
+
+        arg_dict = parse_quality_args(argv)
+        self.assertEqual(arg_dict.get('exclude'),
+                         ['noneed/*.py', 'other/**/*.py'])
 
 
 class MainTest(unittest.TestCase):
