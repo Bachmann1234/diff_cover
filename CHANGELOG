@@ -1,3 +1,10 @@
+11/14/2017 v1.0.0
+
+ * Drop support for python 3.3 and 2.6
+ * Add Support for pypy3 and python 3.6
+ * Replaced pep8 with pycodestyle as the project has deprecated pep8
+ * added diff-cover level exclude files  https://github.com/Bachmann1234/diff-cover/pull/66 Thanks @agroszer
+
 7/23/2017 v0.9.12
 
  * Add pydocstyle support PR#64 thanks @mr-c
