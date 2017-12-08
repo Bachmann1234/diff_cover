@@ -3,12 +3,9 @@ Classes for querying the information in a test coverage report.
 """
 from __future__ import unicode_literals
 
-import re
 from collections import defaultdict
 
-import os
 import itertools
-import posixpath
 from xml.etree import cElementTree
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
@@ -33,21 +30,22 @@ class CloverXmlCoverageReporter(BaseViolationReporter):
         self._info_cache = defaultdict(list)
 
     @staticmethod
-    def _get_src_path_line_nodes(xml_document):
+    def _get_src_path_line_nodes(xml_document, src_path):
         """
-        Returns a list of nodes containing line information for `src_path`
+        Return a list of nodes containing line information for `src_path`
         in `xml_document`.
 
         If file is not present in `xml_document`, return None
         """
         files = [file_tree
                  for file_tree in xml_document.findall(".//file")
+                 if file_tree.get('path') == src_path
                  or []]
         if not files:
             return None
-        else:
-            lines = [file.findall('./line[@type="stmt"]') for file in files]
-            return [elem for elem in itertools.chain(*lines)]
+        lines = [file_tree.findall('./line[@type="stmt"]')
+                 for file_tree in files]
+        return [elem for elem in itertools.chain(*lines)]
 
     def _cache_file(self, src_path):
         """
@@ -68,7 +66,8 @@ class CloverXmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for xml_document in self._xml_roots:
-                line_nodes = self._get_src_path_line_nodes(xml_document)
+                line_nodes = self._get_src_path_line_nodes(xml_document,
+                                                           src_path)
 
                 if line_nodes is None:
                     continue
@@ -142,9 +141,10 @@ class CheckstyleXmlDriver(QualityDriver):
         See super for other args
         """
         super(CheckstyleXmlDriver, self).__init__(
-                'checkstyle',
-                ['java'],
-                ['java', '-jar', 'checkstyle-8.5-all.jar', '-c', '/google_checks.xml' ]
+            'checkstyle',
+            ['java'],
+            ['java', '-jar', 'checkstyle-8.5-all.jar', '-c',
+             '/google_checks.xml']
         )
         self.command_to_check_install = ['java', '-cp', 'checkstyle-8.5-all.jar', 'com.puppycrawl.tools.checkstyle.Main', '-version']
 
@@ -156,16 +156,18 @@ class CheckstyleXmlDriver(QualityDriver):
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
         """
-        xml_document = cElementTree.fromstring("".join(reports))
-        files = xml_document.findall(".//file")
         violations_dict = defaultdict(list)
-        for file in files:
-            for error in file.findall('error'):
-                line_number = error.get('line')
-                error_str = u"{0}: {1}".format(error.get('severity'), error.get('message'))
-                violation = Violation(int(line_number), error_str)
-                filename = GitPathTool.relative_path(file.get('name'))
-                violations_dict[filename].append(violation)
+        for report in reports:
+            xml_document = cElementTree.fromstring("".join(report))
+            files = xml_document.findall(".//file")
+            for file_tree in files:
+                for error in file_tree.findall('error'):
+                    line_number = error.get('line')
+                    error_str = u"{0}: {1}".format(error.get('severity'),
+                                                   error.get('message'))
+                    violation = Violation(int(line_number), error_str)
+                    filename = GitPathTool.relative_path(file_tree.get('name'))
+                    violations_dict[filename].append(violation)
         return violations_dict
 
     def installed(self):
