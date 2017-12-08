@@ -203,6 +203,8 @@ class FindbugsXmlDriver(QualityDriver):
                 category = bug.get('category')
                 short_message = bug.find('ShortMessage').text
                 line = bug.find('SourceLine')
+                if line.get('start') is None or line.get('end') is None:
+                    continue
                 start = int(line.get('start'))
                 end = int(line.get('end'))
                 for line_number in range(start, end+1):
