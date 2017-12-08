@@ -136,9 +136,7 @@ checkstyle_driver = RegexBasedDriver(
 class CheckstyleXmlDriver(QualityDriver):
     def __init__(self):
         """
-        args:
-            expression: regex used to parse report
-        See super for other args
+        See super for args
         """
         super(CheckstyleXmlDriver, self).__init__(
             'checkstyle',
@@ -176,3 +174,63 @@ class CheckstyleXmlDriver(QualityDriver):
         Returns: boolean True if installed
         """
         return run_command_for_code(self.command_to_check_install) == 0
+
+
+"""
+    Report checkstyle violations.
+
+    http://checkstyle.sourceforge.net/apidocs/com/puppycrawl/tools/checkstyle/DefaultLogger.html
+    https://github.com/checkstyle/checkstyle/blob/master/src/main/java/com/puppycrawl/tools/checkstyle/AuditEventDefaultFormatter.java
+"""
+checkstyle_driver = RegexBasedDriver(
+    name='checkstyle',
+    supported_extensions=['java'],
+    command=['checkstyle'],
+    expression=r'^\[\w+\]\s+([^:]+):(\d+):(?:\d+:)? (.*)$',
+    command_to_check_install=['java', '-cp', 'checkstyle-8.5-all.jar', 'com.puppycrawl.tools.checkstyle.Main', '-version']
+)
+
+
+class FindbugsXmlDriver(QualityDriver):
+    def __init__(self):
+        """
+        See super for args
+        """
+        super(FindbugsXmlDriver, self).__init__(
+            'findbugs',
+            ['java'],
+            ['false']
+        )
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        violations_dict = defaultdict(list)
+        for report in reports:
+            xml_document = cElementTree.fromstring("".join(report))
+            bugs = xml_document.findall(".//BugInstance")
+            for bug in bugs:
+                category = bug.get('category')
+                short_message = bug.find('ShortMessage').text
+                line = bug.find('SourceLine')
+                start = int(line.get('start'))
+                end = int(line.get('end'))
+                for line_number in range(start, end+1):
+                    error_str = u"{0}: {1}".format(category, short_message)
+                    violation = Violation(line_number, error_str)
+                    filename = GitPathTool.relative_path(line.get('sourcepath'))
+                    violations_dict[filename].append(violation)
+
+        return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean False: As findbugs analyses bytecode, it would be hard to run it from outside the build framework.
+        """
+        return False

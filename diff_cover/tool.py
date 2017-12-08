@@ -27,7 +27,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     pycodestyle_driver)
 from diff_cover.violationsreporters.java_violations_reporter import (
     CloverXmlCoverageReporter,
-    CheckstyleXmlDriver, checkstyle_driver)
+    CheckstyleXmlDriver, checkstyle_driver, FindbugsXmlDriver)
 
 QUALITY_DRIVERS = {
     'pycodestyle': pycodestyle_driver,
@@ -38,7 +38,8 @@ QUALITY_DRIVERS = {
     'eslint': eslint_driver,
     'pydocstyle': pydocstyle_driver,
     'checkstyle': checkstyle_driver,
-    'checkstylexml': CheckstyleXmlDriver()
+    'checkstylexml': CheckstyleXmlDriver(),
+    'findbugs': FindbugsXmlDriver()
 }
 
 COVERAGE_XML_HELP = "XML coverage report"
