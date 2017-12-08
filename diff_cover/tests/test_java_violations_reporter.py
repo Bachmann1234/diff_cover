@@ -480,6 +480,7 @@ class CheckstyleXmlQualityReporterTest(unittest.TestCase):
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
 
+
 class FindbugsQualityReporterTest(unittest.TestCase):
 
     def setUp(self):

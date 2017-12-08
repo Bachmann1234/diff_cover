@@ -176,21 +176,6 @@ class CheckstyleXmlDriver(QualityDriver):
         return run_command_for_code(self.command_to_check_install) == 0
 
 
-"""
-    Report checkstyle violations.
-
-    http://checkstyle.sourceforge.net/apidocs/com/puppycrawl/tools/checkstyle/DefaultLogger.html
-    https://github.com/checkstyle/checkstyle/blob/master/src/main/java/com/puppycrawl/tools/checkstyle/AuditEventDefaultFormatter.java
-"""
-checkstyle_driver = RegexBasedDriver(
-    name='checkstyle',
-    supported_extensions=['java'],
-    command=['checkstyle'],
-    expression=r'^\[\w+\]\s+([^:]+):(\d+):(?:\d+:)? (.*)$',
-    command_to_check_install=['java', '-cp', 'checkstyle-8.5-all.jar', 'com.puppycrawl.tools.checkstyle.Main', '-version']
-)
-
-
 class FindbugsXmlDriver(QualityDriver):
     def __init__(self):
         """
@@ -223,7 +208,8 @@ class FindbugsXmlDriver(QualityDriver):
                 for line_number in range(start, end+1):
                     error_str = u"{0}: {1}".format(category, short_message)
                     violation = Violation(line_number, error_str)
-                    filename = GitPathTool.relative_path(line.get('sourcepath'))
+                    filename = GitPathTool.relative_path(
+                        line.get('sourcepath'))
                     violations_dict[filename].append(violation)
 
         return violations_dict
