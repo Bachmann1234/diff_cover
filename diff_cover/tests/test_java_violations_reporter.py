@@ -1,30 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-import subprocess
 import xml.etree.cElementTree as etree
-from xml.etree.ElementTree import tostring
-from subprocess import Popen
 from textwrap import dedent
+import unittest
 import mock
+from mock import patch
+from six import BytesIO
 
-import six
 from diff_cover.violationsreporters import base
 
-from diff_cover.command_runner import CommandError, run_command_for_code
-import unittest
+from diff_cover.command_runner import CommandError
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.java_violations_reporter import (
     CloverXmlCoverageReporter, Violation, checkstyle_driver,
     CheckstyleXmlDriver)
-from mock import Mock, patch, MagicMock
-from six import BytesIO, StringIO
 
 
 def _patch_so_all_files_exist():
     _mock_exists = patch.object(base.os.path, 'exists').start()
     _mock_exists.returnvalue = True
+
 
 def _setup_patch(return_value, status_code=0):
     mocked_process = mock.Mock()
@@ -184,9 +180,7 @@ class CloverXmlCoverageReporterTest(unittest.TestCase):
         # Parse the report
         coverage = CloverXmlCoverageReporter(xml_roots)
 
-        v = coverage.violations('file.java')
-        m = coverage.measured_lines('file.java')
-        self.assertEqual(self.MANY_VIOLATIONS, v)
+        self.assertEqual(self.MANY_VIOLATIONS, coverage.violations('file.java'))
         self.assertEqual(self.FEW_VIOLATIONS, coverage.violations('other_file.java'))
 
     def test_empty_violations(self):
@@ -335,6 +329,7 @@ class CheckstyleQualityReporterTest(unittest.TestCase):
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
 
+
 class CheckstyleXmlQualityReporterTest(unittest.TestCase):
 
     def setUp(self):
@@ -460,7 +455,7 @@ class CheckstyleXmlQualityReporterTest(unittest.TestCase):
             <checkstyle version="8.0">
                 <file name="path/to/file.java">
                     <error line="183" severity="error" message="Invalid name '' for type argument (should match [a-z_][a-z0-9_]{2,30}$)"/>
-                </file>  
+                </file>
                 <file name="another/file.java">
                     <error line="183" severity="error" message="Missing docstring"/>
                 </file>
@@ -484,4 +479,3 @@ class CheckstyleXmlQualityReporterTest(unittest.TestCase):
         self.assertEqual(len(actual_violations), len(expected_violations))
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
-
