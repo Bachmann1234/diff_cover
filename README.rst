@@ -28,10 +28,12 @@ Cobertura XML coverage reports can be generated with many coverage tools,
 including:
 
 - Cobertura__ (Java)
+- Clover__ (Java)
 - coverage.py__ (Python)
 - JSCover__ (JavaScript)
 
 __ http://cobertura.sourceforge.net/
+__ http://openclover.org/
 __ http://nedbatchelder.com/code/coverage/
 __ http://tntim96.github.io/JSCover/
 
@@ -120,8 +122,10 @@ You can use diff-cover to see quality reports on the diff as well by running
     diff-quality --violations=<tool>
 
 Where ``tool`` is the quality checker to use. Currently ``pycodestyle``, ``pyflakes``,
-``flake8``, and ``pylint`` are supported, but more checkers can (and should!)
-be integrated.
+``flake8``, ``pylint``, ``checkstyle``, ``checkstylexml`` are supported, but more
+checkers can (and should!) be integrated. There's no way to run ``findbugs`` from
+``diff-quality`` as it operating over the generated java bytecode and should be
+integrated into the build framework.
 
 Like ``diff-cover``, HTML reports can be generated with
 
@@ -130,9 +134,9 @@ Like ``diff-cover``, HTML reports can be generated with
     diff-quality --violations=<tool> --html-report report.html
 
 If you have already generated a report using ``pycodestyle``, ``pyflakes``, ``flake8``,
-or ``pylint`` you can pass the report to ``diff-quality``.  This is more
-efficient than letting ``diff-quality`` re-run ``pycodestyle``, ``pyflakes``,
-``flake8``, or ``pylint``.
+``pylint``, ``checkstyle``, ``checkstylexml``, or ``findbugs`` you can pass the report
+to ``diff-quality``.  This is more efficient than letting ``diff-quality`` re-run
+``pycodestyle``, ``pyflakes``, ``flake8``, ``pylint``, ``checkstyle``, or ``checkstylexml``.
 
 .. code:: bash
 
