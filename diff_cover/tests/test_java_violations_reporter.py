@@ -565,6 +565,20 @@ class FindbugsQualityReporterTest(unittest.TestCase):
                         </SourceLine>
                     </BugInstance>
                 </BugCollection>
+            """).strip().encode('utf-8')),
+
+            # this is a violation which is not bounded to a specific line. We'll skip those
+            BytesIO(dedent(u"""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <BugCollection sequence="0" release="" analysisTimestamp="1512755361404" version="3.0.1" timestamp="1512755226000">
+                    <BugInstance instanceOccurrenceNum="0" instanceHash="2820338ec68e2e75a81848c95d31167f" rank="19" abbrev="Se" category="BAD_PRACTICE" priority="3" type="SE_BAD_FIELD" instanceOccurrenceMax="0">
+                        <ShortMessage>Non-transient non-serializable instance field in serializable class</ShortMessage>
+                        <LongMessage>Class org.opensource.sample.file defines non-transient non-serializable instance field</LongMessage>
+                        <SourceLine synthetic="true" classname="org.opensource.sample.file" sourcepath="path/to/file.java" sourcefile="file.java">
+                            <Message>In file.java</Message>
+                        </SourceLine>
+                    </BugInstance>
+                </BugCollection>
             """).strip().encode('utf-8'))
         ]
 
