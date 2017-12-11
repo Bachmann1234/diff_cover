@@ -129,7 +129,7 @@ checkstyle_driver = RegexBasedDriver(
     supported_extensions=['java'],
     command=['checkstyle'],
     expression=r'^\[\w+\]\s+([^:]+):(\d+):(?:\d+:)? (.*)$',
-    command_to_check_install=['java', '-cp', 'checkstyle-8.5-all.jar', 'com.puppycrawl.tools.checkstyle.Main', '-version']
+    command_to_check_install=['java', 'com.puppycrawl.tools.checkstyle.Main', '-version']
 )
 
 
@@ -141,10 +141,10 @@ class CheckstyleXmlDriver(QualityDriver):
         super(CheckstyleXmlDriver, self).__init__(
             'checkstyle',
             ['java'],
-            ['java', '-jar', 'checkstyle-8.5-all.jar', '-c',
+            ['java', 'com.puppycrawl.tools.checkstyle.Main', '-c',
              '/google_checks.xml']
         )
-        self.command_to_check_install = ['java', '-cp', 'checkstyle-8.5-all.jar', 'com.puppycrawl.tools.checkstyle.Main', '-version']
+        self.command_to_check_install = ['java', 'com.puppycrawl.tools.checkstyle.Main', '-version']
 
     def parse_reports(self, reports):
         """
