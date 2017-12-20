@@ -40,9 +40,12 @@ def execute(command):
 
     stderr = _ensure_unicode(stderr)
     if command[0] == 'pylint':
-        # pylint exit codes are documented here:
+        # Pylint returns bit-encoded exit codes as documented here:
         # https://pylint.readthedocs.io/en/latest/user_guide/run.html
-        if process.returncode & 32:
+        # 1 = fatal error, if an error occurred which prevented pylint from doing further processing
+        # 2,4,8,16 = error/warning/refactor/convention message issued
+        # 32 = usage error
+        if process.returncode & ~ (2 | 4 | 8 | 16):
             raise CommandError(stderr)
     # If we get a non-empty output to stderr, raise an exception
     elif bool(stderr) and process.returncode:
