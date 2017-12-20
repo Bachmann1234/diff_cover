@@ -1,3 +1,4 @@
+import re
 import six
 import subprocess
 
@@ -38,6 +39,9 @@ def execute(command):
         raise
 
     stderr = _ensure_unicode(stderr)
+    # after version 1.8.0 pylint writes a message to stderr:
+    # Using config file {}
+    stderr = re.sub(r'^Using config file .*$', '', stderr).strip()
     # If we get a non-empty output to stderr, raise an exception
     if bool(stderr) and process.returncode:
         raise CommandError(stderr)
