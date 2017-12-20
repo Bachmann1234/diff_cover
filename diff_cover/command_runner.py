@@ -40,7 +40,7 @@ def execute(command, exit_codes=[0]):
         raise
 
     stderr = _ensure_unicode(stderr)
-    if isinstance(process.returncode, (int, long)):
+    if isinstance(process.returncode, int):
         if process.returncode not in exit_codes:
             raise CommandError(stderr)
     # If we get a non-empty output to stderr, raise an exception
