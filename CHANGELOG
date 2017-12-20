@@ -1,3 +1,7 @@
+12/19/2017 v1.0.3
+
+ * Fix pylint 1.8.0 compatibility: configuration file path printed to stderr
+
 12/19/2017 v1.0.2
 
  * Fix bug where clover uses absolute path in its xml report
