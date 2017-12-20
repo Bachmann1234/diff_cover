@@ -7,7 +7,7 @@ import sys
 
 class CommandError(Exception):
     """
-    Error raised when a command being excuted returns an error
+    Error raised when a command being executed returns an error
     """
     pass
 
