@@ -46,7 +46,7 @@ class GitPathTool(object):
     @classmethod
     def absolute_path(cls, src_path):
         """
-        Returns absoloute git_diff_path
+        Returns absolute git_diff_path
         """
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `other_package/some_file.py`
