@@ -39,7 +39,7 @@ class CloverXmlCoverageReporter(BaseViolationReporter):
         """
         files = [file_tree
                  for file_tree in xml_document.findall(".//file")
-                 if file_tree.get('path') == src_path
+                 if GitPathTool.relative_path(file_tree.get('path')) == src_path
                  or []]
         if not files:
             return None

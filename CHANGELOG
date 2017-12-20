@@ -1,3 +1,7 @@
+12/19/2017 v1.0.2
+
+ * Fix bug where clover uses absolute path in its xml report
+
 12/08/2017 v1.0.1
 
  * Add Support for clover and checkstyle
