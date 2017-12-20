@@ -70,7 +70,7 @@ class BaseViolationReporter(object):
 class QualityDriver(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, supported_extensions, command):
+    def __init__(self, name, supported_extensions, command, exit_codes=[0]):
         """
         Args:
             name: (str) name of the driver
@@ -82,6 +82,7 @@ class QualityDriver(object):
         self.name = name
         self.supported_extensions = supported_extensions
         self.command = command
+        self.exit_codes = exit_codes
 
     @abstractmethod
     def parse_reports(self, reports):
@@ -154,7 +155,7 @@ class QualityReporter(BaseViolationReporter):
                     command.append(self.options)
                 if os.path.exists(src_path):
                     command.append(src_path.encode(sys.getfilesystemencoding()))
-                    output, _ = execute(command)
+                    output, _ = execute(command, self.driver.exit_codes)
                     self.violations_dict.update(self.driver.parse_reports([output]))
 
         return self.violations_dict[src_path]
@@ -184,7 +185,8 @@ class RegexBasedDriver(QualityDriver):
             command,
             expression,
             command_to_check_install,
-            flags=0
+            flags=0,
+            exit_codes=[0]
     ):
         """
         args:
@@ -195,7 +197,7 @@ class RegexBasedDriver(QualityDriver):
             command_to_check_install: (list[str]) command to run
             to see if the tool is installed
         """
-        super(RegexBasedDriver, self).__init__(name, supported_extensions, command)
+        super(RegexBasedDriver, self).__init__(name, supported_extensions, command, exit_codes)
         self.expression = re.compile(expression, flags)
         self.command_to_check_install = command_to_check_install
         self.is_installed = None

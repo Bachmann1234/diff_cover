@@ -12,10 +12,11 @@ class CommandError(Exception):
     pass
 
 
-def execute(command):
+def execute(command, exit_codes=[0]):
     """Execute provided command returning the stdout
     Args:
         command (list[str]): list of tokens to execute as your command.
+        exit_codes (list[int]): exit codes which do not indicate error.
         subprocess_mod (module): Defaults to pythons subprocess module but you can optionally pass in
         another. This is mostly for testing purposes
     Returns:
@@ -39,13 +40,8 @@ def execute(command):
         raise
 
     stderr = _ensure_unicode(stderr)
-    if command[0] == 'pylint':
-        # Pylint returns bit-encoded exit codes as documented here:
-        # https://pylint.readthedocs.io/en/latest/user_guide/run.html
-        # 1 = fatal error, if an error occurred which prevented pylint from doing further processing
-        # 2,4,8,16 = error/warning/refactor/convention message issued
-        # 32 = usage error
-        if process.returncode & ~ (2 | 4 | 8 | 16):
+    if isinstance(process.returncode, (int, long)):
+        if process.returncode not in exit_codes:
             raise CommandError(stderr)
     # If we get a non-empty output to stderr, raise an exception
     elif bool(stderr) and process.returncode:
