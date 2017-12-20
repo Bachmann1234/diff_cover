@@ -653,7 +653,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _patch_so_all_files_exist()
 
         # Patch the output of `flake8`
-        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
+        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=255)
 
         # Parse the report
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
