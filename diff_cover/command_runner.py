@@ -39,14 +39,13 @@ def execute(command):
         raise
 
     stderr = _ensure_unicode(stderr)
-    # after version 1.8.0 pylint writes a message to stderr:
-    # Using config file {}
-    # OR
-    # No config file found, using default configuration
-    stderr = re.sub(r'^Using config file .*$', '', stderr).strip()
-    stderr = re.sub(r'^No config file found, using default configuration$', '', stderr).strip()
+    if command[0] == 'pylint':
+        # pylint exit codes are documented here:
+        # https://pylint.readthedocs.io/en/latest/user_guide/run.html
+        if process.returncode & 32:
+            raise CommandError(stderr)
     # If we get a non-empty output to stderr, raise an exception
-    if bool(stderr) and process.returncode:
+    elif bool(stderr) and process.returncode:
         raise CommandError(stderr)
 
     return _ensure_unicode(stdout), stderr

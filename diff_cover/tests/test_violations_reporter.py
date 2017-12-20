@@ -926,7 +926,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
     def test_quality_error(self):
         # Patch the output stderr/stdout and returncode of `pylint`
-        _setup_patch((b'file1.py:1: [C0111] Missing docstring', b'oops'), status_code=1)
+        _setup_patch((b'file1.py:1: [C0111] Missing docstring', b'oops'), status_code=32)
 
         # Parse the report
         with patch('diff_cover.violationsreporters.violations_reporter.run_command_for_code') as code:
