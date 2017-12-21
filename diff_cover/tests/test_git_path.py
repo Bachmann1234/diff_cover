@@ -9,6 +9,7 @@ class TestGitPathTool(unittest.TestCase):
     def setUp(self):
         # Create mock subprocess to simulate `git rev-parse`
         self.process = mock.Mock()
+        self.process.returncode = 0
         self.subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
         self.subprocess.Popen.return_value = self.process
 

@@ -12,6 +12,7 @@ class TestGitDiffTool(unittest.TestCase):
 
         # Create mock subprocess to simulate `git diff`
         self.process = mock.Mock()
+        self.process.returncode = 0
         self.subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
         self.subprocess.Popen.return_value = self.process
         # Create the git diff tool
@@ -77,7 +78,7 @@ class TestGitDiffTool(unittest.TestCase):
         )
 
     def test_errors(self):
-        self._set_git_diff_output('test output', 'fatal error')
+        self._set_git_diff_output('test output', 'fatal error', 1)
 
         with self.assertRaises(CommandError):
             self.tool.diff_unstaged()
@@ -88,9 +89,10 @@ class TestGitDiffTool(unittest.TestCase):
         with self.assertRaises(CommandError):
             self.tool.diff_unstaged()
 
-    def _set_git_diff_output(self, stdout, stderr):
+    def _set_git_diff_output(self, stdout, stderr, returncode=0):
         """
         Configure the `git diff` mock to output `stdout`
         and `stderr` to stdout and stderr, respectively.
         """
         self.process.communicate.return_value = (stdout, stderr)
+        self.process.returncode = returncode

@@ -189,7 +189,10 @@ pycodestyle_driver = RegexBasedDriver(
     supported_extensions=['py'],
     command=['pycodestyle'],
     expression=r'^([^:]+):(\d+).*([EW]\d{3}.*)$',
-    command_to_check_install=['pycodestyle', '--version']
+    command_to_check_install=['pycodestyle', '--version'],
+    # pycodestyle exit code is 1 if there are violations
+    # http://pycodestyle.pycqa.org/en/latest/intro.html
+    exit_codes=[0, 1]
 )
 
 pyflakes_driver = RegexBasedDriver(
@@ -200,7 +203,10 @@ pyflakes_driver = RegexBasedDriver(
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
     expression=r'^([^:]+):(\d+): (.*)$',
-    command_to_check_install=['pyflakes', '--version']
+    command_to_check_install=['pyflakes', '--version'],
+    # pyflakes exit code is 1 if there are violations
+    # https://github.com/PyCQA/pyflakes/blob/master/pyflakes/api.py#L211
+    exit_codes=[0, 1]
 )
 
 """
@@ -223,7 +229,10 @@ flake8_driver = RegexBasedDriver(
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
     expression=r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$',
-    command_to_check_install=['flake8', '--version']
+    command_to_check_install=['flake8', '--version'],
+    # flake8 exit code is 1 if there are violations
+    # http://flake8.pycqa.org/en/latest/user/invocation.html
+    exit_codes=[0, 1]
 )
 
 jshint_driver = RegexBasedDriver(
@@ -259,7 +268,10 @@ pydocstyle_driver = RegexBasedDriver(
     command=['pydocstyle'],
     expression=r'^(.+?):(\d+).*?$.+?^        (.*?)$',
     command_to_check_install=['pydocstyle', '--version'],
-    flags=re.MULTILINE | re.DOTALL
+    flags=re.MULTILINE | re.DOTALL,
+    # pydocstyle exit code is 1 if there are violations
+    # http://www.pydocstyle.org/en/2.1.1/usage.html#return-code
+    exit_codes=[0, 1]
 )
 
 class PylintDriver(QualityDriver):
@@ -272,7 +284,17 @@ class PylintDriver(QualityDriver):
         super(PylintDriver, self).__init__(
                 'pylint',
                 ['py'],
-                ['pylint', '--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"']
+                ['pylint', '--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"'],
+                # Pylint returns bit-encoded exit codes as documented here:
+                # https://pylint.readthedocs.io/en/latest/user_guide/run.html
+                # 1 = fatal error, if an error occurred which prevented pylint from doing further processing
+                # 2,4,8,16 = error/warning/refactor/convention message issued
+                # 32 = usage error
+                [0,
+                 2,
+                 4, 2 | 4,
+                 8, 2 | 8, 4 | 8, 2 | 4 | 8,
+                 16, 2 | 16, 4 | 16, 2 | 4 | 16, 8 | 16, 2 | 8 | 16, 4 | 8 | 16, 2 | 4 | 8 | 16]
         )
         self.pylint_expression = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
         self.dupe_code_violation = 'R0801'

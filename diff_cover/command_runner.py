@@ -7,15 +7,16 @@ import sys
 
 class CommandError(Exception):
     """
-    Error raised when a command being excuted returns an error
+    Error raised when a command being executed returns an error
     """
     pass
 
 
-def execute(command):
+def execute(command, exit_codes=[0]):
     """Execute provided command returning the stdout
     Args:
         command (list[str]): list of tokens to execute as your command.
+        exit_codes (list[int]): exit codes which do not indicate error.
         subprocess_mod (module): Defaults to pythons subprocess module but you can optionally pass in
         another. This is mostly for testing purposes
     Returns:
@@ -39,11 +40,7 @@ def execute(command):
         raise
 
     stderr = _ensure_unicode(stderr)
-    # after version 1.8.0 pylint writes a message to stderr:
-    # Using config file {}
-    stderr = re.sub(r'^Using config file .*$', '', stderr).strip()
-    # If we get a non-empty output to stderr, raise an exception
-    if bool(stderr) and process.returncode:
+    if process.returncode not in exit_codes:
         raise CommandError(stderr)
 
     return _ensure_unicode(stdout), stderr

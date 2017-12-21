@@ -158,7 +158,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         else:
             self._mock_sys.stdout = string_buffer
 
-    def _set_git_diff_output(self, stdout, stderr):
+    def _set_git_diff_output(self, stdout, stderr, returncode=0):
         """
         Patch the call to `git diff` to output `stdout`
         and `stderr`.
@@ -169,10 +169,12 @@ class ToolsIntegrationBase(unittest.TestCase):
             if command[0:4] == ['git', '-c', 'diff.mnemonicprefix=no', 'diff']:
                 mock = Mock()
                 mock.communicate.return_value = (stdout, stderr)
+                mock.returncode = returncode
                 return mock
             elif command[0:2] == ['git', 'rev-parse']:
                 mock = Mock()
                 mock.communicate.return_value = (self._git_root_path, '')
+                mock.returncode = returncode
                 return mock
             else:
                 process = Popen(command, **kwargs)
@@ -363,7 +365,7 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
     def test_git_diff_error(self):
 
         # Patch the output of `git diff` to return an error
-        self._set_git_diff_output('', 'fatal error')
+        self._set_git_diff_output('', 'fatal error', 1)
 
         # Expect an error
         with self.assertRaises(CommandError):
@@ -378,7 +380,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
     def test_git_diff_error_diff_quality(self):
 
         # Patch the output of `git diff` to return an error
-        self._set_git_diff_output('', 'fatal error')
+        self._set_git_diff_output('', 'fatal error', 1)
 
         # Expect an error
         with self.assertRaises(CommandError):

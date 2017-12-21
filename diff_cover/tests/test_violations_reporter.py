@@ -382,7 +382,7 @@ class pycodestyleQualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output of `pycodestyle`
-        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
+        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=255)
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
             # Parse the report
@@ -509,7 +509,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
         _patch_so_all_files_exist()
 
         # Patch the output of `pyflakes`
-        _setup_patch((b"", b'whoops'), status_code=1)
+        _setup_patch((b"", b'whoops'), status_code=255)
 
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
@@ -653,7 +653,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _patch_so_all_files_exist()
 
         # Patch the output of `flake8`
-        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
+        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=255)
 
         # Parse the report
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
