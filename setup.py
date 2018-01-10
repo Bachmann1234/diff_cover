@@ -11,6 +11,7 @@ setup(
     version=VERSION,
     author='Matt Bachmann',
     url='https://github.com/Bachmann1234/diff-cover',
+    test_suite='nose.collector',
     description=DESCRIPTION,
     license='Apache 2.0',
     classifiers=['Development Status :: 5 - Production/Stable',
