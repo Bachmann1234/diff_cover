@@ -8,7 +8,7 @@ Diff: {{ diff_name }}
 {% if stats.percent_covered < 100 %}
 {{ src_path }} ({{ stats.percent_covered|round(1) }}%):
 {% for line, message in stats.violations %}
-    {{ line }}: {{ message }}
+{{ src_path }}:{{ line }}: {{ message }}
 {% endfor %}
 {% else %}
 {{ src_path }} (100%)
