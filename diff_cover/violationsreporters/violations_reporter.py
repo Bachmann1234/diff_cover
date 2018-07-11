@@ -84,7 +84,7 @@ class XmlCoverageReporter(BaseViolationReporter):
              src_abs_path in [
                  self._to_unix_path(
                      os.path.join(
-                         source,
+                         source.strip(),
                          clazz.get('filename')
                      )
                  ) for source in sources]]
