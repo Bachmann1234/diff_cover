@@ -140,25 +140,25 @@ class XmlCoverageReporter(BaseViolationReporter):
 
                 # First case, need to define violations initially
                 if violations is None:
-                    violations = set(
+                    violations = {
                         Violation(int(line.get('number')), None)
                         for line in line_nodes
-                        if int(line.get('hits', 0)) == 0)
+                        if int(line.get('hits', 0)) == 0}
 
                 # If we already have a violations set,
                 # take the intersection of the new
                 # violations set and its old self
                 else:
-                    violations = violations & set(
+                    violations = violations & {
                         Violation(int(line.get('number')), None)
                         for line in line_nodes
                         if int(line.get('hits', 0)) == 0
-                    )
+                    }
 
                 # Measured is the union of itself and the new measured
-                measured = measured | set(
+                measured = measured | {
                     int(line.get('number')) for line in line_nodes
-                )
+                }
 
             # If we don't have any information about the source file,
             # don't report any violations
@@ -361,9 +361,9 @@ class PylintDriver(QualityDriver):
                         # If we're looking for a particular source file,
                         # ignore any other source files.
                         if function_name:
-                            error_str = u"{0}: {1}: {2}".format(pylint_code, function_name, message)
+                            error_str = "{}: {}: {}".format(pylint_code, function_name, message)
                         else:
-                            error_str = u"{0}: {1}".format(pylint_code, message)
+                            error_str = "{}: {}".format(pylint_code, message)
 
                         violation = Violation(int(line_number), error_str)
                         violations_dict[pylint_src_path].append(violation)
