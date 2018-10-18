@@ -220,7 +220,7 @@ class Snippet(object):
         """
 
         # Create a map from ranges (start/end tuples) to tokens
-        token_map = dict((rng, []) for rng in range_list)
+        token_map = {rng: [] for rng in range_list}
 
         # Keep track of the current line number; we will
         # increment this as we encounter newlines in token values

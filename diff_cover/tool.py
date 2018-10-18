@@ -351,7 +351,7 @@ def main(argv=None, directory=None):
         if percent_covered >= fail_under:
             return 0
         else:
-            LOGGER.error("Failure. Coverage is below {0}%.".format(fail_under))
+            LOGGER.error("Failure. Coverage is below {}%.".format(fail_under))
             return 1
 
     elif 'diff-quality' in name:
@@ -377,7 +377,7 @@ def main(argv=None, directory=None):
                 try:
                     input_reports.append(open(path, 'rb'))
                 except IOError:
-                    LOGGER.warning("Could not load '{0}'".format(path))
+                    LOGGER.warning("Could not load '{}'".format(path))
             try:
                 reporter = QualityReporter(driver, input_reports, user_options)
                 percent_passing = generate_quality_report(
@@ -392,12 +392,12 @@ def main(argv=None, directory=None):
                 if percent_passing >= fail_under:
                     return 0
                 else:
-                    LOGGER.error("Failure. Quality is below {0}%.".format(fail_under))
+                    LOGGER.error("Failure. Quality is below {}%.".format(fail_under))
                     return 1
 
             except (ImportError, EnvironmentError):
                 LOGGER.error(
-                    "Quality tool not installed: '{0}'".format(tool)
+                    "Quality tool not installed: '{}'".format(tool)
                 )
                 return 1
             # Close any reports we opened
@@ -406,11 +406,11 @@ def main(argv=None, directory=None):
                     file_handle.close()
 
         else:
-            LOGGER.error("Quality tool not recognized: '{0}'".format(tool))
+            LOGGER.error("Quality tool not recognized: '{}'".format(tool))
             return 1
 
     else:
-        assert False, 'Expect diff-cover or diff-quality in {0}'.format(name)
+        assert False, 'Expect diff-cover or diff-quality in {}'.format(name)
 
 if __name__ == "__main__":
     exit(main())
