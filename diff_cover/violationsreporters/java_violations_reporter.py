@@ -124,7 +124,7 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
     Query information from a Jacoco XML coverage report.
     """
 
-    def __init__(self, xml_roots, src_root=''):
+    def __init__(self, xml_roots, src_roots=None):
         """
         Load the Jacoco XML coverage report represented
         by the cElementTree with root element `xml_root`.
@@ -136,8 +136,10 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
 
-        # scan for source root
-        self._src_root = src_root
+        if src_roots:
+            self._src_roots = src_roots
+        else:
+            self._src_roots = ['']
 
     def _get_src_path_line_nodes(self, xml_document, src_path):
         """
@@ -150,13 +152,15 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
         files = []
         packages = [pkg for pkg in xml_document.findall(".//package")]
         for pkg in packages:
-            _files = [_file
-                      for _file in pkg.findall('sourcefile')
-                      if GitPathTool.relative_path(os.path.join(self._src_root, pkg.get('name'), _file.get('name')))
-                      == src_path
-                      or []
-                      ]
-            files.extend(_files)
+            # iterate through src_roots
+            for root in self._src_roots:
+                _files = [_file
+                          for _file in pkg.findall('sourcefile')
+                          if GitPathTool.relative_path(os.path.join(root, pkg.get('name'), _file.get('name')))
+                          == src_path
+                          or []
+                          ]
+                files.extend(_files)
 
         if not files:
             return None

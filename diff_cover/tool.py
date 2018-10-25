@@ -53,7 +53,7 @@ FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below t
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
-SRC_ROOT_HELP = "Specify source root directory (only for jacoco coverage reports)"
+SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 
 
 LOGGER = logging.getLogger(__name__)
@@ -138,11 +138,12 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
-        '--src-root',
+        '--src-roots',
         metavar='DIRECTORY',
         type=str,
-        default=None,
-        help=SRC_ROOT_HELP
+        nargs='+',
+        default=['src/main/java', 'src/test/java'],
+        help=SRC_ROOTS_HELP
     )
 
     return vars(parser.parse_args(argv))
