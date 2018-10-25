@@ -250,7 +250,7 @@ def parse_quality_args(argv):
 def generate_coverage_report(coverage_xml, compare_branch,
                              html_report=None, css_file=None,
                              ignore_staged=False, ignore_unstaged=False,
-                             exclude=None, src_root=None):
+                             exclude=None, src_roots=None):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
@@ -270,7 +270,7 @@ def generate_coverage_report(coverage_xml, compare_branch,
     elif cobertura_xml_roots:
         coverage = XmlCoverageReporter(cobertura_xml_roots)
     elif jacoco_xml_roots:
-        coverage = JacocoXmlCoverageReporter(jacoco_xml_roots, src_root)
+        coverage = JacocoXmlCoverageReporter(jacoco_xml_roots, src_roots)
     else:
         assert False
 
@@ -361,7 +361,7 @@ def main(argv=None, directory=None):
             ignore_staged=arg_dict['ignore_staged'],
             ignore_unstaged=arg_dict['ignore_unstaged'],
             exclude=arg_dict['exclude'],
-            src_root=arg_dict['src_root'],
+            src_roots=arg_dict['src_roots'],
         )
 
         if percent_covered >= fail_under:
