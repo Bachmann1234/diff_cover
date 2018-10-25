@@ -532,7 +532,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         with io.open('git_diff_add.txt', encoding='utf-8') as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
         argv = ['diff-quality',
-                '--violations={0}'.format(tool_name),
+                '--violations={}'.format(tool_name),
                 report_arg]
 
         with patch('diff_cover.tool.LOGGER') as logger:

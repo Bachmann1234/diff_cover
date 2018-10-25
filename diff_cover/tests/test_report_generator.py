@@ -35,7 +35,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
     """
 
     # Test data, returned by default from the mocks
-    SRC_PATHS = set(['file1.py', 'subdir/file2.py'])
+    SRC_PATHS = {'file1.py', 'subdir/file2.py'}
     LINES = [2, 3, 4, 5, 10, 11, 12, 13, 14, 15]
     VIOLATIONS = [Violation(n, None) for n in (10, 11, 20)]
     MEASURED = [1, 2, 3, 4, 7, 10, 11, 15, 20, 30]
@@ -47,7 +47,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
     REPORT_GENERATOR_CLASS = None
 
     # Snippet returned by the mock
-    SNIPPET = u"<div>Snippet with \u1235 \u8292 unicode</div>"
+    SNIPPET = "<div>Snippet with \u1235 \u8292 unicode</div>"
     SNIPPET_STYLE = '.css { color:red }'
 
     def setUp(self):

@@ -193,7 +193,7 @@ below a certain threshold specify the fail-under parameter
     diff-cover coverage.xml --fail-under=80
     diff-quality --violations=pycodestyle --fail-under=80
 
-The above will return a non zero status if the coverage or quality score was below 80%
+The above will return a non zero status if the coverage or quality score was below 80%.
 
 Troubleshooting
 ----------------------
@@ -250,7 +250,7 @@ may be asked to sign a Contributor Agreement.
 Setting Up For Development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-diff-cover is written to support many versions of python. The best way to set
+diff-cover is written to support many versions of Python. The best way to set
 your machine up for development is to make sure you have ``tox`` installed which
 can be installed using ``pip``.
 
@@ -259,12 +259,12 @@ can be installed using ``pip``.
     pip install tox
 
 Now by simply running ``tox`` from the project root you will have environments
-for all the supported python versions. These will be in the ``.tox`` directory.
+for all the supported Python versions. These will be in the ``.tox`` directory.
 
-To create a specific python dev environment just make a virtualenv for your python
-version and then install the appropriate test-requirements file.
+To create a specific Python dev environment just make a virtualenv for your Python
+version and then install the appropriate ``test-requirements`` file.
 
-For example, setting up python 3:
+For example, setting up Python 3:
 
 .. code:: bash
 
@@ -287,8 +287,8 @@ Originally created with the support of `edX
 .. |build-status| image:: https://travis-ci.org/Bachmann1234/diff-cover.png
     :target: https://travis-ci.org/Bachmann1234/diff-cover
     :alt: Build Status
-.. |coverage-status| image:: https://coveralls.io/repos/Bachmann1234/diff-cover/badge.png
-    :target: https://coveralls.io/r/Bachmann1234/diff-cover
+.. |coverage-status| image:: https://coveralls.io/repos/github/Bachmann1234/diff-cover/badge.svg?branch=master
+    :target: https://coveralls.io/github/Bachmann1234/diff-cover?branch=master
     :alt: Coverage Status
 .. |docs-status| image:: https://readthedocs.org/projects/diff-cover/badge/
     :alt: Documentation Status

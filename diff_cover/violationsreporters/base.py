@@ -149,7 +149,7 @@ class QualityReporter(BaseViolationReporter):
                 if self.driver_tool_installed is None:
                     self.driver_tool_installed = self.driver.installed()
                 if not self.driver_tool_installed:
-                    raise EnvironmentError("{0} is not installed".format(self.driver.name))
+                    raise EnvironmentError("{} is not installed".format(self.driver.name))
                 command = copy.deepcopy(self.driver.command)
                 if self.options:
                     command.append(self.options)

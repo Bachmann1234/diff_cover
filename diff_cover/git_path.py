@@ -62,4 +62,4 @@ class GitPathTool(object):
         """
         command = ['git', 'rev-parse', '--show-toplevel', '--encoding=utf-8']
         git_root = execute(command)[0]
-        return git_root.split('\n')[0] if git_root else u''
+        return git_root.split('\n')[0] if git_root else ''

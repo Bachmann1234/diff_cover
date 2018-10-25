@@ -75,25 +75,25 @@ class CloverXmlCoverageReporter(BaseViolationReporter):
 
                 # First case, need to define violations initially
                 if violations is None:
-                    violations = set(
+                    violations = {
                         Violation(int(line.get('num')), None)
                         for line in line_nodes
-                        if int(line.get('count', 0)) == 0)
+                        if int(line.get('count', 0)) == 0}
 
                 # If we already have a violations set,
                 # take the intersection of the new
                 # violations set and its old self
                 else:
-                    violations = violations & set(
+                    violations = violations & {
                         Violation(int(line.get('num')), None)
                         for line in line_nodes
                         if int(line.get('count', 0)) == 0
-                    )
+                    }
 
                 # Measured is the union of itself and the new measured
-                measured = measured | set(
+                measured = measured | {
                     int(line.get('num')) for line in line_nodes
-                )
+                }
 
             # If we don't have any information about the source file,
             # don't report any violations
@@ -282,7 +282,7 @@ class CheckstyleXmlDriver(QualityDriver):
             for file_tree in files:
                 for error in file_tree.findall('error'):
                     line_number = error.get('line')
-                    error_str = u"{0}: {1}".format(error.get('severity'),
+                    error_str = "{}: {}".format(error.get('severity'),
                                                    error.get('message'))
                     violation = Violation(int(line_number), error_str)
                     filename = GitPathTool.relative_path(file_tree.get('name'))
@@ -329,7 +329,7 @@ class FindbugsXmlDriver(QualityDriver):
                 start = int(line.get('start'))
                 end = int(line.get('end'))
                 for line_number in range(start, end+1):
-                    error_str = u"{0}: {1}".format(category, short_message)
+                    error_str = "{}: {}".format(category, short_message)
                     violation = Violation(line_number, error_str)
                     filename = GitPathTool.relative_path(
                         line.get('sourcepath'))

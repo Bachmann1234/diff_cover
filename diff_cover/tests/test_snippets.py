@@ -15,30 +15,30 @@ import unittest
 class SnippetTest(unittest.TestCase):
 
     SRC_TOKENS = [
-        (Token.Comment, u'# Test source'),
-        (Token.Text, u'\n'),
-        (Token.Keyword, u'def'),
-        (Token.Text, u' '),
-        (Token.Name.Function, u'test_func'),
-        (Token.Punctuation, u'('),
-        (Token.Name, u'arg'),
-        (Token.Punctuation, u')'),
-        (Token.Punctuation, u':'),
-        (Token.Text, u'\n'),
-        (Token.Text, u'    '),
-        (Token.Keyword, u'print'),
-        (Token.Text, u' '),
-        (Token.Name, u'arg'),
-        (Token.Text, u'\n'),
-        (Token.Text, u'    '),
-        (Token.Keyword, u'return'),
-        (Token.Text, u' '),
-        (Token.Name, u'arg'),
-        (Token.Text, u' '),
-        (Token.Operator, u'+'),
-        (Token.Text, u' '),
-        (Token.Literal.Number.Integer, u'5'),
-        (Token.Text, u'\n'),
+        (Token.Comment, '# Test source'),
+        (Token.Text, '\n'),
+        (Token.Keyword, 'def'),
+        (Token.Text, ' '),
+        (Token.Name.Function, 'test_func'),
+        (Token.Punctuation, '('),
+        (Token.Name, 'arg'),
+        (Token.Punctuation, ')'),
+        (Token.Punctuation, ':'),
+        (Token.Text, '\n'),
+        (Token.Text, '    '),
+        (Token.Keyword, 'print'),
+        (Token.Text, ' '),
+        (Token.Name, 'arg'),
+        (Token.Text, '\n'),
+        (Token.Text, '    '),
+        (Token.Keyword, 'return'),
+        (Token.Text, ' '),
+        (Token.Name, 'arg'),
+        (Token.Text, ' '),
+        (Token.Operator, '+'),
+        (Token.Text, ' '),
+        (Token.Literal.Number.Integer, '5'),
+        (Token.Text, '\n'),
     ]
 
     FIXTURES = {
@@ -91,7 +91,7 @@ class SnippetTest(unittest.TestCase):
 
     def test_unicode(self):
 
-        unicode_src = [(Token.Text, u'var = \u0123 \u5872 \u3389')]
+        unicode_src = [(Token.Text, 'var = \u0123 \u5872 \u3389')]
 
         self._assert_format(
             unicode_src, 'test.py',
@@ -271,6 +271,6 @@ class SnippetLoaderTest(unittest.TestCase):
         (Line 1, Line 2, ...).
         """
         return "\n".join([
-            "Line {0}".format(line_num)
+            "Line {}".format(line_num)
             for line_num in range(start_line, end_line + 1)
         ])
