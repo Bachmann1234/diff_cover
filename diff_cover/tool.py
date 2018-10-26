@@ -26,7 +26,6 @@ from diff_cover.violationsreporters.violations_reporter import (
     jshint_driver, eslint_driver, pydocstyle_driver,
     pycodestyle_driver)
 from diff_cover.violationsreporters.java_violations_reporter import (
-    CloverXmlCoverageReporter, JacocoXmlCoverageReporter,
     CheckstyleXmlDriver, checkstyle_driver, FindbugsXmlDriver)
 
 QUALITY_DRIVERS = {
@@ -259,20 +258,7 @@ def generate_coverage_report(coverage_xml, compare_branch,
         ignore_unstaged=ignore_unstaged, exclude=exclude)
 
     xml_roots = [cElementTree.parse(xml_root) for xml_root in coverage_xml]
-    clover_xml_roots = [clover_xml for clover_xml in xml_roots if clover_xml.findall('.[@clover]')]
-    cobertura_xml_roots = [cobertura_xml for cobertura_xml in xml_roots if cobertura_xml.findall('.[@line-rate]')]
-    jacoco_xml_roots = [jacoco_xml for jacoco_xml in xml_roots if jacoco_xml.findall('.[@name]')]
-
-    if (clover_xml_roots and cobertura_xml_roots) or (clover_xml_roots and jacoco_xml_roots) or (cobertura_xml_roots and jacoco_xml_roots):
-        raise TypeError("Can't handle mixed coverage reports")
-    elif clover_xml_roots:
-        coverage = CloverXmlCoverageReporter(clover_xml_roots)
-    elif cobertura_xml_roots:
-        coverage = XmlCoverageReporter(cobertura_xml_roots)
-    elif jacoco_xml_roots:
-        coverage = JacocoXmlCoverageReporter(jacoco_xml_roots, src_roots)
-    else:
-        assert False
+    coverage = XmlCoverageReporter(xml_roots, src_roots)
 
     # Build a report generator
     if html_report is not None:

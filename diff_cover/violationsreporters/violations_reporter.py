@@ -16,12 +16,12 @@ from diff_cover.violationsreporters.base import BaseViolationReporter, Violation
 
 class XmlCoverageReporter(BaseViolationReporter):
     """
-    Query information from a Cobertura XML coverage report.
+    Query information from a Cobertura|Clover|JaCoCo XML coverage report.
     """
 
-    def __init__(self, xml_roots):
+    def __init__(self, xml_roots, src_roots=['']):
         """
-        Load the Cobertura XML coverage report represented
+        Load the XML coverage report represented
         by the cElementTree with root element `xml_root`.
         """
         super(XmlCoverageReporter, self).__init__("XML")
@@ -30,6 +30,8 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Create a dict to cache violations dict results
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
+
+        self._src_roots = src_roots
 
     @staticmethod
     def _to_unix_path(path):
@@ -97,14 +99,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         )
         return classes
 
-    def _get_src_path_line_nodes(self, xml_document, src_path):
-        """
-        Returns a list of nodes containing line information for `src_path`
-        in `xml_document`.
-
-        If file is not present in `xml_document`, return None
-        """
-
+    def _get_src_path_line_nodes_cobertura(self, xml_document, src_path):
         classes = self._get_classes(xml_document, src_path)
 
         if not classes:
@@ -112,6 +107,51 @@ class XmlCoverageReporter(BaseViolationReporter):
         else:
             lines = [clazz.findall('./lines/line') for clazz in classes]
             return [elem for elem in itertools.chain(*lines)]
+
+    def _get_src_path_line_nodes_clover(self, xml_document, src_path):
+        """
+        Return a list of nodes containing line information for `src_path`
+        in `xml_document`.
+
+        If file is not present in `xml_document`, return None
+        """
+
+        files = [file_tree
+                 for file_tree in xml_document.findall(".//file")
+                 if GitPathTool.relative_path(file_tree.get('path')) == src_path
+                 or []]
+        if not files:
+            return None
+        lines = [file_tree.findall('./line[@type="stmt"]')
+                 for file_tree in files]
+        return [elem for elem in itertools.chain(*lines)]
+
+    def _get_src_path_line_nodes_jacoco(self, xml_document, src_path):
+        """
+        Return a list of nodes containing line information for `src_path`
+        in `xml_document`.
+
+        If file is not present in `xml_document`, return None
+        """
+
+        files = []
+        packages = [pkg for pkg in xml_document.findall(".//package")]
+        for pkg in packages:
+            # iterate through src_roots
+            for root in self._src_roots:
+                _files = [_file
+                          for _file in pkg.findall('sourcefile')
+                          if GitPathTool.relative_path(os.path.join(root, pkg.get('name'), _file.get('name')))
+                          == src_path
+                          or []
+                          ]
+                files.extend(_files)
+
+        if not files:
+            return None
+        lines = [file_tree.findall('./line')
+                 for file_tree in files]
+        return [elem for elem in itertools.chain(*lines)]
 
     def _cache_file(self, src_path):
         """
@@ -132,33 +172,45 @@ class XmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for xml_document in self._xml_roots:
-                line_nodes = self._get_src_path_line_nodes(xml_document,
-                                                           src_path)
-
+                if xml_document.findall('.[@clover]'):
+                    # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
+                    line_nodes = self._get_src_path_line_nodes_clover(xml_document, src_path)
+                    _number = 'num'
+                    _hits = 'count'
+                elif xml_document.findall('.[@name]'):
+                    # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
+                    line_nodes = self._get_src_path_line_nodes_jacoco(xml_document, src_path)
+                    _number = 'nr'
+                    _hits = 'ci'
+                else:
+                    # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
+                    line_nodes = self._get_src_path_line_nodes_cobertura(xml_document, src_path)
+                    _number = 'number'
+                    _hits = 'hits'
                 if line_nodes is None:
                     continue
 
                 # First case, need to define violations initially
                 if violations is None:
-                    violations = {
-                        Violation(int(line.get('number')), None)
+                    violations = set(
+                        Violation(int(line.get(_number)), None)
                         for line in line_nodes
-                        if int(line.get('hits', 0)) == 0}
+                        if int(line.get(_hits, 0)) == 0)
 
                 # If we already have a violations set,
                 # take the intersection of the new
                 # violations set and its old self
                 else:
-                    violations = violations & {
-                        Violation(int(line.get('number')), None)
+                    violations = violations & set(
+                        Violation(int(line.get(_number)), None)
                         for line in line_nodes
-                        if int(line.get('hits', 0)) == 0
-                    }
+                        if int(line.get(_hits, 0)) == 0
+                    )
 
                 # Measured is the union of itself and the new measured
-                measured = measured | {
-                    int(line.get('number')) for line in line_nodes
-                }
+                measured = measured | set(
+                    int(line.get(_number)) for line in line_nodes
+                )
 
             # If we don't have any information about the source file,
             # don't report any violations
