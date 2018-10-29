@@ -3,10 +3,8 @@ Classes for querying the information in a test coverage report.
 """
 from __future__ import unicode_literals
 
-import os
 from collections import defaultdict
 
-import itertools
 from xml.etree import cElementTree
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool

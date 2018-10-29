@@ -126,6 +126,12 @@ class XmlCoverageReporter(BaseViolationReporter):
                  for file_tree in files]
         return [elem for elem in itertools.chain(*lines)]
 
+    def _measured_source_path_matches(self, package_name, file_name, src_path):
+        # find src_path in any of the source roots
+        for root in self._src_roots:
+            if GitPathTool.relative_path(os.path.join(root, package_name, file_name)) == src_path:
+                return True
+
     def _get_src_path_line_nodes_jacoco(self, xml_document, src_path):
         """
         Return a list of nodes containing line information for `src_path`
@@ -137,15 +143,12 @@ class XmlCoverageReporter(BaseViolationReporter):
         files = []
         packages = [pkg for pkg in xml_document.findall(".//package")]
         for pkg in packages:
-            # iterate through src_roots
-            for root in self._src_roots:
-                _files = [_file
-                          for _file in pkg.findall('sourcefile')
-                          if GitPathTool.relative_path(os.path.join(root, pkg.get('name'), _file.get('name')))
-                          == src_path
-                          or []
-                          ]
-                files.extend(_files)
+            _files = [_file
+                      for _file in pkg.findall('sourcefile')
+                      if self._measured_source_path_matches(pkg.get('name'), _file.get('name'), src_path)
+                      or []
+                      ]
+            files.extend(_files)
 
         if not files:
             return None
