@@ -267,12 +267,10 @@ def generate_coverage_report(coverage_xml, compare_branch,
         raise TypeError("Can't handle mixed coverage reports")
     elif clover_xml_roots:
         coverage = CloverXmlCoverageReporter(clover_xml_roots)
-    elif cobertura_xml_roots:
-        coverage = XmlCoverageReporter(cobertura_xml_roots)
     elif jacoco_xml_roots:
         coverage = JacocoXmlCoverageReporter(jacoco_xml_roots, src_roots)
     else:
-        assert False
+        coverage = XmlCoverageReporter(cobertura_xml_roots)
 
     # Build a report generator
     if html_report is not None:

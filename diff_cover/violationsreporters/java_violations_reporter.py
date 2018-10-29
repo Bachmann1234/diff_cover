@@ -141,6 +141,12 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
         else:
             self._src_roots = ['']
 
+    def _measured_source_path_matches(self, package_name, file_name, src_path):
+        # find src_path in any of the source roots
+        for root in self._src_roots:
+            if GitPathTool.relative_path(os.path.join(root, package_name, file_name)) == src_path:
+                return True
+
     def _get_src_path_line_nodes(self, xml_document, src_path):
         """
         Return a list of nodes containing line information for `src_path`
@@ -152,15 +158,12 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
         files = []
         packages = [pkg for pkg in xml_document.findall(".//package")]
         for pkg in packages:
-            # iterate through src_roots
-            for root in self._src_roots:
-                _files = [_file
-                          for _file in pkg.findall('sourcefile')
-                          if GitPathTool.relative_path(os.path.join(root, pkg.get('name'), _file.get('name')))
-                          == src_path
-                          or []
-                          ]
-                files.extend(_files)
+            _files = [_file
+                      for _file in pkg.findall('sourcefile')
+                      if self._measured_source_path_matches(pkg.get('name'), _file.get('name'), src_path)
+                      or []
+                      ]
+            files.extend(_files)
 
         if not files:
             return None
@@ -187,6 +190,9 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for xml_document in self._xml_roots:
+                # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
+                _number = 'nr'
+                _hits = 'ci'
                 line_nodes = self._get_src_path_line_nodes(xml_document,
                                                            src_path)
 
@@ -196,23 +202,23 @@ class JacocoXmlCoverageReporter(BaseViolationReporter):
                 # First case, need to define violations initially
                 if violations is None:
                     violations = set(
-                        Violation(int(line.get('nr')), None)
+                        Violation(int(line.get(_number)), None)
                         for line in line_nodes
-                        if int(line.get('ci', 0)) == 0)
+                        if int(line.get(_hits, 0)) == 0)
 
                 # If we already have a violations set,
                 # take the intersection of the new
                 # violations set and its old self
                 else:
                     violations = violations & set(
-                        Violation(int(line.get('nr')), None)
+                        Violation(int(line.get(_number)), None)
                         for line in line_nodes
-                        if int(line.get('ci', 0)) == 0
+                        if int(line.get(_hits, 0)) == 0
                     )
 
                 # Measured is the union of itself and the new measured
                 measured = measured | set(
-                    int(line.get('nr')) for line in line_nodes
+                    int(line.get(_number)) for line in line_nodes
                 )
 
             # If we don't have any information about the source file,
