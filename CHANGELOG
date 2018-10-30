@@ -1,3 +1,8 @@
+10/26/2018 v1.0.5
+
+ * Add support for jacoco xml
+ * support multiple xml formats (any combination of cobertura, clover, jacoco) at the same time
+
 7/10/2018 v1.0.4
  
  * Fix issue where whitespace was not trimmed pulling source file from cobertura causing a missed match

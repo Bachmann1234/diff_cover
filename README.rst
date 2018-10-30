@@ -2,8 +2,8 @@ diff-cover |build-status| |coverage-status| |docs-status|
 =========================================================
 
 Automatically find diff lines that need test coverage.
-Also finds diff lines that have violations (according to tools such as pycodestyle,
-Pyflakes, Flake8, or Pylint).
+Also finds diff lines that have violations (according to tools such
+as pycodestyle, pyflakes, flake8, or pylint).
 This is used as a code quality metric during code reviews.
 
 Overview
@@ -22,18 +22,21 @@ for lines in the diff.
 Currently, ``diff-cover`` requires that:
 
 - You are using ``git`` for version control.
-- Your test runner generates coverage reports in Cobertura XML format.
+- Your test runner generates coverage reports in Cobertura, Clover
+  or JaCoCo XML format.
 
-Cobertura XML coverage reports can be generated with many coverage tools,
+Supported XML coverage reports can be generated with many coverage tools,
 including:
 
 - Cobertura__ (Java)
 - Clover__ (Java)
+- JaCoCo__ (Java)
 - coverage.py__ (Python)
 - JSCover__ (JavaScript)
 
 __ http://cobertura.sourceforge.net/
 __ http://openclover.org/
+__ https://www.jacoco.org/
 __ http://nedbatchelder.com/code/coverage/
 __ http://tntim96.github.io/JSCover/
 
@@ -67,7 +70,7 @@ Getting Started
 
 1. Set the current working directory to a ``git`` repository.
 
-2. Run your test suite under coverage and generate a Cobertura XML report.
+2. Run your test suite under coverage and generate a [Cobertura, Clover or JaCoCo] XML report.
    For example, if you are using `nosetests`__ and `coverage.py`__:
 
 .. code:: bash

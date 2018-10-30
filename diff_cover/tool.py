@@ -26,7 +26,6 @@ from diff_cover.violationsreporters.violations_reporter import (
     jshint_driver, eslint_driver, pydocstyle_driver,
     pycodestyle_driver)
 from diff_cover.violationsreporters.java_violations_reporter import (
-    CloverXmlCoverageReporter,
     CheckstyleXmlDriver, checkstyle_driver, FindbugsXmlDriver)
 
 QUALITY_DRIVERS = {
@@ -53,6 +52,7 @@ FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below t
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
+SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 
 
 LOGGER = logging.getLogger(__name__)
@@ -134,6 +134,15 @@ def parse_coverage_args(argv):
         type=str,
         nargs='+',
         help=EXCLUDE_HELP
+    )
+
+    parser.add_argument(
+        '--src-roots',
+        metavar='DIRECTORY',
+        type=str,
+        nargs='+',
+        default=['src/main/java', 'src/test/java'],
+        help=SRC_ROOTS_HELP
     )
 
     return vars(parser.parse_args(argv))
@@ -240,7 +249,7 @@ def parse_quality_args(argv):
 def generate_coverage_report(coverage_xml, compare_branch,
                              html_report=None, css_file=None,
                              ignore_staged=False, ignore_unstaged=False,
-                             exclude=None):
+                             exclude=None, src_roots=None):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
@@ -249,15 +258,7 @@ def generate_coverage_report(coverage_xml, compare_branch,
         ignore_unstaged=ignore_unstaged, exclude=exclude)
 
     xml_roots = [cElementTree.parse(xml_root) for xml_root in coverage_xml]
-    clover_xml_roots = [clover_xml for clover_xml in xml_roots if clover_xml.findall('.[@clover]')]
-    cobertura_xml_roots = [cobertura_xml for cobertura_xml in xml_roots if cobertura_xml.findall('.[@line-rate]')]
-    if clover_xml_roots and cobertura_xml_roots:
-        raise TypeError("Can't handle mixed coverage reports")
-    elif clover_xml_roots:
-        coverage = CloverXmlCoverageReporter(clover_xml_roots)
-    elif cobertura_xml_roots:
-        coverage = XmlCoverageReporter(cobertura_xml_roots)
-
+    coverage = XmlCoverageReporter(xml_roots, src_roots)
 
     # Build a report generator
     if html_report is not None:
@@ -346,6 +347,7 @@ def main(argv=None, directory=None):
             ignore_staged=arg_dict['ignore_staged'],
             ignore_unstaged=arg_dict['ignore_unstaged'],
             exclude=arg_dict['exclude'],
+            src_roots=arg_dict['src_roots'],
         )
 
         if percent_covered >= fail_under:
