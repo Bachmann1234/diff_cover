@@ -76,7 +76,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         # cobertura sometimes provides the sources for the measurements
         # within it. If we have that we outta use it
         sources = xml_document.findall('sources/source')
-        sources = [source.text for source in sources]
+        sources = [source.text for source in sources if source.text]
         classes = [class_tree
                    for class_tree in xml_document.findall(".//class")
                    or []]
