@@ -6,6 +6,7 @@ import subprocess
 import xml.etree.cElementTree as etree
 from subprocess import Popen
 from textwrap import dedent
+
 import mock
 
 import six
@@ -118,6 +119,32 @@ class XmlCoverageReporterTest(unittest.TestCase):
             coverage.measured_lines(
                 '{}/{}'.format(fancy_path, file_paths[0])
             )
+        )
+
+    def test_non_python_violations_empty_path(self):
+        """
+        In the wild empty sources can happen. See https://github.com/Bachmann1234/diff-cover/issues/88
+        Best I can tell its mostly irrelevant but I mostly dont want it crashing
+        """
+
+        xml = etree.fromstring('''
+        <coverage line-rate="0.178" branch-rate="0.348" version="1.9" timestamp="1545037553" lines-covered="675" lines-valid="3787" branches-covered="260" branches-valid="747">
+        <sources>
+        <source></source>
+        </sources>
+        </coverage>
+        ''')
+
+        coverage = XmlCoverageReporter([xml])
+
+        self.assertEqual(
+            set(),
+            coverage.violations('')
+        )
+
+        self.assertEqual(
+            set(),
+            coverage.measured_lines('')
         )
 
     def test_two_inputs_first_violate(self):
