@@ -1,7 +1,6 @@
-10/26/2018 v1.0.5
+12/17/2018 v1.0.6
 
- * Add support for jacoco xml
- * support multiple xml formats (any combination of cobertura, clover, jacoco) at the same time
+ * Fix bug where no source information would cause a crash https://github.com/Bachmann1234/diff-cover/issues/88 thanks @hjqgloria for the report
 
 7/10/2018 v1.0.4
  
