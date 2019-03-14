@@ -166,7 +166,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         a phony directory.
         """
         def patch_diff(command, **kwargs):
-            if command[0:4] == ['git', '-c', 'diff.mnemonicprefix=no', 'diff']:
+            if command[0:6] == ['git', '-c', 'diff.mnemonicprefix=no', '-c',
+                                'diff.noprefix=no', 'diff']:
                 mock = Mock()
                 mock.communicate.return_value = (stdout, stderr)
                 mock.returncode = returncode
