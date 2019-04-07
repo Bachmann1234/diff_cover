@@ -15,11 +15,13 @@ import unittest
 import io
 import six
 
+from diff_cover.diff_cover_tool import main as diff_cover_main
+from diff_cover.diff_quality_tool import main as diff_quality_main
 from diff_cover.command_runner import CommandError
+from diff_cover.diff_quality_tool import QUALITY_DRIVERS
 from diff_cover.git_path import GitPathTool
 from diff_cover.tests.helpers import fixture_path, \
     assert_long_str_equal
-from diff_cover.tool import main, QUALITY_DRIVERS
 from diff_cover.violationsreporters.base import QualityDriver
 from mock import patch, Mock
 
@@ -41,11 +43,11 @@ class ToolsIntegrationBase(unittest.TestCase):
         cwd = os.getcwd()
 
         self._mock_popen = patch('subprocess.Popen').start()
-        self._mock_sys = patch('diff_cover.tool.sys').start()
+        self._mock_sys = patch('{}.sys'.format(self.tool_module)).start()
         try:
-            self._mock_getcwd = patch('diff_cover.tool.os.getcwdu').start()
+            self._mock_getcwd = patch('{}.os.getcwdu'.format(self.tool_module)).start()
         except AttributeError:
-            self._mock_getcwd = patch('diff_cover.tool.os.getcwd').start()
+            self._mock_getcwd = patch('{}.os.getcwd'.format(self.tool_module)).start()
         self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
@@ -99,7 +101,11 @@ class ToolsIntegrationBase(unittest.TestCase):
             args += ['--external-css-file', css_file]
 
         # Execute the tool
-        code = main(args)
+        if 'diff-cover' in args[0]:
+            code = diff_cover_main(args)
+        else:
+            code = diff_quality_main(args)
+
         self.assertEquals(code, expected_status)
 
         # Check the HTML report
@@ -138,7 +144,10 @@ class ToolsIntegrationBase(unittest.TestCase):
         self._capture_stdout(string_buffer)
 
         # Execute the tool
-        code = main(tool_args)
+        if 'diff-cover' in tool_args[0]:
+            code = diff_cover_main(tool_args)
+        else:
+            code = diff_quality_main(tool_args)
 
         self.assertEquals(code, expected_status)
 
@@ -188,6 +197,8 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
     High-level integration test.
     The `git diff` is a mock, but everything else is our code.
     """
+
+    tool_module = 'diff_cover.diff_cover_tool'
 
     def test_added_file_html(self):
         self._check_html_report(
@@ -370,13 +381,14 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
 
         # Expect an error
         with self.assertRaises(CommandError):
-            main(['diff-cover', 'coverage.xml'])
+            diff_cover_main(['diff-cover', 'coverage.xml'])
 
 
 class DiffQualityIntegrationTest(ToolsIntegrationBase):
     """
     High-level integration test.
     """
+    tool_module = 'diff_cover.diff_quality_tool'
 
     def test_git_diff_error_diff_quality(self):
 
@@ -385,7 +397,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
 
         # Expect an error
         with self.assertRaises(CommandError):
-            main(['diff-quality', '--violations', 'pycodestyle'])
+            diff_quality_main(['diff-quality', '--violations', 'pycodestyle'])
 
     def test_added_file_pycodestyle_html(self):
         self._check_html_report(
@@ -536,8 +548,8 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
                 '--violations={}'.format(tool_name),
                 report_arg]
 
-        with patch('diff_cover.tool.LOGGER') as logger:
-            exit_value = main(argv)
+        with patch('diff_cover.diff_quality_tool.LOGGER') as logger:
+            exit_value = diff_quality_main(argv)
             logger.error.assert_called_with(expected_error)
             self.assertEqual(exit_value, 1)
 

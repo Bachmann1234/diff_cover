@@ -36,7 +36,7 @@ setup(
     package_data={'diff_cover': ['templates/*.txt', 'templates/*.html', 'templates/*.css']},
     install_requires=REQUIREMENTS,
     entry_points={
-        'console_scripts': ['diff-cover = diff_cover.tool:main',
-                            'diff-quality = diff_cover.tool:main']
+        'console_scripts': ['diff-cover = diff_cover.diff_cover_tool:main',
+                            'diff-quality = diff_cover.diff_quality_tool:main']
     }
 )

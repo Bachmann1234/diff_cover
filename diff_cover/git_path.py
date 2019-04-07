@@ -24,6 +24,11 @@ class GitPathTool(object):
         """
         Set the cwd that is used to manipulate paths.
         """
+        if not cwd:
+            try:
+                cwd = os.getcwdu()
+            except AttributeError:
+                cwd = os.getcwd()
         if isinstance(cwd, six.binary_type):
             cwd = cwd.decode(sys.getdefaultencoding())
         cls._cwd = cwd
