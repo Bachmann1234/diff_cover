@@ -46,7 +46,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         :param path: string of the path to convert
         :return: the unix version of that path
         """
-        return posixpath.normpath(path.replace("\\", '/'))
+        return posixpath.normpath(os.path.normcase(path).replace("\\", '/'))
 
     def _get_classes(self, xml_document, src_path):
         """

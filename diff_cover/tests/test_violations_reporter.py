@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 import subprocess
+import sys
 import xml.etree.cElementTree as etree
 from subprocess import Popen
 from textwrap import dedent
@@ -345,6 +346,16 @@ class XmlCoverageReporterTest(unittest.TestCase):
                 line.set('number', str(line_num))
 
         return root
+
+    def test_to_unix_path(self):
+        """
+        Ensure the _to_unix_path static function handles paths properly.
+        """
+        to_unix_path = XmlCoverageReporter._to_unix_path
+        self.assertEqual(to_unix_path('foo/bar'), 'foo/bar')
+        self.assertEqual(to_unix_path('foo\\bar'), 'foo/bar')
+        if sys.platform.startswith('win'):
+            self.assertEqual(to_unix_path('FOO\\bar'), 'foo/bar')
 
 
 class CloverXmlCoverageReporterTest(unittest.TestCase):
