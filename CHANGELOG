@@ -1,6 +1,19 @@
+4/08/2019 v2.0.0
+
+ * Split Diff-cover and diff-quality's entry point scripts to allow them to be executed using pythons "-m" syntax
+
+3/16/2019 v1.0.7
+
+ * Fix bug where git's noprefix option would break diffcover. Thanks @beaugunderson
+
 12/17/2018 v1.0.6
 
  * Fix bug where no source information would cause a crash https://github.com/Bachmann1234/diff-cover/issues/88 thanks @hjqgloria for the report
+    
+10/26/2018 v1.0.5
+
+ * Add support for jacoco xml
+ * support multiple xml formats (any combination of cobertura, clover, jacoco) at the same time
 
 7/10/2018 v1.0.4
  
