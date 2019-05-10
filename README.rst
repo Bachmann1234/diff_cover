@@ -1,5 +1,5 @@
-diff-cover |build-status| |coverage-status| |docs-status|
-=========================================================
+diff-cover |pypi-version| |conda-version| |build-status| |coverage-status| |docs-status|
+========================================================================================
 
 Automatically find diff lines that need test coverage.
 Also finds diff lines that have violations (according to tools such
@@ -284,6 +284,12 @@ Originally created with the support of `edX
 <https://github.com/edx>`_.
 
 
+.. |pypi-version| image:: https://img.shields.io/pypi/v/diff-cover.svg
+    :target: https://pypi.org/project/diff-cover
+    :alt: PyPI version
+.. |conda-version| image:: https://img.shields.io/conda/vn/conda-forge/diff-cover.svg
+    :target: https://anaconda.org/conda-forge/diff-cover
+    :alt: Conda version
 .. |build-status| image:: https://travis-ci.org/Bachmann1234/diff-cover.png
     :target: https://travis-ci.org/Bachmann1234/diff-cover
     :alt: Build Status
