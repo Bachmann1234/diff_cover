@@ -7,7 +7,6 @@ import io
 import six
 import os.path
 import difflib
-from nose.tools import ok_
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
@@ -41,7 +40,7 @@ def assert_long_str_equal(expected, actual, strip=False):
         )
 
         # Fail the test
-        ok_(False, '\n\n' + '\n'.join(diff))
+        assert False, '\n\n' + '\n'.join(diff)
 
 
 def fixture_path(rel_path):
