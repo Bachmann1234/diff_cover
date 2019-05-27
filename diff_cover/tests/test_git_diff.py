@@ -16,10 +16,10 @@ class TestGitDiffTool(unittest.TestCase):
         self.subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
         self.subprocess.Popen.return_value = self.process
         # Create the git diff tool
-        self.tool = GitDiffTool()
+        self.tool = GitDiffTool('...')
 
-    def test_diff_committed(self):
-
+    def check_diff_committed(self, diff_range_notation):
+        self.tool = GitDiffTool(diff_range_notation)
         self._set_git_diff_output('test output', '')
         output = self.tool.diff_committed()
 
@@ -28,11 +28,15 @@ class TestGitDiffTool(unittest.TestCase):
 
         # Expect that the correct command was executed
         expected = ['git', '-c', 'diff.mnemonicprefix=no', '-c',
-                    'diff.noprefix=no', 'diff', 'origin/master...HEAD',
+                    'diff.noprefix=no', 'diff', 'origin/master{}HEAD'.format(diff_range_notation),
                     '--no-color', '--no-ext-diff']
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
+
+    def test_diff_commited(self):
+        self.check_diff_committed('...')
+        self.check_diff_committed('..')
 
     def test_diff_unstaged(self):
         self._set_git_diff_output('test output', '')

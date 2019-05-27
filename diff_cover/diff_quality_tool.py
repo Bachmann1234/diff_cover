@@ -11,8 +11,8 @@ import sys
 import six
 
 import diff_cover
-from diff_cover.diff_cover_tool import COMPARE_BRANCH_HELP, FAIL_UNDER_HELP, IGNORE_STAGED_HELP, IGNORE_UNSTAGED_HELP, \
-    EXCLUDE_HELP, HTML_REPORT_HELP, CSS_FILE_HELP
+from diff_cover.diff_cover_tool import COMPARE_BRANCH_HELP, DIFF_RANGE_NOTATION_HELP, FAIL_UNDER_HELP, \
+    IGNORE_STAGED_HELP, IGNORE_UNSTAGED_HELP, EXCLUDE_HELP, HTML_REPORT_HELP, CSS_FILE_HELP
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
@@ -143,18 +143,26 @@ def parse_quality_args(argv):
         help=EXCLUDE_HELP
     )
 
+    parser.add_argument(
+        '--diff-range-notation',
+        metavar='RANGE_NOTATION',
+        type=str,
+        default='...',
+        help=DIFF_RANGE_NOTATION_HELP
+    )
+
     return vars(parser.parse_args(argv))
 
 
 def generate_quality_report(tool, compare_branch,
                             html_report=None, css_file=None,
                             ignore_staged=False, ignore_unstaged=False,
-                            exclude=None):
+                            exclude=None, diff_range_notation=None):
     """
     Generate the quality report, using kwargs from `parse_args()`.
     """
     diff = GitDiffReporter(
-        compare_branch, git_diff=GitDiffTool(),
+        compare_branch, git_diff=GitDiffTool(diff_range_notation),
         ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged,
         supported_extensions=tool.driver.supported_extensions,
         exclude=exclude)
@@ -222,6 +230,7 @@ def main(argv=None, directory=None):
                 ignore_staged=arg_dict['ignore_staged'],
                 ignore_unstaged=arg_dict['ignore_unstaged'],
                 exclude=arg_dict['exclude'],
+                diff_range_notation=arg_dict['diff_range_notation'],
             )
             if percent_passing >= fail_under:
                 return 0

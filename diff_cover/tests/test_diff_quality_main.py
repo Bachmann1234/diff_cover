@@ -19,6 +19,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
         self.assertEqual(arg_dict.get('input_reports'), [])
         self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertEqual(arg_dict.get('diff_range_notation'), '...')
 
     def test_parse_with_no_html_report(self):
         argv = ['--violations', 'pylint']
@@ -27,6 +28,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get('violations'), 'pylint')
         self.assertEqual(arg_dict.get('input_reports'), [])
         self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertEqual(arg_dict.get('diff_range_notation'), '...')
 
     def test_parse_with_one_input_report(self):
         argv = ['--violations', 'pylint', 'pylint_report.txt']
@@ -88,6 +90,18 @@ class ParseQualityArgsTest(unittest.TestCase):
         arg_dict = parse_quality_args(argv)
         self.assertEqual(arg_dict.get('exclude'),
                          ['noneed/*.py', 'other/**/*.py'])
+
+    def test_parse_diff_range_notation(self):
+        argv = ['--violations', 'pep8',
+                '--diff-range-notation=..']
+
+        arg_dict = parse_quality_args(argv)
+
+        self.assertEqual(arg_dict.get('violations'), 'pep8')
+        self.assertEqual(arg_dict.get('html_report'), None)
+        self.assertEqual(arg_dict.get('input_reports'), [])
+        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertEqual(arg_dict.get('diff_range_notation'), '..')
 
 
 class MainTest(unittest.TestCase):
