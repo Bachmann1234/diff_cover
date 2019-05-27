@@ -31,3 +31,4 @@ deploy:
     secure: bKbDC6D6Dg+fape6GLETBsslac7KscsyXihh/DgGuUyay/fpXr1rI0biq8SVR1pQ02SmZea/gECgyjH5mt2H5IVKgvxx79iY4IM5zEGp6XtveDlQ+fzEUBwRnSndsT9rtWV1szizQ6UIx8pBnt/A5bJgIEcUWj57ckt+IH0U0iM=
   on:
     tags: true
+    condition: "$TOXENV = py37"
