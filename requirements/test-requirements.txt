@@ -1,7 +1,6 @@
 # Common requirements for developing on all supported python versions
 mock
-nose
-coverage
+pytest-cov
 pycodestyle>=2.4.0
 flake8
 pyflakes

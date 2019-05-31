@@ -71,15 +71,13 @@ Getting Started
 1. Set the current working directory to a ``git`` repository.
 
 2. Run your test suite under coverage and generate a [Cobertura, Clover or JaCoCo] XML report.
-   For example, if you are using `nosetests`__ and `coverage.py`__:
+   For example, using `pytest-cov`__:
 
 .. code:: bash
 
-    nosetests --with-coverage
-    coverage xml
+    pytest --cov --cov-report=xml
 
-__ http://nose.readthedocs.org
-__ http://nedbatchelder.com/code/coverage/
+__ https://pypi.org/project/pytest-cov
 
 This will create a ``coverage.xml`` file in the current working directory.
 
