@@ -1,2 +1,8 @@
 [run]
 source = diff_cover
+
+[paths]
+source =
+   src/diff_cover
+   .tox/*/lib/python*/site-packages/diff_cover
+   .tox/pypy*/site-packages/diff_cover

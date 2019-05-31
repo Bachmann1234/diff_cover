@@ -10,9 +10,7 @@ from diff_cover.report_generator import (
     BaseReportGenerator, HtmlReportGenerator,
     StringReportGenerator, TemplateReportGenerator
 )
-from diff_cover.tests.helpers import (
-    load_fixture, assert_long_str_equal
-)
+from .helpers import load_fixture, assert_long_str_equal
 import unittest
 from diff_cover.violationsreporters.violations_reporter import BaseViolationReporter, Violation
 

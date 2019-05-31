@@ -5,7 +5,7 @@ import unittest
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool, GitDiffError
-from diff_cover.tests.helpers import line_numbers, git_diff_output
+from .helpers import line_numbers, git_diff_output
 
 
 class GitDiffReporterTest(unittest.TestCase):

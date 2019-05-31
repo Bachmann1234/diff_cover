@@ -9,7 +9,6 @@ import six
 
 from xml.etree import cElementTree
 
-from diff_cover import DESCRIPTION
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
@@ -44,7 +43,7 @@ def parse_coverage_args(argv):
 
     The path strings may or may not exist.
     """
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser = argparse.ArgumentParser(description='Automatically find diff lines that need test coverage.')
 
     parser.add_argument(
         'coverage_xml',

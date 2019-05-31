@@ -6,8 +6,7 @@ import os
 import tempfile
 from pygments.token import Token
 from diff_cover.snippets import Snippet
-from diff_cover.tests.helpers import load_fixture,\
-    fixture_path, assert_long_str_equal
+from .helpers import load_fixture, fixture_path, assert_long_str_equal
 import six
 import unittest
 
