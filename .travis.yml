@@ -1,5 +1,6 @@
 language: python
 cache: pip
+dist: xenial
 matrix:
   include:
   - python: pypy3
@@ -8,8 +9,6 @@ matrix:
     env: TOXENV=pypy
   - python: 3.7
     env: TOXENV=py37
-    dist: xenial
-    sudo: true
   - python: 3.6
     env: TOXENV=py36
   - python: 3.5
@@ -31,3 +30,4 @@ deploy:
     secure: bKbDC6D6Dg+fape6GLETBsslac7KscsyXihh/DgGuUyay/fpXr1rI0biq8SVR1pQ02SmZea/gECgyjH5mt2H5IVKgvxx79iY4IM5zEGp6XtveDlQ+fzEUBwRnSndsT9rtWV1szizQ6UIx8pBnt/A5bJgIEcUWj57ckt+IH0U0iM=
   on:
     tags: true
+    condition: "$TOXENV = py37"
