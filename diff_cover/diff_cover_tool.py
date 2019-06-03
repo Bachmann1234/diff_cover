@@ -122,6 +122,7 @@ def parse_coverage_args(argv):
         metavar='RANGE_NOTATION',
         type=str,
         default='...',
+        choices=['...', '..'],
         help=DIFF_RANGE_NOTATION_HELP
     )
 
