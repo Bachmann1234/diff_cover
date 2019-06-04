@@ -12,9 +12,9 @@ class TestGitPathTool(unittest.TestCase):
         self.process.returncode = 0
         self.subprocess = mock.patch('diff_cover.command_runner.subprocess').start()
         self.subprocess.Popen.return_value = self.process
+        self.addCleanup(mock.patch.stopall)
 
     def tearDown(self):
-        mock.patch.stopall()
         # Reset static class members
         GitPathTool._root = None
         GitPathTool._cwd = None

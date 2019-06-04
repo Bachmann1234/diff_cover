@@ -54,9 +54,7 @@ class XmlCoverageReporterTest(unittest.TestCase):
         _git_path_mock = patch('diff_cover.violationsreporters.violations_reporter.GitPathTool').start()
         _git_path_mock.relative_path = lambda path: path
         _git_path_mock.absolute_path = lambda path: path
-
-    def tearDown(self):
-        patch.stopall()
+        self.addCleanup(patch.stopall)
 
     def test_violations(self):
 

@@ -119,18 +119,13 @@ class SnippetLoaderTest(unittest.TestCase):
         Create a temporary source file.
         """
         _, self._src_path = tempfile.mkstemp()
+        self.addCleanup(os.remove, self._src_path)
 
         # Path tool should not be aware of testing command
         path_mock = mock.patch('diff_cover.violationsreporters.violations_reporter.GitPathTool').start()
         path_mock.absolute_path = lambda path: path
         path_mock.relative_path = lambda path: path
-
-    def tearDown(self):
-        """
-        Delete the temporary source file.
-        """
-        os.remove(self._src_path)
-        mock.patch.stopall()
+        self.addCleanup(mock.patch.stopall)
 
     def test_one_snippet(self):
         self._init_src_file(10)

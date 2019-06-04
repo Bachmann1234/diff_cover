@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-import xml.etree.cElementTree as etree
 from textwrap import dedent
 import unittest
 import mock
@@ -38,10 +36,7 @@ class CheckstyleQualityReporterTest(unittest.TestCase):
     def setUp(self):
         """Set up required files."""
         _patch_so_all_files_exist()
-
-    def tearDown(self):
-        """Undo all patches."""
-        patch.stopall()
+        self.addCleanup(patch.stopall)
 
     def test_no_such_file(self):
         """Expect that we get no results."""
