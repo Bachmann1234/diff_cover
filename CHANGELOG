@@ -1,4 +1,4 @@
-(unreleased)
+6/3/2019 v2.1.0
 
  * New option that controls how the patch is obtained: `--diff-range-notation`, defaulting to `...`.
 
@@ -9,7 +9,9 @@
    Two-dot range notation ("A..M") compares the tips of both trees and produces a diff. This more
    accurately describes the actual patch that will be applied by merging A into M, even if commits have been
    cherry-picked between branches. This will produce a more accurate diff for coverage comparison when complex
-   merges and cherry-picks are involved.
+   merges and cherry-picks are involved. Thanks @nicoddemus!
+
+ * Fix for windows users! We were not properly normalizing paths causing source lines not to line up properly. Thanks @kingchad1989
 
 5/10/2019 v2.0.1
 
