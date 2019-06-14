@@ -1,3 +1,7 @@
+6/13/2019 v2.2.0
+
+ * Add --version flag to both commands. Shocked we never had this
+
 6/3/2019 v2.1.0
 
  * New option that controls how the patch is obtained: `--diff-range-notation`, defaulting to `...`.

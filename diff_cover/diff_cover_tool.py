@@ -9,7 +9,7 @@ import six
 
 from xml.etree import cElementTree
 
-from diff_cover import DESCRIPTION
+from diff_cover import DESCRIPTION, VERSION
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
@@ -124,6 +124,12 @@ def parse_coverage_args(argv):
         default='...',
         choices=['...', '..'],
         help=DIFF_RANGE_NOTATION_HELP
+    )
+
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='diff-cover {}'.format(VERSION)
     )
 
     return vars(parser.parse_args(argv))
