@@ -151,6 +151,12 @@ def parse_quality_args(argv):
         help=DIFF_RANGE_NOTATION_HELP
     )
 
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='diff-quality {}'.format(diff_cover.VERSION)
+    )
+
     return vars(parser.parse_args(argv))
 
 
