@@ -3,6 +3,7 @@ Classes for querying the information in a test coverage report.
 """
 from __future__ import unicode_literals
 
+import os
 from collections import defaultdict
 
 from xml.etree import cElementTree
@@ -115,3 +116,46 @@ class FindbugsXmlDriver(QualityDriver):
         Returns: boolean False: As findbugs analyses bytecode, it would be hard to run it from outside the build framework.
         """
         return False
+
+
+class PmdXmlDriver(QualityDriver):
+    def __init__(self):
+        """
+        See super for args
+        """
+        super(PmdXmlDriver, self).__init__(
+            'pmd',
+            ['java'],
+            []
+        )
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        violations_dict = defaultdict(list)
+        for report in reports:
+            xml_document = cElementTree.fromstring("".join(report))
+            files = xml_document.findall(".//file")
+            for file in files:
+                for error in file.findall('violation'):
+                    line_number = error.get('beginline')
+                    error_str = "{}: {}".format(error.get('rule'),
+                                                error.text.strip())
+                    violation = Violation(int(line_number), error_str)
+                    filename = GitPathTool.relative_path(file.get('name'))
+                    filename = filename.replace(os.sep, "/")
+                    violations_dict[filename].append(violation)
+
+        return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean False: As findbugs analyses bytecode, it would be hard to run it from outside the build framework.
+        """
+        return True

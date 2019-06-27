@@ -25,7 +25,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     jshint_driver, eslint_driver, pydocstyle_driver,
     pycodestyle_driver)
 from diff_cover.violationsreporters.java_violations_reporter import (
-    CheckstyleXmlDriver, checkstyle_driver, FindbugsXmlDriver)
+    CheckstyleXmlDriver, checkstyle_driver, FindbugsXmlDriver, PmdXmlDriver)
 
 QUALITY_DRIVERS = {
     'pycodestyle': pycodestyle_driver,
@@ -37,7 +37,8 @@ QUALITY_DRIVERS = {
     'pydocstyle': pydocstyle_driver,
     'checkstyle': checkstyle_driver,
     'checkstylexml': CheckstyleXmlDriver(),
-    'findbugs': FindbugsXmlDriver()
+    'findbugs': FindbugsXmlDriver(),
+    'pmd': PmdXmlDriver()
 }
 
 VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(sorted(QUALITY_DRIVERS))
