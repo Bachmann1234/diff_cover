@@ -140,14 +140,14 @@ class PmdXmlDriver(QualityDriver):
         violations_dict = defaultdict(list)
         for report in reports:
             xml_document = cElementTree.fromstring("".join(report))
-            files = xml_document.findall(".//file")
-            for file in files:
-                for error in file.findall('violation'):
+            node_files = xml_document.findall(".//file")
+            for node_file in node_files:
+                for error in node_file.findall('violation'):
                     line_number = error.get('beginline')
                     error_str = "{}: {}".format(error.get('rule'),
                                                 error.text.strip())
                     violation = Violation(int(line_number), error_str)
-                    filename = GitPathTool.relative_path(file.get('name'))
+                    filename = GitPathTool.relative_path(node_file.get('name'))
                     filename = filename.replace(os.sep, "/")
                     violations_dict[filename].append(violation)
 
@@ -158,4 +158,4 @@ class PmdXmlDriver(QualityDriver):
         Method checks if the provided tool is installed.
         Returns: boolean False: As findbugs analyses bytecode, it would be hard to run it from outside the build framework.
         """
-        return True
+        return False
