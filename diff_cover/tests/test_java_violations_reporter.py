@@ -407,8 +407,12 @@ class PmdXmlQualityReporterTest(unittest.TestCase):
             """).strip().encode('utf-8'))
         ]
 
+        pmd_xml_driver = PmdXmlDriver()
         # Generate the violation report
-        quality = QualityReporter(PmdXmlDriver(), reports=pmd_reports)
+        quality = QualityReporter(pmd_xml_driver, reports=pmd_reports)
+
+        # Expect that pmd is not installed
+        self.assertEqual(pmd_xml_driver.installed(), False)
 
         # Expect that we get the right violations
         expected_violations = [
@@ -422,4 +426,3 @@ class PmdXmlQualityReporterTest(unittest.TestCase):
         self.assertEqual(len(actual_violations), len(expected_violations))
         for expected in expected_violations:
             self.assertIn(expected, actual_violations)
-
