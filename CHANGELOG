@@ -1,3 +1,7 @@
+6/30/2019 v2.3.0
+
+ * Add PMD xml driver Thanks @bit-ranger (https://github.com/Bachmann1234/diff_cover/pull/117) 
+
 6/13/2019 v2.2.0
 
  * Add --version flag to both commands. Shocked we never had this
