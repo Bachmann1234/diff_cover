@@ -1742,6 +1742,9 @@ class SubprocessErrorTestCase(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+    def tearDown(self):
+        patch.stopall()
+
     @patch('sys.stderr', new_callable=StringIO)
     def test_quality_reporter(self, mock_stderr):
         _patch_so_all_files_exist()
