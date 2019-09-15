@@ -76,7 +76,7 @@ class CheckstyleQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for a
         # quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('../new_file.java'), None)
+        self.assertIsNone(quality.measured_lines('../new_file.java'))
 
         # Expect that we get violations for file1.java only
         # We're not guaranteed that the violations are returned
@@ -157,7 +157,7 @@ class CheckstyleXmlQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for a
         # quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('file1.java'), None)
+        self.assertIsNone(quality.measured_lines('file1.java'))
 
         # Expect that we get violations for file1.java only
         # We're not guaranteed that the violations are returned
@@ -412,7 +412,7 @@ class PmdXmlQualityReporterTest(unittest.TestCase):
         quality = QualityReporter(pmd_xml_driver, reports=pmd_reports)
 
         # Expect that pmd is not installed
-        self.assertEqual(pmd_xml_driver.installed(), False)
+        self.assertFalse(pmd_xml_driver.installed())
 
         # Expect that we get the right violations
         expected_violations = [

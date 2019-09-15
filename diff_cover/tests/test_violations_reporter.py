@@ -866,7 +866,7 @@ class pycodestyleQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+        self.assertIsNone(quality.measured_lines('../new_file.py'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -947,7 +947,7 @@ class pycodestyleQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+        self.assertIsNone(quality.measured_lines('path/to/file.py'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -994,7 +994,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+        self.assertIsNone(quality.measured_lines('../new_file.py'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -1073,7 +1073,7 @@ class PyflakesQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+        self.assertIsNone(quality.measured_lines('path/to/file.py'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -1128,7 +1128,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+        self.assertIsNone(quality.measured_lines('../new_file.py'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -1227,7 +1227,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('path/to/file.py'), None)
+        self.assertIsNone(quality.measured_lines('path/to/file.py'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -1296,7 +1296,7 @@ class PydocstlyeQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for a
         # quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('../new_file.py'), None)
+        self.assertIsNone(quality.measured_lines('../new_file.py'))
 
         # Expect that we get violations for file1.py only
         # We're not guaranteed that the violations are returned
@@ -1375,7 +1375,7 @@ class PylintQualityReporterTest(unittest.TestCase):
 
         # Measured_lines is undefined for a
         # quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('file1.py'), None)
+        self.assertIsNone(quality.measured_lines('file1.py'))
 
         # Expect that we get violations for file1.py only
         # We're not guaranteed that the violations are returned
@@ -1570,7 +1570,7 @@ class JsQualityBaseReporterMixin(object):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('../blah.js'), None)
+        self.assertIsNone(quality.measured_lines('../blah.js'))
 
         # Expect that we get the right violations
         expected_violations = [
@@ -1651,7 +1651,7 @@ class JsQualityBaseReporterMixin(object):
 
         # Measured_lines is undefined for
         # a quality reporter since all lines are measured
-        self.assertEqual(quality.measured_lines('path/to/file.js'), None)
+        self.assertIsNone(quality.measured_lines('path/to/file.js'))
 
         # Expect that we get the right violations
         expected_violations = [

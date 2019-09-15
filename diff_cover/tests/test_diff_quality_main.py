@@ -18,7 +18,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get('violations'), 'pycodestyle')
         self.assertEqual(arg_dict.get('html_report'), 'diff_cover.html')
         self.assertEqual(arg_dict.get('input_reports'), [])
-        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertFalse(arg_dict.get('ignore_unstaged'))
         self.assertEqual(arg_dict.get('diff_range_notation'), '...')
 
     def test_parse_with_no_html_report(self):
@@ -27,7 +27,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         arg_dict = parse_quality_args(argv)
         self.assertEqual(arg_dict.get('violations'), 'pylint')
         self.assertEqual(arg_dict.get('input_reports'), [])
-        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertFalse(arg_dict.get('ignore_unstaged'))
         self.assertEqual(arg_dict.get('diff_range_notation'), '...')
 
     def test_parse_with_one_input_report(self):
@@ -63,7 +63,7 @@ class ParseQualityArgsTest(unittest.TestCase):
         argv = ['--violations', 'pylint', '--ignore-unstaged']
 
         arg_dict = parse_quality_args(argv)
-        self.assertEqual(arg_dict.get('ignore_unstaged'), True)
+        self.assertTrue(arg_dict.get('ignore_unstaged'))
 
     def test_parse_invalid_arg(self):
         # No code quality test provided
@@ -77,7 +77,7 @@ class ParseQualityArgsTest(unittest.TestCase):
     def test_parse_with_exclude(self):
         argv = ['--violations', 'pep8']
         arg_dict = parse_quality_args(argv)
-        self.assertEqual(arg_dict.get('exclude'), None)
+        self.assertIsNone(arg_dict.get('exclude'))
 
         argv = ['--violations', 'pep8', '--exclude', 'noneed/*.py']
 
@@ -98,9 +98,9 @@ class ParseQualityArgsTest(unittest.TestCase):
         arg_dict = parse_quality_args(argv)
 
         self.assertEqual(arg_dict.get('violations'), 'pep8')
-        self.assertEqual(arg_dict.get('html_report'), None)
+        self.assertIsNone(arg_dict.get('html_report'))
         self.assertEqual(arg_dict.get('input_reports'), [])
-        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertFalse(arg_dict.get('ignore_unstaged'))
         self.assertEqual(arg_dict.get('diff_range_notation'), '..')
 
 

@@ -479,9 +479,9 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_fnmatch(self):
         """Verify that our fnmatch wrapper works as expected."""
-        self.assertEqual(self.diff._fnmatch('foo.py', []), True)
-        self.assertEqual(self.diff._fnmatch('foo.py', ['*.pyc']), False)
-        self.assertEqual(self.diff._fnmatch('foo.pyc', ['*.pyc']), True)
+        self.assertTrue(self.diff._fnmatch('foo.py', []))
+        self.assertFalse(self.diff._fnmatch('foo.py', ['*.pyc']))
+        self.assertTrue(self.diff._fnmatch('foo.pyc', ['*.pyc']))
         self.assertEqual(
             self.diff._fnmatch('foo.pyc', ['*.swp', '*.pyc', '*.py']), True)
 

@@ -44,7 +44,7 @@ class ParseArgsTest(unittest.TestCase):
             arg_dict.get('html_report'),
             'diff_cover.html'
         )
-        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertFalse(arg_dict.get('ignore_unstaged'))
 
     def test_parse_with_no_html_report(self):
         argv = ['reports/coverage.xml']
@@ -54,13 +54,13 @@ class ParseArgsTest(unittest.TestCase):
             arg_dict.get('coverage_xml'),
             ['reports/coverage.xml']
         )
-        self.assertEqual(arg_dict.get('ignore_unstaged'), False)
+        self.assertFalse(arg_dict.get('ignore_unstaged'))
 
     def test_parse_with_ignored_unstaged(self):
         argv = ['reports/coverage.xml', '--ignore-unstaged']
 
         arg_dict = parse_coverage_args(argv)
-        self.assertEqual(arg_dict.get('ignore_unstaged'), True)
+        self.assertTrue(arg_dict.get('ignore_unstaged'))
 
     def test_parse_invalid_arg(self):
 
@@ -75,7 +75,7 @@ class ParseArgsTest(unittest.TestCase):
     def test_parse_with_exclude(self):
         argv = ['reports/coverage.xml']
         arg_dict = parse_coverage_args(argv)
-        self.assertEqual(arg_dict.get('exclude'), None)
+        self.assertIsNone(arg_dict.get('exclude'))
 
         argv = ['reports/coverage.xml', '--exclude', 'noneed/*.py']
 
