@@ -195,25 +195,25 @@ class XmlCoverageReporter(BaseViolationReporter):
 
                 # First case, need to define violations initially
                 if violations is None:
-                    violations = set(
+                    violations = {
                         Violation(int(line.get(_number)), None)
                         for line in line_nodes
-                        if int(line.get(_hits, 0)) == 0)
+                        if int(line.get(_hits, 0)) == 0}
 
                 # If we already have a violations set,
                 # take the intersection of the new
                 # violations set and its old self
                 else:
-                    violations = violations & set(
+                    violations = violations & {
                         Violation(int(line.get(_number)), None)
                         for line in line_nodes
                         if int(line.get(_hits, 0)) == 0
-                    )
+                    }
 
                 # Measured is the union of itself and the new measured
-                measured = measured | set(
+                measured = measured | {
                     int(line.get(_number)) for line in line_nodes
-                )
+                }
 
             # If we don't have any information about the source file,
             # don't report any violations
