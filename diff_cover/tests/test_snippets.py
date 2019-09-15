@@ -109,7 +109,7 @@ class SnippetTest(unittest.TestCase):
         expected_str = load_fixture(expected_fixture, encoding='utf-8')
 
         assert_long_str_equal(expected_str, result, strip=True)
-        self.assertTrue(isinstance(result, six.text_type))
+        self.assertIsInstance(result, six.text_type)
 
 
 class SnippetLoaderTest(unittest.TestCase):
