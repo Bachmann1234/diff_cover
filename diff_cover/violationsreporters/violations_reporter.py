@@ -431,3 +431,61 @@ class PylintDriver(QualityDriver):
         Returns: boolean True if installed
         """
         return run_command_for_code(self.command_to_check_install) == 0
+
+class CppcheckDriver(QualityDriver):
+    """
+    Driver for cppcheck c/c++ static analyzer.
+    """
+    def __init__(self):
+        """
+        args:
+            expression: regex used to parse report
+        See super for other args
+        """
+        super(CppcheckDriver, self).__init__(
+            'cppcheck',
+            ['c', 'cpp', 'h', 'hpp'],
+            ['cppcheck', '--quiet'],
+            output_stderr=True,
+        )
+        # Errors look like:
+        # [src/foo.c:123]: (error) Array 'yolo[4]' accessed at index 4, which is out of bounds.
+        # Match for everything, including ":" in the file name (first capturing
+        # group), in case there are pathological path names with ":"
+        self.cppcheck_expression = re.compile(r"^\[(.*?):(\d+)\]: (.*$)")
+        self.command_to_check_install = ['cppcheck', '--version']
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        violations_dict = defaultdict(list)
+        for report in reports:
+            output_lines = report.splitlines()
+
+            for line in output_lines:
+                match = self.cppcheck_expression.match(line)
+
+                # Ignore any line that isn't matched
+                # (for example, snippets from the source code)
+                if match is not None:
+
+                    (cppcheck_src_path,
+                     line_number,
+                     message) = match.groups()
+
+                    violation = Violation(int(line_number), message)
+                    violations_dict[cppcheck_src_path].append(violation)
+
+        return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        return run_command_for_code(self.command_to_check_install) == 0

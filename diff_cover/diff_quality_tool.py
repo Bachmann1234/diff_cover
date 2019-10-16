@@ -21,13 +21,20 @@ from diff_cover.report_generator import (
 )
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
-    flake8_driver, pyflakes_driver, PylintDriver,
-    jshint_driver, eslint_driver, pydocstyle_driver,
-    pycodestyle_driver)
+    CppcheckDriver,
+    flake8_driver,
+    pyflakes_driver,
+    PylintDriver,
+    jshint_driver,
+    eslint_driver,
+    pydocstyle_driver,
+    pycodestyle_driver,
+)
 from diff_cover.violationsreporters.java_violations_reporter import (
     CheckstyleXmlDriver, checkstyle_driver, FindbugsXmlDriver, PmdXmlDriver)
 
 QUALITY_DRIVERS = {
+    'cppcheck' : CppcheckDriver(),
     'pycodestyle': pycodestyle_driver,
     'pyflakes': pyflakes_driver,
     'pylint': PylintDriver(),

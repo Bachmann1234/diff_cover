@@ -70,7 +70,7 @@ class BaseViolationReporter(object):
 class QualityDriver(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, supported_extensions, command, exit_codes=[0]):
+    def __init__(self, name, supported_extensions, command, exit_codes=[0], output_stderr=False):
         """
         Args:
             name: (str) name of the driver
@@ -78,11 +78,14 @@ class QualityDriver(object):
                 Example: py, js
             command: (list[str]) list of tokens that are the command to be executed
                 to create a report
+            exit_codes: (list[int]) list of exit codes that do not indicate a command error
+            output_stderr: (bool) use stderr instead of stdout from the invoked command
         """
         self.name = name
         self.supported_extensions = supported_extensions
         self.command = command
         self.exit_codes = exit_codes
+        self.output_stderr = output_stderr
 
     @abstractmethod
     def parse_reports(self, reports):
@@ -155,7 +158,12 @@ class QualityReporter(BaseViolationReporter):
                     command.append(self.options)
                 if os.path.exists(src_path):
                     command.append(src_path.encode(sys.getfilesystemencoding()))
-                    output, _ = execute(command, self.driver.exit_codes)
+
+                    output = execute(command, self.driver.exit_codes)
+                    if self.driver.output_stderr:
+                        output = output[1]
+                    else:
+                        output = output[0]
                     self.violations_dict.update(self.driver.parse_reports([output]))
 
         return self.violations_dict[src_path]
