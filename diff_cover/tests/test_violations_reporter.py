@@ -17,9 +17,17 @@ from diff_cover.command_runner import CommandError, run_command_for_code
 import unittest
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
-    XmlCoverageReporter, Violation, pycodestyle_driver, pyflakes_driver,
-    flake8_driver, PylintDriver, jshint_driver, eslint_driver,
-    pydocstyle_driver)
+    XmlCoverageReporter,
+    Violation,
+    pycodestyle_driver,
+    pyflakes_driver,
+    flake8_driver,
+    PylintDriver,
+    jshint_driver,
+    eslint_driver,
+    pydocstyle_driver,
+    CppcheckDriver,
+)
 from mock import Mock, patch, MagicMock
 from six import BytesIO, StringIO
 
@@ -1755,3 +1763,20 @@ class SubprocessErrorTestCase(unittest.TestCase):
                 reporter.violations("path/to/file.py")
 
             self.assertEqual(mock_stderr.getvalue(), "pycodestyle path/to/file.py")
+
+class CppcheckQualityDriverTest(unittest.TestCase):
+    """
+    Tests for cppcheck quality driver.
+    """
+    def test_parse_report(self):
+        """Basic report test parse"""
+        expected_violations = {
+            "src/foo.c": Violation(123, "(error) Array 'yolo[4]' accessed at index 4, which is out of bounds."),
+        }
+        report = "[src/foo.c:123]: (error) Array 'yolo[4]' accessed at index 4, which is out of bounds."
+
+        driver = CppcheckDriver()
+        actual_violations = driver.parse_reports([report])
+        self.assertEqual(len(actual_violations), len(expected_violations))
+        for expected in expected_violations:
+            self.assertIn(expected, actual_violations)
