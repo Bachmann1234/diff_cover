@@ -1,0 +1,16 @@
+-------------
+Diff Quality
+Quality Report: pylint
+Diff: origin/master...HEAD, staged and unstaged changes
+-------------
+violations_test_file.py (66.7%):
+violations_test_file.py:1: C0114: (missing-module-docstring), : Missing module docstring
+violations_test_file.py:1: C0116: (missing-function-docstring), func_1: Missing function or method docstring
+violations_test_file.py:2: C0326: (bad-whitespace), : Exactly one space required around comparison
+violations_test_file.py:11: C0326: (bad-whitespace), : Exactly one space required around assignment
+violations_test_file.py:11: W0612: (unused-variable), func_2: Unused variable 'unused'
+-------------
+Total:   9 lines
+Violations: 3 lines
+% Quality: 66%
+-------------
