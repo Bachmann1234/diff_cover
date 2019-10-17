@@ -3,27 +3,27 @@ High-level integration tests of diff-cover tool.
 """
 from __future__ import unicode_literals
 
+import io
 import os
 import os.path
 import re
 import shutil
 import tempfile
+import unittest
 from collections import defaultdict
 from io import BytesIO
 from subprocess import Popen
-import unittest
-import io
-import six
 
-from diff_cover.diff_cover_tool import main as diff_cover_main
-from diff_cover.diff_quality_tool import main as diff_quality_main
+import pylint
+import six
 from diff_cover.command_runner import CommandError
+from diff_cover.diff_cover_tool import main as diff_cover_main
 from diff_cover.diff_quality_tool import QUALITY_DRIVERS
+from diff_cover.diff_quality_tool import main as diff_quality_main
 from diff_cover.git_path import GitPathTool
-from diff_cover.tests.helpers import fixture_path, \
-    assert_long_str_equal
+from diff_cover.tests.helpers import assert_long_str_equal, fixture_path
 from diff_cover.violationsreporters.base import QualityDriver
-from mock import patch, Mock
+from mock import Mock, patch
 
 
 class ToolsIntegrationBase(unittest.TestCase):
@@ -106,7 +106,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         else:
             code = diff_quality_main(args)
 
-        self.assertEquals(code, expected_status)
+        self.assertEqual(code, expected_status)
 
         # Check the HTML report
         with io.open(expected_html_path, encoding='utf-8') as expected_file:
@@ -149,7 +149,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         else:
             code = diff_quality_main(tool_args)
 
-        self.assertEquals(code, expected_status)
+        self.assertEqual(code, expected_status)
 
         # Check the console report
         with open(expected_console_path) as expected_file:
@@ -492,9 +492,14 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         )
 
     def test_added_file_pylint_console(self):
+        # output text was modified in https://github.com/PyCQA/pylint/pull/2036
+        if tuple(map(int, pylint.__version__.split('.'))) < (2, 4, 0):
+            console_report = 'pylint_violations_console_report.txt'
+        else:
+            console_report = 'pylint_violations_console_report_pylint_2.4.0.txt'
         self._check_console_report(
             'git_diff_violations.txt',
-            'pylint_violations_console_report.txt',
+            console_report,
             ['diff-quality', '--violations=pylint'],
         )
 
@@ -596,4 +601,3 @@ class DoNothingDriver(QualityDriver):
 
     def installed(self):
         return False
-

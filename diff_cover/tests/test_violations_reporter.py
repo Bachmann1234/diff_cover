@@ -1727,14 +1727,14 @@ class SimpleCommandTestCase(unittest.TestCase):
         self._mock_communicate.return_value = self.subproc_mock
         # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
         bad_command = run_command_for_code('foo')  # pylint: disable=protected-access
-        self.assertEquals(bad_command, 127)
+        self.assertEqual(bad_command, 127)
 
     def test_run_simple_success(self):
         self.subproc_mock.returncode = 0
         self._mock_communicate.return_value = self.subproc_mock
         # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
         good_command = run_command_for_code('foo')  # pylint: disable=protected-access
-        self.assertEquals(good_command, 0)
+        self.assertEqual(good_command, 0)
 
 
 class SubprocessErrorTestCase(unittest.TestCase):
