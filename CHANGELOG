@@ -1,3 +1,8 @@
+10/17/2019 v2.4.0
+
+ * Drop support for python 3.4 and upgrade syntax with pyupgrade. Thanks @hugovk
+ * Add support for cppcheck. Thanks @noahp
+
 6/30/2019 v2.3.0
 
  * Add PMD xml driver Thanks @bit-ranger (https://github.com/Bachmann1234/diff_cover/pull/117) 
