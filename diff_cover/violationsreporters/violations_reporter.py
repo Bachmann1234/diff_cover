@@ -128,8 +128,12 @@ class XmlCoverageReporter(BaseViolationReporter):
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
         # find src_path in any of the source roots
+        if not src_path.endswith(file_name):
+            return None
+
+        norm_src_path = os.path.normcase(src_path);
         for root in self._src_roots:
-            if os.path.normcase(GitPathTool.relative_path(os.path.join(root, package_name, file_name))) == os.path.normcase(src_path):
+            if os.path.normcase(GitPathTool.relative_path(os.path.join(root, package_name, file_name))) == norm_src_path:
                 return True
 
     def _get_src_path_line_nodes_jacoco(self, xml_document, src_path):
