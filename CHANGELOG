@@ -1,3 +1,7 @@
+11/20/2019 v2.4.1
+
+ * Performance improvement identifying matching source path by only computing the main src_path the one time rather than N times Thanks @gaellalire (https://github.com/Bachmann1234/diff_cover/pull/124)
+
 10/17/2019 v2.4.0
 
  * Drop support for python 3.4 and upgrade syntax with pyupgrade. Thanks @hugovk
