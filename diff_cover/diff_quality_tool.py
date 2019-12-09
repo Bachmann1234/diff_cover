@@ -8,9 +8,11 @@ import logging
 import os
 import sys
 
+import pluggy
 import six
 
 import diff_cover
+from diff_cover import hookspecs
 from diff_cover.diff_cover_tool import COMPARE_BRANCH_HELP, DIFF_RANGE_NOTATION_HELP, FAIL_UNDER_HELP, \
     IGNORE_STAGED_HELP, IGNORE_UNSTAGED_HELP, EXCLUDE_HELP, HTML_REPORT_HELP, CSS_FILE_HELP
 from diff_cover.diff_reporter import GitDiffReporter
@@ -222,20 +224,33 @@ def main(argv=None, directory=None):
         last_char = user_options[-1]
         if first_char == last_char and first_char in ('"', "'"):
             user_options = user_options[1:-1]
+    reporter = None
     driver = QUALITY_DRIVERS.get(tool)
+    if driver is None:
+        # The requested tool is not built into diff_cover. See if another Python
+        # package provides it.
+        pm = pluggy.PluginManager('diff_cover')
+        pm.add_hookspecs(hookspecs)
+        pm.load_setuptools_entrypoints('diff_cover')
+        for name, reporter_fn in pm.hook.diff_cover_report_quality():
+            if name == tool:
+                reporter = reporter_fn()
+                break
 
-    if driver is not None:
-        # If we've been given pre-generated reports,
-        # try to open the files
+    if reporter is not None or driver is not None:
         input_reports = []
-
-        for path in arg_dict['input_reports']:
-            try:
-                input_reports.append(open(path, 'rb'))
-            except IOError:
-                LOGGER.warning("Could not load '{}'".format(path))
         try:
-            reporter = QualityReporter(driver, input_reports, user_options)
+            if driver is not None:
+                # If we've been given pre-generated reports,
+                # try to open the files
+
+                for path in arg_dict['input_reports']:
+                    try:
+                        input_reports.append(open(path, 'rb'))
+                    except IOError:
+                        LOGGER.warning("Could not load '{}'".format(path))
+                reporter = QualityReporter(driver, input_reports, user_options)
+
             percent_passing = generate_quality_report(
                 reporter,
                 arg_dict['compare_branch'],

@@ -2,4 +2,5 @@
 Jinja2>=2.7.1
 six>=1.6.1
 jinja2_pluralize
+pluggy
 pygments
