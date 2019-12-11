@@ -177,10 +177,12 @@ def generate_quality_report(tool, compare_branch,
     """
     Generate the quality report, using kwargs from `parse_args()`.
     """
+    supported_extensions = getattr(tool, 'supported_extensions') \
+        or tool.driver.supported_extensions
     diff = GitDiffReporter(
         compare_branch, git_diff=GitDiffTool(diff_range_notation),
         ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged,
-        supported_extensions=tool.driver.supported_extensions,
+        supported_extensions=supported_extensions,
         exclude=exclude)
 
     if html_report is not None:
