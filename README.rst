@@ -124,9 +124,12 @@ You can use diff-cover to see quality reports on the diff as well by running
 
 Where ``tool`` is the quality checker to use. Currently ``pycodestyle``, ``pyflakes``,
 ``flake8``, ``pylint``, ``checkstyle``, ``checkstylexml`` are supported, but more
-checkers can (and should!) be integrated. There's no way to run ``findbugs`` from
-``diff-quality`` as it operating over the generated java bytecode and should be
-integrated into the build framework.
+checkers can (and should!) be supported. See the section "Adding `diff-quality``
+Support for a New Quality Checker".
+
+NOTE: There's no way to run ``findbugs`` from ``diff-quality`` as it operating
+over the generated java bytecode and should be integrated into the build
+framework.
 
 Like ``diff-cover``, HTML reports can be generated with
 
@@ -245,6 +248,10 @@ Contributions are very welcome. The easiest way is to fork this repo, and then
 make a pull request from your fork. The first time you make a pull request, you
 may be asked to sign a Contributor Agreement.
 
+NOTE: ``diff-quality`` supports a plugin model, so new tools can be integrated
+without requiring changes to this repo. See the section "Adding `diff-quality``
+Support for a New Quality Checker".
+
 Setting Up For Development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -270,6 +277,85 @@ For example, setting up Python 3:
     source venv/bin/activate
     pip install -r test-requirements.txt
 
+
+Adding `diff-quality`` Support for a New Quality Checker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adding support for a new quality checker is simple. ``diff-quality`` supports
+plugins using the popular Python
+[``pluggy`` package](https://pluggy.readthedocs.io/en/latest/).
+
+If the quality checker is already implemented as a Python package, great! If not,
+[create a Python package](https://packaging.python.org/tutorials/packaging-projects/)
+to host the plugin implementation.
+
+In the Python package's ``setup.py`` file, define an entry point for the plugin,
+e.g.
+
+.. code:: python
+    setup(
+        ...
+        entry_points={
+            'diff_cover': [
+                'sqlfluff = sqlfluff.diff_quality_plugin'
+            ],
+        },
+        ...
+    )
+
+Notes:
+* The dictionary key for the entry point must be named ``diff_cover``
+* The value must be in the format ``TOOL_NAME = YOUR_PACKAGE.PLUGIN_MODULE``
+
+When your package is installed,``diff-quality`` uses this information to
+look up the tool package and module based on the tool name provided to the
+``--violations`` option of the ``diff-quality`` command, e.g.:
+
+.. code:: bash
+    $ diff-quality --violations sqlfluff
+
+The plugin implementation will look something like the example below. This is
+a simplified example based on a working plugin implementation.
+
+.. code:: python
+    import diff_cover
+    from diff_cover.violationsreporters.base import BaseViolationReporter, Violation
+
+    class SQLFluffViolationReporter(BaseViolationReporter):
+        supported_extensions = ['sql']
+
+        def __init__(self):
+            super(SQLFluffViolationReporter, self).__init__('sqlfluff')
+
+        def violations(self, src_path):
+            return [
+                Violation(violation.line_number, violation.description)
+                for violation in get_linter().get_violations(src_path)
+            ]
+
+        def measured_lines(self, src_path):
+            return None
+
+        @staticmethod
+        def installed():
+            return True
+
+
+    @diff_cover.hookimpl
+    def diff_cover_report_quality():
+        return SQLFluffViolationReporter()
+
+Important notes:
+* ``diff-quality`` is looking for a plugin function:
+  * Located in your package's module that was listed in the ``setup.py`` entry point.
+  * Marked with the ``@diff_cover.hookimpl`` decorator
+  * Named ``diff_cover_report_quality``. (This distinguishes it from any other
+    plugin types ``diff_cover`` may support.)
+* The function should return an object with the following properties and methods:
+  * ``supported_extensions`` property with a list of supported file extensions
+  * ``violations()`` function that returns a list of ``Violation`` objects for
+    the specified ``src_path``. For more details on this function and other
+    possible reporting-related methods, see the ``BaseViolationReporter`` class
+    [here](https://github.com/Bachmann1234/diff_cover/blob/master/diff_cover/violationsreporters/base.py).
 
 Special Thanks
 -------------------------
