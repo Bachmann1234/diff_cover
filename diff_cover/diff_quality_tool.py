@@ -237,7 +237,7 @@ def main(argv=None, directory=None):
                 reporter = reporter_fn()
                 break
 
-    if reporter is not None or driver is not None:
+    if reporter or driver:
         input_reports = []
         try:
             if driver is not None:
