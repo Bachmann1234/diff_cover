@@ -177,7 +177,7 @@ def generate_quality_report(tool, compare_branch,
     """
     Generate the quality report, using kwargs from `parse_args()`.
     """
-    supported_extensions = getattr(tool, 'supported_extensions') \
+    supported_extensions = getattr(tool, 'supported_extensions', None) \
         or tool.driver.supported_extensions
     diff = GitDiffReporter(
         compare_branch, git_diff=GitDiffTool(diff_range_notation),
