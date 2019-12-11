@@ -232,9 +232,9 @@ def main(argv=None, directory=None):
         pm = pluggy.PluginManager('diff_cover')
         pm.add_hookspecs(hookspecs)
         pm.load_setuptools_entrypoints('diff_cover')
-        for name, reporter_fn in pm.hook.diff_cover_report_quality():
-            if name == tool:
-                reporter = reporter_fn()
+        for hookimpl in pm.hook.diff_cover_report_quality.get_hookimpls():
+            if hookimpl.plugin_name == tool:
+                reporter = hookimpl.function()
                 break
 
     if reporter or driver:
