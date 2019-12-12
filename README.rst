@@ -317,7 +317,7 @@ The plugin implementation will look something like the example below. This is
 a simplified example based on a working plugin implementation.
 
 .. code:: python
-    import diff_cover
+    import diff_cover.hook import hookimpl as diff_cover_hookimpl
     from diff_cover.violationsreporters.base import BaseViolationReporter, Violation
 
     class SQLFluffViolationReporter(BaseViolationReporter):
@@ -340,14 +340,14 @@ a simplified example based on a working plugin implementation.
             return True
 
 
-    @diff_cover.hookimpl
+    @diff_cover_hookimpl
     def diff_cover_report_quality():
         return SQLFluffViolationReporter()
 
 Important notes:
 * ``diff-quality`` is looking for a plugin function:
   * Located in your package's module that was listed in the ``setup.py`` entry point.
-  * Marked with the ``@diff_cover.hookimpl`` decorator
+  * Marked with the ``@diff_cover_hookimpl`` decorator
   * Named ``diff_cover_report_quality``. (This distinguishes it from any other
     plugin types ``diff_cover`` may support.)
 * The function should return an object with the following properties and methods:

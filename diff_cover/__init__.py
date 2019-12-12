@@ -1,10 +1,7 @@
 from __future__ import unicode_literals
 
-import pluggy
+# This file is imported in setup.py and cannot use any external dependencies
 
-VERSION = '2.4.1'
+VERSION = '2.5.0'
 DESCRIPTION = 'Automatically find diff lines that need test coverage.'
 QUALITY_DESCRIPTION = 'Automatically find diff lines with quality violations.'
-
-# Other packages that implement diff_cover plugins use this.
-hookimpl = pluggy.HookimplMarker('diff_cover')
