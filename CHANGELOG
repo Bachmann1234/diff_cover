@@ -1,6 +1,6 @@
 12/11/2019 v2.5.0
  
- * Diff quality now has a plugin system! From now own this project will avoid adding new tools and instead direct those to become plugins instead. Perhaps we can look into moving exisitng tools into separate plugins over time however, currently im leaving it allone. Thank you @barrywhart (https://github.com/Bachmann1234/diff_cover/pull/128)
+ * Diff quality now has a plugin system! From now own this project will avoid adding new tools and instead direct those to become plugins instead. Perhaps we can look into moving existing tools into separate plugins over time however, currently im leaving it alone. Thank you @barrywhart (https://github.com/Bachmann1234/diff_cover/pull/128)
 
 11/20/2019 v2.4.1
 

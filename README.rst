@@ -317,7 +317,7 @@ The plugin implementation will look something like the example below. This is
 a simplified example based on a working plugin implementation.
 
 .. code:: python
-    import diff_cover.hook import hookimpl as diff_cover_hookimpl
+    from diff_cover.hook import hookimpl as diff_cover_hookimpl
     from diff_cover.violationsreporters.base import BaseViolationReporter, Violation
 
     class SQLFluffViolationReporter(BaseViolationReporter):
