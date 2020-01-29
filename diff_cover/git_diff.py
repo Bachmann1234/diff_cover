@@ -50,7 +50,8 @@ class GitDiffTool(object):
             '-c', 'diff.noprefix=no',
             'diff', '{branch}{notation}HEAD'.format(branch=compare_branch, notation=self._range_notation),
             '--no-color',
-            '--no-ext-diff'
+            '--no-ext-diff',
+            '-U0'
         ])[0]
 
     def diff_unstaged(self):
@@ -67,7 +68,8 @@ class GitDiffTool(object):
             '-c', 'diff.noprefix=no',
             'diff',
             '--no-color',
-            '--no-ext-diff'
+            '--no-ext-diff',
+            '-U0'
         ])[0]
 
     def diff_staged(self):
@@ -85,5 +87,6 @@ class GitDiffTool(object):
             'diff',
             '--cached',
             '--no-color',
-            '--no-ext-diff'
+            '--no-ext-diff',
+            '-U0'
         ])[0]
