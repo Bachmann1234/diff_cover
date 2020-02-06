@@ -30,7 +30,7 @@ class TestGitDiffTool(unittest.TestCase):
         # Expect that the correct command was executed
         expected = ['git', '-c', 'diff.mnemonicprefix=no', '-c',
                     'diff.noprefix=no', 'diff', 'origin/master{}HEAD'.format(diff_range_notation),
-                    '--no-color', '--no-ext-diff']
+                    '--no-color', '--no-ext-diff', '-U0']
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
@@ -48,7 +48,8 @@ class TestGitDiffTool(unittest.TestCase):
 
         # Expect that the correct command was executed
         expected = ['git', '-c', 'diff.mnemonicprefix=no', '-c',
-                    'diff.noprefix=no', 'diff', '--no-color', '--no-ext-diff']
+                    'diff.noprefix=no', 'diff', '--no-color', '--no-ext-diff',
+                    '-U0']
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
@@ -63,7 +64,7 @@ class TestGitDiffTool(unittest.TestCase):
         # Expect that the correct command was executed
         expected = ['git', '-c', 'diff.mnemonicprefix=no', '-c',
                     'diff.noprefix=no', 'diff', '--cached', '--no-color',
-                    '--no-ext-diff']
+                    '--no-ext-diff', '-U0']
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
@@ -80,7 +81,7 @@ class TestGitDiffTool(unittest.TestCase):
         # Expect that the correct command was executed
         expected = ['git', '-c', 'diff.mnemonicprefix=no', '-c',
                     'diff.noprefix=no', 'diff', 'release...HEAD', '--no-color',
-                    '--no-ext-diff']
+                    '--no-ext-diff', '-U0']
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
