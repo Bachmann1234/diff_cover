@@ -7,7 +7,12 @@ import sys
 import argparse
 import six
 
-from xml.etree import cElementTree
+try:
+    # Needed for Python < 3.3, works up to 3.8
+    import xml.etree.cElementTree as etree
+except ImportError:
+    # Python 3.9 onwards
+    import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
 from diff_cover.diff_reporter import GitDiffReporter
@@ -147,7 +152,7 @@ def generate_coverage_report(coverage_xml, compare_branch,
         ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged,
         exclude=exclude)
 
-    xml_roots = [cElementTree.parse(xml_root) for xml_root in coverage_xml]
+    xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
     coverage = XmlCoverageReporter(xml_roots, src_roots)
 
     # Build a report generator

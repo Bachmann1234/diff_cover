@@ -6,7 +6,12 @@ from __future__ import unicode_literals
 import os
 from collections import defaultdict
 
-from xml.etree import cElementTree
+try:
+    # Needed for Python < 3.3, works up to 3.8
+    import xml.etree.cElementTree as etree
+except ImportError:
+    # Python 3.9 onwards
+    import xml.etree.ElementTree as etree
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import BaseViolationReporter, Violation, RegexBasedDriver, QualityDriver
@@ -50,7 +55,7 @@ class CheckstyleXmlDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            xml_document = cElementTree.fromstring("".join(report))
+            xml_document = etree.fromstring("".join(report))
             files = xml_document.findall(".//file")
             for file_tree in files:
                 for error in file_tree.findall('error'):
@@ -91,7 +96,7 @@ class FindbugsXmlDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            xml_document = cElementTree.fromstring("".join(report))
+            xml_document = etree.fromstring("".join(report))
             bugs = xml_document.findall(".//BugInstance")
             for bug in bugs:
                 category = bug.get('category')
@@ -139,7 +144,7 @@ class PmdXmlDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            xml_document = cElementTree.fromstring("".join(report))
+            xml_document = etree.fromstring("".join(report))
             node_files = xml_document.findall(".//file")
             for node_file in node_files:
                 for error in node_file.findall('violation'):
