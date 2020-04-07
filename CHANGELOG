@@ -1,3 +1,7 @@
+4/7/2020 v2.6.1
+
+* cElementTree is going to be removed in python3.9. Added some logic to handle this. Thanks @Adamwill
+
 2/8/2020 v2.6.0
 
 * Remove context lines from git diff to avoid false positives. Thans @macho !
