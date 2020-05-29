@@ -7,6 +7,7 @@ from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
 from diff_cover.snippets import Snippet
 import six
+import json
 
 
 class DiffViolations(object):
@@ -167,14 +168,43 @@ class BaseReportGenerator(object):
         """
         if not self._diff_violations_dict:
             self._diff_violations_dict = {
-                    src_path: DiffViolations(
-                        self._violations.violations(src_path),
-                        self._violations.measured_lines(src_path),
-                        self._diff.lines_changed(src_path),
-                    )
-                 for src_path in self._diff.src_paths_changed()
+                src_path: DiffViolations(
+                    self._violations.violations(src_path),
+                    self._violations.measured_lines(src_path),
+                    self._diff.lines_changed(src_path),
+                )
+                for src_path in self._diff.src_paths_changed()
             }
         return self._diff_violations_dict
+
+    def report_dict(self):
+        src_stats = {
+            src: self._src_path_stats(src) for src in self.src_paths()
+        }
+
+        return {
+            'report_name': self.coverage_report_name(),
+            'diff_name': self.diff_report_name(),
+            'src_stats': src_stats,
+            'total_num_lines': self.total_num_lines(),
+            'total_num_violations': self.total_num_violations(),
+            'total_percent_covered': self.total_percent_covered(),
+        }
+
+    def _src_path_stats(self, src_path):
+        """
+        Return a dict of statistics for the source file at `src_path`.
+        """
+
+        # Find violation lines
+        violation_lines = self.violation_lines(src_path)
+        violations = sorted(self._diff_violations()[src_path].violations)
+
+        return {
+            'percent_covered': self.percent_covered(src_path),
+            'violation_lines': violation_lines,
+            'violations': violations,
+        }
 
 
 # Set up the template environment
@@ -184,6 +214,11 @@ TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER,
                            lstrip_blocks=True)
 TEMPLATE_ENV.filters['iteritems'] = six.iteritems
 TEMPLATE_ENV.filters['pluralize'] = pluralize_dj
+
+
+class JsonReportGenerator(BaseReportGenerator):
+    def generate_report(self, output_file):
+        json.dump(self.report_dict(), output_file)
 
 
 class TemplateReportGenerator(BaseReportGenerator):
@@ -254,11 +289,6 @@ class TemplateReportGenerator(BaseReportGenerator):
         }
         """
 
-        # Calculate the information to pass to the template
-        src_stats = {
-            src: self._src_path_stats(src) for src in self.src_paths()
-        }
-
         # Include snippet style info if we're displaying
         # source code snippets
         if self.INCLUDE_SNIPPETS:
@@ -266,16 +296,13 @@ class TemplateReportGenerator(BaseReportGenerator):
         else:
             snippet_style = None
 
-        return {
+        context = super().report_dict()
+        context.update({
             'css_url': self.css_url,
-            'report_name': self.coverage_report_name(),
-            'diff_name': self.diff_report_name(),
-            'src_stats': src_stats,
-            'total_num_lines': self.total_num_lines(),
-            'total_num_violations': self.total_num_violations(),
-            'total_percent_covered': self.total_percent_covered(),
             'snippet_style': snippet_style
-        }
+        })
+
+        return context
 
     @staticmethod
     def combine_adjacent_lines(line_numbers):
@@ -307,30 +334,25 @@ class TemplateReportGenerator(BaseReportGenerator):
         return combined_list
 
     def _src_path_stats(self, src_path):
-        """
-        Return a dict of statistics for the source file at `src_path`.
-        """
 
-        # Find violation lines
-        violation_lines = self.violation_lines(src_path)
-        violations = sorted(self._diff_violations()[src_path].violations)
+        stats = super()._src_path_stats(src_path)
 
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
         if self.INCLUDE_SNIPPETS:
             try:
-                snippets = Snippet.load_snippets_html(src_path, violation_lines)
+                snippets = Snippet.load_snippets_html(src_path, stats['violation_lines'])
             except IOError:
                 snippets = []
         else:
             snippets = []
 
-        return {
-            'percent_covered': self.percent_covered(src_path),
-            'violation_lines': TemplateReportGenerator.combine_adjacent_lines(violation_lines),
-            'violations': violations,
-            'snippets_html': snippets
-        }
+        stats.update({
+            'snippets_html': snippets,
+            'violation_lines': TemplateReportGenerator.combine_adjacent_lines(stats['violation_lines']),
+        })
+
+        return stats
 
 
 class StringReportGenerator(TemplateReportGenerator):

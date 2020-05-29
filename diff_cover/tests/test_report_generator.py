@@ -2,13 +2,15 @@ from __future__ import unicode_literals
 
 from io import BytesIO
 from textwrap import dedent
+import json
 
 import mock
 
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.report_generator import (
     BaseReportGenerator, HtmlReportGenerator,
-    StringReportGenerator, TemplateReportGenerator
+    StringReportGenerator, TemplateReportGenerator,
+    JsonReportGenerator
 )
 from diff_cover.tests.helpers import (
     load_fixture, assert_long_str_equal
@@ -263,6 +265,77 @@ class TemplateReportGeneratorTest(BaseReportGeneratorTest):
 
     def test_one_number(self):
         self.assertEqual(["1"], TemplateReportGenerator.combine_adjacent_lines([1]))
+
+
+class JsonReportGeneratorTest(BaseReportGeneratorTest):
+
+    REPORT_GENERATOR_CLASS = JsonReportGenerator
+
+    def test_generate_report(self):
+
+        # Generate a default report
+        self.use_default_values()
+
+        # Verify that we got the expected string
+        expected = json.dumps({
+            'report_name': 'Diff Coverage',
+            'diff_name': 'master',
+            'src_stats': {
+                'file1.py': {
+                    'percent_covered': 66.7,
+                    'violation_lines': [10, 11]
+                },
+                'subdir/file2.py': {
+                    'percent_covered': 66.7,
+                    'violation_lines': [10, 11]
+                }
+            },
+            'total_num_lines': 12,
+            'total_num_violations': 4,
+            'total_percent_covered': 66.7
+        })
+
+        self.assert_report(expected)
+
+    def test_hundred_percent(self):
+
+        # Have the dependencies return an empty report
+        self.set_src_paths_changed(['file.py'])
+        self.set_lines_changed('file.py', [line for line in range(0, 100)])
+        self.set_violations('file.py', [])
+        self.set_measured('file.py', [2])
+
+        expected = json.dumps({
+            'report_name': 'Diff Coverage',
+            'diff_name': 'master',
+            'src_stats': {
+                'file.py': {
+                    'percent_covered': 100,
+                    'violation_lines': []
+                }
+            },
+            'total_num_lines': 1,
+            'total_num_violations': 0,
+            'total_percent_covered': 100
+        })
+
+        self.assert_report(expected)
+
+    def test_empty_report(self):
+
+        # Have the dependencies return an empty report
+        # (this is the default)
+
+        expected = json.dumps({
+            'report_name': 'Diff Coverage',
+            'diff_name': 'master',
+            'src_stats': {},
+            'total_num_lines': 0,
+            'total_num_violations': 0,
+            'total_percent_covered': 100
+        })
+
+        self.assert_report(expected)
 
 
 class StringReportGeneratorTest(BaseReportGeneratorTest):
