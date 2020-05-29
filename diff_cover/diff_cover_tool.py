@@ -182,7 +182,7 @@ def generate_coverage_report(coverage_xml, compare_branch,
 
     elif json_report is not None:
         reporter = JsonReportGenerator(coverage, diff)
-        with open(json_report, "w") as output_file:
+        with open(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     reporter = StringReportGenerator(coverage, diff)

@@ -218,7 +218,11 @@ TEMPLATE_ENV.filters['pluralize'] = pluralize_dj
 
 class JsonReportGenerator(BaseReportGenerator):
     def generate_report(self, output_file):
-        json.dump(self.report_dict(), output_file)
+        json_report_str = json.dumps(self.report_dict())
+
+        # all report generators are expected to write raw bytes, so we encode
+        # the json
+        output_file.write(json_report_str.encode())
 
 
 class TemplateReportGenerator(BaseReportGenerator):
@@ -296,7 +300,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         else:
             snippet_style = None
 
-        context = super().report_dict()
+        context = super(TemplateReportGenerator, self).report_dict()
         context.update({
             'css_url': self.css_url,
             'snippet_style': snippet_style
@@ -335,7 +339,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
     def _src_path_stats(self, src_path):
 
-        stats = super()._src_path_stats(src_path)
+        stats = super(TemplateReportGenerator, self)._src_path_stats(src_path)
 
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
