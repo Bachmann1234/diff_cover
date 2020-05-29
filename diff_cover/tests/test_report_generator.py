@@ -278,21 +278,23 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
 
         # Verify that we got the expected string
         expected = json.dumps({
-            'report_name': 'Diff Coverage',
+            'report_name': ['reports/coverage.xml'],
             'diff_name': 'master',
             'src_stats': {
                 'file1.py': {
-                    'percent_covered': 66.7,
-                    'violation_lines': [10, 11]
+                    'percent_covered': 66.66666666666667,
+                    'violation_lines': [10, 11],
+                    'violations': [[10, None], [11, None]]
                 },
                 'subdir/file2.py': {
-                    'percent_covered': 66.7,
-                    'violation_lines': [10, 11]
+                    'percent_covered': 66.66666666666667,
+                    'violation_lines': [10, 11],
+                    'violations': [[10, None], [11, None]]
                 }
             },
             'total_num_lines': 12,
             'total_num_violations': 4,
-            'total_percent_covered': 66.7
+            'total_percent_covered': 66
         })
 
         self.assert_report(expected)
@@ -306,12 +308,13 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         self.set_measured('file.py', [2])
 
         expected = json.dumps({
-            'report_name': 'Diff Coverage',
+            'report_name': ['reports/coverage.xml'],
             'diff_name': 'master',
             'src_stats': {
                 'file.py': {
-                    'percent_covered': 100,
-                    'violation_lines': []
+                    'percent_covered': 100.0,
+                    'violation_lines': [],
+                    'violations': []
                 }
             },
             'total_num_lines': 1,
@@ -327,7 +330,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         # (this is the default)
 
         expected = json.dumps({
-            'report_name': 'Diff Coverage',
+            'report_name': ['reports/coverage.xml'],
             'diff_name': 'master',
             'src_stats': {},
             'total_num_lines': 0,
