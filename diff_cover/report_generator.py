@@ -222,7 +222,7 @@ class JsonReportGenerator(BaseReportGenerator):
 
         # all report generators are expected to write raw bytes, so we encode
         # the json
-        output_file.write(json_report_str.encode())
+        output_file.write(json_report_str.encode('utf-8'))
 
 
 class TemplateReportGenerator(BaseReportGenerator):
