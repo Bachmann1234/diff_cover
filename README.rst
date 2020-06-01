@@ -99,7 +99,7 @@ You can also generate an HTML or JSON version of the report:
 .. code:: bash
 
     diff-cover coverage.xml --html-report report.html
-	diff-cover coverage.xml --json-report report.json
+    diff-cover coverage.xml --json-report report.json
 
 Multiple XML Coverage Reports
 -------------------------------
