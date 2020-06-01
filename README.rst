@@ -94,11 +94,12 @@ need to use different commands to generate the coverage XML report.
 This will compare the current ``git`` branch to ``origin/master`` and print
 the diff coverage report to the console.
 
-You can also generate an HTML version of the report:
+You can also generate an HTML or JSON version of the report:
 
 .. code:: bash
 
-	diff-cover coverage.xml --html-report report.html
+    diff-cover coverage.xml --html-report report.html
+	diff-cover coverage.xml --json-report report.json
 
 Multiple XML Coverage Reports
 -------------------------------
@@ -131,11 +132,12 @@ NOTE: There's no way to run ``findbugs`` from ``diff-quality`` as it operating
 over the generated java bytecode and should be integrated into the build
 framework.
 
-Like ``diff-cover``, HTML reports can be generated with
+Like ``diff-cover``, HTML and JSON reports can be generated with
 
 .. code:: bash
 
     diff-quality --violations=<tool> --html-report report.html
+    diff-quality --violations=<tool> --json-report report.json
 
 If you have already generated a report using ``pycodestyle``, ``pyflakes``, ``flake8``,
 ``pylint``, ``checkstyle``, ``checkstylexml``, or ``findbugs`` you can pass the report
@@ -360,11 +362,11 @@ Important notes:
 Special Thanks
 -------------------------
 
-Shout out to the original author of diff-cover `Will Daly 
-<https://github.com/wedaly>`_ and the original author of diff-quality `Sarina Canelake 
-<https://github.com/sarina>`_. 
+Shout out to the original author of diff-cover `Will Daly
+<https://github.com/wedaly>`_ and the original author of diff-quality `Sarina Canelake
+<https://github.com/sarina>`_.
 
-Originally created with the support of `edX 
+Originally created with the support of `edX
 <https://github.com/edx>`_.
 
 
