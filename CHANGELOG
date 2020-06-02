@@ -1,3 +1,8 @@
+6/2/2020 v2.7.0
+
+* Add Json report Thanks @ThePletch!
+* Provide different errors for environment issues and tools not being installed Thanks @ziafazal!
+
 4/7/2020 v2.6.1
 
 * cElementTree is going to be removed in python3.9. Added some logic to handle this. Thanks @Adamwill
