@@ -269,9 +269,14 @@ def main(argv=None, directory=None):
                 LOGGER.error("Failure. Quality is below {}%.".format(fail_under))
                 return 1
 
-        except (ImportError, EnvironmentError):
+        except ImportError:
             LOGGER.error(
                 "Quality tool not installed: '{}'".format(tool)
+            )
+            return 1
+        except EnvironmentError as exc:
+            LOGGER.error(
+                "Failure: '{}'".format(exc)
             )
             return 1
         # Close any reports we opened
