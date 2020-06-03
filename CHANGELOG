@@ -1,7 +1,8 @@
-6/2/2020 v2.7.0
+6/2/2020 v3.0.0
 
 * Add Json report Thanks @ThePletch!
 * Provide different errors for environment issues and tools not being installed Thanks @ziafazal!
+* Update pyflakes regex to handle new format (I think it should still work for the older version but im bumping a major version to highlight a potentially breaking change)
 
 4/7/2020 v2.6.1
 
