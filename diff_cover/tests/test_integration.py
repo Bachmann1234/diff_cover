@@ -571,8 +571,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         try:
             self._call_quality_expecting_error(
                 'not_installed',
-                "Quality tool not installed: "
-                "'not_installed'",
+                "Failure: 'not_installed is not installed'",
                 report_arg=''
             )
         finally:
