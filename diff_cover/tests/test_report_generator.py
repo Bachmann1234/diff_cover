@@ -160,7 +160,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         output.close()
 
         # Verify that we got the expected string
-        assert_long_str_equal(expected, output_str, strip=True)
+        assert_equals(expected, json.loads(output_str))
 
 
 class SimpleReportGeneratorTest(BaseReportGeneratorTest):
