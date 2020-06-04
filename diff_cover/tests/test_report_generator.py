@@ -277,7 +277,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         self.use_default_values()
 
         # Verify that we got the expected string
-        expected = json.dumps({
+        expected = {
             'report_name': ['reports/coverage.xml'],
             'diff_name': 'master',
             'src_stats': {
@@ -295,9 +295,9 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
             'total_num_lines': 12,
             'total_num_violations': 4,
             'total_percent_covered': 66
-        })
+        }
 
-        self.assert_report(expected)
+        self.assert_report(json.loads(expected))
 
     def test_hundred_percent(self):
 
@@ -307,7 +307,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         self.set_violations('file.py', [])
         self.set_measured('file.py', [2])
 
-        expected = json.dumps({
+        expected = {
             'report_name': ['reports/coverage.xml'],
             'diff_name': 'master',
             'src_stats': {
@@ -320,25 +320,25 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
             'total_num_lines': 1,
             'total_num_violations': 0,
             'total_percent_covered': 100
-        })
+        }
 
-        self.assert_report(expected)
+        self.assert_report(json.loads(expected))
 
     def test_empty_report(self):
 
         # Have the dependencies return an empty report
         # (this is the default)
 
-        expected = json.dumps({
+        expected = {
             'report_name': ['reports/coverage.xml'],
             'diff_name': 'master',
             'src_stats': {},
             'total_num_lines': 0,
             'total_num_violations': 0,
             'total_percent_covered': 100
-        })
+        }
 
-        self.assert_report(expected)
+        self.assert_report(json.loads(expected))
 
 
 class StringReportGeneratorTest(BaseReportGeneratorTest):
