@@ -144,7 +144,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
             self.set_measured(src, self.MEASURED)
             self.set_num_snippets(0)
 
-    def assert_report(self, expected):
+    def get_report(self):
         """
         Generate a report and assert that it matches
         the string `expected`.
@@ -159,8 +159,11 @@ class BaseReportGeneratorTest(unittest.TestCase):
         output_str = output.getvalue()
         output.close()
 
-        # Verify that we got the expected string
-        assert_long_str_equal(expected, output_str, strip=True)
+        return output_str.decode('utf-8')
+
+    def assert_report(self, expected):
+        output_report_string = self.get_report()
+        assert_long_str_equal(expected, output_report_string, strip=True)
 
 
 class SimpleReportGeneratorTest(BaseReportGeneratorTest):
@@ -270,6 +273,13 @@ class TemplateReportGeneratorTest(BaseReportGeneratorTest):
 class JsonReportGeneratorTest(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = JsonReportGenerator
+
+    def assert_report(self, expected):
+        output_report_string = self.get_report()
+        self.assertDictEqual(
+            json.loads(expected),
+            json.loads(output_report_string)
+        )
 
     def test_generate_report(self):
 
