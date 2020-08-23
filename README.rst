@@ -279,6 +279,13 @@ For example, setting up Python 3:
     source venv/bin/activate
     pip install -r test-requirements.txt
 
+I would also suggest running this command after. This will make it so git blame ignores the commit
+that formatted the entire codebase.
+
+.. code:: bash
+
+    git config blame.ignoreRevsFile .git-blame-ignore-revs
+
 
 Adding `diff-quality`` Support for a New Quality Checker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
