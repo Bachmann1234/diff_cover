@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 # This file is imported in setup.py and cannot use any external dependencies
 
 VERSION = '3.0.1'

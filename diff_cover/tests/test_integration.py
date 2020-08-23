@@ -1,7 +1,6 @@
 """
 High-level integration tests of diff-cover tool.
 """
-from __future__ import unicode_literals
 
 import io
 import os
@@ -15,7 +14,6 @@ from io import BytesIO
 from subprocess import Popen
 
 import pylint
-import six
 from diff_cover.command_runner import CommandError
 from diff_cover.diff_cover_tool import main as diff_cover_main
 from diff_cover.diff_quality_tool import QUALITY_DRIVERS
@@ -23,7 +21,7 @@ from diff_cover.diff_quality_tool import main as diff_quality_main
 from diff_cover.git_path import GitPathTool
 from diff_cover.tests.helpers import assert_long_str_equal, fixture_path
 from diff_cover.violationsreporters.base import QualityDriver
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 
 class ToolsIntegrationBase(unittest.TestCase):
@@ -85,7 +83,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         """
 
         # Patch the output of `git diff`
-        with io.open(git_diff_path, encoding='utf-8') as git_diff_file:
+        with open(git_diff_path, encoding='utf-8') as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
 
         # Create a temporary directory to hold the output HTML report
@@ -109,8 +107,8 @@ class ToolsIntegrationBase(unittest.TestCase):
         self.assertEqual(code, expected_status)
 
         # Check the HTML report
-        with io.open(expected_html_path, encoding='utf-8') as expected_file:
-            with io.open(html_report_path, encoding='utf-8') as html_report:
+        with open(expected_html_path, encoding='utf-8') as expected_file:
+            with open(html_report_path, encoding='utf-8') as html_report:
                 html = html_report.read()
                 expected = expected_file.read()
                 if css_file is None:
@@ -136,7 +134,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         """
 
         # Patch the output of `git diff`
-        with io.open(git_diff_path, encoding='utf-8') as git_diff_file:
+        with open(git_diff_path, encoding='utf-8') as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
 
         # Capture stdout to a string buffer
@@ -162,10 +160,7 @@ class ToolsIntegrationBase(unittest.TestCase):
         Redirect output sent to `sys.stdout` to the BytesIO buffer
         `string_buffer`.
         """
-        if six.PY3:
-            self._mock_sys.stdout.buffer = string_buffer
-        else:
-            self._mock_sys.stdout = string_buffer
+        self._mock_sys.stdout.buffer = string_buffer
 
     def _set_git_diff_output(self, stdout, stderr, returncode=0):
         """
@@ -547,7 +542,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         Takes in a string which is a tool to call and
         an string which is the error you expect to see
         """
-        with io.open('git_diff_add.txt', encoding='utf-8') as git_diff_file:
+        with open('git_diff_add.txt', encoding='utf-8') as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
         argv = ['diff-quality',
                 '--violations={}'.format(tool_name),
@@ -593,7 +588,7 @@ class DoNothingDriver(QualityDriver):
     function
     """
     def __init__(self, name, supported_extensions, command):
-        super(DoNothingDriver, self).__init__(name, supported_extensions, command)
+        super().__init__(name, supported_extensions, command)
 
     def parse_reports(self, parse_reports):
         return defaultdict(list)

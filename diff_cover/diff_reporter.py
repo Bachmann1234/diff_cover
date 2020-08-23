@@ -1,7 +1,6 @@
 """
 Classes for querying which lines have changed based on a diff.
 """
-from __future__ import unicode_literals
 from abc import ABCMeta, abstractmethod
 from diff_cover.git_diff import GitDiffError
 import fnmatch
@@ -9,7 +8,7 @@ import os
 import re
 
 
-class BaseDiffReporter(object):
+class BaseDiffReporter:
     """
     Query information about lines changed in a diff.
     """
@@ -120,7 +119,7 @@ class GitDiffReporter(BaseDiffReporter):
             # Apply and + changes to the last option
             name += " and " + options[-1] + " changes"
 
-        super(GitDiffReporter, self).__init__(name, exclude)
+        super().__init__(name, exclude)
 
         self._compare_branch = compare_branch
         self._git_diff_tool = git_diff

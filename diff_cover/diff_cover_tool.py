@@ -1,11 +1,8 @@
-from __future__ import unicode_literals
-
 import logging
 
 import os
 import sys
 import argparse
-import six
 
 try:
     # Needed for Python < 3.3, works up to 3.8
@@ -186,7 +183,7 @@ def generate_coverage_report(coverage_xml, compare_branch,
             reporter.generate_report(output_file)
 
     reporter = StringReportGenerator(coverage, diff)
-    output_file = sys.stdout if six.PY2 else sys.stdout.buffer
+    output_file = sys.stdout.buffer
 
     # Generate the report
     reporter.generate_report(output_file)

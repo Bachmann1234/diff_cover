@@ -2,36 +2,17 @@
 Load snippets from source files to show violation lines
 in HTML reports.
 """
-from __future__ import unicode_literals
 import pygments
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers import guess_lexer_for_filename
 from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
-import six
 
 from diff_cover.git_path import GitPathTool
-# If tokenize.open (Python>=3.2) is available, use that to open python files.
-# Otherwise, use detect_encoding from lib2to3 (2.6, 2.7) wrapped the same way
-# that tokenize.open would have.
-try:
-    from tokenize import open as openpy
-except ImportError:
-    def openpy(filename):
-        from lib2to3.pgen2.tokenize import detect_encoding
-        import io
 
-        # The following is copied from tokenize.py in Python 3.2,
-        # Copyright (c) 2001-2014 Python Software Foundation; All Rights Reserved
-        buffer = io.open(filename, 'rb')
-        encoding, lines = detect_encoding(buffer.readline)
-        buffer.seek(0)
-        text = io.TextIOWrapper(buffer, encoding, line_buffering=True)
-        text.mode = 'r'
-        return text
+from tokenize import open as openpy
 
-
-class Snippet(object):
+class Snippet:
     """
     A source code snippet.
     """
@@ -155,7 +136,7 @@ class Snippet(object):
             contents = src_file.read()
 
         # Convert the source file to unicode (Python < 3)
-        if isinstance(contents, six.binary_type):
+        if isinstance(contents, bytes):
             contents = contents.decode('utf-8', 'replace')
 
         # Construct a list of snippet ranges
@@ -236,7 +217,7 @@ class Snippet(object):
                 val_lines = val.split('\n')
 
                 # Check if the tokens match each range
-                for (start, end), filtered_tokens in six.iteritems(token_map):
+                for (start, end), filtered_tokens in token_map.items():
 
                     # Filter out lines that are not in this range
                     include_vals = [
@@ -258,7 +239,7 @@ class Snippet(object):
             # If we're in the line range, add it
             else:
                 # Check if the tokens match each range
-                for (start, end), filtered_tokens in six.iteritems(token_map):
+                for (start, end), filtered_tokens in token_map.items():
 
                     # If we got a match, store the token
                     if line_num in range(start, end + 1):

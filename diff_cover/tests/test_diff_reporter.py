@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-import mock
+from unittest import mock
 import unittest
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter

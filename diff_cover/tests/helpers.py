@@ -3,8 +3,6 @@ Test helper functions.
 """
 import random
 
-import io
-import six
 import os.path
 import difflib
 
@@ -23,9 +21,9 @@ def assert_long_str_equal(expected, actual, strip=False):
     # If we've been given a byte string, we need to convert
     # it back to unicode.  Otherwise, Python3 won't
     # let us use string methods!
-    if isinstance(expected, six.binary_type):
+    if isinstance(expected, bytes):
         expected = expected.decode('utf-8')
-    if isinstance(actual, six.binary_type):
+    if isinstance(actual, bytes):
         actual = actual.decode('utf-8')
 
     if strip:
@@ -60,10 +58,10 @@ def load_fixture(rel_path, encoding=None):
     If `encoding` is not None, attempts to decode
     the contents as `encoding` (e.g. 'utf-8').
     """
-    with io.open(fixture_path(rel_path), encoding=encoding or 'utf-8') as fixture_file:
+    with open(fixture_path(rel_path), encoding=encoding or 'utf-8') as fixture_file:
         contents = fixture_file.read()
 
-    if encoding is not None and isinstance(contents, six.binary_type):
+    if encoding is not None and isinstance(contents, bytes):
         contents = contents.decode(encoding)
 
     return contents

@@ -1,7 +1,6 @@
 """
 Classes for querying the information in a test coverage report.
 """
-from __future__ import unicode_literals
 
 import re
 from collections import defaultdict
@@ -24,7 +23,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         Load the XML coverage report represented
         by the cElementTree with root element `xml_root`.
         """
-        super(XmlCoverageReporter, self).__init__("XML")
+        super().__init__("XML")
         self._xml_roots = xml_roots
 
         # Create a dict to cache violations dict results
@@ -340,7 +339,7 @@ class PylintDriver(QualityDriver):
             expression: regex used to parse report
         See super for other args
         """
-        super(PylintDriver, self).__init__(
+        super().__init__(
                 'pylint',
                 ['py'],
                 ['pylint', '--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"'],
@@ -446,7 +445,7 @@ class CppcheckDriver(QualityDriver):
             expression: regex used to parse report
         See super for other args
         """
-        super(CppcheckDriver, self).__init__(
+        super().__init__(
             'cppcheck',
             ['c', 'cpp', 'h', 'hpp'],
             ['cppcheck', '--quiet'],

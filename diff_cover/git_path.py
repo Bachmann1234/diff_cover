@@ -1,16 +1,13 @@
 """
 Converter for `git diff` paths
 """
-from __future__ import unicode_literals
 import os
-import subprocess
-import six
 import sys
 
 from diff_cover.command_runner import execute
 
 
-class GitPathTool(object):
+class GitPathTool:
     """
     Converts `git diff` paths to absolute paths or relative paths to cwd.
     This class should be used throughout the project to change paths from
@@ -29,7 +26,7 @@ class GitPathTool(object):
                 cwd = os.getcwdu()
             except AttributeError:
                 cwd = os.getcwd()
-        if isinstance(cwd, six.binary_type):
+        if isinstance(cwd, bytes):
             cwd = cwd.decode(sys.getdefaultencoding())
         cls._cwd = cwd
         cls._root = cls._git_root()

@@ -1,7 +1,6 @@
 """
 Classes for querying the information in a test coverage report.
 """
-from __future__ import unicode_literals
 
 import os
 from collections import defaultdict
@@ -37,7 +36,7 @@ class CheckstyleXmlDriver(QualityDriver):
         """
         See super for args
         """
-        super(CheckstyleXmlDriver, self).__init__(
+        super().__init__(
             'checkstyle',
             ['java'],
             ['java', 'com.puppycrawl.tools.checkstyle.Main', '-c',
@@ -80,7 +79,7 @@ class FindbugsXmlDriver(QualityDriver):
         """
         See super for args
         """
-        super(FindbugsXmlDriver, self).__init__(
+        super().__init__(
             'findbugs',
             ['java'],
             ['false']
@@ -128,7 +127,7 @@ class PmdXmlDriver(QualityDriver):
         """
         See super for args
         """
-        super(PmdXmlDriver, self).__init__(
+        super().__init__(
             'pmd',
             ['java'],
             []

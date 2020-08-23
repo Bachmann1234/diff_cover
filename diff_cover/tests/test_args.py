@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import contextlib
 import sys
 import unittest
@@ -14,7 +13,7 @@ def nostderr():
     """
     savestderr = sys.stderr
 
-    class Devnull(object):
+    class Devnull:
         """
         Mock class to suppress stderr
         """

@@ -1,4 +1,3 @@
-import six
 import subprocess
 
 import sys
@@ -65,7 +64,7 @@ def _ensure_unicode(text):
     Returns:
         unicode
     """
-    if isinstance(text, six.binary_type):
+    if isinstance(text, bytes):
         return text.decode(sys.getfilesystemencoding(), 'replace')
     else:
         return text

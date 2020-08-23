@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import pytest
 
 from diff_cover.diff_cover_tool import parse_coverage_args

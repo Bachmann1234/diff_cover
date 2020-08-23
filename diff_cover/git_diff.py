@@ -1,7 +1,6 @@
 """
 Wrapper for `git diff` command.
 """
-from __future__ import unicode_literals
 
 from diff_cover.command_runner import execute
 
@@ -13,7 +12,7 @@ class GitDiffError(Exception):
     pass
 
 
-class GitDiffTool(object):
+class GitDiffTool:
     """
     Thin wrapper for a subset of the `git diff` command.
     """

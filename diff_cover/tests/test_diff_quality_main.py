@@ -1,8 +1,6 @@
-from __future__ import unicode_literals
-
 import unittest
 
-from mock import patch
+from unittest.mock import patch
 
 from diff_cover.diff_quality_tool import parse_quality_args, main
 
