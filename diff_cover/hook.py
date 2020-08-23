@@ -1,4 +1,4 @@
 import pluggy
 
 # Other packages that implement diff_cover plugins use this.
-hookimpl = pluggy.HookimplMarker('diff_cover')
+hookimpl = pluggy.HookimplMarker("diff_cover")

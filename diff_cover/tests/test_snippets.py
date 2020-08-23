@@ -4,113 +4,106 @@ import os
 import tempfile
 from pygments.token import Token
 from diff_cover.snippets import Snippet
-from diff_cover.tests.helpers import load_fixture,\
-    fixture_path, assert_long_str_equal
+from diff_cover.tests.helpers import load_fixture, fixture_path, assert_long_str_equal
 import unittest
 
 
 class SnippetTest(unittest.TestCase):
 
     SRC_TOKENS = [
-        (Token.Comment, '# Test source'),
-        (Token.Text, '\n'),
-        (Token.Keyword, 'def'),
-        (Token.Text, ' '),
-        (Token.Name.Function, 'test_func'),
-        (Token.Punctuation, '('),
-        (Token.Name, 'arg'),
-        (Token.Punctuation, ')'),
-        (Token.Punctuation, ':'),
-        (Token.Text, '\n'),
-        (Token.Text, '    '),
-        (Token.Keyword, 'print'),
-        (Token.Text, ' '),
-        (Token.Name, 'arg'),
-        (Token.Text, '\n'),
-        (Token.Text, '    '),
-        (Token.Keyword, 'return'),
-        (Token.Text, ' '),
-        (Token.Name, 'arg'),
-        (Token.Text, ' '),
-        (Token.Operator, '+'),
-        (Token.Text, ' '),
-        (Token.Literal.Number.Integer, '5'),
-        (Token.Text, '\n'),
+        (Token.Comment, "# Test source"),
+        (Token.Text, "\n"),
+        (Token.Keyword, "def"),
+        (Token.Text, " "),
+        (Token.Name.Function, "test_func"),
+        (Token.Punctuation, "("),
+        (Token.Name, "arg"),
+        (Token.Punctuation, ")"),
+        (Token.Punctuation, ":"),
+        (Token.Text, "\n"),
+        (Token.Text, "    "),
+        (Token.Keyword, "print"),
+        (Token.Text, " "),
+        (Token.Name, "arg"),
+        (Token.Text, "\n"),
+        (Token.Text, "    "),
+        (Token.Keyword, "return"),
+        (Token.Text, " "),
+        (Token.Name, "arg"),
+        (Token.Text, " "),
+        (Token.Operator, "+"),
+        (Token.Text, " "),
+        (Token.Literal.Number.Integer, "5"),
+        (Token.Text, "\n"),
     ]
 
     FIXTURES = {
-        'style': 'snippet.css',
-        'default': 'snippet_default.html',
-        'invalid_violations': 'snippet_invalid_violations.html',
-        'no_filename_ext': 'snippet_no_filename_ext.html',
-        'unicode': 'snippet_unicode.html',
+        "style": "snippet.css",
+        "default": "snippet_default.html",
+        "invalid_violations": "snippet_invalid_violations.html",
+        "no_filename_ext": "snippet_no_filename_ext.html",
+        "unicode": "snippet_unicode.html",
     }
 
     def test_style_defs(self):
         style_str = Snippet.style_defs()
-        expected_styles = load_fixture(self.FIXTURES['style']).strip()
+        expected_styles = load_fixture(self.FIXTURES["style"]).strip()
 
         # Check that a sample of the styles are present
         # (use only a sample to make the test more robust
         # against Pygment changes).
-        for expect_line in expected_styles.split('\n'):
+        for expect_line in expected_styles.split("\n"):
             self.assertIn(expect_line, style_str)
 
     def test_format(self):
         self._assert_format(
-            self.SRC_TOKENS, 'test.py',
-            4, [4, 6], self.FIXTURES['default']
+            self.SRC_TOKENS, "test.py", 4, [4, 6], self.FIXTURES["default"]
         )
 
     def test_format_with_invalid_start_line(self):
         for start_line in [-2, -1, 0]:
             with self.assertRaises(ValueError):
-                Snippet('# test', 'test.py', start_line, [])
+                Snippet("# test", "test.py", start_line, [])
 
     def test_format_with_invalid_violation_lines(self):
 
         # Violation lines outside the range of lines in the file
         # should be ignored.
         self._assert_format(
-            self.SRC_TOKENS, 'test.py',
-            1, [-1, 0, 5, 6],
-            self.FIXTURES['invalid_violations']
+            self.SRC_TOKENS,
+            "test.py",
+            1,
+            [-1, 0, 5, 6],
+            self.FIXTURES["invalid_violations"],
         )
 
     def test_no_filename_ext(self):
 
         # No filename extension: should default to text lexer
         self._assert_format(
-            self.SRC_TOKENS, 'test',
-            4, [4, 6],
-            self.FIXTURES['no_filename_ext']
+            self.SRC_TOKENS, "test", 4, [4, 6], self.FIXTURES["no_filename_ext"]
         )
 
     def test_unicode(self):
 
-        unicode_src = [(Token.Text, 'var = \u0123 \u5872 \u3389')]
+        unicode_src = [(Token.Text, "var = \u0123 \u5872 \u3389")]
 
-        self._assert_format(
-            unicode_src, 'test.py',
-            1, [], self.FIXTURES['unicode']
-        )
+        self._assert_format(unicode_src, "test.py", 1, [], self.FIXTURES["unicode"])
 
-    def _assert_format(self, src_tokens, src_filename,
-                       start_line, violation_lines,
-                       expected_fixture):
+    def _assert_format(
+        self, src_tokens, src_filename, start_line, violation_lines, expected_fixture
+    ):
 
-        snippet = Snippet(src_tokens, src_filename,
-                          start_line, violation_lines)
+        snippet = Snippet(src_tokens, src_filename, start_line, violation_lines)
         result = snippet.html()
 
-        expected_str = load_fixture(expected_fixture, encoding='utf-8')
+        expected_str = load_fixture(expected_fixture, encoding="utf-8")
 
         assert_long_str_equal(expected_str, result, strip=True)
         self.assertIsInstance(result, str)
 
 
 class SnippetLoaderTest(unittest.TestCase):
-
     def setUp(self):
         """
         Create a temporary source file.
@@ -119,7 +112,9 @@ class SnippetLoaderTest(unittest.TestCase):
         self.addCleanup(os.remove, self._src_path)
 
         # Path tool should not be aware of testing command
-        path_mock = mock.patch('diff_cover.violationsreporters.violations_reporter.GitPathTool').start()
+        path_mock = mock.patch(
+            "diff_cover.violationsreporters.violations_reporter.GitPathTool"
+        ).start()
         path_mock.absolute_path = lambda path: path
         path_mock.relative_path = lambda path: path
         self.addCleanup(mock.patch.stopall)
@@ -176,42 +171,44 @@ class SnippetLoaderTest(unittest.TestCase):
         expected_ranges = [(24, 37)]
         self._assert_line_range(violations, expected_ranges)
 
-    def _compare_snippets_html_output(self, filename, violations, expected_out_filename):
+    def _compare_snippets_html_output(
+        self, filename, violations, expected_out_filename
+    ):
         # Need to be in the fixture directory
         # so the source path is displayed correctly
         old_cwd = os.getcwd()
         self.addCleanup(lambda: os.chdir(old_cwd))
-        os.chdir(fixture_path(''))
+        os.chdir(fixture_path(""))
 
         # One higher-level test to make sure
         # the snippets are being rendered correctly
-        snippets_html = '\n\n'.join(
-            Snippet.load_snippets_html(filename, violations)
-        )
+        snippets_html = "\n\n".join(Snippet.load_snippets_html(filename, violations))
         # Load the fixture for the expected contents
         expected_path = fixture_path(expected_out_filename)
-        with open(expected_path, encoding='utf-8') as fixture_file:
+        with open(expected_path, encoding="utf-8") as fixture_file:
             expected = fixture_file.read()
             if isinstance(expected, bytes):
-                expected = expected.decode('utf-8')
+                expected = expected.decode("utf-8")
 
         # Check that we got what we expected
         assert_long_str_equal(expected, snippets_html, strip=True)
 
     def test_load_snippets_html(self):
-        self._compare_snippets_html_output('snippet_src.py',
-                                           [10, 12, 13, 50, 51, 54, 55, 57],
-                                           'snippet_list.html')
+        self._compare_snippets_html_output(
+            "snippet_src.py", [10, 12, 13, 50, 51, 54, 55, 57], "snippet_list.html"
+        )
 
     def test_load_utf8_snippets(self):
-        self._compare_snippets_html_output('snippet_unicode.py',
-                                           [10, 12, 13, 50, 51, 54, 55, 57],
-                                           'snippet_unicode_html_output.html')
+        self._compare_snippets_html_output(
+            "snippet_unicode.py",
+            [10, 12, 13, 50, 51, 54, 55, 57],
+            "snippet_unicode_html_output.html",
+        )
 
     def test_load_declared_arabic(self):
-        self._compare_snippets_html_output('snippet_8859.py',
-                                           [7],
-                                           'snippet_arabic_output.html')
+        self._compare_snippets_html_output(
+            "snippet_8859.py", [7], "snippet_arabic_output.html"
+        )
 
     def _assert_line_range(self, violation_lines, expected_ranges):
         """
@@ -227,9 +224,7 @@ class SnippetLoaderTest(unittest.TestCase):
         """
 
         # Load snippets from the source file
-        snippet_list = Snippet.load_snippets(
-            self._src_path, violation_lines
-        )
+        snippet_list = Snippet.load_snippets(self._src_path, violation_lines)
 
         # Check that we got the right number of snippets
         self.assertEqual(len(snippet_list), len(expected_ranges))
@@ -253,7 +248,7 @@ class SnippetLoaderTest(unittest.TestCase):
         if src_path is None:
             src_path = self._src_path
 
-        with open(src_path, 'w') as src_file:
+        with open(src_path, "w") as src_file:
             src_file.truncate()
             src_file.write(self._src_lines(1, num_src_lines))
 
@@ -262,7 +257,6 @@ class SnippetLoaderTest(unittest.TestCase):
         Test lines to write to the source file
         (Line 1, Line 2, ...).
         """
-        return "\n".join([
-            "Line {}".format(line_num)
-            for line_num in range(start_line, end_line + 1)
-        ])
+        return "\n".join(
+            ["Line {}".format(line_num) for line_num in range(start_line, end_line + 1)]
+        )

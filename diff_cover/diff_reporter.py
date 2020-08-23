@@ -95,10 +95,15 @@ class GitDiffReporter(BaseDiffReporter):
     Query information from a Git diff between branches.
     """
 
-    def __init__(self, compare_branch='origin/master', git_diff=None,
-                 ignore_staged=None, ignore_unstaged=None,
-                 supported_extensions=None,
-                 exclude=None):
+    def __init__(
+        self,
+        compare_branch="origin/master",
+        git_diff=None,
+        ignore_staged=None,
+        ignore_unstaged=None,
+        supported_extensions=None,
+        exclude=None,
+    ):
         """
         Configure the reporter to use `git_diff` as the wrapper
         for the `git diff` tool.  (Should have same interface
@@ -203,13 +208,17 @@ class GitDiffReporter(BaseDiffReporter):
                     root, extension = os.path.splitext(src_path)
                     extension = extension[1:].lower()
                     # 'not self._supported_extensions' tests for both None and empty list []
-                    if not self._supported_extensions or extension in self._supported_extensions:
+                    if (
+                        not self._supported_extensions
+                        or extension in self._supported_extensions
+                    ):
                         added_lines, deleted_lines = diff_dict[src_path]
 
                         # Remove any lines from the dict that have been deleted
                         # Include any lines that have been added
                         result_dict[src_path] = [
-                            line for line in result_dict.get(src_path, [])
+                            line
+                            for line in result_dict.get(src_path, [])
                             if not line in deleted_lines
                         ] + added_lines
 
@@ -225,8 +234,8 @@ class GitDiffReporter(BaseDiffReporter):
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^ \n"]*)"?')
-    MERGE_CONFLICT_RE = re.compile(r'^diff --cc ([^ \n]*)')
-    HUNK_LINE_RE = re.compile(r'\+([0-9]*)')
+    MERGE_CONFLICT_RE = re.compile(r"^diff --cc ([^ \n]*)")
+    HUNK_LINE_RE = re.compile(r"\+([0-9]*)")
 
     def _parse_diff_str(self, diff_str):
         """
@@ -274,12 +283,12 @@ class GitDiffReporter(BaseDiffReporter):
         found_hunk = False
 
         # Parse the diff string into sections by source file
-        for line in diff_str.split('\n'):
+        for line in diff_str.split("\n"):
 
             # If the line starts with "diff --git"
             # or "diff --cc" (in the case of a merge conflict)
             # then it is the start of a new source file
-            if line.startswith('diff --git') or line.startswith('diff --cc'):
+            if line.startswith("diff --git") or line.startswith("diff --cc"):
 
                 # Retrieve the name of the source file
                 src_path = self._parse_source_line(line)
@@ -298,7 +307,7 @@ class GitDiffReporter(BaseDiffReporter):
 
                 # Only add lines if we're in a hunk section
                 # (ignore index and files changed lines)
-                if found_hunk or line.startswith('@@'):
+                if found_hunk or line.startswith("@@"):
 
                     # Remember that we found a hunk
                     found_hunk = True
@@ -336,12 +345,12 @@ class GitDiffReporter(BaseDiffReporter):
 
             # If this is the start of the hunk definition, retrieve
             # the starting line number
-            if line.startswith('@@'):
+            if line.startswith("@@"):
                 line_num = self._parse_hunk_line(line)
                 current_line_new, current_line_old = line_num, line_num
 
             # This is an added/modified line, so store the line number
-            elif line.startswith('+'):
+            elif line.startswith("+"):
 
                 # Since we parse for source file sections before
                 # calling this method, we're guaranteed to have a source
@@ -356,7 +365,7 @@ class GitDiffReporter(BaseDiffReporter):
 
             # This is a deleted line that does not exist in the final
             # version, so skip it
-            elif line.startswith('-'):
+            elif line.startswith("-"):
 
                 # Since we parse for source file sections before
                 # calling this method, we're guaranteed to have a source
@@ -390,9 +399,9 @@ class GitDiffReporter(BaseDiffReporter):
         Given a source line in `git diff` output, return the path
         to the source file.
         """
-        if '--git' in line:
+        if "--git" in line:
             regex = self.SRC_FILE_RE
-        elif '--cc' in line:
+        elif "--cc" in line:
             regex = self.MERGE_CONFLICT_RE
         else:
             msg = "Do not recognize format of source in line '{}'".format(line)
@@ -425,7 +434,7 @@ class GitDiffReporter(BaseDiffReporter):
         in the `TEXT` section of the line.
         """
         # Split the line at the @@ terminators (start and end of the line)
-        components = line.split('@@')
+        components = line.split("@@")
 
         # The first component should be an empty string, because
         # the line starts with '@@'.  The second component should

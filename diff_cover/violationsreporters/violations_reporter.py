@@ -10,7 +10,12 @@ import itertools
 import posixpath
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
-from diff_cover.violationsreporters.base import BaseViolationReporter, Violation, RegexBasedDriver, QualityDriver
+from diff_cover.violationsreporters.base import (
+    BaseViolationReporter,
+    Violation,
+    RegexBasedDriver,
+    QualityDriver,
+)
 
 
 class XmlCoverageReporter(BaseViolationReporter):
@@ -18,7 +23,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura|Clover|JaCoCo XML coverage report.
     """
 
-    def __init__(self, xml_roots, src_roots=['']):
+    def __init__(self, xml_roots, src_roots=[""]):
         """
         Load the XML coverage report represented
         by the cElementTree with root element `xml_root`.
@@ -45,7 +50,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         :param path: string of the path to convert
         :return: the unix version of that path
         """
-        return posixpath.normpath(os.path.normcase(path).replace("\\", '/'))
+        return posixpath.normpath(os.path.normcase(path).replace("\\", "/"))
 
     def _get_classes(self, xml_document, src_path):
         """
@@ -74,27 +79,32 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         # cobertura sometimes provides the sources for the measurements
         # within it. If we have that we outta use it
-        sources = xml_document.findall('sources/source')
+        sources = xml_document.findall("sources/source")
         sources = [source.text for source in sources if source.text]
-        classes = [class_tree
-                   for class_tree in xml_document.findall(".//class")
-                   or []]
+        classes = [class_tree for class_tree in xml_document.findall(".//class") or []]
 
         classes = (
-            [clazz for clazz in classes if
-             src_abs_path in [
-                 self._to_unix_path(
-                     os.path.join(
-                         source.strip(),
-                         clazz.get('filename')
-                     )
-                 ) for source in sources]]
-            or
-            [clazz for clazz in classes if
-             self._to_unix_path(clazz.get('filename')) == src_abs_path]
-            or
-            [clazz for clazz in classes if
-             self._to_unix_path(clazz.get('filename')) == src_rel_path]
+            [
+                clazz
+                for clazz in classes
+                if src_abs_path
+                in [
+                    self._to_unix_path(
+                        os.path.join(source.strip(), clazz.get("filename"))
+                    )
+                    for source in sources
+                ]
+            ]
+            or [
+                clazz
+                for clazz in classes
+                if self._to_unix_path(clazz.get("filename")) == src_abs_path
+            ]
+            or [
+                clazz
+                for clazz in classes
+                if self._to_unix_path(clazz.get("filename")) == src_rel_path
+            ]
         )
         return classes
 
@@ -104,7 +114,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         if not classes:
             return None
         else:
-            lines = [clazz.findall('./lines/line') for clazz in classes]
+            lines = [clazz.findall("./lines/line") for clazz in classes]
             return [elem for elem in itertools.chain(*lines)]
 
     def _get_src_path_line_nodes_clover(self, xml_document, src_path):
@@ -115,14 +125,14 @@ class XmlCoverageReporter(BaseViolationReporter):
         If file is not present in `xml_document`, return None
         """
 
-        files = [file_tree
-                 for file_tree in xml_document.findall(".//file")
-                 if GitPathTool.relative_path(file_tree.get('path')) == src_path
-                 or []]
+        files = [
+            file_tree
+            for file_tree in xml_document.findall(".//file")
+            if GitPathTool.relative_path(file_tree.get("path")) == src_path or []
+        ]
         if not files:
             return None
-        lines = [file_tree.findall('./line[@type="stmt"]')
-                 for file_tree in files]
+        lines = [file_tree.findall('./line[@type="stmt"]') for file_tree in files]
         return [elem for elem in itertools.chain(*lines)]
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
@@ -130,9 +140,16 @@ class XmlCoverageReporter(BaseViolationReporter):
         if not src_path.endswith(file_name):
             return None
 
-        norm_src_path = os.path.normcase(src_path);
+        norm_src_path = os.path.normcase(src_path)
         for root in self._src_roots:
-            if os.path.normcase(GitPathTool.relative_path(os.path.join(root, package_name, file_name))) == norm_src_path:
+            if (
+                os.path.normcase(
+                    GitPathTool.relative_path(
+                        os.path.join(root, package_name, file_name)
+                    )
+                )
+                == norm_src_path
+            ):
                 return True
 
     def _get_src_path_line_nodes_jacoco(self, xml_document, src_path):
@@ -146,17 +163,19 @@ class XmlCoverageReporter(BaseViolationReporter):
         files = []
         packages = [pkg for pkg in xml_document.findall(".//package")]
         for pkg in packages:
-            _files = [_file
-                      for _file in pkg.findall('sourcefile')
-                      if self._measured_source_path_matches(pkg.get('name'), _file.get('name'), src_path)
-                      or []
-                      ]
+            _files = [
+                _file
+                for _file in pkg.findall("sourcefile")
+                if self._measured_source_path_matches(
+                    pkg.get("name"), _file.get("name"), src_path
+                )
+                or []
+            ]
             files.extend(_files)
 
         if not files:
             return None
-        lines = [file_tree.findall('./line')
-                 for file_tree in files]
+        lines = [file_tree.findall("./line") for file_tree in files]
         return [elem for elem in itertools.chain(*lines)]
 
     def _cache_file(self, src_path):
@@ -178,21 +197,27 @@ class XmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for xml_document in self._xml_roots:
-                if xml_document.findall('.[@clover]'):
+                if xml_document.findall(".[@clover]"):
                     # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
-                    line_nodes = self._get_src_path_line_nodes_clover(xml_document, src_path)
-                    _number = 'num'
-                    _hits = 'count'
-                elif xml_document.findall('.[@name]'):
+                    line_nodes = self._get_src_path_line_nodes_clover(
+                        xml_document, src_path
+                    )
+                    _number = "num"
+                    _hits = "count"
+                elif xml_document.findall(".[@name]"):
                     # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
-                    line_nodes = self._get_src_path_line_nodes_jacoco(xml_document, src_path)
-                    _number = 'nr'
-                    _hits = 'ci'
+                    line_nodes = self._get_src_path_line_nodes_jacoco(
+                        xml_document, src_path
+                    )
+                    _number = "nr"
+                    _hits = "ci"
                 else:
                     # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
-                    line_nodes = self._get_src_path_line_nodes_cobertura(xml_document, src_path)
-                    _number = 'number'
-                    _hits = 'hits'
+                    line_nodes = self._get_src_path_line_nodes_cobertura(
+                        xml_document, src_path
+                    )
+                    _number = "number"
+                    _hits = "hits"
                 if line_nodes is None:
                     continue
 
@@ -201,7 +226,8 @@ class XmlCoverageReporter(BaseViolationReporter):
                     violations = {
                         Violation(int(line.get(_number)), None)
                         for line in line_nodes
-                        if int(line.get(_hits, 0)) == 0}
+                        if int(line.get(_hits, 0)) == 0
+                    }
 
                 # If we already have a violations set,
                 # take the intersection of the new
@@ -214,9 +240,7 @@ class XmlCoverageReporter(BaseViolationReporter):
                     }
 
                 # Measured is the union of itself and the new measured
-                measured = measured | {
-                    int(line.get(_number)) for line in line_nodes
-                }
+                measured = measured | {int(line.get(_number)) for line in line_nodes}
 
             # If we don't have any information about the source file,
             # don't report any violations
@@ -242,29 +266,30 @@ class XmlCoverageReporter(BaseViolationReporter):
         self._cache_file(src_path)
         return self._info_cache[src_path][1]
 
+
 pycodestyle_driver = RegexBasedDriver(
-    name='pycodestyle',
-    supported_extensions=['py'],
-    command=['pycodestyle'],
-    expression=r'^([^:]+):(\d+).*([EW]\d{3}.*)$',
-    command_to_check_install=['pycodestyle', '--version'],
+    name="pycodestyle",
+    supported_extensions=["py"],
+    command=["pycodestyle"],
+    expression=r"^([^:]+):(\d+).*([EW]\d{3}.*)$",
+    command_to_check_install=["pycodestyle", "--version"],
     # pycodestyle exit code is 1 if there are violations
     # http://pycodestyle.pycqa.org/en/latest/intro.html
-    exit_codes=[0, 1]
+    exit_codes=[0, 1],
 )
 
 pyflakes_driver = RegexBasedDriver(
-    name='pyflakes',
-    supported_extensions=['py'],
-    command=['pyflakes'],
+    name="pyflakes",
+    supported_extensions=["py"],
+    command=["pyflakes"],
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
-    expression=r'^([^:]+):(\d+):\d* (.*)$',
-    command_to_check_install=['pyflakes', '--version'],
+    expression=r"^([^:]+):(\d+):\d* (.*)$",
+    command_to_check_install=["pyflakes", "--version"],
     # pyflakes exit code is 1 if there are violations
     # https://github.com/PyCQA/pyflakes/blob/master/pyflakes/api.py#L211
-    exit_codes=[0, 1]
+    exit_codes=[0, 1],
 )
 
 """
@@ -280,33 +305,33 @@ pyflakes_driver = RegexBasedDriver(
     http://flake8.readthedocs.org/en/latest/warnings.html
 """
 flake8_driver = RegexBasedDriver(
-    name='flake8',
-    supported_extensions=['py'],
-    command=['flake8'],
+    name="flake8",
+    supported_extensions=["py"],
+    command=["flake8"],
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
-    expression=r'^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$',
-    command_to_check_install=['flake8', '--version'],
+    expression=r"^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$",
+    command_to_check_install=["flake8", "--version"],
     # flake8 exit code is 1 if there are violations
     # http://flake8.pycqa.org/en/latest/user/invocation.html
-    exit_codes=[0, 1]
+    exit_codes=[0, 1],
 )
 
 jshint_driver = RegexBasedDriver(
-    name='jshint',
-    supported_extensions=['js'],
-    command=['jshint'],
-    expression=r'^([^:]+): line (\d+), col \d+, (.*)$',
-    command_to_check_install=['jshint', '-v']
+    name="jshint",
+    supported_extensions=["js"],
+    command=["jshint"],
+    expression=r"^([^:]+): line (\d+), col \d+, (.*)$",
+    command_to_check_install=["jshint", "-v"],
 )
 
 eslint_driver = RegexBasedDriver(
-    name='eslint',
-    supported_extensions=['js'],
-    command=['eslint', '--format=compact'],
-    expression=r'^([^:]+): line (\d+), col \d+, (.*)$',
-    command_to_check_install=['eslint', '-v'],
+    name="eslint",
+    supported_extensions=["js"],
+    command=["eslint", "--format=compact"],
+    expression=r"^([^:]+): line (\d+), col \d+, (.*)$",
+    command_to_check_install=["eslint", "-v"],
 )
 
 """
@@ -321,16 +346,17 @@ eslint_driver = RegexBasedDriver(
     http://www.pydocstyle.org/en/latest/error_codes.html
 """
 pydocstyle_driver = RegexBasedDriver(
-    name='pydocstyle',
-    supported_extensions=['py'],
-    command=['pydocstyle'],
-    expression=r'^(.+?):(\d+).*?$.+?^        (.*?)$',
-    command_to_check_install=['pydocstyle', '--version'],
+    name="pydocstyle",
+    supported_extensions=["py"],
+    command=["pydocstyle"],
+    expression=r"^(.+?):(\d+).*?$.+?^        (.*?)$",
+    command_to_check_install=["pydocstyle", "--version"],
     flags=re.MULTILINE | re.DOTALL,
     # pydocstyle exit code is 1 if there are violations
     # http://www.pydocstyle.org/en/2.1.1/usage.html#return-code
-    exit_codes=[0, 1]
+    exit_codes=[0, 1],
 )
+
 
 class PylintDriver(QualityDriver):
     def __init__(self):
@@ -340,29 +366,47 @@ class PylintDriver(QualityDriver):
         See super for other args
         """
         super().__init__(
-                'pylint',
-                ['py'],
-                ['pylint', '--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"'],
-                # Pylint returns bit-encoded exit codes as documented here:
-                # https://pylint.readthedocs.io/en/latest/user_guide/run.html
-                # 1 = fatal error, if an error occurred which prevented pylint from doing further processing
-                # 2,4,8,16 = error/warning/refactor/convention message issued
-                # 32 = usage error
-                [0,
-                 2,
-                 4, 2 | 4,
-                 8, 2 | 8, 4 | 8, 2 | 4 | 8,
-                 16, 2 | 16, 4 | 16, 2 | 4 | 16, 8 | 16, 2 | 8 | 16, 4 | 8 | 16, 2 | 4 | 8 | 16]
+            "pylint",
+            ["py"],
+            [
+                "pylint",
+                '--msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"',
+            ],
+            # Pylint returns bit-encoded exit codes as documented here:
+            # https://pylint.readthedocs.io/en/latest/user_guide/run.html
+            # 1 = fatal error, if an error occurred which prevented pylint from doing further processing
+            # 2,4,8,16 = error/warning/refactor/convention message issued
+            # 32 = usage error
+            [
+                0,
+                2,
+                4,
+                2 | 4,
+                8,
+                2 | 8,
+                4 | 8,
+                2 | 4 | 8,
+                16,
+                2 | 16,
+                4 | 16,
+                2 | 4 | 16,
+                8 | 16,
+                2 | 8 | 16,
+                4 | 8 | 16,
+                2 | 4 | 8 | 16,
+            ],
         )
-        self.pylint_expression = re.compile(r'^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$')
-        self.dupe_code_violation = 'R0801'
-        self.command_to_check_install = ['pylint', '--version']
+        self.pylint_expression = re.compile(
+            r"^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$"
+        )
+        self.dupe_code_violation = "R0801"
+        self.command_to_check_install = ["pylint", "--version"]
 
         # Match lines of the form:
         # path/to/file.py:123: [C0111] Missing docstring
         # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
-        self.multi_line_violation_regex = re.compile(r'==(\w|.+):(.*)')
-        self.dupe_code_violation_regex = re.compile(r'Similar lines in (\d+) files')
+        self.multi_line_violation_regex = re.compile(r"==(\w|.+):(.*)")
+        self.dupe_code_violation_regex = re.compile(r"Similar lines in (\d+) files")
 
     def _process_dupe_code_violation(self, lines, current_line, message):
         """
@@ -374,11 +418,9 @@ class PylintDriver(QualityDriver):
         if message_match:
             for _ in range(int(message_match.group(1))):
                 current_line += 1
-                match = self.multi_line_violation_regex.match(
-                    lines[current_line]
-                )
+                match = self.multi_line_violation_regex.match(lines[current_line])
                 src_path, l_number = match.groups()
-                src_paths.append(('%s.py' % src_path, l_number))
+                src_paths.append(("%s.py" % src_path, l_number))
         return src_paths
 
     def parse_reports(self, reports):
@@ -391,7 +433,7 @@ class PylintDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            output_lines = report.split('\n')
+            output_lines = report.split("\n")
 
             for output_line_number, line in enumerate(output_lines):
                 match = self.pylint_expression.match(line)
@@ -400,16 +442,16 @@ class PylintDriver(QualityDriver):
                 # (for example, snippets from the source code)
                 if match is not None:
 
-                    (pylint_src_path,
-                     line_number,
-                     pylint_code,
-                     function_name,
-                     message) = match.groups()
+                    (
+                        pylint_src_path,
+                        line_number,
+                        pylint_code,
+                        function_name,
+                        message,
+                    ) = match.groups()
                     if pylint_code == self.dupe_code_violation:
                         files_involved = self._process_dupe_code_violation(
-                            output_lines,
-                            output_line_number,
-                            message
+                            output_lines, output_line_number, message
                         )
                     else:
                         files_involved = [(pylint_src_path, line_number)]
@@ -419,7 +461,9 @@ class PylintDriver(QualityDriver):
                         # If we're looking for a particular source file,
                         # ignore any other source files.
                         if function_name:
-                            error_str = "{}: {}: {}".format(pylint_code, function_name, message)
+                            error_str = "{}: {}: {}".format(
+                                pylint_code, function_name, message
+                            )
                         else:
                             error_str = "{}: {}".format(pylint_code, message)
 
@@ -435,10 +479,12 @@ class PylintDriver(QualityDriver):
         """
         return run_command_for_code(self.command_to_check_install) == 0
 
+
 class CppcheckDriver(QualityDriver):
     """
     Driver for cppcheck c/c++ static analyzer.
     """
+
     def __init__(self):
         """
         args:
@@ -446,9 +492,9 @@ class CppcheckDriver(QualityDriver):
         See super for other args
         """
         super().__init__(
-            'cppcheck',
-            ['c', 'cpp', 'h', 'hpp'],
-            ['cppcheck', '--quiet'],
+            "cppcheck",
+            ["c", "cpp", "h", "hpp"],
+            ["cppcheck", "--quiet"],
             output_stderr=True,
         )
         # Errors look like:
@@ -456,7 +502,7 @@ class CppcheckDriver(QualityDriver):
         # Match for everything, including ":" in the file name (first capturing
         # group), in case there are pathological path names with ":"
         self.cppcheck_expression = re.compile(r"^\[(.*?):(\d+)\]: (.*$)")
-        self.command_to_check_install = ['cppcheck', '--version']
+        self.command_to_check_install = ["cppcheck", "--version"]
 
     def parse_reports(self, reports):
         """
@@ -477,9 +523,7 @@ class CppcheckDriver(QualityDriver):
                 # (for example, snippets from the source code)
                 if match is not None:
 
-                    (cppcheck_src_path,
-                     line_number,
-                     message) = match.groups()
+                    (cppcheck_src_path, line_number, message) = match.groups()
 
                     violation = Violation(int(line_number), message)
                     violations_dict[cppcheck_src_path].append(violation)

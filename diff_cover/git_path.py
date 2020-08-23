@@ -13,6 +13,7 @@ class GitPathTool:
     This class should be used throughout the project to change paths from
     the paths yielded by `git diff` to correct project paths
     """
+
     _cwd = None
     _root = None
 
@@ -62,6 +63,6 @@ class GitPathTool:
         Returns the output of `git rev-parse --show-toplevel`, which
         is the absolute path for the git project root.
         """
-        command = ['git', 'rev-parse', '--show-toplevel', '--encoding=utf-8']
+        command = ["git", "rev-parse", "--show-toplevel", "--encoding=utf-8"]
         git_root = execute(command)[0]
-        return git_root.split('\n')[0] if git_root else ''
+        return git_root.split("\n")[0] if git_root else ""
