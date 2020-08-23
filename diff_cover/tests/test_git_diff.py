@@ -15,10 +15,12 @@ class TestGitDiffTool(unittest.TestCase):
         self.subprocess.Popen.return_value = self.process
         self.addCleanup(mock.patch.stopall)
         # Create the git diff tool
-        self.tool = GitDiffTool("...")
+        self.tool = GitDiffTool(range_notation="...", ignore_whitespace=False)
 
-    def check_diff_committed(self, diff_range_notation):
-        self.tool = GitDiffTool(diff_range_notation)
+    def check_diff_committed(self, diff_range_notation, ignore_whitespace):
+        self.tool = GitDiffTool(
+            range_notation=diff_range_notation, ignore_whitespace=ignore_whitespace
+        )
         self._set_git_diff_output("test output", "")
         output = self.tool.diff_committed()
 
@@ -36,15 +38,20 @@ class TestGitDiffTool(unittest.TestCase):
             "--no-color",
             "--no-ext-diff",
             "-U0",
-            "origin/master{}HEAD".format(diff_range_notation),
         ]
+        if ignore_whitespace:
+            expected.append("--ignore-all-space")
+            expected.append("--ignore-blank-lines")
+        expected.append("origin/master{}HEAD".format(diff_range_notation))
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )
 
     def test_diff_commited(self):
-        self.check_diff_committed("...")
-        self.check_diff_committed("..")
+        self.check_diff_committed("...", ignore_whitespace=False)
+        self.check_diff_committed("...", ignore_whitespace=True)
+        self.check_diff_committed("..", ignore_whitespace=False)
+        self.check_diff_committed("..", ignore_whitespace=True)
 
     def test_diff_unstaged(self):
         self._set_git_diff_output("test output", "")

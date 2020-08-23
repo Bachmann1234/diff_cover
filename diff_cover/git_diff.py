@@ -18,7 +18,7 @@ class GitDiffTool:
     Thin wrapper for a subset of the `git diff` command.
     """
 
-    def __init__(self, range_notation):
+    def __init__(self, range_notation, ignore_whitespace):
         """
         :param str range_notation:
             which range notation to use when producing the diff for committed
@@ -33,6 +33,9 @@ class GitDiffTool:
             describes the actual patch that will be applied by merging A into M, even if commits have been
             cherry-picked between branches. This will produce a more accurate diff for coverage comparison when
             complex merges and cherry-picks are involved.
+
+         :param bool ignore_whitespace:
+            Perform a diff but ignore any and all whitespace.
         """
         self._range_notation = range_notation
         self._default_git_args = [
@@ -44,6 +47,10 @@ class GitDiffTool:
         ]
 
         self._default_diff_args = ["diff", "--no-color", "--no-ext-diff", "-U0"]
+
+        if ignore_whitespace:
+            self._default_diff_args.append("--ignore-all-space")
+            self._default_diff_args.append("--ignore-blank-lines")
 
     def diff_committed(self, compare_branch="origin/master"):
         """

@@ -20,6 +20,7 @@ from diff_cover.diff_cover_tool import (
     EXCLUDE_HELP,
     HTML_REPORT_HELP,
     CSS_FILE_HELP,
+    IGNORE_WHITESPACE,
 )
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
@@ -154,6 +155,12 @@ def parse_quality_args(argv):
         action="version",
         version="diff-quality {}".format(diff_cover.VERSION),
     )
+    parser.add_argument(
+        "--ignore-whitespace",
+        action="store_true",
+        default=False,
+        help=IGNORE_WHITESPACE,
+    )
 
     return vars(parser.parse_args(argv))
 
@@ -167,6 +174,7 @@ def generate_quality_report(
     ignore_unstaged=False,
     exclude=None,
     diff_range_notation=None,
+    ignore_whitespace=False,
 ):
     """
     Generate the quality report, using kwargs from `parse_args()`.
@@ -176,7 +184,7 @@ def generate_quality_report(
     )
     diff = GitDiffReporter(
         compare_branch,
-        git_diff=GitDiffTool(diff_range_notation),
+        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
         supported_extensions=supported_extensions,
@@ -260,6 +268,7 @@ def main(argv=None, directory=None):
                 ignore_unstaged=arg_dict["ignore_unstaged"],
                 exclude=arg_dict["exclude"],
                 diff_range_notation=arg_dict["diff_range_notation"],
+                ignore_whitespace=arg_dict["ignore_whitespace"],
             )
             if percent_passing >= fail_under:
                 return 0
