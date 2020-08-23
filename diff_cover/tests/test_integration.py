@@ -419,7 +419,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         self._check_html_report(
             'git_diff_violations.txt',
             'pylint_violations_report.html',
-            ['diff-quality', '--violations=pylint', '--fail-under=70'],
+            ['diff-quality', '--violations=pylint', '--fail-under=80'],
             expected_status=1
         )
 
@@ -487,11 +487,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         )
 
     def test_added_file_pylint_console(self):
-        # output text was modified in https://github.com/PyCQA/pylint/pull/2036
-        if tuple(map(int, pylint.__version__.split('.'))) < (2, 4, 0):
-            console_report = 'pylint_violations_console_report.txt'
-        else:
-            console_report = 'pylint_violations_console_report_pylint_2.4.0.txt'
+        console_report = 'pylint_violations_console_report.txt'
         self._check_console_report(
             'git_diff_violations.txt',
             console_report,
