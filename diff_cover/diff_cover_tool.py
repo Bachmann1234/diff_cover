@@ -31,6 +31,7 @@ FAIL_UNDER_HELP = (
 )
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
+IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
 SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 COVERAGE_XML_HELP = "XML coverage report"
@@ -136,6 +137,13 @@ def parse_coverage_args(argv):
         "--version", action="version", version="diff-cover {}".format(VERSION)
     )
 
+    parser.add_argument(
+        "--ignore-whitespace",
+        action="store_true",
+        default=False,
+        help=IGNORE_WHITESPACE,
+    )
+
     return vars(parser.parse_args(argv))
 
 
@@ -150,13 +158,14 @@ def generate_coverage_report(
     exclude=None,
     src_roots=None,
     diff_range_notation=None,
+    ignore_whitespace=False,
 ):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
     diff = GitDiffReporter(
         compare_branch,
-        git_diff=GitDiffTool(diff_range_notation),
+        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
         exclude=exclude,
@@ -215,6 +224,7 @@ def main(argv=None, directory=None):
         exclude=arg_dict["exclude"],
         src_roots=arg_dict["src_roots"],
         diff_range_notation=arg_dict["diff_range_notation"],
+        ignore_whitespace=arg_dict["ignore_whitespace"],
     )
 
     if percent_covered >= fail_under:
