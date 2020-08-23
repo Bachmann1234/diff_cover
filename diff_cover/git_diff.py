@@ -35,6 +35,15 @@ class GitDiffTool:
             complex merges and cherry-picks are involved.
         """
         self._range_notation = range_notation
+        self._default_git_args = [
+            "git",
+            "-c",
+            "diff.mnemonicprefix=no",
+            "-c",
+            "diff.noprefix=no",
+        ]
+
+        self._default_diff_args = ["diff", "--no-color", "--no-ext-diff", "-U0"]
 
     def diff_committed(self, compare_branch="origin/master"):
         """
@@ -44,22 +53,12 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute(
-            [
-                "git",
-                "-c",
-                "diff.mnemonicprefix=no",
-                "-c",
-                "diff.noprefix=no",
-                "diff",
-                "{branch}{notation}HEAD".format(
-                    branch=compare_branch, notation=self._range_notation
-                ),
-                "--no-color",
-                "--no-ext-diff",
-                "-U0",
-            ]
-        )[0]
+        diff_range = "{branch}{notation}HEAD".format(
+            branch=compare_branch, notation=self._range_notation
+        )
+        return execute(self._default_git_args + self._default_diff_args + [diff_range])[
+            0
+        ]
 
     def diff_unstaged(self):
         """
@@ -69,19 +68,7 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute(
-            [
-                "git",
-                "-c",
-                "diff.mnemonicprefix=no",
-                "-c",
-                "diff.noprefix=no",
-                "diff",
-                "--no-color",
-                "--no-ext-diff",
-                "-U0",
-            ]
-        )[0]
+        return execute(self._default_git_args + self._default_diff_args)[0]
 
     def diff_staged(self):
         """
@@ -91,17 +78,6 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute(
-            [
-                "git",
-                "-c",
-                "diff.mnemonicprefix=no",
-                "-c",
-                "diff.noprefix=no",
-                "diff",
-                "--cached",
-                "--no-color",
-                "--no-ext-diff",
-                "-U0",
-            ]
-        )[0]
+        return execute(self._default_git_args + self._default_diff_args + ["--cached"])[
+            0
+        ]
