@@ -7,6 +7,7 @@ class CommandError(Exception):
     """
     Error raised when a command being executed returns an error
     """
+
     pass
 
 
@@ -23,17 +24,19 @@ def execute(command, exit_codes=[0]):
         ValueError if there is a error running the command
     """
     stdout_pipe = subprocess.PIPE
-    process = subprocess.Popen(
-        command, stdout=stdout_pipe,
-        stderr=stdout_pipe
-    )
+    process = subprocess.Popen(command, stdout=stdout_pipe, stderr=stdout_pipe)
     try:
         stdout, stderr = process.communicate()
     except OSError:
-        sys.stderr.write(" ".join(
-                [cmd.decode(sys.getfilesystemencoding())
-                 if isinstance(cmd, bytes) else cmd
-                 for cmd in command])
+        sys.stderr.write(
+            " ".join(
+                [
+                    cmd.decode(sys.getfilesystemencoding())
+                    if isinstance(cmd, bytes)
+                    else cmd
+                    for cmd in command
+                ]
+            )
         )
         raise
 
@@ -48,9 +51,7 @@ def run_command_for_code(command):
     """
     Returns command's exit code.
     """
-    process = subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.communicate()
     exit_code = process.returncode
     return exit_code
@@ -65,6 +66,6 @@ def _ensure_unicode(text):
         unicode
     """
     if isinstance(text, bytes):
-        return text.decode(sys.getfilesystemencoding(), 'replace')
+        return text.decode(sys.getfilesystemencoding(), "replace")
     else:
         return text

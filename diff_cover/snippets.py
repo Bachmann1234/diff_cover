@@ -12,13 +12,14 @@ from diff_cover.git_path import GitPathTool
 
 from tokenize import open as openpy
 
+
 class Snippet:
     """
     A source code snippet.
     """
 
-    VIOLATION_COLOR = '#ffcccc'
-    DIV_CSS_CLASS = 'snippet'
+    VIOLATION_COLOR = "#ffcccc"
+    DIV_CSS_CLASS = "snippet"
 
     # Number of extra lines to include before and after
     # each snippet to provide context.
@@ -29,8 +30,7 @@ class Snippet:
     # should split into two snippets.
     MAX_GAP_IN_SNIPPET = 4
 
-    def __init__(self, src_tokens, src_filename,
-                 start_line, violation_lines):
+    def __init__(self, src_tokens, src_filename, start_line, violation_lines):
         """
         Create a source code snippet.
 
@@ -51,7 +51,7 @@ class Snippet:
         Raises a `ValueError` if `start_line` is less than 1
         """
         if start_line < 1:
-            raise ValueError('Start line must be >= 1')
+            raise ValueError("Start line must be >= 1")
 
         self._src_tokens = src_tokens
         self._src_filename = src_filename
@@ -76,11 +76,8 @@ class Snippet:
             cssclass=self.DIV_CSS_CLASS,
             linenos=True,
             linenostart=self._start_line,
-            hl_lines=self._shift_lines(
-                self._violation_lines,
-                self._start_line
-            ),
-            lineanchors=self._src_filename
+            hl_lines=self._shift_lines(self._violation_lines, self._start_line),
+            lineanchors=self._src_filename,
         )
 
         return pygments.format(self.src_tokens(), formatter)
@@ -97,7 +94,7 @@ class Snippet:
         Return a tuple of the form `(start_line, end_line)`
         indicating the start and end line number of the snippet.
         """
-        num_lines = len(self.text().split('\n'))
+        num_lines = len(self.text().split("\n"))
         end_line = self._start_line + num_lines - 1
         return (self._start_line, end_line)
 
@@ -105,7 +102,7 @@ class Snippet:
         """
         Return the source text for the snippet.
         """
-        return ''.join([val for _, val in self._src_tokens])
+        return "".join([val for _, val in self._src_tokens])
 
     @classmethod
     def load_snippets_html(cls, src_path, violation_lines):
@@ -137,10 +134,10 @@ class Snippet:
 
         # Convert the source file to unicode (Python < 3)
         if isinstance(contents, bytes):
-            contents = contents.decode('utf-8', 'replace')
+            contents = contents.decode("utf-8", "replace")
 
         # Construct a list of snippet ranges
-        src_lines = contents.split('\n')
+        src_lines = contents.split("\n")
         snippet_ranges = cls._snippet_ranges(len(src_lines), violation_lines)
 
         # Parse the source into tokens
@@ -213,22 +210,22 @@ class Snippet:
             # we need to split it up and check whether
             # each line within the token is within one
             # of our ranges.
-            if '\n' in val:
-                val_lines = val.split('\n')
+            if "\n" in val:
+                val_lines = val.split("\n")
 
                 # Check if the tokens match each range
                 for (start, end), filtered_tokens in token_map.items():
 
                     # Filter out lines that are not in this range
                     include_vals = [
-                        val_lines[i] for i in
-                        range(0, len(val_lines))
+                        val_lines[i]
+                        for i in range(0, len(val_lines))
                         if i + line_num in range(start, end + 1)
                     ]
 
                     # If we found any lines, store the tokens
                     if len(include_vals) > 0:
-                        token = (ttype, '\n'.join(include_vals))
+                        token = (ttype, "\n".join(include_vals))
                         filtered_tokens.append(token)
 
                 # Increment the line number
@@ -287,8 +284,7 @@ class Snippet:
                     # Expand to include extra context, but not after last line
                     snippet_end = line_num - lines_since_last_violation
                     snippet_end = min(
-                        num_src_lines,
-                        snippet_end + cls.NUM_CONTEXT_LINES
+                        num_src_lines, snippet_end + cls.NUM_CONTEXT_LINES
                     )
                     current_range = (current_range[0], snippet_end)
 
@@ -318,6 +314,8 @@ class Snippet:
         than or equal to `start_line`; otherwise, they will
         be excluded from the list.
         """
-        return [line_num - start_line + 1
-                for line_num in line_num_list
-                if line_num >= start_line]
+        return [
+            line_num - start_line + 1
+            for line_num in line_num_list
+            if line_num >= start_line
+        ]

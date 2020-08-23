@@ -9,6 +9,7 @@ class GitDiffError(Exception):
     """
     `git diff` command produced an error.
     """
+
     pass
 
 
@@ -35,7 +36,7 @@ class GitDiffTool:
         """
         self._range_notation = range_notation
 
-    def diff_committed(self, compare_branch='origin/master'):
+    def diff_committed(self, compare_branch="origin/master"):
         """
         Returns the output of `git diff` for committed
         changes not yet in origin/master.
@@ -43,15 +44,22 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute([
-            'git',
-            '-c', 'diff.mnemonicprefix=no',
-            '-c', 'diff.noprefix=no',
-            'diff', '{branch}{notation}HEAD'.format(branch=compare_branch, notation=self._range_notation),
-            '--no-color',
-            '--no-ext-diff',
-            '-U0'
-        ])[0]
+        return execute(
+            [
+                "git",
+                "-c",
+                "diff.mnemonicprefix=no",
+                "-c",
+                "diff.noprefix=no",
+                "diff",
+                "{branch}{notation}HEAD".format(
+                    branch=compare_branch, notation=self._range_notation
+                ),
+                "--no-color",
+                "--no-ext-diff",
+                "-U0",
+            ]
+        )[0]
 
     def diff_unstaged(self):
         """
@@ -61,15 +69,19 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute([
-            'git',
-            '-c', 'diff.mnemonicprefix=no',
-            '-c', 'diff.noprefix=no',
-            'diff',
-            '--no-color',
-            '--no-ext-diff',
-            '-U0'
-        ])[0]
+        return execute(
+            [
+                "git",
+                "-c",
+                "diff.mnemonicprefix=no",
+                "-c",
+                "diff.noprefix=no",
+                "diff",
+                "--no-color",
+                "--no-ext-diff",
+                "-U0",
+            ]
+        )[0]
 
     def diff_staged(self):
         """
@@ -79,13 +91,17 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute([
-            'git',
-            '-c', 'diff.mnemonicprefix=no',
-            '-c', 'diff.noprefix=no',
-            'diff',
-            '--cached',
-            '--no-color',
-            '--no-ext-diff',
-            '-U0'
-        ])[0]
+        return execute(
+            [
+                "git",
+                "-c",
+                "diff.mnemonicprefix=no",
+                "-c",
+                "diff.noprefix=no",
+                "diff",
+                "--cached",
+                "--no-color",
+                "--no-ext-diff",
+                "-U0",
+            ]
+        )[0]

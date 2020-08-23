@@ -13,7 +13,12 @@ except ImportError:
     import xml.etree.ElementTree as etree
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
-from diff_cover.violationsreporters.base import BaseViolationReporter, Violation, RegexBasedDriver, QualityDriver
+from diff_cover.violationsreporters.base import (
+    BaseViolationReporter,
+    Violation,
+    RegexBasedDriver,
+    QualityDriver,
+)
 
 
 """
@@ -23,11 +28,15 @@ from diff_cover.violationsreporters.base import BaseViolationReporter, Violation
     https://github.com/checkstyle/checkstyle/blob/master/src/main/java/com/puppycrawl/tools/checkstyle/AuditEventDefaultFormatter.java
 """
 checkstyle_driver = RegexBasedDriver(
-    name='checkstyle',
-    supported_extensions=['java'],
-    command=['checkstyle'],
-    expression=r'^\[\w+\]\s+([^:]+):(\d+):(?:\d+:)? (.*)$',
-    command_to_check_install=['java', 'com.puppycrawl.tools.checkstyle.Main', '-version']
+    name="checkstyle",
+    supported_extensions=["java"],
+    command=["checkstyle"],
+    expression=r"^\[\w+\]\s+([^:]+):(\d+):(?:\d+:)? (.*)$",
+    command_to_check_install=[
+        "java",
+        "com.puppycrawl.tools.checkstyle.Main",
+        "-version",
+    ],
 )
 
 
@@ -37,12 +46,20 @@ class CheckstyleXmlDriver(QualityDriver):
         See super for args
         """
         super().__init__(
-            'checkstyle',
-            ['java'],
-            ['java', 'com.puppycrawl.tools.checkstyle.Main', '-c',
-             '/google_checks.xml']
+            "checkstyle",
+            ["java"],
+            [
+                "java",
+                "com.puppycrawl.tools.checkstyle.Main",
+                "-c",
+                "/google_checks.xml",
+            ],
         )
-        self.command_to_check_install = ['java', 'com.puppycrawl.tools.checkstyle.Main', '-version']
+        self.command_to_check_install = [
+            "java",
+            "com.puppycrawl.tools.checkstyle.Main",
+            "-version",
+        ]
 
     def parse_reports(self, reports):
         """
@@ -57,12 +74,13 @@ class CheckstyleXmlDriver(QualityDriver):
             xml_document = etree.fromstring("".join(report))
             files = xml_document.findall(".//file")
             for file_tree in files:
-                for error in file_tree.findall('error'):
-                    line_number = error.get('line')
-                    error_str = "{}: {}".format(error.get('severity'),
-                                                   error.get('message'))
+                for error in file_tree.findall("error"):
+                    line_number = error.get("line")
+                    error_str = "{}: {}".format(
+                        error.get("severity"), error.get("message")
+                    )
                     violation = Violation(int(line_number), error_str)
-                    filename = GitPathTool.relative_path(file_tree.get('name'))
+                    filename = GitPathTool.relative_path(file_tree.get("name"))
                     violations_dict[filename].append(violation)
         return violations_dict
 
@@ -79,11 +97,7 @@ class FindbugsXmlDriver(QualityDriver):
         """
         See super for args
         """
-        super().__init__(
-            'findbugs',
-            ['java'],
-            ['false']
-        )
+        super().__init__("findbugs", ["java"], ["false"])
 
     def parse_reports(self, reports):
         """
@@ -98,18 +112,17 @@ class FindbugsXmlDriver(QualityDriver):
             xml_document = etree.fromstring("".join(report))
             bugs = xml_document.findall(".//BugInstance")
             for bug in bugs:
-                category = bug.get('category')
-                short_message = bug.find('ShortMessage').text
-                line = bug.find('SourceLine')
-                if line.get('start') is None or line.get('end') is None:
+                category = bug.get("category")
+                short_message = bug.find("ShortMessage").text
+                line = bug.find("SourceLine")
+                if line.get("start") is None or line.get("end") is None:
                     continue
-                start = int(line.get('start'))
-                end = int(line.get('end'))
-                for line_number in range(start, end+1):
+                start = int(line.get("start"))
+                end = int(line.get("end"))
+                for line_number in range(start, end + 1):
                     error_str = "{}: {}".format(category, short_message)
                     violation = Violation(line_number, error_str)
-                    filename = GitPathTool.relative_path(
-                        line.get('sourcepath'))
+                    filename = GitPathTool.relative_path(line.get("sourcepath"))
                     violations_dict[filename].append(violation)
 
         return violations_dict
@@ -127,11 +140,7 @@ class PmdXmlDriver(QualityDriver):
         """
         See super for args
         """
-        super().__init__(
-            'pmd',
-            ['java'],
-            []
-        )
+        super().__init__("pmd", ["java"], [])
 
     def parse_reports(self, reports):
         """
@@ -146,12 +155,11 @@ class PmdXmlDriver(QualityDriver):
             xml_document = etree.fromstring("".join(report))
             node_files = xml_document.findall(".//file")
             for node_file in node_files:
-                for error in node_file.findall('violation'):
-                    line_number = error.get('beginline')
-                    error_str = "{}: {}".format(error.get('rule'),
-                                                error.text.strip())
+                for error in node_file.findall("violation"):
+                    line_number = error.get("beginline")
+                    error_str = "{}: {}".format(error.get("rule"), error.text.strip())
                     violation = Violation(int(line_number), error_str)
-                    filename = GitPathTool.relative_path(node_file.get('name'))
+                    filename = GitPathTool.relative_path(node_file.get("name"))
                     filename = filename.replace(os.sep, "/")
                     violations_dict[filename].append(violation)
 

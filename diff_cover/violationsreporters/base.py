@@ -11,13 +11,14 @@ import os
 
 from diff_cover.command_runner import execute, run_command_for_code
 
-Violation = namedtuple('Violation', 'line, message')
+Violation = namedtuple("Violation", "line, message")
 
 
 class QualityReporterError(Exception):
     """
     A quality reporter command produced an error.
     """
+
     pass
 
 
@@ -69,7 +70,9 @@ class BaseViolationReporter:
 class QualityDriver:
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, supported_extensions, command, exit_codes=[0], output_stderr=False):
+    def __init__(
+        self, name, supported_extensions, command, exit_codes=[0], output_stderr=False
+    ):
         """
         Args:
             name: (str) name of the driver
@@ -107,7 +110,6 @@ class QualityDriver:
 
 
 class QualityReporter(BaseViolationReporter):
-
     def __init__(self, driver, reports=None, options=None):
         """
         Args:
@@ -130,12 +132,7 @@ class QualityReporter(BaseViolationReporter):
         contents = []
         for file_handle in report_files:
             # Convert to unicode, replacing unreadable chars
-            contents.append(
-                file_handle.read().decode(
-                    'utf-8',
-                    'replace'
-                )
-            )
+            contents.append(file_handle.read().decode("utf-8", "replace"))
         return contents
 
     def violations(self, src_path):
@@ -186,14 +183,14 @@ class QualityReporter(BaseViolationReporter):
 
 class RegexBasedDriver(QualityDriver):
     def __init__(
-            self,
-            name,
-            supported_extensions,
-            command,
-            expression,
-            command_to_check_install,
-            flags=0,
-            exit_codes=[0]
+        self,
+        name,
+        supported_extensions,
+        command,
+        expression,
+        command_to_check_install,
+        flags=0,
+        exit_codes=[0],
     ):
         """
         args:
@@ -220,11 +217,9 @@ class RegexBasedDriver(QualityDriver):
         violations_dict = defaultdict(list)
         for report in reports:
             if self.expression.flags & re.MULTILINE:
-                matches = (match for match in
-                           re.finditer(self.expression, report))
+                matches = (match for match in re.finditer(self.expression, report))
             else:
-                matches = (self.expression.match(line) for line in
-                           report.split('\n'))
+                matches = (self.expression.match(line) for line in report.split("\n"))
             for match in matches:
                 if match is not None:
                     src, line_number, message = match.groups()

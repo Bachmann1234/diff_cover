@@ -15,20 +15,28 @@ from diff_cover import DESCRIPTION, VERSION
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
-from diff_cover.report_generator import HtmlReportGenerator, StringReportGenerator, JsonReportGenerator
+from diff_cover.report_generator import (
+    HtmlReportGenerator,
+    StringReportGenerator,
+    JsonReportGenerator,
+)
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter
 
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
-FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
+FAIL_UNDER_HELP = (
+    "Returns an error code if coverage or quality score is below this value"
+)
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
 SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 COVERAGE_XML_HELP = "XML coverage report"
-DIFF_RANGE_NOTATION_HELP = "Git diff range notation to use when comparing branches, defaults to '...'"
+DIFF_RANGE_NOTATION_HELP = (
+    "Git diff range notation to use when comparing branches, defaults to '...'"
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -51,116 +59,108 @@ def parse_coverage_args(argv):
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
 
-    parser.add_argument(
-        'coverage_xml',
-        type=str,
-        help=COVERAGE_XML_HELP,
-        nargs='+'
-    )
+    parser.add_argument("coverage_xml", type=str, help=COVERAGE_XML_HELP, nargs="+")
 
     output_format = parser.add_mutually_exclusive_group()
 
     output_format.add_argument(
-        '--html-report',
-        metavar='FILENAME',
+        "--html-report",
+        metavar="FILENAME",
         type=str,
         default=None,
-        help=HTML_REPORT_HELP
+        help=HTML_REPORT_HELP,
     )
 
     output_format.add_argument(
-        '--json-report',
-        metavar='FILENAME',
+        "--json-report",
+        metavar="FILENAME",
         type=str,
         default=None,
-        help=JSON_REPORT_HELP
+        help=JSON_REPORT_HELP,
     )
 
     parser.add_argument(
-        '--external-css-file',
-        metavar='FILENAME',
+        "--external-css-file",
+        metavar="FILENAME",
         type=str,
         default=None,
         help=CSS_FILE_HELP,
     )
 
     parser.add_argument(
-        '--compare-branch',
-        metavar='BRANCH',
+        "--compare-branch",
+        metavar="BRANCH",
         type=str,
-        default='origin/master',
-        help=COMPARE_BRANCH_HELP
+        default="origin/master",
+        help=COMPARE_BRANCH_HELP,
     )
 
     parser.add_argument(
-        '--fail-under',
-        metavar='SCORE',
-        type=float,
-        default='0',
-        help=FAIL_UNDER_HELP
+        "--fail-under", metavar="SCORE", type=float, default="0", help=FAIL_UNDER_HELP
     )
 
     parser.add_argument(
-        '--ignore-staged',
-        action='store_true',
+        "--ignore-staged", action="store_true", default=False, help=IGNORE_STAGED_HELP
+    )
+
+    parser.add_argument(
+        "--ignore-unstaged",
+        action="store_true",
         default=False,
-        help=IGNORE_STAGED_HELP
+        help=IGNORE_UNSTAGED_HELP,
     )
 
     parser.add_argument(
-        '--ignore-unstaged',
-        action='store_true',
-        default=False,
-        help=IGNORE_UNSTAGED_HELP
+        "--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP
     )
 
     parser.add_argument(
-        '--exclude',
-        metavar='EXCLUDE',
+        "--src-roots",
+        metavar="DIRECTORY",
         type=str,
-        nargs='+',
-        help=EXCLUDE_HELP
+        nargs="+",
+        default=["src/main/java", "src/test/java"],
+        help=SRC_ROOTS_HELP,
     )
 
     parser.add_argument(
-        '--src-roots',
-        metavar='DIRECTORY',
+        "--diff-range-notation",
+        metavar="RANGE_NOTATION",
         type=str,
-        nargs='+',
-        default=['src/main/java', 'src/test/java'],
-        help=SRC_ROOTS_HELP
+        default="...",
+        choices=["...", ".."],
+        help=DIFF_RANGE_NOTATION_HELP,
     )
 
     parser.add_argument(
-        '--diff-range-notation',
-        metavar='RANGE_NOTATION',
-        type=str,
-        default='...',
-        choices=['...', '..'],
-        help=DIFF_RANGE_NOTATION_HELP
-    )
-
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='diff-cover {}'.format(VERSION)
+        "--version", action="version", version="diff-cover {}".format(VERSION)
     )
 
     return vars(parser.parse_args(argv))
 
 
-def generate_coverage_report(coverage_xml, compare_branch,
-                             html_report=None, css_file=None,
-                             json_report=None,
-                             ignore_staged=False, ignore_unstaged=False,
-                             exclude=None, src_roots=None, diff_range_notation=None):
+def generate_coverage_report(
+    coverage_xml,
+    compare_branch,
+    html_report=None,
+    css_file=None,
+    json_report=None,
+    ignore_staged=False,
+    ignore_unstaged=False,
+    exclude=None,
+    src_roots=None,
+    diff_range_notation=None,
+):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
     diff = GitDiffReporter(
-        compare_branch, git_diff=GitDiffTool(diff_range_notation),
-        ignore_staged=ignore_staged, ignore_unstaged=ignore_unstaged,
-        exclude=exclude)
+        compare_branch,
+        git_diff=GitDiffTool(diff_range_notation),
+        ignore_staged=ignore_staged,
+        ignore_unstaged=ignore_unstaged,
+        exclude=exclude,
+    )
 
     xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
     coverage = XmlCoverageReporter(xml_roots, src_roots)
@@ -198,23 +198,23 @@ def main(argv=None, directory=None):
        1 is an error
        0 is successful run
    """
-    logging.basicConfig(format='%(message)s')
+    logging.basicConfig(format="%(message)s")
 
     argv = argv or sys.argv
     arg_dict = parse_coverage_args(argv[1:])
     GitPathTool.set_cwd(directory)
-    fail_under = arg_dict.get('fail_under')
+    fail_under = arg_dict.get("fail_under")
     percent_covered = generate_coverage_report(
-        arg_dict['coverage_xml'],
-        arg_dict['compare_branch'],
-        html_report=arg_dict['html_report'],
-        json_report=arg_dict['json_report'],
-        css_file=arg_dict['external_css_file'],
-        ignore_staged=arg_dict['ignore_staged'],
-        ignore_unstaged=arg_dict['ignore_unstaged'],
-        exclude=arg_dict['exclude'],
-        src_roots=arg_dict['src_roots'],
-        diff_range_notation=arg_dict['diff_range_notation']
+        arg_dict["coverage_xml"],
+        arg_dict["compare_branch"],
+        html_report=arg_dict["html_report"],
+        json_report=arg_dict["json_report"],
+        css_file=arg_dict["external_css_file"],
+        ignore_staged=arg_dict["ignore_staged"],
+        ignore_unstaged=arg_dict["ignore_unstaged"],
+        exclude=arg_dict["exclude"],
+        src_roots=arg_dict["src_roots"],
+        diff_range_notation=arg_dict["diff_range_notation"],
     )
 
     if percent_covered >= fail_under:
@@ -224,5 +224,5 @@ def main(argv=None, directory=None):
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

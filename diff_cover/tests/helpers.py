@@ -8,7 +8,7 @@ import difflib
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
-LINE_STRINGS = ['test', '+ has a plus sign', '- has a minus sign']
+LINE_STRINGS = ["test", "+ has a plus sign", "- has a minus sign"]
 
 
 def assert_long_str_equal(expected, actual, strip=False):
@@ -22,9 +22,9 @@ def assert_long_str_equal(expected, actual, strip=False):
     # it back to unicode.  Otherwise, Python3 won't
     # let us use string methods!
     if isinstance(expected, bytes):
-        expected = expected.decode('utf-8')
+        expected = expected.decode("utf-8")
     if isinstance(actual, bytes):
-        actual = actual.decode('utf-8')
+        actual = actual.decode("utf-8")
 
     if strip:
         expected = expected.strip()
@@ -33,12 +33,10 @@ def assert_long_str_equal(expected, actual, strip=False):
     if expected != actual:
 
         # Print a human-readable diff
-        diff = difflib.Differ().compare(
-            expected.split('\n'), actual.split('\n')
-        )
+        diff = difflib.Differ().compare(expected.split("\n"), actual.split("\n"))
 
         # Fail the test
-        assert False, '\n\n' + '\n'.join(diff)
+        assert False, "\n\n" + "\n".join(diff)
 
 
 def fixture_path(rel_path):
@@ -46,7 +44,7 @@ def fixture_path(rel_path):
     Returns the absolute path to a fixture file
     given `rel_path` relative to the fixture directory.
     """
-    fixture_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
+    fixture_dir = os.path.join(os.path.dirname(__file__), "fixtures")
     return os.path.join(fixture_dir, rel_path)
 
 
@@ -58,7 +56,7 @@ def load_fixture(rel_path, encoding=None):
     If `encoding` is not None, attempts to decode
     the contents as `encoding` (e.g. 'utf-8').
     """
-    with open(fixture_path(rel_path), encoding=encoding or 'utf-8') as fixture_file:
+    with open(fixture_path(rel_path), encoding=encoding or "utf-8") as fixture_file:
         contents = fixture_file.read()
 
     if encoding is not None and isinstance(contents, bytes):
@@ -105,7 +103,7 @@ def git_diff_output(diff_dict, deleted_files=None):
 
         output.extend(_source_file_entry(src_file, modified_lines))
 
-    return '\n'.join(output)
+    return "\n".join(output)
 
 
 def _deleted_file_entries(deleted_files):
@@ -124,17 +122,17 @@ def _deleted_file_entries(deleted_files):
 
         for src_file in deleted_files:
             # File information
-            output.append('diff --git a/{} b/{}'.format(src_file, src_file))
-            output.append('index 629e8ad..91b8c0a 100644')
-            output.append('--- a/{}'.format(src_file))
-            output.append('+++ b/dev/null')
+            output.append("diff --git a/{} b/{}".format(src_file, src_file))
+            output.append("index 629e8ad..91b8c0a 100644")
+            output.append("--- a/{}".format(src_file))
+            output.append("+++ b/dev/null")
 
             # Choose a random number of lines
             num_lines = random.randint(1, 30)
 
             # Hunk information
-            output.append('@@ -0,{} +0,0 @@'.format(num_lines))
-            output.extend(['-' + _random_string() for _ in range(num_lines)])
+            output.append("@@ -0,{} +0,0 @@".format(num_lines))
+            output.extend(["-" + _random_string() for _ in range(num_lines)])
 
     return output
 
@@ -152,14 +150,14 @@ def _source_file_entry(src_file, modified_lines):
     output = []
 
     # Line for the file names
-    output.append('diff --git a/{} b/{}'.format(src_file, src_file))
+    output.append("diff --git a/{} b/{}".format(src_file, src_file))
 
     # Index line
-    output.append('index 629e8ad..91b8c0a 100644')
+    output.append("index 629e8ad..91b8c0a 100644")
 
     # Additions/deletions
-    output.append('--- a/{}'.format(src_file))
-    output.append('+++ b/{}'.format(src_file))
+    output.append("--- a/{}".format(src_file))
+    output.append("+++ b/{}".format(src_file))
 
     # Hunk information
     for (start, end) in _hunks(modified_lines):
@@ -191,7 +189,7 @@ def _hunk_entry(start, end, modified_lines):
     # for before/after the change, but since we're only interested
     # in after the change, we use the same numbers for both.
     length = end - start
-    output.append('@@ -{0},{1} +{0},{1} @@'.format(start, length))
+    output.append("@@ -{0},{1} +{0},{1} @@".format(start, length))
 
     # Output line modifications
     for line_number in range(start, end + 1):
@@ -200,15 +198,15 @@ def _hunk_entry(start, end, modified_lines):
         if line_number in modified_lines:
 
             # Delete the old line
-            output.append('-' + _random_string())
+            output.append("-" + _random_string())
 
             # Include the changed line
-            output.append('+' + _random_string())
+            output.append("+" + _random_string())
 
         # This is a line we didn't modify, so no + or - signs
         # but prepend with a space.
         else:
-            output.append(' ' + _random_string())
+            output.append(" " + _random_string())
 
     return output
 
