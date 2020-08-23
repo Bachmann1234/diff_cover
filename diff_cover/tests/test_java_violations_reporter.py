@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
+from io import BytesIO
 from textwrap import dedent
 import unittest
-import mock
-from mock import patch
-from six import BytesIO
+from unittest import mock
+from unittest.mock import patch
 
 from diff_cover.violationsreporters import base
 

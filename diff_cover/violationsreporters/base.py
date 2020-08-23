@@ -1,4 +1,3 @@
-from __future__ import unicode_literals, absolute_import
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict, namedtuple
 
@@ -22,7 +21,7 @@ class QualityReporterError(Exception):
     pass
 
 
-class BaseViolationReporter(object):
+class BaseViolationReporter:
     """
     Query information from a coverage report.
     """
@@ -67,7 +66,7 @@ class BaseViolationReporter(object):
         return self._name
 
 
-class QualityDriver(object):
+class QualityDriver:
     __metaclass__ = ABCMeta
 
     def __init__(self, name, supported_extensions, command, exit_codes=[0], output_stderr=False):
@@ -116,7 +115,7 @@ class QualityReporter(BaseViolationReporter):
             reports (list[file]) pre-generated reports. If not provided the tool will be run instead.
             options (str) options to be passed into the command
         """
-        super(QualityReporter, self).__init__(driver.name)
+        super().__init__(driver.name)
         self.reports = self._load_reports(reports) if reports else None
         self.violations_dict = defaultdict(list)
         self.driver = driver
@@ -152,7 +151,7 @@ class QualityReporter(BaseViolationReporter):
                 if self.driver_tool_installed is None:
                     self.driver_tool_installed = self.driver.installed()
                 if not self.driver_tool_installed:
-                    raise EnvironmentError("{} is not installed".format(self.driver.name))
+                    raise OSError("{} is not installed".format(self.driver.name))
                 command = copy.deepcopy(self.driver.command)
                 if self.options:
                     command.append(self.options)
@@ -205,7 +204,7 @@ class RegexBasedDriver(QualityDriver):
             command_to_check_install: (list[str]) command to run
             to see if the tool is installed
         """
-        super(RegexBasedDriver, self).__init__(name, supported_extensions, command, exit_codes)
+        super().__init__(name, supported_extensions, command, exit_codes)
         self.expression = re.compile(expression, flags)
         self.command_to_check_install = command_to_check_install
         self.is_installed = None

@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-import mock
+from unittest import mock
 from diff_cover.git_path import GitPathTool
 import unittest
 

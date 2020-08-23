@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-import mock
+from unittest import mock
 
 from diff_cover.command_runner import CommandError
 from diff_cover.git_diff import GitDiffTool

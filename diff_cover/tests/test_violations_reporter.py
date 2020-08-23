@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import subprocess
 import sys
+from io import BytesIO, StringIO
+
 try:
     # Needed for Python < 3.3, works up to 3.8
     import xml.etree.cElementTree as etree
@@ -13,9 +12,8 @@ except ImportError:
 from subprocess import Popen
 from textwrap import dedent
 
-import mock
+from unittest import mock
 
-import six
 from diff_cover.violationsreporters import base
 
 from diff_cover.command_runner import CommandError, run_command_for_code
@@ -33,9 +31,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     pydocstyle_driver,
     CppcheckDriver,
 )
-from mock import Mock, patch, MagicMock
-from six import BytesIO, StringIO
-
+from unittest.mock import Mock, patch, MagicMock
 
 def _patch_so_all_files_exist():
     _mock_exists = patch.object(base.os.path, 'exists').start()
@@ -911,7 +907,7 @@ class pycodestyleQualityReporterTest(unittest.TestCase):
     def test_quality_error(self):
 
         # Patch the output of `pycodestyle`
-        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=255)
+        _setup_patch((b"", 'whoops Ƕئ'.encode()), status_code=255)
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
             # Parse the report
@@ -921,7 +917,7 @@ class pycodestyleQualityReporterTest(unittest.TestCase):
             self.assertEqual(quality.name(), 'pycodestyle')
             with self.assertRaises(CommandError) as ex:
                 quality.violations('file1.py')
-            self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+            self.assertEqual(str(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = QualityReporter(pycodestyle_driver)
@@ -1182,7 +1178,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
         _patch_so_all_files_exist()
 
         # Patch the output of `flake8`
-        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=255)
+        _setup_patch((b"", 'whoops Ƕئ'.encode()), status_code=255)
 
         # Parse the report
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
@@ -1193,7 +1189,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
             self.assertEqual(quality.name(), 'flake8')
             with self.assertRaises(CommandError) as ex:
                 quality.violations('file1.py')
-            self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+            self.assertEqual(str(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = QualityReporter(flake8_driver)
@@ -1534,7 +1530,7 @@ class PylintQualityReporterTest(unittest.TestCase):
         self.assertEqual(violations, [Violation(2, "W1401: Invalid char '\ufffd'")])
 
 
-class JsQualityBaseReporterMixin(object):
+class JsQualityBaseReporterMixin:
     """
     Generic JS linter tests. Assumes the linter is not available as a python
     library, but is available on the commandline.
@@ -1615,7 +1611,7 @@ class JsQualityBaseReporterMixin(object):
 
     def test_quality_error(self):
         _patch_so_all_files_exist()
-        _setup_patch((b"", 'whoops Ƕئ'.encode('utf-8')), status_code=1)
+        _setup_patch((b"", 'whoops Ƕئ'.encode()), status_code=1)
         with patch('diff_cover.violationsreporters.base.run_command_for_code') as code:
             code.return_value = 0
             # Parse the report
@@ -1625,7 +1621,7 @@ class JsQualityBaseReporterMixin(object):
             self.assertEqual(quality.name(), self.quality_name)
             with self.assertRaises(CommandError) as ex:
                 quality.violations('file1.js')
-            self.assertEqual(six.text_type(ex.exception), 'whoops Ƕئ')
+            self.assertEqual(str(ex.exception), 'whoops Ƕئ')
 
     def test_no_such_file(self):
         quality = QualityReporter(self._get_out())

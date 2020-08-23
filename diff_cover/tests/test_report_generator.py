@@ -1,10 +1,8 @@
-from __future__ import unicode_literals
-
 from io import BytesIO
 from textwrap import dedent
 import json
 
-import mock
+from unittest import mock
 
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.report_generator import (
@@ -25,7 +23,7 @@ class SimpleReportGenerator(BaseReportGenerator):
     """
 
     def __init__(self, cover, diff):
-        super(SimpleReportGenerator, self).__init__(cover, diff)
+        super().__init__(cover, diff)
 
     def generate_report(self, output_file):
         pass
@@ -171,7 +169,7 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = SimpleReportGenerator
 
     def setUp(self):
-        super(SimpleReportGeneratorTest, self).setUp()
+        super().setUp()
         self.use_default_values()
 
     def test_src_paths(self):

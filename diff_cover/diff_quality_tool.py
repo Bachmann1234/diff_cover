@@ -1,7 +1,6 @@
 """
 Implement the command-line tool interface for diff_quality.
 """
-from __future__ import unicode_literals
 
 import argparse
 import logging
@@ -9,7 +8,6 @@ import os
 import sys
 
 import pluggy
-import six
 
 import diff_cover
 from diff_cover import hookspecs
@@ -198,7 +196,7 @@ def generate_quality_report(tool, compare_branch,
 
     # Generate the report for stdout
     reporter = StringQualityReportGenerator(tool, diff)
-    output_file = sys.stdout if six.PY2 else sys.stdout.buffer
+    output_file = sys.stdout.buffer
 
     reporter.generate_report(output_file)
     return reporter.total_percent_covered()
@@ -249,7 +247,7 @@ def main(argv=None, directory=None):
                 for path in arg_dict['input_reports']:
                     try:
                         input_reports.append(open(path, 'rb'))
-                    except IOError:
+                    except OSError:
                         LOGGER.warning("Could not load '{}'".format(path))
                 reporter = QualityReporter(driver, input_reports, user_options)
 
@@ -274,7 +272,7 @@ def main(argv=None, directory=None):
                 "Quality tool not installed: '{}'".format(tool)
             )
             return 1
-        except EnvironmentError as exc:
+        except OSError as exc:
             LOGGER.error(
                 "Failure: '{}'".format(exc)
             )

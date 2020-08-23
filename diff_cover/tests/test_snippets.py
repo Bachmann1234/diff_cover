@@ -1,14 +1,11 @@
-from __future__ import unicode_literals
-
 import io
-import mock
+from unittest import mock
 import os
 import tempfile
 from pygments.token import Token
 from diff_cover.snippets import Snippet
 from diff_cover.tests.helpers import load_fixture,\
     fixture_path, assert_long_str_equal
-import six
 import unittest
 
 
@@ -109,7 +106,7 @@ class SnippetTest(unittest.TestCase):
         expected_str = load_fixture(expected_fixture, encoding='utf-8')
 
         assert_long_str_equal(expected_str, result, strip=True)
-        self.assertIsInstance(result, six.text_type)
+        self.assertIsInstance(result, str)
 
 
 class SnippetLoaderTest(unittest.TestCase):
@@ -193,9 +190,9 @@ class SnippetLoaderTest(unittest.TestCase):
         )
         # Load the fixture for the expected contents
         expected_path = fixture_path(expected_out_filename)
-        with io.open(expected_path, encoding='utf-8') as fixture_file:
+        with open(expected_path, encoding='utf-8') as fixture_file:
             expected = fixture_file.read()
-            if isinstance(expected, six.binary_type):
+            if isinstance(expected, bytes):
                 expected = expected.decode('utf-8')
 
         # Check that we got what we expected
