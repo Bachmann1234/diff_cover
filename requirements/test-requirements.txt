@@ -6,5 +6,4 @@ flake8
 pyflakes
 pylint
 pydocstyle
-black
 -r requirements.txt
