@@ -1828,7 +1828,6 @@ class SubprocessErrorTestCase(unittest.TestCase):
         _mock_Popen.return_value.communicate.side_effect = OSError
         patcher = patch("diff_cover.command_runner.subprocess.Popen", _mock_Popen)
         patcher.start()
-        self.addCleanup(patcher.stop)
 
     def tearDown(self):
         patch.stopall()
