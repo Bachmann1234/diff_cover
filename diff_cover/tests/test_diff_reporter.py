@@ -534,8 +534,7 @@ class GitDiffReporterTest(unittest.TestCase):
         )
 
     def test_fnmatch_returns_the_default_with_empty_default(self):
-        """The default parameter should be returned when no patterns are given.
-        """
+        """The default parameter should be returned when no patterns are given."""
         sentinel = object()
         self.assertTrue(self.diff._fnmatch("file.py", [], default=sentinel) is sentinel)
 

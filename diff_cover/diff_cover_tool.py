@@ -201,12 +201,12 @@ def generate_coverage_report(
 
 def main(argv=None, directory=None):
     """
-       Main entry point for the tool, used by setup.py
-       Returns a value that can be passed into exit() specifying
-       the exit code.
-       1 is an error
-       0 is successful run
-   """
+    Main entry point for the tool, used by setup.py
+    Returns a value that can be passed into exit() specifying
+    the exit code.
+    1 is an error
+    0 is successful run
+    """
     logging.basicConfig(format="%(message)s")
 
     argv = argv or sys.argv
