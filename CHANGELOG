@@ -1,3 +1,8 @@
+8/31/2020 v4.0.0
+
+* Drops python 2.7 support
+* Adds option to ignore whitespace in a diff
+
 6/4/2020 v3.0.1
 
 * Updates a test around the json report that was flaking. This gets a release as some people run the tests from the packaged code 
