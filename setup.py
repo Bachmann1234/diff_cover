@@ -16,7 +16,7 @@ setup(
     test_suite="nose.collector",
     description=DESCRIPTION,
     license="Apache 2.0",
-    python_requires="!=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    python_requires=">= 3.5",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
