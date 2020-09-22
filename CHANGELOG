@@ -1,3 +1,8 @@
+9/22/2020 v4.0.1
+
+* No changes to logic. I goofed up the setup.py and 2.7 users are downloading diff cover 4.0 when that wont work (thanks jaraco for the fix!)
+
+
 8/31/2020 v4.0.0
 
 * Drops python 2.7 support
