@@ -10,10 +10,14 @@
 {% endif %}
 {% endfor %}
 
-- Total:   {{ total_num_lines }} line{{ total_num_lines|pluralize }}
-- Missing: {{ total_num_violations }} line{{ total_num_violations|pluralize }}
-- Coverage: {{ total_percent_covered }}%
+## Summary
+
+- **Total**: {{ total_num_lines }} line{{ total_num_lines|pluralize }}
+- **Missing**: {{ total_num_violations }} line{{ total_num_violations|pluralize }}
+- **Coverage**: {{ total_percent_covered }}%
 
 {% else %}
 No lines with coverage information in this diff.
 {% endif %}
+
+{% include 'snippet_content.md' %}

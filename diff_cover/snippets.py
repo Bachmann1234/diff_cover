@@ -4,6 +4,7 @@ in HTML reports.
 """
 import pygments
 from pygments.formatters.html import HtmlFormatter
+from pygments.formatters.terminal import TerminalFormatter
 from pygments.lexers import guess_lexer_for_filename
 from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
@@ -78,6 +79,18 @@ class Snippet:
             linenostart=self._start_line,
             hl_lines=self._shift_lines(self._violation_lines, self._start_line),
             lineanchors=self._src_filename,
+        )
+
+        return pygments.format(self.src_tokens(), formatter)
+
+    def terminal(self):
+        """
+        Return an HTML representation of the snippet.
+        """
+        formatter = TerminalFormatter(
+            linenos=True,
+            colorscheme=None,
+            linenostart=self._start_line,
         )
 
         return pygments.format(self.src_tokens(), formatter)

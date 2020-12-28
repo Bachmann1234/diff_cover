@@ -35,7 +35,12 @@ setup(
     ],
     packages=["diff_cover", "diff_cover/violationsreporters"],
     package_data={
-        "diff_cover": ["templates/*.txt", "templates/*.html", "templates/*.css"]
+        "diff_cover": [
+            "templates/*.txt",
+            "templates/*.html",
+            "templates/*.css",
+            "templates/*.md",
+        ]
     },
     install_requires=REQUIREMENTS,
     entry_points={
