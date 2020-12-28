@@ -393,3 +393,21 @@ class HtmlQualityReportGenerator(TemplateReportGenerator):
     TEMPLATE_NAME = "html_quality_report.html"
     CSS_TEMPLATE_NAME = "external_style.css"
     INCLUDE_SNIPPETS = True
+
+
+class MarkdownReportGenerator(TemplateReportGenerator):
+    """
+    Generate a Markdown formatted diff quality report.
+    """
+
+    TEMPLATE_NAME = "markdown_coverage_report.md"
+    INCLUDE_SNIPPETS = True
+
+
+class MarkdownQualityReportGenerator(TemplateReportGenerator):
+    """
+    Generate a Markdown formatted diff quality report.
+    """
+
+    TEMPLATE_NAME = "markdown_quality_report.md"
+    INCLUDE_SNIPPETS = True

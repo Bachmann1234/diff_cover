@@ -19,11 +19,13 @@ from diff_cover.report_generator import (
     HtmlReportGenerator,
     StringReportGenerator,
     JsonReportGenerator,
+    MarkdownReportGenerator,
 )
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter
 
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
+MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
@@ -78,6 +80,14 @@ def parse_coverage_args(argv):
         type=str,
         default=None,
         help=JSON_REPORT_HELP,
+    )
+
+    output_format.add_argument(
+        "--markdown-report",
+        metavar="FILENAME",
+        type=str,
+        default=None,
+        help=MARKDOWN_REPORT_HELP,
     )
 
     parser.add_argument(
@@ -153,6 +163,7 @@ def generate_coverage_report(
     html_report=None,
     css_file=None,
     json_report=None,
+    markdown_report=None,
     ignore_staged=False,
     ignore_unstaged=False,
     exclude=None,
@@ -191,6 +202,11 @@ def generate_coverage_report(
         with open(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
+    elif markdown_report is not None:
+        reporter = MarkdownReportGenerator(coverage, diff)
+        with open(markdown_report, "wb") as output_file:
+            reporter.generate_report(output_file)
+
     reporter = StringReportGenerator(coverage, diff)
     output_file = sys.stdout.buffer
 
@@ -218,6 +234,7 @@ def main(argv=None, directory=None):
         arg_dict["compare_branch"],
         html_report=arg_dict["html_report"],
         json_report=arg_dict["json_report"],
+        markdown_report=arg_dict["markdown_report"],
         css_file=arg_dict["external_css_file"],
         ignore_staged=arg_dict["ignore_staged"],
         ignore_unstaged=arg_dict["ignore_unstaged"],
