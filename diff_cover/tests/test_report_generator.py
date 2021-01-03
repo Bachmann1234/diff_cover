@@ -50,7 +50,8 @@ class BaseReportGeneratorTest(unittest.TestCase):
     REPORT_GENERATOR_CLASS = None
 
     # Snippet returned by the mock
-    SNIPPET = "<div>Snippet with \u1235 \u8292 unicode</div>"
+    SNIPPET_HTML = "<div>Snippet with \u1235 \u8292 unicode</div>"
+    SNIPPET_TEXT = "Snippet with \u1235 \u8292 unicode"
     SNIPPET_STYLE = ".css { color:red }"
 
     def setUp(self):
@@ -62,8 +63,8 @@ class BaseReportGeneratorTest(unittest.TestCase):
         self.addCleanup(mock.patch.stopall)
 
         # Patch snippet loading to always return the same string
-        self._load_snippets_html = mock.patch(
-            "diff_cover.snippets.Snippet.load_snippets_html"
+        self._load_formatted_snippets = mock.patch(
+            "diff_cover.snippets.Snippet.load_formatted_snippets"
         ).start()
 
         self.set_num_snippets(0)
@@ -124,7 +125,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         Patch the depdenency `Snippet.load_snippets_html()`
         to return `num_snippets` of the fake snippet HTML.
         """
-        self._load_snippets_html.return_value = num_snippets * [self.SNIPPET]
+        self._load_formatted_snippets.return_value = num_snippets * [self.SNIPPET_HTML], num_snippets * [self.SNIPPET_TEXT]
 
     def use_default_values(self):
         """

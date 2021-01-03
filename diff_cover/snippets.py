@@ -118,15 +118,15 @@ class Snippet:
         return "".join([val for _, val in self._src_tokens])
 
     @classmethod
-    def load_snippets_html(cls, src_path, violation_lines):
+    def load_formatted_snippets(cls, src_path, violation_lines):
         """
         Load snippets from the file at `src_path` and format
-        them as HTML.
+        them as HTML and as plain text and returns the two lists.
 
         See `load_snippets()` for details.
         """
         snippet_list = cls.load_snippets(src_path, violation_lines)
-        return [snippet.html() for snippet in snippet_list]
+        return [snippet.html() for snippet in snippet_list], [snippet.terminal() for snippet in snippet_list]
 
     @classmethod
     def load_snippets(cls, src_path, violation_lines):
