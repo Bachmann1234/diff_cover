@@ -182,7 +182,8 @@ class SnippetLoaderTest(unittest.TestCase):
 
         # One higher-level test to make sure
         # the snippets are being rendered correctly
-        snippets_html = "\n\n".join(Snippet.load_snippets_html(filename, violations))
+        snippets_html, _ = Snippet.load_formatted_snippets(filename, violations)
+        snippets_html = "\n\n".join(snippets_html)
         # Load the fixture for the expected contents
         expected_path = fixture_path(expected_out_filename)
         with open(expected_path, encoding="utf-8") as fixture_file:
