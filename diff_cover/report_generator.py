@@ -344,9 +344,6 @@ class TemplateReportGenerator(BaseReportGenerator):
                 snippets_html, snippets_text = Snippet.load_formatted_snippets(src_path, stats["violation_lines"])
             except OSError:
                 pass
-        else:
-            snippets_text = []
-            snippets_html = []
 
         stats.update(
             {
