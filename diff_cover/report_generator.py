@@ -341,7 +341,9 @@ class TemplateReportGenerator(BaseReportGenerator):
         snippets_html = []
         if self.INCLUDE_SNIPPETS:
             try:
-                snippets_html, snippets_text = Snippet.load_formatted_snippets(src_path, stats["violation_lines"])
+                snippets_html, snippets_text = Snippet.load_formatted_snippets(
+                    src_path, stats["violation_lines"]
+                )
             except OSError:
                 pass
 

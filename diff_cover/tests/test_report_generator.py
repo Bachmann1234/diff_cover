@@ -125,7 +125,10 @@ class BaseReportGeneratorTest(unittest.TestCase):
         Patch the depdenency `Snippet.load_snippets_html()`
         to return `num_snippets` of the fake snippet HTML.
         """
-        self._load_formatted_snippets.return_value = num_snippets * [self.SNIPPET_HTML], num_snippets * [self.SNIPPET_TEXT]
+        self._load_formatted_snippets.return_value = (
+            num_snippets * [self.SNIPPET_HTML],
+            num_snippets * [self.SNIPPET_TEXT],
+        )
 
     def use_default_values(self):
         """

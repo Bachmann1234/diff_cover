@@ -14,9 +14,9 @@
 {% endif %}
 {% endfor %}
 
-- Total:   {{ total_num_lines }} line{{ total_num_lines|pluralize }}
-- Violations: {{ total_num_violations }} line{{ total_num_violations|pluralize }}
-- % Quality: {{ total_percent_covered }}%
+- **Total**:   {{ total_num_lines }} line{{ total_num_lines|pluralize }}
+- **Violations**: {{ total_num_violations }} line{{ total_num_violations|pluralize }}
+- **% Quality**: {{ total_percent_covered }}%
 
 {% else %}
 No lines with quality information in this diff.
