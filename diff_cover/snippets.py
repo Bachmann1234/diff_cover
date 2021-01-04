@@ -85,7 +85,7 @@ class Snippet:
 
     def terminal(self):
         """
-        Return an HTML representation of the snippet.
+        Return a Terminal-friendly (with ANSI color sequences) representation of the snippet.
         """
         formatter = TerminalFormatter(
             linenos=True,
@@ -126,7 +126,9 @@ class Snippet:
         See `load_snippets()` for details.
         """
         snippet_list = cls.load_snippets(src_path, violation_lines)
-        return [snippet.html() for snippet in snippet_list], [snippet.terminal() for snippet in snippet_list]
+        return [snippet.html() for snippet in snippet_list], [
+            snippet.terminal() for snippet in snippet_list
+        ]
 
     @classmethod
     def load_snippets(cls, src_path, violation_lines):
