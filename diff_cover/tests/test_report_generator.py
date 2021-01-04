@@ -11,6 +11,7 @@ from diff_cover.report_generator import (
     StringReportGenerator,
     TemplateReportGenerator,
     JsonReportGenerator,
+    MarkdownReportGenerator,
 )
 from diff_cover.tests.helpers import load_fixture, assert_long_str_equal
 import unittest
@@ -467,4 +468,98 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
 
         # Verify that we got the expected string
         expected = load_fixture("html_report_two_snippets.html").strip()
+        self.assert_report(expected)
+
+
+class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
+
+    REPORT_GENERATOR_CLASS = MarkdownReportGenerator
+
+    def test_generate_report(self):
+
+        # Generate a default report
+        self.use_default_values()
+
+        # Verify that we got the expected string
+        expected = dedent(
+            """
+        # Diff Coverage
+        ## Diff: master
+
+        - file1&#46;py (66.7%): Missing lines 10-11
+        - subdir/file2&#46;py (66.7%): Missing lines 10-11
+
+        ## Summary
+
+        - **Total**: 12 lines
+        - **Missing**: 4 lines
+        - **Coverage**: 66%
+        """
+        ).strip()
+
+        self.assert_report(expected)
+
+    def test_hundred_percent(self):
+
+        # Have the dependencies return an empty report
+        self.set_src_paths_changed(["file.py"])
+        self.set_lines_changed("file.py", [line for line in range(0, 100)])
+        self.set_violations("file.py", [])
+        self.set_measured("file.py", [2])
+
+        expected = dedent(
+            """
+        # Diff Coverage
+        ## Diff: master
+
+        - file&#46;py (100%)
+
+        ## Summary
+        
+        - **Total**: 1 line
+        - **Missing**: 0 lines
+        - **Coverage**: 100%
+        """
+        ).strip()
+
+        self.assert_report(expected)
+
+    def test_empty_report(self):
+
+        # Have the dependencies return an empty report
+        # (this is the default)
+
+        expected = dedent(
+            """
+        # Diff Coverage
+        ## Diff: master
+
+        No lines with coverage information in this diff.
+        """
+        ).strip()
+
+        self.assert_report(expected)
+
+    def test_one_snippet(self):
+
+        self.use_default_values()
+
+        # Have the snippet loader always report
+        # provide one snippet (for every source file)
+        self.set_num_snippets(1)
+
+        # Verify that we got the expected string
+        expected = load_fixture("markdown_report_one_snippet.md").strip()
+        self.assert_report(expected)
+
+    def test_multiple_snippets(self):
+
+        self.use_default_values()
+
+        # Have the snippet loader always report
+        # multiple snippets for each source file
+        self.set_num_snippets(2)
+
+        # Verify that we got the expected string
+        expected = load_fixture("markdown_report_two_snippets.md").strip()
         self.assert_report(expected)

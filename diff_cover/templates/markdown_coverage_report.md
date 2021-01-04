@@ -4,9 +4,9 @@
 {% if src_stats %}
 {% for src_path, stats in src_stats|dictsort %}
 {% if stats.percent_covered < 100 %}
-- {{ src_path }} ({{ stats.percent_covered|round(1) }}%): Missing lines {{ stats.violation_lines|join(',') }}
+- {{ src_path | replace(".", "&#46;") }} ({{ stats.percent_covered|round(1) }}%): Missing lines {{ stats.violation_lines|join(',') }}
 {% else %}
-- {{ src_path }} (100%)
+- {{ src_path | replace(".", "&#46;") }} (100%)
 {% endif %}
 {% endfor %}
 
