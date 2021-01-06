@@ -337,7 +337,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
-        formatted_snippets = {"html": [], "text": []}
+        formatted_snippets = {"html": [], "markdown": []}
         if self.INCLUDE_SNIPPETS:
             try:
                 formatted_snippets = Snippet.load_formatted_snippets(
@@ -349,7 +349,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         stats.update(
             {
                 "snippets_html": formatted_snippets["html"],
-                "snippets_text": formatted_snippets["text"],
+                "snippets_markdown": formatted_snippets["markdown"],
                 "violation_lines": TemplateReportGenerator.combine_adjacent_lines(
                     stats["violation_lines"]
                 ),
