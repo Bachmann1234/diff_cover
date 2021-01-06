@@ -57,13 +57,13 @@ class SnippetTest(unittest.TestCase):
 
     def test_format(self):
         self._assert_format(
-            self.SRC_TOKENS, "test.py", 4, [4, 6], self.FIXTURES["default"]
+            self.SRC_TOKENS, "test.py", 4, 6, [4, 6], self.FIXTURES["default"]
         )
 
     def test_format_with_invalid_start_line(self):
         for start_line in [-2, -1, 0]:
             with self.assertRaises(ValueError):
-                Snippet("# test", "test.py", start_line, [], None)
+                Snippet("# test", "test.py", start_line, start_line + 1, [], None)
 
     def test_format_with_invalid_violation_lines(self):
 
@@ -73,6 +73,7 @@ class SnippetTest(unittest.TestCase):
             self.SRC_TOKENS,
             "test.py",
             1,
+            2,
             [-1, 0, 5, 6],
             self.FIXTURES["invalid_violations"],
         )
@@ -81,20 +82,28 @@ class SnippetTest(unittest.TestCase):
 
         # No filename extension: should default to text lexer
         self._assert_format(
-            self.SRC_TOKENS, "test", 4, [4, 6], self.FIXTURES["no_filename_ext"]
+            self.SRC_TOKENS, "test", 4, 6, [4, 6], self.FIXTURES["no_filename_ext"]
         )
 
     def test_unicode(self):
 
         unicode_src = [(Token.Text, "var = \u0123 \u5872 \u3389")]
 
-        self._assert_format(unicode_src, "test.py", 1, [], self.FIXTURES["unicode"])
+        self._assert_format(unicode_src, "test.py", 1, 2, [], self.FIXTURES["unicode"])
 
     def _assert_format(
-        self, src_tokens, src_filename, start_line, violation_lines, expected_fixture
+        self,
+        src_tokens,
+        src_filename,
+        start_line,
+        last_line,
+        violation_lines,
+        expected_fixture,
     ):
 
-        snippet = Snippet(src_tokens, src_filename, start_line, violation_lines, None)
+        snippet = Snippet(
+            src_tokens, src_filename, start_line, last_line, violation_lines, None
+        )
         result = snippet.html()
 
         expected_str = load_fixture(expected_fixture, encoding="utf-8")

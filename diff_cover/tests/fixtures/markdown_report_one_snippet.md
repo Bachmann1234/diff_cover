@@ -14,6 +14,8 @@
 
 ## file1&#46;py
 
+Lines 1-1
+
 ```
 Snippet with ስ 芒 unicode
 ```
@@ -23,6 +25,8 @@ Snippet with ስ 芒 unicode
 
 
 ## subdir/file2&#46;py
+
+Lines 1-1
 
 ```
 Snippet with ስ 芒 unicode
