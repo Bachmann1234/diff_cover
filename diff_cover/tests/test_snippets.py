@@ -210,12 +210,18 @@ class SnippetLoaderTest(unittest.TestCase):
             "snippet_list.md",
         )
 
-    def test_load_snippets_markdown(self):
         self._compare_snippets_output(
             "markdown",
-            "snippet_src.cpp",
+            "snippet_src2.cpp",
             [4, 5],
             "snippet_list2.md",
+        )
+
+        self._compare_snippets_output(
+            "markdown",
+            "snippet_src3.cpp",
+            [12],
+            "snippet_list3.md",
         )
 
     def test_load_utf8_snippets(self):
