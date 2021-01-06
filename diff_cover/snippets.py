@@ -31,7 +31,17 @@ class Snippet:
     # should split into two snippets.
     MAX_GAP_IN_SNIPPET = 4
 
-    def __init__(self, src_tokens, src_filename, start_line, violation_lines):
+    # See https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
+    # for typical values of accepted programming language hints in Markdown code fenced blocks
+    LEXER_TO_MARKDOWN_CODE_HINT = {
+        "Python": "python",
+        "C++": "cpp",
+        # TODO: expand this list...
+    }
+
+    def __init__(
+        self, src_tokens, src_filename, start_line, violation_lines, lexer_name
+    ):
         """
         Create a source code snippet.
 
@@ -49,6 +59,10 @@ class Snippet:
         `violation_lines` is a list of line numbers
         to highlight as violations.
 
+        `lexer_name` provides an hint on the
+        programming language for this snippet.
+        See https://pygments.org/docs/lexers/
+
         Raises a `ValueError` if `start_line` is less than 1
         """
         if start_line < 1:
@@ -58,6 +72,7 @@ class Snippet:
         self._src_filename = src_filename
         self._start_line = start_line
         self._violation_lines = violation_lines
+        self._lexer_name = lexer_name
 
     @classmethod
     def style_defs(cls):
@@ -82,6 +97,23 @@ class Snippet:
         )
 
         return pygments.format(self.src_tokens(), formatter)
+
+    def markdown(self):
+        """
+        Return a Markdown representation of the snippet using Markdown code fences.
+        See https://github.github.com/gfm/#fenced-code-blocks.
+        """
+        if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
+            return (
+                "```"
+                + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
+                + "\n"
+                + self.text()
+                + "\n```\n"
+            )
+        else:
+            # return "```\n" + self.text() + "\n```\n"
+            return "```\n" + self._lexer_name + "\n" + self.text() + "\n```\n"
 
     def terminal(self):
         """
@@ -134,7 +166,7 @@ class Snippet:
         # ...render twice in different formats
         return {
             "html": [snippet.html() for snippet in snippet_list],
-            "text": [snippet.terminal() for snippet in snippet_list],
+            "markdown": [snippet.markdown() for snippet in snippet_list],
         }
 
     @classmethod
@@ -163,13 +195,13 @@ class Snippet:
         snippet_ranges = cls._snippet_ranges(len(src_lines), violation_lines)
 
         # Parse the source into tokens
-        token_stream = cls._parse_src(contents, src_path)
+        token_stream, lexer = cls._parse_src(contents, src_path)
 
         # Group the tokens by snippet
         token_groups = cls._group_tokens(token_stream, snippet_ranges)
 
         return [
-            Snippet(tokens, src_path, start, violation_lines)
+            Snippet(tokens, src_path, start, violation_lines, lexer.name)
             for (start, _), tokens in sorted(token_groups.items())
         ]
 
@@ -193,7 +225,7 @@ class Snippet:
         # the source file when lexing.
         lexer.stripnl = False
 
-        return pygments.lex(src_contents, lexer)
+        return pygments.lex(src_contents, lexer), lexer
 
     @classmethod
     def _group_tokens(cls, token_stream, range_list):

@@ -52,7 +52,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
 
     # Snippet returned by the mock
     SNIPPET_HTML = "<div>Snippet with \u1235 \u8292 unicode</div>"
-    SNIPPET_TEXT = "Snippet with \u1235 \u8292 unicode"
+    SNIPPET_MARKDOWN = "```\nSnippet with \u1235 \u8292 unicode\n```"
     SNIPPET_STYLE = ".css { color:red }"
 
     def setUp(self):
@@ -128,7 +128,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         """
         self._load_formatted_snippets.return_value = {
             "html": num_snippets * [self.SNIPPET_HTML],
-            "text": num_snippets * [self.SNIPPET_TEXT],
+            "markdown": num_snippets * [self.SNIPPET_MARKDOWN],
         }
 
     def use_default_values(self):

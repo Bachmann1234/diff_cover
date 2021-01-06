@@ -63,7 +63,7 @@ class SnippetTest(unittest.TestCase):
     def test_format_with_invalid_start_line(self):
         for start_line in [-2, -1, 0]:
             with self.assertRaises(ValueError):
-                Snippet("# test", "test.py", start_line, [])
+                Snippet("# test", "test.py", start_line, [], None)
 
     def test_format_with_invalid_violation_lines(self):
 
@@ -94,7 +94,7 @@ class SnippetTest(unittest.TestCase):
         self, src_tokens, src_filename, start_line, violation_lines, expected_fixture
     ):
 
-        snippet = Snippet(src_tokens, src_filename, start_line, violation_lines)
+        snippet = Snippet(src_tokens, src_filename, start_line, violation_lines, None)
         result = snippet.html()
 
         expected_str = load_fixture(expected_fixture, encoding="utf-8")
@@ -171,8 +171,8 @@ class SnippetLoaderTest(unittest.TestCase):
         expected_ranges = [(24, 37)]
         self._assert_line_range(violations, expected_ranges)
 
-    def _compare_snippets_html_output(
-        self, filename, violations, expected_out_filename
+    def _compare_snippets_output(
+        self, format, filename, violations, expected_out_filename
     ):
         # Need to be in the fixture directory
         # so the source path is displayed correctly
@@ -183,7 +183,7 @@ class SnippetLoaderTest(unittest.TestCase):
         # One higher-level test to make sure
         # the snippets are being rendered correctly
         formatted_snippets = Snippet.load_formatted_snippets(filename, violations)
-        snippets_html = "\n\n".join(formatted_snippets["html"])
+        snippets_selected = "\n\n".join(formatted_snippets[format])
         # Load the fixture for the expected contents
         expected_path = fixture_path(expected_out_filename)
         with open(expected_path, encoding="utf-8") as fixture_file:
@@ -192,28 +192,43 @@ class SnippetLoaderTest(unittest.TestCase):
                 expected = expected.decode("utf-8")
 
         # Check that we got what we expected
-        assert_long_str_equal(expected, snippets_html, strip=True)
+        assert_long_str_equal(expected, snippets_selected, strip=True)
 
     def test_load_snippets_html(self):
-        self._compare_snippets_html_output(
-            "snippet_src.py", [10, 12, 13, 50, 51, 54, 55, 57], "snippet_list.html"
+        self._compare_snippets_output(
+            "html",
+            "snippet_src.py",
+            [10, 12, 13, 50, 51, 54, 55, 57],
+            "snippet_list.html",
         )
 
-    def test_load_snippets_html(self):
-        self._compare_snippets_html_output(
-            "snippet_src.py", [10, 12, 13, 50, 51, 54, 55, 57], "snippet_list.html"
+    def test_load_snippets_markdown(self):
+        self._compare_snippets_output(
+            "markdown",
+            "snippet_src.py",
+            [10, 12, 13, 50, 51, 54, 55, 57],
+            "snippet_list.md",
+        )
+
+    def test_load_snippets_markdown(self):
+        self._compare_snippets_output(
+            "markdown",
+            "snippet_src.cpp",
+            [4, 5],
+            "snippet_list2.md",
         )
 
     def test_load_utf8_snippets(self):
-        self._compare_snippets_html_output(
+        self._compare_snippets_output(
+            "html",
             "snippet_unicode.py",
             [10, 12, 13, 50, 51, 54, 55, 57],
             "snippet_unicode_html_output.html",
         )
 
     def test_load_declared_arabic(self):
-        self._compare_snippets_html_output(
-            "snippet_8859.py", [7], "snippet_arabic_output.html"
+        self._compare_snippets_output(
+            "html", "snippet_8859.py", [7], "snippet_arabic_output.html"
         )
 
     def _assert_line_range(self, violation_lines, expected_ranges):
