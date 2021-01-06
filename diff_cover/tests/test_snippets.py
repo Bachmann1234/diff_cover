@@ -182,8 +182,8 @@ class SnippetLoaderTest(unittest.TestCase):
 
         # One higher-level test to make sure
         # the snippets are being rendered correctly
-        snippets_html, _ = Snippet.load_formatted_snippets(filename, violations)
-        snippets_html = "\n\n".join(snippets_html)
+        formatted_snippets = Snippet.load_formatted_snippets(filename, violations)
+        snippets_html = "\n\n".join(formatted_snippets["html"])
         # Load the fixture for the expected contents
         expected_path = fixture_path(expected_out_filename)
         with open(expected_path, encoding="utf-8") as fixture_file:
@@ -193,6 +193,11 @@ class SnippetLoaderTest(unittest.TestCase):
 
         # Check that we got what we expected
         assert_long_str_equal(expected, snippets_html, strip=True)
+
+    def test_load_snippets_html(self):
+        self._compare_snippets_html_output(
+            "snippet_src.py", [10, 12, 13, 50, 51, 54, 55, 57], "snippet_list.html"
+        )
 
     def test_load_snippets_html(self):
         self._compare_snippets_html_output(

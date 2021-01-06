@@ -337,11 +337,10 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
-        snippets_text = []
-        snippets_html = []
+        formatted_snippets = {"html": [], "text": []}
         if self.INCLUDE_SNIPPETS:
             try:
-                snippets_html, snippets_text = Snippet.load_formatted_snippets(
+                formatted_snippets = Snippet.load_formatted_snippets(
                     src_path, stats["violation_lines"]
                 )
             except OSError:
@@ -349,8 +348,8 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         stats.update(
             {
-                "snippets_html": snippets_html,
-                "snippets_text": snippets_text,
+                "snippets_html": formatted_snippets["html"],
+                "snippets_text": formatted_snippets["text"],
                 "violation_lines": TemplateReportGenerator.combine_adjacent_lines(
                     stats["violation_lines"]
                 ),
