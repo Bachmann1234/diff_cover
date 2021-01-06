@@ -40,7 +40,13 @@ class Snippet:
     }
 
     def __init__(
-        self, src_tokens, src_filename, start_line, violation_lines, lexer_name
+        self,
+        src_tokens,
+        src_filename,
+        start_line,
+        last_line,
+        violation_lines,
+        lexer_name,
     ):
         """
         Create a source code snippet.
@@ -55,6 +61,9 @@ class Snippet:
         `start_line` is the line number of first line
         in `src_str`.  The first line in the file is
         line number 1.
+
+        `last_line` is the line number of last line
+        in `src_str`.
 
         `violation_lines` is a list of line numbers
         to highlight as violations.
@@ -71,6 +80,7 @@ class Snippet:
         self._src_tokens = src_tokens
         self._src_filename = src_filename
         self._start_line = start_line
+        self._last_line = last_line
         self._violation_lines = violation_lines
         self._lexer_name = lexer_name
 
@@ -100,20 +110,21 @@ class Snippet:
 
     def markdown(self):
         """
-        Return a Markdown representation of the snippet using Markdown code fences.
+        Return a Markdown representation of the snippet using Markdown fenced code blocks.
         See https://github.github.com/gfm/#fenced-code-blocks.
         """
+        header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
         if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
-            return (
+            return header + (
                 "```"
                 + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
                 + "\n"
                 + self.text()
                 + "\n```\n"
             )
-        else:
-            # return "```\n" + self.text() + "\n```\n"
-            return "```\n" + self._lexer_name + "\n" + self.text() + "\n```\n"
+
+        # unknown programming language, return a non-decorated fenced code block:
+        return "```\n" + self.text() + "\n```\n"
 
     def terminal(self):
         """
@@ -201,8 +212,8 @@ class Snippet:
         token_groups = cls._group_tokens(token_stream, snippet_ranges)
 
         return [
-            Snippet(tokens, src_path, start, violation_lines, lexer.name)
-            for (start, _), tokens in sorted(token_groups.items())
+            Snippet(tokens, src_path, start, end, violation_lines, lexer.name)
+            for (start, end), tokens in sorted(token_groups.items())
         ]
 
     @classmethod
