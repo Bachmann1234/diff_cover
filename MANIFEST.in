@@ -7,4 +7,4 @@ include NOTICE
 include pylintrc
 include tox.ini
 include .coveragerc
-recursive-include diff_cover *.txt *.html *.css *.xml *.py *.md pylintrc
+recursive-include diff_cover *.txt *.html *.css *.xml *.py *.md *.cpp pylintrc
