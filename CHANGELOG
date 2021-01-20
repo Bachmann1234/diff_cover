@@ -1,8 +1,12 @@
-1/9/2020 v4.1.1
+1/20/2021 v4.2.0
+
+* Attempts to sniff the encoding of src files before reading them in. I am resisting adding an argument to have the user specify them until I am absolutely certain its necessary
+
+1/9/2021 v4.1.1
 
 * Adds the cpp test fixtures to the manifest. No functionality changes just ensuring the packaged tests can run
 
-1/7/2020 v4.1.0
+1/7/2021 v4.1.0
 
 * Adds markdown report rendering support (thanks @f18m !)
 
