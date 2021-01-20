@@ -2,6 +2,7 @@
 Load snippets from source files to show violation lines
 in HTML reports.
 """
+import chardet
 import pygments
 from pygments.formatters.html import HtmlFormatter
 from pygments.formatters.terminal import TerminalFormatter
@@ -194,11 +195,31 @@ class Snippet:
         Raises an `IOError` if the file could not be loaded.
         """
         # Load the contents of the file
-        with openpy(GitPathTool.relative_path(src_path)) as src_file:
-            contents = src_file.read()
+        try:
+            with openpy(GitPathTool.relative_path(src_path)) as src_file:
+                contents = src_file.read()
+        except UnicodeDecodeError:
+            # this tool was originally written with python in mind.
+            # for processing non python files encoded in anything other than ascii or utf-8 that
+            # code wont work
+            with open(GitPathTool.relative_path(src_path)) as src_file:
+                contents = src_file.read()
 
-        # Convert the source file to unicode (Python < 3)
         if isinstance(contents, bytes):
+            encoding = chardet.detect(contents).get("encoding", "utf-8")
+            try:
+                contents = contents.decode(encoding)
+            except UnicodeDecodeError:
+                pass
+
+        if isinstance(contents, bytes):
+            # We failed to decode the file.
+            # if this is happening a lot I should just bite the bullet
+            # and write a parameter to let people list their file encodings
+            print(
+                "Warning: I was not able to decode your src file. "
+                "I can continue but code snippets in the final report may look wrong"
+            )
             contents = contents.decode("utf-8", "replace")
 
         # Construct a list of snippet ranges
