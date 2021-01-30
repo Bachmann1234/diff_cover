@@ -182,27 +182,15 @@ class Snippet:
         }
 
     @classmethod
-    def load_snippets(cls, src_path, violation_lines):
-        """
-        Load snippets from the file at `src_path` to show
-        violations on lines in the list `violation_lines`
-        (list of line numbers, starting at index 0).
-
-        The file at `src_path` should be a text file (not binary).
-
-        Returns a list of `Snippet` instances.
-
-        Raises an `IOError` if the file could not be loaded.
-        """
-        # Load the contents of the file
+    def load_contents(cls, src_path):
         try:
             with openpy(GitPathTool.relative_path(src_path)) as src_file:
                 contents = src_file.read()
-        except UnicodeDecodeError:
+        except (SyntaxError, UnicodeDecodeError):
             # this tool was originally written with python in mind.
             # for processing non python files encoded in anything other than ascii or utf-8 that
             # code wont work
-            with open(GitPathTool.relative_path(src_path)) as src_file:
+            with open(GitPathTool.relative_path(src_path), "rb") as src_file:
                 contents = src_file.read()
 
         if isinstance(contents, bytes):
@@ -221,6 +209,22 @@ class Snippet:
                 "I can continue but code snippets in the final report may look wrong"
             )
             contents = contents.decode("utf-8", "replace")
+        return contents
+
+    @classmethod
+    def load_snippets(cls, src_path, violation_lines):
+        """
+        Load snippets from the file at `src_path` to show
+        violations on lines in the list `violation_lines`
+        (list of line numbers, starting at index 0).
+
+        The file at `src_path` should be a text file (not binary).
+
+        Returns a list of `Snippet` instances.
+
+        Raises an `IOError` if the file could not be loaded.
+        """
+        contents = cls.load_contents(src_path)
 
         # Construct a list of snippet ranges
         src_lines = contents.split("\n")

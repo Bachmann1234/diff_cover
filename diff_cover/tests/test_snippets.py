@@ -246,6 +246,13 @@ class SnippetLoaderTest(unittest.TestCase):
             "html", "snippet_8859.py", [7], "snippet_arabic_output.html"
         )
 
+    def test_latin_one_undeclared(self):
+        with tempfile.NamedTemporaryFile() as temp:
+            temp.write("I am some latin 1 Â encoded text".encode("latin1"))
+            temp.flush()
+            contents = Snippet.load_contents(temp.name)
+        self.assertEqual(contents, "I am some latin 1 Â encoded text")
+
     def _assert_line_range(self, violation_lines, expected_ranges):
         """
         Assert that the snippets loaded using `violation_lines`
