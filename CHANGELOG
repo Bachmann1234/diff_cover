@@ -1,3 +1,7 @@
+1/30/2021 v4.2.1
+
+* The fix from 4.2.0 was incorrect
+
 1/20/2021 v4.2.0
 
 * Attempts to sniff the encoding of src files before reading them in. I am resisting adding an argument to have the user specify them until I am absolutely certain its necessary
