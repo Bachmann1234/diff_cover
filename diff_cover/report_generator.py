@@ -30,7 +30,11 @@ class DiffViolations:
         if measured_lines is None:
             self.measured_lines = set(diff_lines)
         else:
-            self.measured_lines = set(measured_lines).intersection(diff_lines)
+            self.measured_lines = {
+                measuredInfo
+                for measuredInfo in measured_lines
+                    if measuredInfo.line in diff_lines
+            }
 
 
 class BaseReportGenerator:
@@ -99,9 +103,9 @@ class BaseReportGenerator:
             return None
 
         # Protect against a divide by zero
-        num_measured = len(diff_violations.measured_lines)
+        num_measured = sum(line.total_instructions for line in diff_violations.measured_lines)
         if num_measured > 0:
-            num_uncovered = len(diff_violations.lines)
+            num_uncovered = sum(line.missed_instructions for line in diff_violations.violations)
             return 100 - float(num_uncovered) / num_measured * 100
 
         else:
@@ -131,8 +135,9 @@ class BaseReportGenerator:
 
         return sum(
             [
-                len(summary.measured_lines)
+                line.total_instructions
                 for summary in self._diff_violations().values()
+                    for line in summary.measured_lines
             ]
         )
 
@@ -142,7 +147,13 @@ class BaseReportGenerator:
         that are in violation.
         """
 
-        return sum(len(summary.lines) for summary in self._diff_violations().values())
+        return sum(
+            [
+                line.missed_instructions
+                for summary in self._diff_violations().values()
+                    for line in summary.violations
+            ]
+        )
 
     def total_percent_covered(self):
         """
@@ -208,7 +219,7 @@ class BaseReportGenerator:
 
 
 # Set up the template environment
-TEMPLATE_LOADER = PackageLoader(__package__)
+TEMPLATE_LOADER = PackageLoader("diff_cover")
 TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, trim_blocks=True, lstrip_blocks=True)
 TEMPLATE_ENV.filters["pluralize"] = pluralize_dj
 

@@ -13,6 +13,8 @@ from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import (
     BaseViolationReporter,
     Violation,
+    ViolationInfo,
+    MeasuredInfo,
     RegexBasedDriver,
     QualityDriver,
 )
@@ -210,6 +212,7 @@ class XmlCoverageReporter(BaseViolationReporter):
                         xml_document, src_path
                     )
                     _number = "nr"
+                    _misses = "mi"
                     _hits = "ci"
                 else:
                     # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
@@ -224,9 +227,9 @@ class XmlCoverageReporter(BaseViolationReporter):
                 # First case, need to define violations initially
                 if violations is None:
                     violations = {
-                        Violation(int(line.get(_number)), None)
+                        ViolationInfo(int(line.get(_number)), int(line.get(_misses, 0)))
                         for line in line_nodes
-                        if int(line.get(_hits, 0)) == 0
+                        if int(line.get(_misses, 1)) != 0
                     }
 
                 # If we already have a violations set,
@@ -234,13 +237,16 @@ class XmlCoverageReporter(BaseViolationReporter):
                 # violations set and its old self
                 else:
                     violations = violations & {
-                        Violation(int(line.get(_number)), None)
+                        ViolationInfo(int(line.get(_number)), int(line.get(_misses, 0)))
                         for line in line_nodes
-                        if int(line.get(_hits, 0)) == 0
+                        if int(line.get(_misses, 1)) != 0
                     }
 
                 # Measured is the union of itself and the new measured
-                measured = measured | {int(line.get(_number)) for line in line_nodes}
+                measured = measured | {
+                        MeasuredInfo(int(line.get(_number)), int(line.get(_hits, 0)) + int(line.get(_misses, 0)))
+                        for line in line_nodes
+                    }
 
             # If we don't have any information about the source file,
             # don't report any violations

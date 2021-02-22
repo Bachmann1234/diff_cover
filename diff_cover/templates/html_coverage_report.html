@@ -10,8 +10,8 @@
         <p>Diff: {{ diff_name }}</p>
         {% if src_stats %}
         <ul>
-            <li><b>Total</b>: {{ total_num_lines }} line{{ total_num_lines|pluralize }}</li>
-            <li><b>Missing</b>: {{ total_num_violations }} line{{ total_num_violations|pluralize }}</li>
+            <li><b>Total</b>: {{ total_num_lines }} instruction{{ total_num_lines|pluralize }}</li>
+            <li><b>Missing</b>: {{ total_num_violations }} instruction{{ total_num_violations|pluralize }}</li>
             <li><b>Coverage</b>: {{ total_percent_covered }}%</li>
         </ul>
         <table border="1">
