@@ -1,4 +1,5 @@
 # Production requirements
+inflect==3.0.2 # remove when you drop support for python3.5
 Jinja2>=2.7.1
 jinja2_pluralize
 pluggy
