@@ -2,6 +2,7 @@
 
 * We still support python 3.5 (though we should probably drop it soon). A transitive dep dropped support for 3.5. 
   this version pins inflect
+* Pins pygments cuse updates keep breaking my overly fragile html tests"
 
 1/30/2021 v4.2.1
 
