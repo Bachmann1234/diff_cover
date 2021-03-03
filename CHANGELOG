@@ -1,4 +1,8 @@
-1/30/2021 v4.2.2
+3/03/2021 v4.2.3
+
+* I pinned pygments last release and that was a bit of lazieness. This releases unpins it again
+
+3/01/2021 v4.2.2
 
 * We still support python 3.5 (though we should probably drop it soon). A transitive dep dropped support for 3.5. 
   this version pins inflect
