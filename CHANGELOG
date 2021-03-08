@@ -1,3 +1,8 @@
+3/08/2021 v5.0.0
+
+* Bumping a major version as I am dropping python 3.5 support as it has been EOL for some time
+* As a consolation I am adding 3.9 to the build. The project ran on 3.9 just fine (I develop on it..) but I had not declared support
+
 3/03/2021 v4.2.3
 
 * I pinned pygments last release and that was a bit of lazieness. This releases unpins it again
