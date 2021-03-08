@@ -120,7 +120,7 @@ class FindbugsXmlDriver(QualityDriver):
                 start = int(line.get("start"))
                 end = int(line.get("end"))
                 for line_number in range(start, end + 1):
-                    error_str = "{}: {}".format(category, short_message)
+                    error_str = f"{category}: {short_message}"
                     violation = Violation(line_number, error_str)
                     filename = GitPathTool.relative_path(line.get("sourcepath"))
                     violations_dict[filename].append(violation)

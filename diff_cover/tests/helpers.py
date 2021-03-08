@@ -122,16 +122,16 @@ def _deleted_file_entries(deleted_files):
 
         for src_file in deleted_files:
             # File information
-            output.append("diff --git a/{} b/{}".format(src_file, src_file))
+            output.append(f"diff --git a/{src_file} b/{src_file}")
             output.append("index 629e8ad..91b8c0a 100644")
-            output.append("--- a/{}".format(src_file))
+            output.append(f"--- a/{src_file}")
             output.append("+++ b/dev/null")
 
             # Choose a random number of lines
             num_lines = random.randint(1, 30)
 
             # Hunk information
-            output.append("@@ -0,{} +0,0 @@".format(num_lines))
+            output.append(f"@@ -0,{num_lines} +0,0 @@")
             output.extend(["-" + _random_string() for _ in range(num_lines)])
 
     return output
@@ -150,14 +150,14 @@ def _source_file_entry(src_file, modified_lines):
     output = []
 
     # Line for the file names
-    output.append("diff --git a/{} b/{}".format(src_file, src_file))
+    output.append(f"diff --git a/{src_file} b/{src_file}")
 
     # Index line
     output.append("index 629e8ad..91b8c0a 100644")
 
     # Additions/deletions
-    output.append("--- a/{}".format(src_file))
-    output.append("+++ b/{}".format(src_file))
+    output.append(f"--- a/{src_file}")
+    output.append(f"+++ b/{src_file}")
 
     # Hunk information
     for (start, end) in _hunks(modified_lines):

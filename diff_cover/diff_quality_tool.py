@@ -153,7 +153,7 @@ def parse_quality_args(argv):
     parser.add_argument(
         "--version",
         action="version",
-        version="diff-quality {}".format(diff_cover.VERSION),
+        version=f"diff-quality {diff_cover.VERSION}",
     )
     parser.add_argument(
         "--ignore-whitespace",
@@ -256,7 +256,7 @@ def main(argv=None, directory=None):
                     try:
                         input_reports.append(open(path, "rb"))
                     except OSError:
-                        LOGGER.warning("Could not load '{}'".format(path))
+                        LOGGER.warning(f"Could not load '{path}'")
                 reporter = QualityReporter(driver, input_reports, user_options)
 
             percent_passing = generate_quality_report(
@@ -273,14 +273,14 @@ def main(argv=None, directory=None):
             if percent_passing >= fail_under:
                 return 0
             else:
-                LOGGER.error("Failure. Quality is below {}%.".format(fail_under))
+                LOGGER.error(f"Failure. Quality is below {fail_under}%.")
                 return 1
 
         except ImportError:
-            LOGGER.error("Quality tool not installed: '{}'".format(tool))
+            LOGGER.error(f"Quality tool not installed: '{tool}'")
             return 1
         except OSError as exc:
-            LOGGER.error("Failure: '{}'".format(exc))
+            LOGGER.error(f"Failure: '{exc}'")
             return 1
         # Close any reports we opened
         finally:
@@ -288,7 +288,7 @@ def main(argv=None, directory=None):
                 file_handle.close()
 
     else:
-        LOGGER.error("Quality tool not recognized: '{}'".format(tool))
+        LOGGER.error(f"Quality tool not recognized: '{tool}'")
         return 1
 
 

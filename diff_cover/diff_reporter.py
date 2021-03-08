@@ -116,7 +116,7 @@ class GitDiffReporter(BaseDiffReporter):
             options.append("unstaged")
 
         # Branch is always present, so use as basis for name
-        name = "{}...HEAD".format(compare_branch)
+        name = f"{compare_branch}...HEAD"
         if len(options) > 0:
             # If more options are present separate them by comma's, except the last one
             for item in options[:-1]:
@@ -319,7 +319,7 @@ class GitDiffReporter(BaseDiffReporter):
                         # We tolerate other information before we have
                         # a source file defined, unless it's a hunk line
                         if line.startswith("@@"):
-                            msg = "Hunk has no source file: '{}'".format(line)
+                            msg = f"Hunk has no source file: '{line}'"
                             raise GitDiffError(msg)
 
         return source_dict
@@ -404,7 +404,7 @@ class GitDiffReporter(BaseDiffReporter):
         elif "--cc" in line:
             regex = self.MERGE_CONFLICT_RE
         else:
-            msg = "Do not recognize format of source in line '{}'".format(line)
+            msg = f"Do not recognize format of source in line '{line}'"
             raise GitDiffError(msg)
 
         # Parse for the source file path
@@ -414,7 +414,7 @@ class GitDiffReporter(BaseDiffReporter):
             return groups[0]
 
         else:
-            msg = "Could not parse source path in line '{}'".format(line)
+            msg = f"Could not parse source path in line '{line}'"
             raise GitDiffError(msg)
 
     def _parse_hunk_line(self, line):
@@ -455,11 +455,11 @@ class GitDiffReporter(BaseDiffReporter):
                     raise GitDiffError(msg)
 
             else:
-                msg = "Could not find start of hunk in line '{}'".format(line)
+                msg = f"Could not find start of hunk in line '{line}'"
                 raise GitDiffError(msg)
 
         else:
-            msg = "Could not parse hunk in line '{}'".format(line)
+            msg = f"Could not parse hunk in line '{line}'"
             raise GitDiffError(msg)
 
     @staticmethod

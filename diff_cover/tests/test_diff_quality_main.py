@@ -62,7 +62,7 @@ class ParseQualityArgsTest(unittest.TestCase):
 
         for argv in invalid_argv:
             with self.assertRaises(SystemExit):
-                print("args = {}".format(argv))
+                print(f"args = {argv}")
                 parse_quality_args(argv)
 
     def test_parse_with_exclude(self):

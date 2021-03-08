@@ -143,9 +143,7 @@ def parse_coverage_args(argv):
         help=DIFF_RANGE_NOTATION_HELP,
     )
 
-    parser.add_argument(
-        "--version", action="version", version="diff-cover {}".format(VERSION)
-    )
+    parser.add_argument("--version", action="version", version=f"diff-cover {VERSION}")
 
     parser.add_argument(
         "--ignore-whitespace",
@@ -247,7 +245,7 @@ def main(argv=None, directory=None):
     if percent_covered >= fail_under:
         return 0
     else:
-        LOGGER.error("Failure. Coverage is below {}%.".format(fail_under))
+        LOGGER.error(f"Failure. Coverage is below {fail_under}%.")
         return 1
 
 

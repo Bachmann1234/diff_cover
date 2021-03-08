@@ -465,7 +465,7 @@ class PylintDriver(QualityDriver):
                                 pylint_code, function_name, message
                             )
                         else:
-                            error_str = "{}: {}".format(pylint_code, message)
+                            error_str = f"{pylint_code}: {message}"
 
                         violation = Violation(int(line_number), error_str)
                         violations_dict[pylint_src_path].append(violation)
