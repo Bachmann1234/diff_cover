@@ -408,7 +408,7 @@ class GitDiffReporterTest(unittest.TestCase):
                 self.diff.src_paths_changed()
 
             with self.assertRaises(GitDiffError):
-                print("lines_changed() should fail for {}".format(diff_str))
+                print(f"lines_changed() should fail for {diff_str}")
                 self.diff.lines_changed("subdir/file1.py")
 
     def test_plus_sign_in_hunk_bug(self):

@@ -301,5 +301,5 @@ class SnippetLoaderTest(unittest.TestCase):
         (Line 1, Line 2, ...).
         """
         return "\n".join(
-            ["Line {}".format(line_num) for line_num in range(start_line, end_line + 1)]
+            [f"Line {line_num}" for line_num in range(start_line, end_line + 1)]
         )

@@ -42,7 +42,7 @@ class TestGitDiffTool(unittest.TestCase):
         if ignore_whitespace:
             expected.append("--ignore-all-space")
             expected.append("--ignore-blank-lines")
-        expected.append("origin/master{}HEAD".format(diff_range_notation))
+        expected.append(f"origin/master{diff_range_notation}HEAD")
         self.subprocess.Popen.assert_called_with(
             expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
         )

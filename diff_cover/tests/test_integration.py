@@ -42,11 +42,11 @@ class ToolsIntegrationBase(unittest.TestCase):
         cwd = os.getcwd()
 
         self._mock_popen = patch("subprocess.Popen").start()
-        self._mock_sys = patch("{}.sys".format(self.tool_module)).start()
+        self._mock_sys = patch(f"{self.tool_module}.sys").start()
         try:
-            self._mock_getcwd = patch("{}.os.getcwdu".format(self.tool_module)).start()
+            self._mock_getcwd = patch(f"{self.tool_module}.os.getcwdu").start()
         except AttributeError:
-            self._mock_getcwd = patch("{}.os.getcwd".format(self.tool_module)).start()
+            self._mock_getcwd = patch(f"{self.tool_module}.os.getcwd").start()
         self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
@@ -559,7 +559,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         """
         with open("git_diff_add.txt", encoding="utf-8") as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
-        argv = ["diff-quality", "--violations={}".format(tool_name), report_arg]
+        argv = ["diff-quality", f"--violations={tool_name}", report_arg]
 
         with patch("diff_cover.diff_quality_tool.LOGGER") as logger:
             exit_value = diff_quality_main(argv)
