@@ -1,3 +1,8 @@
+3/10/2021 v5.0.1
+
+* Removing universal wheels as we do not support python 2 (thanks @nicoddemus)
+* relaxing the requirement for chardet to 3.0
+
 3/08/2021 v5.0.0
 
 * Bumping a major version as I am dropping python 3.5 support as it has been EOL for some time
