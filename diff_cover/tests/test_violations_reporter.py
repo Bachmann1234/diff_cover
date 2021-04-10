@@ -1,4 +1,5 @@
 import os
+import pathlib
 import subprocess
 import sys
 from io import BytesIO, StringIO
@@ -1835,13 +1836,17 @@ class SubprocessErrorTestCase(unittest.TestCase):
     @patch("sys.stderr", new_callable=StringIO)
     def test_quality_reporter(self, mock_stderr):
         _patch_so_all_files_exist()
+        root_path = pathlib.Path(__file__).parent.parent.parent.absolute()
         with patch("diff_cover.violationsreporters.base.run_command_for_code") as code:
             code.return_value = 0
             reporter = QualityReporter(pycodestyle_driver)
+
             with self.assertRaises(OSError):
                 reporter.violations("path/to/file.py")
 
-            self.assertEqual(mock_stderr.getvalue(), "pycodestyle path/to/file.py")
+            self.assertEqual(
+                mock_stderr.getvalue(), f"pycodestyle {root_path}/path/to/file.py"
+            )
 
 
 class CppcheckQualityDriverTest(unittest.TestCase):
