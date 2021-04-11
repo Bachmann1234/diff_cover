@@ -295,10 +295,10 @@ Adding `diff-quality`` Support for a New Quality Checker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Adding support for a new quality checker is simple. ``diff-quality`` supports
 plugins using the popular Python
-[``pluggy`` package](https://pluggy.readthedocs.io/en/latest/).
+`pluggy package <https://pluggy.readthedocs.io/en/latest/>`_.
 
 If the quality checker is already implemented as a Python package, great! If not,
-[create a Python package](https://packaging.python.org/tutorials/packaging-projects/)
+`create a Python package <https://packaging.python.org/tutorials/packaging-projects/>`_
 to host the plugin implementation.
 
 In the Python package's ``setup.py`` file, define an entry point for the plugin,
@@ -368,7 +368,7 @@ Important notes:
   * ``violations()`` function that returns a list of ``Violation`` objects for
     the specified ``src_path``. For more details on this function and other
     possible reporting-related methods, see the ``BaseViolationReporter`` class
-    [here](https://github.com/Bachmann1234/diff_cover/blob/master/diff_cover/violationsreporters/base.py).
+    `here <https://github.com/Bachmann1234/diff_cover/blob/master/diff_cover/violationsreporters/base.py>`_.
 
 Special Thanks
 -------------------------
