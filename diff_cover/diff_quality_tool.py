@@ -67,6 +67,7 @@ VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(
 )
 INPUT_REPORTS_HELP = "Which violations reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
+INCLUDE_HELP = "Files to include (glob pattern)"
 
 
 LOGGER = logging.getLogger(__name__)
@@ -143,6 +144,10 @@ def parse_quality_args(argv):
     )
 
     parser.add_argument(
+        "--include", metavar="INCLUDE", default=["**/*.py"], nargs="+", type=str, help=INCLUDE_HELP
+    )
+
+    parser.add_argument(
         "--diff-range-notation",
         metavar="RANGE_NOTATION",
         type=str,
@@ -173,6 +178,7 @@ def generate_quality_report(
     ignore_staged=False,
     ignore_unstaged=False,
     exclude=None,
+    include=None,
     diff_range_notation=None,
     ignore_whitespace=False,
 ):
@@ -189,6 +195,7 @@ def generate_quality_report(
         ignore_unstaged=ignore_unstaged,
         supported_extensions=supported_extensions,
         exclude=exclude,
+        include=include,
     )
 
     if html_report is not None:
@@ -267,6 +274,7 @@ def main(argv=None, directory=None):
                 ignore_staged=arg_dict["ignore_staged"],
                 ignore_unstaged=arg_dict["ignore_unstaged"],
                 exclude=arg_dict["exclude"],
+                include=arg_dict["include"],
                 diff_range_notation=arg_dict["diff_range_notation"],
                 ignore_whitespace=arg_dict["ignore_whitespace"],
             )

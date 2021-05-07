@@ -42,3 +42,7 @@ report.html
 .project
 .pydevproject
 .python-version
+
+# VS Code
+.vscode/*
+*.code-workspaces
