@@ -12,6 +12,7 @@ import unittest
 from collections import defaultdict
 from io import BytesIO
 from subprocess import Popen
+import glob
 
 import pylint
 from diff_cover.command_runner import CommandError
@@ -542,6 +543,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         )
 
     def test_pylint_report_with_dup_code_violation(self):
+        patch.object(glob, "glob", return_value=["fileone.py"]).start()
         self._check_console_report(
             "git_diff_code_dupe.txt",
             "pylint_dupe_violations_report.txt",

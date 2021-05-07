@@ -4,6 +4,7 @@ Classes for querying which lines have changed based on a diff.
 from abc import ABCMeta, abstractmethod
 from diff_cover.git_diff import GitDiffError
 import fnmatch
+import glob
 import os
 import re
 
@@ -15,14 +16,16 @@ class BaseDiffReporter:
 
     __metaclass__ = ABCMeta
     _exclude = None
+    _include = None
 
-    def __init__(self, name, exclude=None):
+    def __init__(self, name, exclude=None, include=None):
         """
         Provide a `name` for the diff report, which will
         be included in the diff coverage report.
         """
         self._name = name
         self._exclude = exclude
+        self._include = include
 
     @abstractmethod
     def src_paths_changed(self):
@@ -72,12 +75,19 @@ class BaseDiffReporter:
         """
         Check if a path is excluded.
 
+        First it is checked if the path matches one of the include patterns (if provided).
+        Second, the path is matched against the exclude patterns.
+
         :param str path:
-            Path to check against the exclude patterns.
+            Path to check against the exclude and include patterns.
         :returns:
-            True if there are exclude patterns and the path matches,
-            otherwise False.
+            True if the patch should be excluded, otherwise False.
         """
+        absolute_path = os.path.abspath(path)
+        include = self._include
+        if include and not any(path in glob.glob(pattern, recursive=True) for pattern in include):
+            return True
+
         exclude = self._exclude
         if not exclude:
             return False
@@ -85,7 +95,6 @@ class BaseDiffReporter:
         if self._fnmatch(basename, exclude):
             return True
 
-        absolute_path = os.path.abspath(path)
         match = self._fnmatch(absolute_path, exclude)
         return match
 
@@ -103,6 +112,7 @@ class GitDiffReporter(BaseDiffReporter):
         ignore_unstaged=None,
         supported_extensions=None,
         exclude=None,
+        include=None,
     ):
         """
         Configure the reporter to use `git_diff` as the wrapper
@@ -124,7 +134,7 @@ class GitDiffReporter(BaseDiffReporter):
             # Apply and + changes to the last option
             name += " and " + options[-1] + " changes"
 
-        super().__init__(name, exclude)
+        super().__init__(name, exclude, include)
 
         self._compare_branch = compare_branch
         self._git_diff_tool = git_diff
