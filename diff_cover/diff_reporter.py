@@ -87,8 +87,10 @@ class BaseDiffReporter:
         include = self._include
         if include:
             for pattern in include:
-                if not any(path in glob.glob(pattern, recursive=True)):
-                    return True
+                if absolute_path in glob.glob(pattern, recursive=True):
+                    break  # file is included
+            else:
+                return True
 
         exclude = self._exclude
         if not exclude:

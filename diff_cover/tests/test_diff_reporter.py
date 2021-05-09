@@ -1,5 +1,8 @@
 from unittest import mock
 import unittest
+import tempfile
+import os
+from pathlib import Path
 from textwrap import dedent
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool, GitDiffError
@@ -52,27 +55,71 @@ class GitDiffReporterTest(unittest.TestCase):
             "origin/master...HEAD",
         )
 
-    def test_git_exclude(self):
-        self.diff = GitDiffReporter(git_diff=self._git_diff, exclude=["file1.py"])
-
-        # Configure the git diff output
-        self._set_git_diff_output(
-            git_diff_output(
-                {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    def test_git_path_selection(self):
+        for include, exclude, expected in [
+            # no include/exclude --> use all paths
+            ([], [], ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]),
+            # specified exclude without include
+            (
+                [],
+                ["file1.py"],
+                ["file3.py", "README.md", "subdir2/file2.py"],
             ),
-            git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-            git_diff_output(dict(), deleted_files=["README.md"]),
-        )
+            # specified include (folder) without exclude
+            (["subdir1/**"], [], ["subdir1/file1.py"]),
+            # specified include (file) without exclude
+            (["subdir1/file1.py"], [], ["subdir1/file1.py"]),
+            # specified include and exclude
+            (
+                ["subdir1/**", "subdir2/**"],
+                ["file1.py", "file3.py"],
+                ["subdir2/file2.py"],
+            ),
+        ]:
+            self._test_git_path_selection(include, exclude, expected)
 
-        # Get the source paths in the diff
-        source_paths = self.diff.src_paths_changed()
+    def _test_git_path_selection(self, include, exclude, expected):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # because we don't want to mock glob completely, just make all patterns
+            # absolute (add tmp_dir to the start)
+            include = [f"{tmp_dir}/{path}" for path in include]
 
-        # Validate the source paths
-        # They should be in alphabetical order
-        self.assertEqual(len(source_paths), 3)
-        self.assertEqual("file3.py", source_paths[0])
-        self.assertEqual("README.md", source_paths[1])
-        self.assertEqual("subdir2/file2.py", source_paths[2])
+            self.diff = GitDiffReporter(
+                git_diff=self._git_diff, exclude=exclude, include=include
+            )
+
+            main_dir = Path(tmp_dir)
+
+            (main_dir / "file3.py").touch()
+
+            subdir1 = main_dir / "subdir1"
+            subdir1.mkdir()
+            (subdir1 / "file1.py").touch()
+
+            subdir2 = main_dir / "subdir2"
+            subdir2.mkdir()
+            (subdir2 / "file2.py").touch()
+
+            # Configure the git diff output
+            self._set_git_diff_output(
+                git_diff_output(
+                    {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+                ),
+                git_diff_output(
+                    {"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}
+                ),
+                git_diff_output(dict(), deleted_files=["README.md"]),
+            )
+
+            # Get the source paths in the diff
+            with mock.patch.object(
+                os.path, "abspath", lambda path: f"{tmp_dir}/{path}"
+            ):
+                source_paths = self.diff.src_paths_changed()
+
+            # Validate the source paths
+            # They should be in alphabetical order
+            self.assertEqual(source_paths, expected)
 
     def test_git_source_paths(self):
 
