@@ -66,6 +66,10 @@ class ParseQualityArgsTest(unittest.TestCase):
                 parse_quality_args(argv)
 
     def _test_parse_with_path_patterns(self, name):
+        argv = ["--violations", "pep8"]
+        arg_dict = parse_quality_args(argv)
+        self.assertIsNone(arg_dict.get("include"))
+
         argv = ["--violations", "pep8", f"--{name}", "noneed/*.py"]
         arg_dict = parse_quality_args(argv)
         self.assertEqual(arg_dict.get(name), ["noneed/*.py"])
@@ -75,17 +79,9 @@ class ParseQualityArgsTest(unittest.TestCase):
         self.assertEqual(arg_dict.get(name), ["noneed/*.py", "other/**/*.py"])
 
     def test_parse_with_exclude(self):
-        argv = ["--violations", "pep8"]
-        arg_dict = parse_quality_args(argv)
-        self.assertIsNone(arg_dict.get("exclude"))
-
         self._test_parse_with_path_patterns("exclude")
 
     def test_parse_with_include(self):
-        argv = ["--violations", "pep8"]
-        arg_dict = parse_quality_args(argv)
-        self.assertEqual(arg_dict.get("include"), ["**/*.py"])
-
         self._test_parse_with_path_patterns("include")
 
     def test_parse_diff_range_notation(self):

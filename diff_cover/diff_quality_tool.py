@@ -144,7 +144,7 @@ def parse_quality_args(argv):
     )
 
     parser.add_argument(
-        "--include", metavar="INCLUDE", default=["**/*.py"], nargs="+", type=str, help=INCLUDE_HELP
+        "--include", metavar="INCLUDE", nargs="+", type=str, help=INCLUDE_HELP
     )
 
     parser.add_argument(

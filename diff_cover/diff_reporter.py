@@ -85,8 +85,10 @@ class BaseDiffReporter:
         """
         absolute_path = os.path.abspath(path)
         include = self._include
-        if include and not any(path in glob.glob(pattern, recursive=True) for pattern in include):
-            return True
+        if include:
+            for pattern in include:
+                if not any(path in glob.glob(pattern, recursive=True)):
+                    return True
 
         exclude = self._exclude
         if not exclude:
