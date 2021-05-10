@@ -8,8 +8,6 @@ class CommandError(Exception):
     Error raised when a command being executed returns an error
     """
 
-    pass
-
 
 def execute(command, exit_codes=[0]):
     """Execute provided command returning the stdout
@@ -67,5 +65,4 @@ def _ensure_unicode(text):
     """
     if isinstance(text, bytes):
         return text.decode(sys.getfilesystemencoding(), "replace")
-    else:
-        return text
+    return text

@@ -10,8 +10,6 @@ class GitDiffError(Exception):
     `git diff` command produced an error.
     """
 
-    pass
-
 
 class GitDiffTool:
     """

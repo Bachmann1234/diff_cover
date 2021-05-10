@@ -2,6 +2,7 @@
 Load snippets from source files to show violation lines
 in HTML reports.
 """
+from tokenize import open as openpy
 import chardet
 import pygments
 from pygments.formatters.html import HtmlFormatter
@@ -11,8 +12,6 @@ from pygments.lexers.special import TextLexer
 from pygments.util import ClassNotFound
 
 from diff_cover.git_path import GitPathTool
-
-from tokenize import open as openpy
 
 
 class Snippet:
