@@ -1,3 +1,7 @@
+5/09/2021 v5.1.0
+
+* Add the --includes option for diff-quality (Thanks @kasium https://github.com/Bachmann1234/diff_cover/pull/184)
+
 3/10/2021 v5.0.1
 
 * Removing universal wheels as we do not support python 2 (thanks @nicoddemus)
