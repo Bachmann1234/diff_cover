@@ -563,12 +563,12 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
 
         with patch("diff_cover.diff_quality_tool.LOGGER") as logger:
             exit_value = diff_quality_main(argv)
-            logger.error.assert_called_with(expected_error)
+            logger.error.assert_called_with(*expected_error)
             self.assertEqual(exit_value, 1)
 
     def test_tool_not_recognized(self):
         self._call_quality_expecting_error(
-            "garbage", "Quality tool not recognized: " "'garbage'"
+            "garbage", ("Quality tool not recognized: '%s'", "garbage"), "'garbage'"
         )
 
     def test_tool_not_installed(self):
@@ -579,7 +579,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         try:
             self._call_quality_expecting_error(
                 "not_installed",
-                "Failure: 'not_installed is not installed'",
+                ("Failure: '%s'", "not_installed is not installed"),
                 report_arg="",
             )
         finally:

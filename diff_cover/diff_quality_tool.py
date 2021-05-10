@@ -280,15 +280,15 @@ def main(argv=None, directory=None):
             )
             if percent_passing >= fail_under:
                 return 0
-            else:
-                LOGGER.error(f"Failure. Quality is below {fail_under}%.")
-                return 1
+
+            LOGGER.error("Failure. Quality is below %i.", fail_under)
+            return 1
 
         except ImportError:
-            LOGGER.error(f"Quality tool not installed: '{tool}'")
+            LOGGER.error("Quality tool not installed: '%s'", tool)
             return 1
         except OSError as exc:
-            LOGGER.error(f"Failure: '{exc}'")
+            LOGGER.error("Failure: '%s'", str(exc))
             return 1
         # Close any reports we opened
         finally:
@@ -296,7 +296,7 @@ def main(argv=None, directory=None):
                 file_handle.close()
 
     else:
-        LOGGER.error(f"Quality tool not recognized: '{tool}'")
+        LOGGER.error("Quality tool not recognized: '%s'", tool)
         return 1
 
 

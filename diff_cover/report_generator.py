@@ -2,11 +2,10 @@
 Classes for generating diff coverage reports.
 """
 from abc import ABCMeta, abstractmethod
-
+import json
 from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
 from diff_cover.snippets import Snippet
-import json
 
 
 class DiffViolations:
@@ -61,7 +60,6 @@ class BaseReportGenerator:
         Concrete subclasses should access diff coverage info
         using the base class methods.
         """
-        pass
 
     def coverage_report_name(self):
         """
@@ -104,8 +102,7 @@ class BaseReportGenerator:
             num_uncovered = len(diff_violations.lines)
             return 100 - float(num_uncovered) / num_measured * 100
 
-        else:
-            return None
+        return None
 
     def violation_lines(self, src_path):
         """
@@ -155,8 +152,7 @@ class BaseReportGenerator:
             num_covered = total_lines - self.total_num_violations()
             return int(float(num_covered) / total_lines * 100)
 
-        else:
-            return 100
+        return 100
 
     def _diff_violations(self):
         """

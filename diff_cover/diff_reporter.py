@@ -2,11 +2,11 @@
 Classes for querying which lines have changed based on a diff.
 """
 from abc import ABCMeta, abstractmethod
-from diff_cover.git_diff import GitDiffError
 import fnmatch
 import glob
 import os
 import re
+from diff_cover.git_diff import GitDiffError
 
 
 class BaseDiffReporter:
@@ -34,7 +34,6 @@ class BaseDiffReporter:
 
         Source paths are guaranteed to be unique.
         """
-        pass
 
     @abstractmethod
     def lines_changed(self, src_path):
@@ -45,7 +44,6 @@ class BaseDiffReporter:
         Each line is guaranteed to be included only once in the list
         and in ascending order.
         """
-        pass
 
     def name(self):
         """
@@ -215,11 +213,11 @@ class GitDiffReporter(BaseDiffReporter):
                 # Parse the output of the diff string
                 diff_dict = self._parse_diff_str(diff_str)
 
-                for src_path in diff_dict.keys():
+                for src_path in diff_dict:
                     if self._is_path_excluded(src_path):
                         continue
                     # If no _supported_extensions provided, or extension present: process
-                    root, extension = os.path.splitext(src_path)
+                    _, extension = os.path.splitext(src_path)
                     extension = extension[1:].lower()
                     # 'not self._supported_extensions' tests for both None and empty list []
                     if (
@@ -427,9 +425,8 @@ class GitDiffReporter(BaseDiffReporter):
         if len(groups) == 1:
             return groups[0]
 
-        else:
-            msg = f"Could not parse source path in line '{line}'"
-            raise GitDiffError(msg)
+        msg = f"Could not parse source path in line '{line}'"
+        raise GitDiffError(msg)
 
     def _parse_hunk_line(self, line):
         """

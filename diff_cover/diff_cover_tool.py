@@ -244,9 +244,8 @@ def main(argv=None, directory=None):
 
     if percent_covered >= fail_under:
         return 0
-    else:
-        LOGGER.error(f"Failure. Coverage is below {fail_under}%.")
-        return 1
+    LOGGER.error("Failure. Coverage is below %i%%.", fail_under)
+    return 1
 
 
 if __name__ == "__main__":
