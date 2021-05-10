@@ -202,6 +202,25 @@ below a certain threshold specify the fail-under parameter
 
 The above will return a non zero status if the coverage or quality score was below 80%.
 
+Exclude/Include paths
+---------------------
+
+Explicit exclusion of paths is possible for both ``diff-cover`` and ``diff-quality``, while inclusion is
+only supported for ``diff-quality`` (since 5.1.0).
+
+The exclude option works with ``fnmatch``, include with ``glob``. Both options can be specified multiple times.
+
+.. code:: bash
+    diff-cover coverage.xml --exclude setup.py
+    diff-quality --violations=pycodestyle --exclude setup.py
+
+    diff-quality --violations=pycodestyle --include project/foo/**
+
+The following is executed for every changed file:
+#. check if any include pattern was specified
+#. if yes, check if the changed file is part of at least one include pattern
+#. check if the file is part of any exclude pattern
+
 Troubleshooting
 ----------------------
 
