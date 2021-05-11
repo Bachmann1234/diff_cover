@@ -1,3 +1,8 @@
+5/11/2021 v5.1.1
+
+* Bug fix to in include's functionality around absolute vs reletive paths (Thanks @Kasium https://github.com/Bachmann1234/diff_cover/pull/187)
+* Some pylint fixes  (Thanks @Kasium https://github.com/Bachmann1234/diff_cover/pull/186)
+
 5/09/2021 v5.1.0
 
 * Add the --includes option for diff-quality (Thanks @kasium https://github.com/Bachmann1234/diff_cover/pull/184)
