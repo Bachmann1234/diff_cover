@@ -209,6 +209,8 @@ Explicit exclusion of paths is possible for both ``diff-cover`` and ``diff-quali
 only supported for ``diff-quality`` (since 5.1.0).
 
 The exclude option works with ``fnmatch``, include with ``glob``. Both options can be specified multiple times.
+Include options should be wrapped in double quotes to prevent shell globbing. Also they should be relative to
+the current git directory.
 
 .. code:: bash
     diff-cover coverage.xml --exclude setup.py

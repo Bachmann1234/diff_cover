@@ -81,11 +81,10 @@ class BaseDiffReporter:
         :returns:
             True if the patch should be excluded, otherwise False.
         """
-        absolute_path = os.path.abspath(path)
         include = self._include
         if include:
             for pattern in include:
-                if absolute_path in glob.glob(pattern, recursive=True):
+                if path in glob.glob(pattern, recursive=True):
                     break  # file is included
             else:
                 return True
@@ -97,6 +96,7 @@ class BaseDiffReporter:
         if self._fnmatch(basename, exclude):
             return True
 
+        absolute_path = os.path.abspath(path)
         match = self._fnmatch(absolute_path, exclude)
         return match
 
