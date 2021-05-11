@@ -79,10 +79,10 @@ class GitDiffReporterTest(unittest.TestCase):
             self._test_git_path_selection(include, exclude, expected)
 
     def _test_git_path_selection(self, include, exclude, expected):
+        old_cwd = os.getcwd()
         with tempfile.TemporaryDirectory() as tmp_dir:
-            # because we don't want to mock glob completely, just make all patterns
-            # absolute (add tmp_dir to the start)
-            include = [f"{tmp_dir}/{path}" for path in include]
+            # change the working directory into the temp directory so that globs are working
+            os.chdir(tmp_dir)
 
             self.diff = GitDiffReporter(
                 git_diff=self._git_diff, exclude=exclude, include=include
@@ -120,6 +120,9 @@ class GitDiffReporterTest(unittest.TestCase):
             # Validate the source paths
             # They should be in alphabetical order
             self.assertEqual(source_paths, expected)
+
+        # change back to the previous working directory
+        os.chdir(old_cwd)
 
     def test_git_source_paths(self):
 
