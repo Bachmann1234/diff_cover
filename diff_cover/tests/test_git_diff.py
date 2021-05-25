@@ -15,7 +15,7 @@ class TestGitDiffTool(unittest.TestCase):
         self.subprocess.Popen.return_value = self.process
         self.addCleanup(mock.patch.stopall)
         # Create the git diff tool
-        self.tool = GitDiffTool(range_notation="...", ignore_whitespace=False)
+        self.tool = GitDiffTool(range_notation="...", ignore_whitespace=False, work_tree=None)
 
     def check_diff_committed(self, diff_range_notation, ignore_whitespace):
         self.tool = GitDiffTool(

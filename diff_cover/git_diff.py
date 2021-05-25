@@ -16,7 +16,7 @@ class GitDiffTool:
     Thin wrapper for a subset of the `git diff` command.
     """
 
-    def __init__(self, range_notation, ignore_whitespace):
+    def __init__(self, range_notation, ignore_whitespace, work_tree):
         """
         :param str range_notation:
             which range notation to use when producing the diff for committed
@@ -42,6 +42,8 @@ class GitDiffTool:
             "diff.mnemonicprefix=no",
             "-c",
             "diff.noprefix=no",
+            "--git-dir={directory}/.git".format(directory=work_tree),
+            "--work-tree={directory}".format(directory=work_tree)
         ]
 
         self._default_diff_args = ["diff", "--no-color", "--no-ext-diff", "-U0"]

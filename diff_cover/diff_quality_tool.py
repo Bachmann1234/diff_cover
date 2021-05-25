@@ -68,6 +68,7 @@ VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(
 INPUT_REPORTS_HELP = "Which violations reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 INCLUDE_HELP = "Files to include (glob pattern)"
+WORK_TREE = "Hold the project directory name or path"
 
 
 LOGGER = logging.getLogger(__name__)
@@ -166,7 +167,13 @@ def parse_quality_args(argv):
         default=False,
         help=IGNORE_WHITESPACE,
     )
-
+    parser.add_argument(
+        "--work-tree",
+        metavar="WORKTREE",
+        type=str,
+        default=".",
+        help=WORK_TREE,
+    )
     return vars(parser.parse_args(argv))
 
 
@@ -181,6 +188,7 @@ def generate_quality_report(
     include=None,
     diff_range_notation=None,
     ignore_whitespace=False,
+    work_tree=None,
 ):
     """
     Generate the quality report, using kwargs from `parse_args()`.
@@ -190,7 +198,7 @@ def generate_quality_report(
     )
     diff = GitDiffReporter(
         compare_branch,
-        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
+        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace, work_tree),
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
         supported_extensions=supported_extensions,
@@ -277,6 +285,7 @@ def main(argv=None, directory=None):
                 include=arg_dict["include"],
                 diff_range_notation=arg_dict["diff_range_notation"],
                 ignore_whitespace=arg_dict["ignore_whitespace"],
+                work_tree=arg_dict["work_tree"]
             )
             if percent_passing >= fail_under:
                 return 0

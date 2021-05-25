@@ -40,6 +40,7 @@ COVERAGE_XML_HELP = "XML coverage report"
 DIFF_RANGE_NOTATION_HELP = (
     "Git diff range notation to use when comparing branches, defaults to '...'"
 )
+WORK_TREE = "Hold the project directory name or path"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -152,6 +153,14 @@ def parse_coverage_args(argv):
         help=IGNORE_WHITESPACE,
     )
 
+    parser.add_argument(
+        "--work-tree",
+        metavar="WORKTREE",
+        type=str,
+        default=".",
+        help=WORK_TREE,
+    )
+
     return vars(parser.parse_args(argv))
 
 
@@ -168,13 +177,14 @@ def generate_coverage_report(
     src_roots=None,
     diff_range_notation=None,
     ignore_whitespace=False,
+    work_tree=None
 ):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
     """
     diff = GitDiffReporter(
         compare_branch,
-        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
+        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace, work_tree),
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
         exclude=exclude,
@@ -240,6 +250,7 @@ def main(argv=None, directory=None):
         src_roots=arg_dict["src_roots"],
         diff_range_notation=arg_dict["diff_range_notation"],
         ignore_whitespace=arg_dict["ignore_whitespace"],
+        work_tree=arg_dict["work_tree"]
     )
 
     if percent_covered >= fail_under:
