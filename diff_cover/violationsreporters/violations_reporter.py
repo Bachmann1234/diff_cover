@@ -108,7 +108,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         )
         return classes
 
-    def _get_src_path_line_nodes_cobertura(self, xml_document, src_path):
+    def get_src_path_line_nodes_cobertura(self, xml_document, src_path):
         classes = self._get_classes(xml_document, src_path)
 
         if not classes:
@@ -117,7 +117,8 @@ class XmlCoverageReporter(BaseViolationReporter):
             lines = [clazz.findall("./lines/line") for clazz in classes]
             return [elem for elem in itertools.chain(*lines)]
 
-    def _get_src_path_line_nodes_clover(self, xml_document, src_path):
+    @staticmethod
+    def get_src_path_line_nodes_clover(xml_document, src_path):
         """
         Return a list of nodes containing line information for `src_path`
         in `xml_document`.
@@ -132,7 +133,10 @@ class XmlCoverageReporter(BaseViolationReporter):
         ]
         if not files:
             return None
-        lines = [file_tree.findall('./line[@type="stmt"]') for file_tree in files]
+        lines = []
+        for file_tree in files:
+            lines.append(file_tree.findall('./line[@type="stmt"]'))
+            lines.append(file_tree.findall('./line[@type="cond"]'))
         return [elem for elem in itertools.chain(*lines)]
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
@@ -152,7 +156,7 @@ class XmlCoverageReporter(BaseViolationReporter):
             ):
                 return True
 
-    def _get_src_path_line_nodes_jacoco(self, xml_document, src_path):
+    def get_src_path_line_nodes_jacoco(self, xml_document, src_path):
         """
         Return a list of nodes containing line information for `src_path`
         in `xml_document`.
@@ -199,21 +203,21 @@ class XmlCoverageReporter(BaseViolationReporter):
             for xml_document in self._xml_roots:
                 if xml_document.findall(".[@clover]"):
                     # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
-                    line_nodes = self._get_src_path_line_nodes_clover(
+                    line_nodes = self.get_src_path_line_nodes_clover(
                         xml_document, src_path
                     )
                     _number = "num"
                     _hits = "count"
                 elif xml_document.findall(".[@name]"):
                     # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
-                    line_nodes = self._get_src_path_line_nodes_jacoco(
+                    line_nodes = self.get_src_path_line_nodes_jacoco(
                         xml_document, src_path
                     )
                     _number = "nr"
                     _hits = "ci"
                 else:
                     # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
-                    line_nodes = self._get_src_path_line_nodes_cobertura(
+                    line_nodes = self.get_src_path_line_nodes_cobertura(
                         xml_document, src_path
                     )
                     _number = "number"
