@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import pathlib
-
 from setuptools import setup
 from diff_cover import VERSION, DESCRIPTION
 
