@@ -1,3 +1,9 @@
+5/29/2021 v5.1.2
+
+* Fixes a bug where clover reports were not counting conditionals (Thanks for ZSmallX providing a detailed report that made fixing this easy) (https://github.com/Bachmann1234/diff_cover/issues/190)
+* Switch to github actions for CI as I ran out of free credits for travis and this job does not pay
+* Drop 'official' support for pypy3. I don't really have any reason to think pypy wont work for this project and I wanted to simplify my ci builds. 
+
 5/11/2021 v5.1.1
 
 * Bug fix to in include's functionality around absolute vs reletive paths (Thanks @Kasium https://github.com/Bachmann1234/diff_cover/pull/187)
