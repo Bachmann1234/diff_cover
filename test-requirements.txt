@@ -6,4 +6,6 @@ flake8
 pyflakes
 pylint
 pydocstyle
+tox==3.23.1
+black
 -r requirements.txt

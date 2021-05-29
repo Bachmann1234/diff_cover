@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import os
+import pathlib
+
 from setuptools import setup
 from diff_cover import VERSION, DESCRIPTION
 
-REQUIREMENTS = [
-    line.strip()
-    for line in open(os.path.join("requirements", "requirements.txt")).readlines()
-]
+REQUIREMENTS = [line.strip() for line in open("requirements.txt").readlines()]
 setup(
     name="diff_cover",
     version=VERSION,
@@ -30,7 +28,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Testing",
         "Topic :: Software Development :: Quality Assurance",
     ],
