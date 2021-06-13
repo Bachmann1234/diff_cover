@@ -9,29 +9,28 @@ try:
 except ImportError:
     # Python 3.9 onwards
     import xml.etree.ElementTree as etree
+
+import unittest
 from subprocess import Popen
 from textwrap import dedent
-
 from unittest import mock
-
-from diff_cover.violationsreporters import base
+from unittest.mock import MagicMock, Mock, patch
 
 from diff_cover.command_runner import CommandError, run_command_for_code
-import unittest
+from diff_cover.violationsreporters import base
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
-    XmlCoverageReporter,
-    Violation,
-    pycodestyle_driver,
-    pyflakes_driver,
-    flake8_driver,
-    PylintDriver,
-    jshint_driver,
-    eslint_driver,
-    pydocstyle_driver,
     CppcheckDriver,
+    PylintDriver,
+    Violation,
+    XmlCoverageReporter,
+    eslint_driver,
+    flake8_driver,
+    jshint_driver,
+    pycodestyle_driver,
+    pydocstyle_driver,
+    pyflakes_driver,
 )
-from unittest.mock import Mock, patch, MagicMock
 
 
 def _patch_so_all_files_exist():

@@ -1,8 +1,7 @@
 import unittest
-
 from unittest.mock import patch
 
-from diff_cover.diff_quality_tool import parse_quality_args, main
+from diff_cover.diff_quality_tool import main, parse_quality_args
 
 
 class ParseQualityArgsTest(unittest.TestCase):

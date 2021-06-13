@@ -1,20 +1,19 @@
+import json
+import unittest
 from io import BytesIO
 from textwrap import dedent
-import json
-
 from unittest import mock
 
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.report_generator import (
     BaseReportGenerator,
     HtmlReportGenerator,
-    StringReportGenerator,
-    TemplateReportGenerator,
     JsonReportGenerator,
     MarkdownReportGenerator,
+    StringReportGenerator,
+    TemplateReportGenerator,
 )
-from diff_cover.tests.helpers import load_fixture, assert_long_str_equal
-import unittest
+from diff_cover.tests.helpers import assert_long_str_equal, load_fixture
 from diff_cover.violationsreporters.violations_reporter import (
     BaseViolationReporter,
     Violation,

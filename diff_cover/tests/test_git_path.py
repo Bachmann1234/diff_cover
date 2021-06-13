@@ -1,6 +1,7 @@
-from unittest import mock
-from diff_cover.git_path import GitPathTool
 import unittest
+from unittest import mock
+
+from diff_cover.git_path import GitPathTool
 
 
 class TestGitPathTool(unittest.TestCase):

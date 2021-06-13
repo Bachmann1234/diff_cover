@@ -1,11 +1,12 @@
 """
 Classes for querying which lines have changed based on a diff.
 """
-from abc import ABCMeta, abstractmethod
 import fnmatch
 import glob
 import os
 import re
+from abc import ABCMeta, abstractmethod
+
 from diff_cover.git_diff import GitDiffError
 
 

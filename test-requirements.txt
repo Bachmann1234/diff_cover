@@ -8,4 +8,5 @@ pylint
 pydocstyle
 tox==3.23.1
 black
+isort
 -r requirements.txt

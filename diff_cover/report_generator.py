@@ -1,10 +1,12 @@
 """
 Classes for generating diff coverage reports.
 """
-from abc import ABCMeta, abstractmethod
 import json
+from abc import ABCMeta, abstractmethod
+
 from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
+
 from diff_cover.snippets import Snippet
 
 

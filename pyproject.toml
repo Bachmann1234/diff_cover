@@ -21,3 +21,6 @@ exclude = '''
   | diff_cover/tests/fixtures/*
 )
 '''
+
+[tool.isort]
+profile = "black"

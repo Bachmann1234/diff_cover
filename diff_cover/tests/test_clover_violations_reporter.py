@@ -4,6 +4,7 @@ from io import StringIO
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter
 
+
 # https://github.com/Bachmann1234/diff_cover/issues/190
 def test_get_src_path_clover():
     GitPathTool._cwd = "/"
