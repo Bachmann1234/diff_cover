@@ -1,9 +1,7 @@
+import argparse
 import logging
-
 import os
 import sys
-import argparse
-
 import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
@@ -12,9 +10,9 @@ from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.report_generator import (
     HtmlReportGenerator,
-    StringReportGenerator,
     JsonReportGenerator,
     MarkdownReportGenerator,
+    StringReportGenerator,
 )
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter
 

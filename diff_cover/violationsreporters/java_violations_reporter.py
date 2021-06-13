@@ -11,15 +11,14 @@ try:
 except ImportError:
     # Python 3.9 onwards
     import xml.etree.ElementTree as etree
+
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import (
-    BaseViolationReporter,
-    Violation,
-    RegexBasedDriver,
     QualityDriver,
+    RegexBasedDriver,
+    Violation,
 )
-
 
 """
     Report checkstyle violations.

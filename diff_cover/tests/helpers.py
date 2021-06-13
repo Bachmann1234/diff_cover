@@ -1,10 +1,9 @@
 """
 Test helper functions.
 """
-import random
-
-import os.path
 import difflib
+import os.path
+import random
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300

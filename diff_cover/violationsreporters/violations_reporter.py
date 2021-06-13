@@ -2,19 +2,19 @@
 Classes for querying the information in a test coverage report.
 """
 
+import itertools
+import os
+import posixpath
 import re
 from collections import defaultdict
 
-import os
-import itertools
-import posixpath
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import (
     BaseViolationReporter,
-    Violation,
-    RegexBasedDriver,
     QualityDriver,
+    RegexBasedDriver,
+    Violation,
 )
 
 

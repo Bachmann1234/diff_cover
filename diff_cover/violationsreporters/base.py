@@ -1,13 +1,9 @@
-from abc import ABCMeta, abstractmethod
-from collections import defaultdict, namedtuple
-
-
 import copy
-
+import os
 import re
 import sys
-import os
-
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict, namedtuple
 
 from diff_cover.command_runner import execute, run_command_for_code
 

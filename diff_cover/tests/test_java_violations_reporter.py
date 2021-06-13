@@ -1,19 +1,18 @@
+import unittest
 from io import BytesIO
 from textwrap import dedent
-import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from diff_cover.violationsreporters import base
-
 from diff_cover.command_runner import CommandError
+from diff_cover.violationsreporters import base
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.java_violations_reporter import (
-    Violation,
-    checkstyle_driver,
     CheckstyleXmlDriver,
     FindbugsXmlDriver,
     PmdXmlDriver,
+    Violation,
+    checkstyle_driver,
 )
 
 

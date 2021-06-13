@@ -1,8 +1,8 @@
+import unittest
 from unittest import mock
 
 from diff_cover.command_runner import CommandError
 from diff_cover.git_diff import GitDiffTool
-import unittest
 
 
 class TestGitDiffTool(unittest.TestCase):

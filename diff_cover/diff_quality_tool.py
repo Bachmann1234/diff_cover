@@ -13,13 +13,13 @@ import diff_cover
 from diff_cover import hookspecs
 from diff_cover.diff_cover_tool import (
     COMPARE_BRANCH_HELP,
+    CSS_FILE_HELP,
     DIFF_RANGE_NOTATION_HELP,
+    EXCLUDE_HELP,
     FAIL_UNDER_HELP,
+    HTML_REPORT_HELP,
     IGNORE_STAGED_HELP,
     IGNORE_UNSTAGED_HELP,
-    EXCLUDE_HELP,
-    HTML_REPORT_HELP,
-    CSS_FILE_HELP,
     IGNORE_WHITESPACE,
 )
 from diff_cover.diff_reporter import GitDiffReporter
@@ -30,21 +30,21 @@ from diff_cover.report_generator import (
     StringQualityReportGenerator,
 )
 from diff_cover.violationsreporters.base import QualityReporter
-from diff_cover.violationsreporters.violations_reporter import (
-    CppcheckDriver,
-    flake8_driver,
-    pyflakes_driver,
-    PylintDriver,
-    jshint_driver,
-    eslint_driver,
-    pydocstyle_driver,
-    pycodestyle_driver,
-)
 from diff_cover.violationsreporters.java_violations_reporter import (
     CheckstyleXmlDriver,
-    checkstyle_driver,
     FindbugsXmlDriver,
     PmdXmlDriver,
+    checkstyle_driver,
+)
+from diff_cover.violationsreporters.violations_reporter import (
+    CppcheckDriver,
+    PylintDriver,
+    eslint_driver,
+    flake8_driver,
+    jshint_driver,
+    pycodestyle_driver,
+    pydocstyle_driver,
+    pyflakes_driver,
 )
 
 QUALITY_DRIVERS = {

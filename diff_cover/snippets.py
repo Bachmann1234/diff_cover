@@ -3,6 +3,7 @@ Load snippets from source files to show violation lines
 in HTML reports.
 """
 from tokenize import open as openpy
+
 import chardet
 import pygments
 from pygments.formatters.html import HtmlFormatter

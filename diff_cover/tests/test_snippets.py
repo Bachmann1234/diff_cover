@@ -1,11 +1,13 @@
 import io
-from unittest import mock
 import os
 import tempfile
-from pygments.token import Token
-from diff_cover.snippets import Snippet
-from diff_cover.tests.helpers import load_fixture, fixture_path, assert_long_str_equal
 import unittest
+from unittest import mock
+
+from pygments.token import Token
+
+from diff_cover.snippets import Snippet
+from diff_cover.tests.helpers import assert_long_str_equal, fixture_path, load_fixture
 
 
 class SnippetTest(unittest.TestCase):
