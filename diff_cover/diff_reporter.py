@@ -232,7 +232,7 @@ class GitDiffReporter(BaseDiffReporter):
                         result_dict[src_path] = [
                             line
                             for line in result_dict.get(src_path, [])
-                            if not line in deleted_lines
+                            if line not in deleted_lines
                         ] + added_lines
 
             # Eliminate repeats and order line numbers
