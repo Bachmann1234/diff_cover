@@ -2,7 +2,6 @@
 High-level integration tests of diff-cover tool.
 """
 
-import io
 import os
 import os.path
 import re
@@ -13,8 +12,6 @@ from collections import defaultdict
 from io import BytesIO
 from subprocess import Popen
 from unittest.mock import Mock, patch
-
-import pylint
 
 from diff_cover.command_runner import CommandError
 from diff_cover.diff_cover_tool import main as diff_cover_main

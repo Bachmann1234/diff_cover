@@ -22,15 +22,18 @@ class GitDiffTool:
             which range notation to use when producing the diff for committed
             files against another branch.
 
-            Traditionally in git-cover the symmetric difference (three-dot, "A...M") notation has been used: it
-            includes commits reachable from A and M from their merge-base, but not both, taking history in account.
-            This includes cherry-picks between A and M, which are harmless and do not produce changes, but might give
-            inaccurate coverage false-negatives.
+            Traditionally in git-cover the symmetric difference (three-dot, "A...M") notation has
+            been used:
+            it includes commits reachable from A and M from their merge-base, but not both,
+            taking history in account.
+            This includes cherry-picks between A and M, which are harmless and do not produce
+            changes, but might give inaccurate coverage false-negatives.
 
-            Two-dot range notation ("A..M") compares the tips of both trees and produces a diff. This more accurately
-            describes the actual patch that will be applied by merging A into M, even if commits have been
-            cherry-picked between branches. This will produce a more accurate diff for coverage comparison when
-            complex merges and cherry-picks are involved.
+            Two-dot range notation ("A..M") compares the tips of both trees and produces a diff.
+            This more accurately describes the actual patch that will be applied by merging A into
+            M, even if commits have been cherry-picked between branches.
+            This will produce a more accurate diff for coverage comparison when complex merges and
+            cherry-picks are involved.
 
          :param bool ignore_whitespace:
             Perform a diff but ignore any and all whitespace.
