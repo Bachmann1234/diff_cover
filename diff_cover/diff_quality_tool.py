@@ -3,6 +3,7 @@ Implement the command-line tool interface for diff_quality.
 """
 
 import argparse
+import io
 import logging
 import os
 import sys
@@ -21,6 +22,7 @@ from diff_cover.diff_cover_tool import (
     IGNORE_STAGED_HELP,
     IGNORE_UNSTAGED_HELP,
     IGNORE_WHITESPACE,
+    QUIET_HELP,
 )
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
@@ -167,6 +169,8 @@ def parse_quality_args(argv):
         help=IGNORE_WHITESPACE,
     )
 
+    parser.add_argument("-q", "--quiet", action="store_true", help=QUIET_HELP)
+
     return vars(parser.parse_args(argv))
 
 
@@ -181,6 +185,7 @@ def generate_quality_report(
     include=None,
     diff_range_notation=None,
     ignore_whitespace=False,
+    quiet=False,
 ):
     """
     Generate the quality report, using kwargs from `parse_args()`.
@@ -211,7 +216,7 @@ def generate_quality_report(
 
     # Generate the report for stdout
     reporter = StringQualityReportGenerator(tool, diff)
-    output_file = sys.stdout.buffer
+    output_file = io.BytesIO() if quiet else sys.stdout.buffer
 
     reporter.generate_report(output_file)
     return reporter.total_percent_covered()
@@ -225,10 +230,14 @@ def main(argv=None, directory=None):
     1 is an error
     0 is successful run
     """
-    logging.basicConfig(format="%(message)s")
 
     argv = argv or sys.argv
     arg_dict = parse_quality_args(argv[1:])
+
+    quiet = arg_dict["quiet"]
+    level = logging.ERROR if quiet else logging.WARNING
+    logging.basicConfig(format="%(message)s", level=level)
+
     GitPathTool.set_cwd(directory)
     fail_under = arg_dict.get("fail_under")
     tool = arg_dict["violations"]
@@ -277,6 +286,7 @@ def main(argv=None, directory=None):
                 include=arg_dict["include"],
                 diff_range_notation=arg_dict["diff_range_notation"],
                 ignore_whitespace=arg_dict["ignore_whitespace"],
+                quiet=quiet,
             )
             if percent_passing >= fail_under:
                 return 0

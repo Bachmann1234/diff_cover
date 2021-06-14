@@ -390,6 +390,13 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         with self.assertRaises(CommandError):
             diff_cover_main(["diff-cover", "coverage.xml"])
 
+    def test_quite_mode(self):
+        self._check_console_report(
+            "git_diff_violations.txt",
+            "empty.txt",
+            ["diff-cover", "coverage.xml", "-q"],
+        )
+
 
 class DiffQualityIntegrationTest(ToolsIntegrationBase):
     """
@@ -591,6 +598,13 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         # name though which is cool
         reporter = DoNothingDriver("pycodestyle", [], [])
         self.assertEqual(reporter.parse_reports(""), {})
+
+    def test_quite_mode(self):
+        self._check_console_report(
+            "git_diff_violations.txt",
+            "empty.txt",
+            ["diff-quality", "--violations=pylint", "-q"],
+        )
 
 
 class DoNothingDriver(QualityDriver):

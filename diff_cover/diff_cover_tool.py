@@ -1,4 +1,5 @@
 import argparse
+import io
 import logging
 import os
 import sys
@@ -33,6 +34,7 @@ COVERAGE_XML_HELP = "XML coverage report"
 DIFF_RANGE_NOTATION_HELP = (
     "Git diff range notation to use when comparing branches, defaults to '...'"
 )
+QUIET_HELP = "Only print errors and failures"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -145,6 +147,8 @@ def parse_coverage_args(argv):
         help=IGNORE_WHITESPACE,
     )
 
+    parser.add_argument("-q", "--quiet", action="store_true", help=QUIET_HELP)
+
     return vars(parser.parse_args(argv))
 
 
@@ -161,6 +165,7 @@ def generate_coverage_report(
     src_roots=None,
     diff_range_notation=None,
     ignore_whitespace=False,
+    quiet=False,
 ):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
@@ -198,8 +203,9 @@ def generate_coverage_report(
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
+    # Generate the report for stdout
     reporter = StringReportGenerator(coverage, diff)
-    output_file = sys.stdout.buffer
+    output_file = io.BytesIO() if quiet else sys.stdout.buffer
 
     # Generate the report
     reporter.generate_report(output_file)
@@ -214,10 +220,13 @@ def main(argv=None, directory=None):
     1 is an error
     0 is successful run
     """
-    logging.basicConfig(format="%(message)s")
-
     argv = argv or sys.argv
     arg_dict = parse_coverage_args(argv[1:])
+
+    quiet = arg_dict["quiet"]
+    level = logging.ERROR if quiet else logging.WARNING
+    logging.basicConfig(format="%(message)s", level=level)
+
     GitPathTool.set_cwd(directory)
     fail_under = arg_dict.get("fail_under")
     percent_covered = generate_coverage_report(
@@ -233,6 +242,7 @@ def main(argv=None, directory=None):
         src_roots=arg_dict["src_roots"],
         diff_range_notation=arg_dict["diff_range_notation"],
         ignore_whitespace=arg_dict["ignore_whitespace"],
+        quiet=quiet,
     )
 
     if percent_covered >= fail_under:
