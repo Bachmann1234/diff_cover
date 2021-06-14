@@ -223,6 +223,17 @@ The following is executed for every changed file:
 #. if yes, check if the changed file is part of at least one include pattern
 #. check if the file is part of any exclude pattern
 
+Quiet mode
+----------
+Both ``diff-cover`` and ``diff-quality`` support a quiet mode which is disable by default.
+It can be enabled by using the ``-q``/``--quiet`` flag:
+
+.. code:: bash
+    diff-cover coverage.xml -q
+    diff-quality --violations=pycodestyle -q
+
+If enabled, the tool will only print errors and failures but no information or warning messages.
+
 Troubleshooting
 ----------------------
 
