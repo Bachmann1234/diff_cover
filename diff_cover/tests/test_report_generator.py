@@ -514,7 +514,7 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         - file&#46;py (100%)
 
         ## Summary
-        
+
         - **Total**: 1 line
         - **Missing**: 0 lines
         - **Coverage**: 100%

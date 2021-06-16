@@ -110,7 +110,7 @@ class QualityReporter(BaseViolationReporter):
         """
         Args:
             driver (QualityDriver) object that works with the underlying quality tool
-            reports (list[file]) pre-generated reports. If not provided the tool will be run instead.
+            reports (list[file]) pre-generated reports. If not provided the tool will be run instead
             options (str) options to be passed into the command
         """
         super().__init__(driver.name)

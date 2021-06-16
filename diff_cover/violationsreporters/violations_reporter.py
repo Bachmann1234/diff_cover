@@ -378,7 +378,7 @@ class PylintDriver(QualityDriver):
             ],
             # Pylint returns bit-encoded exit codes as documented here:
             # https://pylint.readthedocs.io/en/latest/user_guide/run.html
-            # 1 = fatal error, if an error occurred which prevented pylint from doing further processing
+            # 1 = fatal error, occurs if an error prevents pylint from doing further processing
             # 2,4,8,16 = error/warning/refactor/convention message issued
             # 32 = usage error
             [

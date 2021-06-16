@@ -13,8 +13,8 @@ def execute(command, exit_codes=[0]):
     Args:
         command (list[str]): list of tokens to execute as your command.
         exit_codes (list[int]): exit codes which do not indicate error.
-        subprocess_mod (module): Defaults to pythons subprocess module but you can optionally pass in
-        another. This is mostly for testing purposes
+        subprocess_mod (module): Defaults to pythons subprocess module but you can optionally pass
+        in another. This is mostly for testing purposes
     Returns:
         str - Stdout of the command passed in. This will be Unicode for python < 3. Str for python 3
     Raises:

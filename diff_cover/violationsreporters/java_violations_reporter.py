@@ -129,7 +129,9 @@ class FindbugsXmlDriver(QualityDriver):
     def installed(self):
         """
         Method checks if the provided tool is installed.
-        Returns: boolean False: As findbugs analyses bytecode, it would be hard to run it from outside the build framework.
+        Returns:
+            boolean False: As findbugs analyses bytecode,
+            it would be hard to run it from outside the build framework.
         """
         return False
 
@@ -167,6 +169,8 @@ class PmdXmlDriver(QualityDriver):
     def installed(self):
         """
         Method checks if the provided tool is installed.
-        Returns: boolean False: As findbugs analyses bytecode, it would be hard to run it from outside the build framework.
+        Returns:
+            boolean False: As findbugs analyses bytecode,
+            it would be hard to run it from outside the build framework.
         """
         return False

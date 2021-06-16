@@ -793,7 +793,7 @@ class pycodestyleQualityReporterTest(unittest.TestCase):
     def test_quality(self):
 
         # Patch the output of `pycodestyle`
-        _mock_communicate = patch.object(Popen, "communicate").start()
+        patch.object(Popen, "communicate").start()
         return_string = (
             "\n"
             + dedent(
