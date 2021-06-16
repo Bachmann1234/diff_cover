@@ -390,7 +390,7 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         with self.assertRaises(CommandError):
             diff_cover_main(["diff-cover", "coverage.xml"])
 
-    def test_quite_mode(self):
+    def test_quiet_mode(self):
         self._check_console_report(
             "git_diff_violations.txt",
             "empty.txt",
@@ -599,7 +599,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         reporter = DoNothingDriver("pycodestyle", [], [])
         self.assertEqual(reporter.parse_reports(""), {})
 
-    def test_quite_mode(self):
+    def test_quiet_mode(self):
         self._check_console_report(
             "git_diff_violations.txt",
             "empty.txt",
