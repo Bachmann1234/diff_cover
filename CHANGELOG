@@ -1,3 +1,8 @@
+6/18/2021 v5.2.0
+
+* Adds 'quiet mode' which will only print errors and failures. Flag -q thanks @kasium https://github.com/Bachmann1234/diff_cover/issues/160 
+* Several internal improvement to tools and configs. Thanks @kasium !
+
 5/29/2021 v5.1.2
 
 * Fixes a bug where clover reports were not counting conditionals (Thanks for ZSmallX providing a detailed report that made fixing this easy) (https://github.com/Bachmann1234/diff_cover/issues/190)
