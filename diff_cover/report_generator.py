@@ -343,7 +343,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
-        formatted_snippets = {"html": [], "markdown": []}
+        formatted_snippets = {"html": [], "markdown": [], "terminal": []}
         if self.INCLUDE_SNIPPETS:
             try:
                 formatted_snippets = Snippet.load_formatted_snippets(
@@ -356,6 +356,7 @@ class TemplateReportGenerator(BaseReportGenerator):
             {
                 "snippets_html": formatted_snippets["html"],
                 "snippets_markdown": formatted_snippets["markdown"],
+                "snippets_terminal": formatted_snippets["terminal"],
                 "violation_lines": TemplateReportGenerator.combine_adjacent_lines(
                     stats["violation_lines"]
                 ),
@@ -371,6 +372,11 @@ class StringReportGenerator(TemplateReportGenerator):
     """
 
     TEMPLATE_NAME = "console_coverage_report.txt"
+    INCLUDE_SNIPPETS = False
+
+    def __init__(self, violations_reporter, diff_reporter, show_uncovered=False):
+        super().__init__(violations_reporter, diff_reporter)
+        StringReportGenerator.INCLUDE_SNIPPETS = show_uncovered
 
 
 class HtmlReportGenerator(TemplateReportGenerator):

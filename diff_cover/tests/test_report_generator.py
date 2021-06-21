@@ -53,6 +53,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
     SNIPPET_HTML = "<div>Snippet with \u1235 \u8292 unicode</div>"
     SNIPPET_MARKDOWN = "Lines 1-1\n\n```\nSnippet with \u1235 \u8292 unicode\n```"
     SNIPPET_STYLE = ".css { color:red }"
+    SNIPPET_TERMINAL = SNIPPET_MARKDOWN
 
     def setUp(self):
 
@@ -128,6 +129,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
         self._load_formatted_snippets.return_value = {
             "html": num_snippets * [self.SNIPPET_HTML],
             "markdown": num_snippets * [self.SNIPPET_MARKDOWN],
+            "terminal": num_snippets * [self.SNIPPET_TERMINAL],
         }
 
     def use_default_values(self):
