@@ -19,3 +19,5 @@ Coverage: {{ total_percent_covered }}%
 No lines with coverage information in this diff.
 -------------
 {% endif %}
+
+{% include 'snippet_content.txt' %}

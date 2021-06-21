@@ -179,6 +179,7 @@ class Snippet:
         return {
             "html": [snippet.html() for snippet in snippet_list],
             "markdown": [snippet.markdown() for snippet in snippet_list],
+            "terminal": [snippet.terminal() for snippet in snippet_list],
         }
 
     @classmethod

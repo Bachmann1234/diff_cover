@@ -35,6 +35,7 @@ DIFF_RANGE_NOTATION_HELP = (
     "Git diff range notation to use when comparing branches, defaults to '...'"
 )
 QUIET_HELP = "Only print errors and failures"
+SHOW_UNCOVERED = "Show uncovered lines on the console"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -83,6 +84,10 @@ def parse_coverage_args(argv):
         type=str,
         default=None,
         help=MARKDOWN_REPORT_HELP,
+    )
+
+    output_format.add_argument(
+        "--show-uncovered", action="store_true", default=False, help=SHOW_UNCOVERED
     )
 
     parser.add_argument(
@@ -166,6 +171,7 @@ def generate_coverage_report(
     diff_range_notation=None,
     ignore_whitespace=False,
     quiet=False,
+    show_uncovered=False,
 ):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
@@ -204,7 +210,7 @@ def generate_coverage_report(
             reporter.generate_report(output_file)
 
     # Generate the report for stdout
-    reporter = StringReportGenerator(coverage, diff)
+    reporter = StringReportGenerator(coverage, diff, show_uncovered)
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
 
     # Generate the report
@@ -243,6 +249,7 @@ def main(argv=None, directory=None):
         diff_range_notation=arg_dict["diff_range_notation"],
         ignore_whitespace=arg_dict["ignore_whitespace"],
         quiet=quiet,
+        show_uncovered=arg_dict["show_uncovered"],
     )
 
     if percent_covered >= fail_under:
