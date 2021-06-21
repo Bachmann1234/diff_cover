@@ -156,6 +156,13 @@ class BaseReportGenerator:
 
         return 100
 
+    def num_changed_lines(self):
+        """Returns the number of changed lines."""
+        return sum(
+            len(self._diff.lines_changed(src_path))
+            for src_path in self._diff.src_paths_changed()
+        )
+
     def _diff_violations(self):
         """
         Returns a dictionary of the form:
@@ -187,6 +194,7 @@ class BaseReportGenerator:
             "total_num_lines": self.total_num_lines(),
             "total_num_violations": self.total_num_violations(),
             "total_percent_covered": self.total_percent_covered(),
+            "num_changed_lines": self.num_changed_lines(),
         }
 
     def _src_path_stats(self, src_path):
