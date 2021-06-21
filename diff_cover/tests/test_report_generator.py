@@ -304,6 +304,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
                 "total_num_lines": 12,
                 "total_num_violations": 4,
                 "total_percent_covered": 66,
+                "num_changed_lines": len(self.SRC_PATHS) * len(self.LINES),
             }
         )
 
@@ -331,6 +332,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
                 "total_num_lines": 1,
                 "total_num_violations": 0,
                 "total_percent_covered": 100,
+                "num_changed_lines": 100,
             }
         )
 
@@ -349,6 +351,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
                 "total_num_lines": 0,
                 "total_num_violations": 0,
                 "total_percent_covered": 100,
+                "num_changed_lines": 0,
             }
         )
 
