@@ -1,0 +1,24 @@
+-------------
+Diff Coverage
+Diff: origin/master...HEAD, staged and unstaged changes
+-------------
+test_src.txt (50.0%): Missing lines 2,4,6,8,10
+-------------
+Total:   10 lines
+Missing: 5 lines
+Coverage: 50%
+-------------
+
+--- test_src.txt ---
+
+0001: test 1
+0002: test 2
+0003: test 3
+0004: test 4
+0005: test 5
+0006: test 6
+0007: test 7
+0008: test 8
+0009: test 9
+0010: test 10
+0011:

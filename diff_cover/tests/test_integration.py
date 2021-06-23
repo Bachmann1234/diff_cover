@@ -397,6 +397,13 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             ["diff-cover", "coverage.xml", "-q"],
         )
 
+    def test_show_uncovered_lines_console(self):
+        self._check_console_report(
+            "git_diff_add.txt",
+            "show_uncovered_lines_console.txt",
+            ["diff-cover", "--show-uncovered", "coverage.xml"],
+        )
+
 
 class DiffQualityIntegrationTest(ToolsIntegrationBase):
     """
