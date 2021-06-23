@@ -1,3 +1,7 @@
+6/22/2021 v5.3.0
+
+* Adds 'num_changed_lines' to json report. Thanks @kasium https://github.com/Bachmann1234/diff_cover/issues/170
+
 6/18/2021 v5.2.0
 
 * Adds 'quiet mode' which will only print errors and failures. Flag -q thanks @kasium https://github.com/Bachmann1234/diff_cover/issues/160 
