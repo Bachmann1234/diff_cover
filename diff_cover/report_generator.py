@@ -235,12 +235,12 @@ class TemplateReportGenerator(BaseReportGenerator):
 
     # Subclasses override this to specify the name of the templates
     # If not overridden, the template reporter will raise an exception
-    TEMPLATE_NAME = None
-    CSS_TEMPLATE_NAME = None
+    template_path = None
+    css_template_path = None
 
     # Subclasses should set this to True to indicate
     # that they want to include source file snippets.
-    INCLUDE_SNIPPETS = False
+    include_snippets = False
 
     def __init__(self, violations_reporter, diff_reporter, css_url=None):
         super().__init__(violations_reporter, diff_reporter)
@@ -252,8 +252,8 @@ class TemplateReportGenerator(BaseReportGenerator):
         output_file must be a file handler that takes in bytes!
         """
 
-        if self.TEMPLATE_NAME is not None:
-            template = TEMPLATE_ENV.get_template(self.TEMPLATE_NAME)
+        if self.template_path is not None:
+            template = TEMPLATE_ENV.get_template(self.template_path)
             report = template.render(self._context())
 
             if isinstance(report, str):
@@ -267,8 +267,8 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         output_file must be a file handler that takes in bytes!
         """
-        if self.CSS_TEMPLATE_NAME is not None:
-            template = TEMPLATE_ENV.get_template(self.CSS_TEMPLATE_NAME)
+        if self.css_template_path is not None:
+            template = TEMPLATE_ENV.get_template(self.css_template_path)
             style = template.render(self._context())
 
         if isinstance(style, str):
@@ -298,7 +298,7 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         # Include snippet style info if we're displaying
         # source code snippets
-        if self.INCLUDE_SNIPPETS:
+        if self.include_snippets:
             snippet_style = Snippet.style_defs()
         else:
             snippet_style = None
@@ -344,7 +344,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         # Load source snippets (if the report will display them)
         # If we cannot load the file, then fail gracefully
         formatted_snippets = {"html": [], "markdown": [], "terminal": []}
-        if self.INCLUDE_SNIPPETS:
+        if self.include_snippets:
             try:
                 formatted_snippets = Snippet.load_formatted_snippets(
                     src_path, stats["violation_lines"]
@@ -371,12 +371,11 @@ class StringReportGenerator(TemplateReportGenerator):
     Generate a string diff coverage report.
     """
 
-    TEMPLATE_NAME = "console_coverage_report.txt"
-    INCLUDE_SNIPPETS = False
+    template_path = "console_coverage_report.txt"
 
     def __init__(self, violations_reporter, diff_reporter, show_uncovered=False):
         super().__init__(violations_reporter, diff_reporter)
-        StringReportGenerator.INCLUDE_SNIPPETS = show_uncovered
+        self.include_snippets = show_uncovered
 
 
 class HtmlReportGenerator(TemplateReportGenerator):
@@ -384,9 +383,9 @@ class HtmlReportGenerator(TemplateReportGenerator):
     Generate an HTML formatted diff coverage report.
     """
 
-    TEMPLATE_NAME = "html_coverage_report.html"
-    CSS_TEMPLATE_NAME = "external_style.css"
-    INCLUDE_SNIPPETS = True
+    template_path = "html_coverage_report.html"
+    css_template_path = "external_style.css"
+    include_snippets = True
 
 
 class StringQualityReportGenerator(TemplateReportGenerator):
@@ -394,7 +393,7 @@ class StringQualityReportGenerator(TemplateReportGenerator):
     Generate a string diff quality report.
     """
 
-    TEMPLATE_NAME = "console_quality_report.txt"
+    template_path = "console_quality_report.txt"
 
 
 class HtmlQualityReportGenerator(TemplateReportGenerator):
@@ -402,9 +401,9 @@ class HtmlQualityReportGenerator(TemplateReportGenerator):
     Generate an HTML formatted diff quality report.
     """
 
-    TEMPLATE_NAME = "html_quality_report.html"
-    CSS_TEMPLATE_NAME = "external_style.css"
-    INCLUDE_SNIPPETS = True
+    template_path = "html_quality_report.html"
+    css_template_path = "external_style.css"
+    include_snippets = True
 
 
 class MarkdownReportGenerator(TemplateReportGenerator):
@@ -412,8 +411,8 @@ class MarkdownReportGenerator(TemplateReportGenerator):
     Generate a Markdown formatted diff quality report.
     """
 
-    TEMPLATE_NAME = "markdown_coverage_report.md"
-    INCLUDE_SNIPPETS = True
+    template_path = "markdown_coverage_report.md"
+    include_snippets = True
 
 
 class MarkdownQualityReportGenerator(TemplateReportGenerator):
@@ -421,5 +420,5 @@ class MarkdownQualityReportGenerator(TemplateReportGenerator):
     Generate a Markdown formatted diff quality report.
     """
 
-    TEMPLATE_NAME = "markdown_quality_report.md"
-    INCLUDE_SNIPPETS = True
+    template_path = "markdown_quality_report.md"
+    include_snippets = True
