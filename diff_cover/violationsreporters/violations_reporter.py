@@ -298,24 +298,14 @@ pyflakes_driver = RegexBasedDriver(
 
 """
     Report Flake8 violations.
-
-    Flake8 warning/error codes:
-        E***/W***: pycodestyle errors and warnings
-        F***: pyflakes codes
-        C9**: mccabe complexity plugin
-        N8**: pycodestyle-naming plugin
-        T000: flake8-todo plugin
-
-    http://flake8.readthedocs.org/en/latest/warnings.html
 """
 flake8_driver = RegexBasedDriver(
     name="flake8",
     supported_extensions=["py"],
     command=["flake8"],
     # Match lines of the form:
-    # path/to/file.py:328: undefined name '_thing'
-    # path/to/file.py:418: 'random' imported but unused
-    expression=r"^([^:]+):(\d+).*([EWFCNTIBDSQ]\d{3}.*)$",
+    # new_file.py:1:17: E231 whitespace
+    expression=r"^([^:]+):(\d+):(?:\d+): ([a-zA-Z]+\d+.*)$",
     command_to_check_install=["flake8", "--version"],
     # flake8 exit code is 1 if there are violations
     # http://flake8.pycqa.org/en/latest/user/invocation.html

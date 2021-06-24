@@ -1102,6 +1102,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
                 ../new_file.py:90:0: D207 Docstring is under-indented
                 ../new_file.py:100:0: S100 Snippet found
                 ../new_file.py:110:0: Q000 Remove Single quotes
+                ../new_file.py:120:0: ABCXYZ000 Dummy
             """
             ).strip()
             + "\n"
@@ -1133,6 +1134,7 @@ class Flake8QualityReporterTest(unittest.TestCase):
             Violation(90, "D207 Docstring is under-indented"),
             Violation(100, "S100 Snippet found"),
             Violation(110, "Q000 Remove Single quotes"),
+            Violation(120, "ABCXYZ000 Dummy"),
         ]
 
         self.assertEqual(expected_violations, quality.violations("../new_file.py"))
