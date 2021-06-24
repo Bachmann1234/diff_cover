@@ -219,6 +219,7 @@ the current git directory.
     diff-quality --violations=pycodestyle --include project/foo/**
 
 The following is executed for every changed file:
+
 #. check if any include pattern was specified
 #. if yes, check if the changed file is part of at least one include pattern
 #. check if the file is part of any exclude pattern
@@ -347,6 +348,7 @@ e.g.
     )
 
 Notes:
+
 * The dictionary key for the entry point must be named ``diff_cover``
 * The value must be in the format ``TOOL_NAME = YOUR_PACKAGE.PLUGIN_MODULE``
 
