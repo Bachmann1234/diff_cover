@@ -1,3 +1,12 @@
+6/24/2021 v5.4.0
+
+* Some tweaks to the readme
+* Changes to how flake8 is parsed allowing diff_quality to support error codes that dont conform to the suggested 3 letter 3 digit form
+* Adds option to show snippets in the console report to help provide context for violations
+* Some tests migrated from unit test's class based approach to pytests functional approach
+
+All of these are due to @kasium Thanks for all you have done to this point!
+
 6/22/2021 v5.3.0
 
 * Adds 'num_changed_lines' to json report. Thanks @kasium https://github.com/Bachmann1234/diff_cover/issues/170
