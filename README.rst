@@ -208,7 +208,7 @@ Exclude/Include paths
 Explicit exclusion of paths is possible for both ``diff-cover`` and ``diff-quality``, while inclusion is
 only supported for ``diff-quality`` (since 5.1.0).
 
-The exclude option works with ``fnmatch``, include with ``glob``. Both options can be specified multiple times.
+The exclude option works with ``fnmatch``, include with ``glob``. Both options can consume multiple values.
 Include options should be wrapped in double quotes to prevent shell globbing. Also they should be relative to
 the current git directory.
 
