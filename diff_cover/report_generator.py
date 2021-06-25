@@ -8,6 +8,7 @@ from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
 
 from diff_cover.snippets import Snippet
+from diff_cover.violationsreporters.base import ALL_LINES
 
 
 class DiffViolations:
@@ -16,9 +17,12 @@ class DiffViolations:
     """
 
     def __init__(self, violations, measured_lines, diff_lines):
-        self.lines = {violation.line for violation in violations}.intersection(
-            diff_lines
-        )
+        if len(violations) == 1 and violations[0].line == ALL_LINES:
+            self.lines = diff_lines
+        else:
+            self.lines = {violation.line for violation in violations}.intersection(
+                diff_lines
+            )
 
         self.violations = {
             violation for violation in violations if violation.line in self.lines

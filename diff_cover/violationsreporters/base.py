@@ -7,6 +7,8 @@ from collections import defaultdict, namedtuple
 
 from diff_cover.command_runner import execute, run_command_for_code
 
+ALL_LINES = -1
+
 Violation = namedtuple("Violation", "line, message")
 
 
@@ -187,6 +189,7 @@ class RegexBasedDriver(QualityDriver):
         command_to_check_install,
         flags=0,
         exit_codes=[0],
+        output_stderr=False,
     ):
         """
         args:
@@ -197,7 +200,7 @@ class RegexBasedDriver(QualityDriver):
             command_to_check_install: (list[str]) command to run
             to see if the tool is installed
         """
-        super().__init__(name, supported_extensions, command, exit_codes)
+        super().__init__(name, supported_extensions, command, exit_codes, output_stderr)
         self.expression = re.compile(expression, flags)
         self.command_to_check_install = command_to_check_install
         self.is_installed = None
@@ -218,7 +221,9 @@ class RegexBasedDriver(QualityDriver):
                 matches = (self.expression.match(line) for line in report.split("\n"))
             for match in matches:
                 if match is not None:
-                    src, line_number, message = match.groups()
+                    src = match.group("src")
+                    line_number = match.groupdict().get("line", ALL_LINES)
+                    message = match.group("message")
                     # Transform src to a relative path, if it isn't already
                     src = os.path.relpath(src)
                     violation = Violation(int(line_number), message)

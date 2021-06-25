@@ -305,7 +305,7 @@ flake8_driver = RegexBasedDriver(
     command=["flake8"],
     # Match lines of the form:
     # new_file.py:1:17: E231 whitespace
-    expression=r"^([^:]+):(\d+):(?:\d+): ([a-zA-Z]+\d+.*)$",
+    expression=r"^(?P<src>[^:]+):(?P<line>\d+):(?:\d+): (?P<message>[a-zA-Z]+\d+.*)$",
     command_to_check_install=["flake8", "--version"],
     # flake8 exit code is 1 if there are violations
     # http://flake8.pycqa.org/en/latest/user/invocation.html
@@ -349,6 +349,16 @@ pydocstyle_driver = RegexBasedDriver(
     # pydocstyle exit code is 1 if there are violations
     # http://www.pydocstyle.org/en/2.1.1/usage.html#return-code
     exit_codes=[0, 1],
+)
+
+black_driver = RegexBasedDriver(
+    name="black",
+    supported_extensions=["py"],
+    command=["black", "--check"],
+    expression=r"(?P<message>would reformat (?P<src>.*))",
+    command_to_check_install=["black", "--version"],
+    exit_codes=[0, 1],
+    output_stderr=True,
 )
 
 
