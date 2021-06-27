@@ -1,31 +1,53 @@
-import unittest
-from unittest import mock
+# pylint: disable=missing-function-docstring,missing-class-docstring
+
+"""Test for diff_cover.git_diff"""
+
+import pytest
 
 from diff_cover.command_runner import CommandError
 from diff_cover.git_diff import GitDiffTool
 
 
-class TestGitDiffTool(unittest.TestCase):
-    def setUp(self):
+@pytest.fixture
+def process(mocker):
+    process_ = mocker.Mock()
+    process_.returncode = 0
+    return process_
 
-        # Create mock subprocess to simulate `git diff`
-        self.process = mock.Mock()
-        self.process.returncode = 0
-        self.subprocess = mock.patch("diff_cover.command_runner.subprocess").start()
-        self.subprocess.Popen.return_value = self.process
-        self.addCleanup(mock.patch.stopall)
-        # Create the git diff tool
-        self.tool = GitDiffTool(range_notation="...", ignore_whitespace=False)
 
-    def check_diff_committed(self, diff_range_notation, ignore_whitespace):
-        self.tool = GitDiffTool(
+@pytest.fixture(autouse=True)
+def subprocess(mocker, process):
+    subprocess_ = mocker.patch("diff_cover.command_runner.subprocess")
+    subprocess_.Popen.return_value = process
+    return subprocess_
+
+
+@pytest.fixture
+def tool():
+    return GitDiffTool(range_notation="...", ignore_whitespace=False)
+
+
+@pytest.fixture
+def set_git_diff_output(process):
+    def _inner(stdout, stderr, returncode=0):
+        process.communicate.return_value = (stdout, stderr)
+        process.returncode = returncode
+
+    return _inner
+
+
+@pytest.fixture
+def check_diff_committed(subprocess, set_git_diff_output):
+    def _inner(diff_range_notation, ignore_whitespace):
+        tool_ = GitDiffTool(
             range_notation=diff_range_notation, ignore_whitespace=ignore_whitespace
         )
-        self._set_git_diff_output("test output", "")
-        output = self.tool.diff_committed()
+
+        set_git_diff_output("test output", "")
+        output = tool_.diff_committed()
 
         # Expect that we get the correct output
-        self.assertEqual(output, "test output")
+        assert output == "test output"
 
         # Expect that the correct command was executed
         expected = [
@@ -43,106 +65,103 @@ class TestGitDiffTool(unittest.TestCase):
             expected.append("--ignore-all-space")
             expected.append("--ignore-blank-lines")
         expected.append(f"origin/master{diff_range_notation}HEAD")
-        self.subprocess.Popen.assert_called_with(
-            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
+        subprocess.Popen.assert_called_with(
+            expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
 
-    def test_diff_commited(self):
-        self.check_diff_committed("...", ignore_whitespace=False)
-        self.check_diff_committed("...", ignore_whitespace=True)
-        self.check_diff_committed("..", ignore_whitespace=False)
-        self.check_diff_committed("..", ignore_whitespace=True)
+    return _inner
 
-    def test_diff_unstaged(self):
-        self._set_git_diff_output("test output", "")
-        output = self.tool.diff_unstaged()
 
-        # Expect that we get the correct output
-        self.assertEqual(output, "test output")
+def test_diff_commited(check_diff_committed):
+    check_diff_committed("...", ignore_whitespace=False)
+    check_diff_committed("...", ignore_whitespace=True)
+    check_diff_committed("..", ignore_whitespace=False)
+    check_diff_committed("..", ignore_whitespace=True)
 
-        # Expect that the correct command was executed
-        expected = [
-            "git",
-            "-c",
-            "diff.mnemonicprefix=no",
-            "-c",
-            "diff.noprefix=no",
-            "diff",
-            "--no-color",
-            "--no-ext-diff",
-            "-U0",
-        ]
-        self.subprocess.Popen.assert_called_with(
-            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
-        )
 
-    def test_diff_staged(self):
-        self._set_git_diff_output("test output", "")
-        output = self.tool.diff_staged()
+def test_diff_unstaged(set_git_diff_output, tool, subprocess):
+    set_git_diff_output("test output", "")
+    output = tool.diff_unstaged()
 
-        # Expect that we get the correct output
-        self.assertEqual(output, "test output")
+    # Expect that we get the correct output
+    assert output == "test output"
 
-        # Expect that the correct command was executed
-        expected = [
-            "git",
-            "-c",
-            "diff.mnemonicprefix=no",
-            "-c",
-            "diff.noprefix=no",
-            "diff",
-            "--no-color",
-            "--no-ext-diff",
-            "-U0",
-            "--cached",
-        ]
-        self.subprocess.Popen.assert_called_with(
-            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
-        )
+    # Expect that the correct command was executed
+    expected = [
+        "git",
+        "-c",
+        "diff.mnemonicprefix=no",
+        "-c",
+        "diff.noprefix=no",
+        "diff",
+        "--no-color",
+        "--no-ext-diff",
+        "-U0",
+    ]
+    subprocess.Popen.assert_called_with(
+        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
-    def test_diff_committed_compare_branch(self):
 
-        # Override the default compare branch
-        self._set_git_diff_output("test output", "")
-        output = self.tool.diff_committed(compare_branch="release")
+def test_diff_staged(tool, subprocess, set_git_diff_output):
+    set_git_diff_output("test output", "")
+    output = tool.diff_staged()
 
-        # Expect that we get the correct output
-        self.assertEqual(output, "test output")
+    # Expect that we get the correct output
+    assert output == "test output"
 
-        # Expect that the correct command was executed
+    # Expect that the correct command was executed
+    expected = [
+        "git",
+        "-c",
+        "diff.mnemonicprefix=no",
+        "-c",
+        "diff.noprefix=no",
+        "diff",
+        "--no-color",
+        "--no-ext-diff",
+        "-U0",
+        "--cached",
+    ]
+    subprocess.Popen.assert_called_with(
+        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
-        expected = [
-            "git",
-            "-c",
-            "diff.mnemonicprefix=no",
-            "-c",
-            "diff.noprefix=no",
-            "diff",
-            "--no-color",
-            "--no-ext-diff",
-            "-U0",
-            "release...HEAD",
-        ]
-        self.subprocess.Popen.assert_called_with(
-            expected, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE
-        )
 
-    def test_errors(self):
-        self._set_git_diff_output("test output", "fatal error", 1)
+def test_diff_committed_compare_branch(set_git_diff_output, tool, subprocess):
+    # Override the default compare branch
+    set_git_diff_output("test output", "")
+    output = tool.diff_committed(compare_branch="release")
 
-        with self.assertRaises(CommandError):
-            self.tool.diff_unstaged()
+    # Expect that we get the correct output
+    assert output == "test output"
 
-        with self.assertRaises(CommandError):
-            self.tool.diff_staged()
+    # Expect that the correct command was executed
+    expected = [
+        "git",
+        "-c",
+        "diff.mnemonicprefix=no",
+        "-c",
+        "diff.noprefix=no",
+        "diff",
+        "--no-color",
+        "--no-ext-diff",
+        "-U0",
+        "release...HEAD",
+    ]
+    subprocess.Popen.assert_called_with(
+        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
-        with self.assertRaises(CommandError):
-            self.tool.diff_unstaged()
 
-    def _set_git_diff_output(self, stdout, stderr, returncode=0):
-        """
-        Configure the `git diff` mock to output `stdout`
-        and `stderr` to stdout and stderr, respectively.
-        """
-        self.process.communicate.return_value = (stdout, stderr)
-        self.process.returncode = returncode
+def test_errors(set_git_diff_output, tool):
+    set_git_diff_output("test output", "fatal error", 1)
+
+    with pytest.raises(CommandError):
+        tool.diff_unstaged()
+
+    with pytest.raises(CommandError):
+        tool.diff_staged()
+
+    with pytest.raises(CommandError):
+        tool.diff_unstaged()
