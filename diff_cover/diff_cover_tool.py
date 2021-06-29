@@ -60,9 +60,7 @@ def parse_coverage_args(argv):
 
     parser.add_argument("coverage_xml", type=str, help=COVERAGE_XML_HELP, nargs="+")
 
-    output_format = parser.add_mutually_exclusive_group()
-
-    output_format.add_argument(
+    parser.add_argument(
         "--html-report",
         metavar="FILENAME",
         type=str,
@@ -70,7 +68,7 @@ def parse_coverage_args(argv):
         help=HTML_REPORT_HELP,
     )
 
-    output_format.add_argument(
+    parser.add_argument(
         "--json-report",
         metavar="FILENAME",
         type=str,
@@ -78,7 +76,7 @@ def parse_coverage_args(argv):
         help=JSON_REPORT_HELP,
     )
 
-    output_format.add_argument(
+    parser.add_argument(
         "--markdown-report",
         metavar="FILENAME",
         type=str,
@@ -86,7 +84,7 @@ def parse_coverage_args(argv):
         help=MARKDOWN_REPORT_HELP,
     )
 
-    output_format.add_argument(
+    parser.add_argument(
         "--show-uncovered", action="store_true", default=False, help=SHOW_UNCOVERED
     )
 
@@ -199,12 +197,12 @@ def generate_coverage_report(
             with open(css_file, "wb") as output_file:
                 reporter.generate_css(output_file)
 
-    elif json_report is not None:
+    if json_report is not None:
         reporter = JsonReportGenerator(coverage, diff)
         with open(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    elif markdown_report is not None:
+    if markdown_report is not None:
         reporter = MarkdownReportGenerator(coverage, diff)
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
