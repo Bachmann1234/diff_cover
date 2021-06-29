@@ -337,6 +337,7 @@ In the Python package's ``setup.py`` file, define an entry point for the plugin,
 e.g.
 
 .. code:: python
+
     setup(
         ...
         entry_points={
@@ -357,6 +358,7 @@ look up the tool package and module based on the tool name provided to the
 ``--violations`` option of the ``diff-quality`` command, e.g.:
 
 .. code:: bash
+
     $ diff-quality --violations sqlfluff
 
 The plugin implementation will look something like the example below. This is
