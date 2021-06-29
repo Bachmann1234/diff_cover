@@ -352,7 +352,7 @@ Notes:
 * The dictionary key for the entry point must be named ``diff_cover``
 * The value must be in the format ``TOOL_NAME = YOUR_PACKAGE.PLUGIN_MODULE``
 
-When your package is installed,``diff-quality`` uses this information to
+When your package is installed, ``diff-quality`` uses this information to
 look up the tool package and module based on the tool name provided to the
 ``--violations`` option of the ``diff-quality`` command, e.g.:
 
@@ -363,6 +363,7 @@ The plugin implementation will look something like the example below. This is
 a simplified example based on a working plugin implementation.
 
 .. code:: python
+
     from diff_cover.hook import hookimpl as diff_cover_hookimpl
     from diff_cover.violationsreporters.base import BaseViolationReporter, Violation
 
@@ -391,12 +392,15 @@ a simplified example based on a working plugin implementation.
         return SQLFluffViolationReporter()
 
 Important notes:
+
 * ``diff-quality`` is looking for a plugin function:
+
   * Located in your package's module that was listed in the ``setup.py`` entry point.
   * Marked with the ``@diff_cover_hookimpl`` decorator
   * Named ``diff_cover_report_quality``. (This distinguishes it from any other
     plugin types ``diff_cover`` may support.)
 * The function should return an object with the following properties and methods:
+
   * ``supported_extensions`` property with a list of supported file extensions
   * ``violations()`` function that returns a list of ``Violation`` objects for
     the specified ``src_path``. For more details on this function and other
