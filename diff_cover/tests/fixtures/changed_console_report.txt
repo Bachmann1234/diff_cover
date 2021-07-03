@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Diff: origin/master...HEAD, staged and unstaged changes
+Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 test_src.txt (100%)
 -------------

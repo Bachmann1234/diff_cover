@@ -53,10 +53,10 @@ class GitDiffTool:
             self._default_diff_args.append("--ignore-all-space")
             self._default_diff_args.append("--ignore-blank-lines")
 
-    def diff_committed(self, compare_branch="origin/master"):
+    def diff_committed(self, compare_branch="origin/main"):
         """
         Returns the output of `git diff` for committed
-        changes not yet in origin/master.
+        changes not yet in origin/main.
 
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.

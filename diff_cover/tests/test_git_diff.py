@@ -64,7 +64,7 @@ def check_diff_committed(subprocess, set_git_diff_output):
         if ignore_whitespace:
             expected.append("--ignore-all-space")
             expected.append("--ignore-blank-lines")
-        expected.append(f"origin/master{diff_range_notation}HEAD")
+        expected.append(f"origin/main{diff_range_notation}HEAD")
         subprocess.Popen.assert_called_with(
             expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )

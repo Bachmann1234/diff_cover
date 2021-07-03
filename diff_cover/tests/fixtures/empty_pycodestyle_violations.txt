@@ -1,7 +1,7 @@
 -------------
 Diff Quality
 Quality Report: pycodestyle
-Diff: origin/master...HEAD, staged and unstaged changes
+Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 violations_test_file.py (100%)
 -------------

@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Diff: origin/master...HEAD, staged and unstaged changes
+Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 scripts/maths.lua (50.0%): Missing lines 12
 -------------

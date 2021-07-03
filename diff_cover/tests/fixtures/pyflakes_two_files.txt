@@ -1,7 +1,7 @@
 -------------
 Diff Quality
 Quality Report: pyflakes
-Diff: origin/master...HEAD, staged and unstaged changes
+Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 hello.py (0.0%):
 hello.py:2: undefined name 'unknown_var'

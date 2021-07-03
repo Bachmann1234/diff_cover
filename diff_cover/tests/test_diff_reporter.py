@@ -23,7 +23,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
         # Expect that diff report is named after its compare branch
         self.assertEqual(
-            self.diff.name(), "origin/master...HEAD, staged and unstaged changes"
+            self.diff.name(), "origin/main...HEAD, staged and unstaged changes"
         )
 
     def test_name_compare_branch(self):
@@ -37,14 +37,14 @@ class GitDiffReporterTest(unittest.TestCase):
         # Override the default branch
         self.assertEqual(
             GitDiffReporter(git_diff=self._git_diff, ignore_staged=True).name(),
-            "origin/master...HEAD and unstaged changes",
+            "origin/main...HEAD and unstaged changes",
         )
 
     def test_name_ignore_unstaged(self):
         # Override the default branch
         self.assertEqual(
             GitDiffReporter(git_diff=self._git_diff, ignore_unstaged=True).name(),
-            "origin/master...HEAD and staged changes",
+            "origin/main...HEAD and staged changes",
         )
 
     def test_name_ignore_staged_and_unstaged(self):
@@ -53,7 +53,7 @@ class GitDiffReporterTest(unittest.TestCase):
             GitDiffReporter(
                 git_diff=self._git_diff, ignore_staged=True, ignore_unstaged=True
             ).name(),
-            "origin/master...HEAD",
+            "origin/main...HEAD",
         )
 
     def test_git_path_selection(self):

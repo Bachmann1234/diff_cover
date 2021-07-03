@@ -93,7 +93,7 @@ need to use different commands to generate the coverage XML report.
 
     diff-cover coverage.xml
 
-This will compare the current ``git`` branch to ``origin/master`` and print
+This will compare the current ``git`` branch to ``origin/main`` and print
 the diff coverage report to the console.
 
 You can also generate an HTML, JSON or Markdown version of the report:
@@ -183,7 +183,7 @@ If you need to pass in additional options you can with the ``options`` flag
 Compare Branch
 --------------
 
-By default, ``diff-cover`` compares the current branch to ``origin/master``.  To specify a different compare branch:
+By default, ``diff-cover`` compares the current branch to ``origin/main``.  To specify a different compare branch:
 
 .. code:: bash
 
@@ -252,17 +252,17 @@ __ http://nedbatchelder.com/code/coverage/
 
 .. code:: bash
 
-    fatal: ambiguous argument 'origin/master...HEAD': unknown revision or path not in the working tree.
+    fatal: ambiguous argument 'origin/main...HEAD': unknown revision or path not in the working tree.
 
 This is known to occur when running ``diff-cover`` in `Travis CI`__
 
 __ http://travis-ci.org
 
-**Solution**: Fetch the remote master branch before running ``diff-cover``:
+**Solution**: Fetch the remote main branch before running ``diff-cover``:
 
 .. code:: bash
 
-    git fetch origin master:refs/remotes/origin/master
+    git fetch origin master:refs/remotes/origin/main
 
 **Issue**: ``diff-quality`` reports "diff_cover.violations_reporter.QualityReporterError: No config file found, using default configuration"
 
