@@ -1,3 +1,10 @@
+7/03/2021 v5.5.0
+
+* Migrate more stuff to pytest
+* Multiple reports can now be generated at once
+
+Thanks again to @kasium for both of these
+
 6/24/2021 v5.4.0
 
 * Some tweaks to the readme
