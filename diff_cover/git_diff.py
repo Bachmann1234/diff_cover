@@ -1,8 +1,9 @@
 """
 Wrapper for `git diff` command.
 """
+from textwrap import dedent
 
-from diff_cover.command_runner import execute
+from diff_cover.command_runner import execute, CommandError
 
 
 class GitDiffError(Exception):
@@ -64,9 +65,22 @@ class GitDiffTool:
         diff_range = "{branch}{notation}HEAD".format(
             branch=compare_branch, notation=self._range_notation
         )
-        return execute(self._default_git_args + self._default_diff_args + [diff_range])[
-            0
-        ]
+        try:
+            return execute(
+                self._default_git_args + self._default_diff_args + [diff_range]
+            )[0]
+        except CommandError as e:
+            if "unknown revision" in str(e):
+                raise ValueError(
+                    dedent(
+                        f"""
+                        Could not find the branch to compare to. Does '{compare_branch}' exist?
+                        the `--compare-branch` argument allows you to set a different branch.
+                    """
+                    )
+                )
+            else:
+                raise
 
     def diff_unstaged(self):
         """

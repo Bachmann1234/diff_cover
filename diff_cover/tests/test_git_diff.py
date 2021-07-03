@@ -128,6 +128,22 @@ def test_diff_staged(tool, subprocess, set_git_diff_output):
     )
 
 
+def test_diff_missing_branch_error(set_git_diff_output, tool, subprocess):
+    # Override the default compare branch
+    set_git_diff_output("test output", "fatal error", 1)
+    with pytest.raises(CommandError):
+        tool.diff_committed(compare_branch="release")
+
+    set_git_diff_output(
+        "test output",
+        "ambiguous argument 'origin/master...HEAD': "
+        "unknown revision or path not in the working tree.",
+        1,
+    )
+    with pytest.raises(ValueError):
+        tool.diff_committed(compare_branch="release")
+
+
 def test_diff_committed_compare_branch(set_git_diff_output, tool, subprocess):
     # Override the default compare branch
     set_git_diff_output("test output", "")
