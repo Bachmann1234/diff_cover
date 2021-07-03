@@ -114,7 +114,7 @@ def parse_quality_args(argv):
         "--compare-branch",
         metavar="BRANCH",
         type=str,
-        default="origin/master",
+        default="origin/main",
         help=COMPARE_BRANCH_HELP,
     )
 

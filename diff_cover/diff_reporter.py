@@ -109,7 +109,7 @@ class GitDiffReporter(BaseDiffReporter):
 
     def __init__(
         self,
-        compare_branch="origin/master",
+        compare_branch="origin/main",
         git_diff=None,
         ignore_staged=None,
         ignore_unstaged=None,

@@ -1,6 +1,6 @@
 -------------
 Diff Coverage
-Diff: origin/master...HEAD, staged and unstaged changes
+Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 No lines with coverage information in this diff.
 -------------

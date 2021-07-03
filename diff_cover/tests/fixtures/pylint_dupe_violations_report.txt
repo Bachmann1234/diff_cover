@@ -1,7 +1,7 @@
 -------------
 Diff Quality
 Quality Report: pylint
-Diff: origin/master...HEAD, staged and unstaged changes
+Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 fileone.py (93.8%):
 fileone.py:3: R0801: (duplicate-code), : Similar lines in 2 files
