@@ -136,7 +136,7 @@ def test_diff_missing_branch_error(set_git_diff_output, tool, subprocess):
 
     set_git_diff_output(
         "test output",
-        "ambiguous argument 'origin/master...HEAD': "
+        "ambiguous argument 'origin/main...HEAD': "
         "unknown revision or path not in the working tree.",
         1,
     )

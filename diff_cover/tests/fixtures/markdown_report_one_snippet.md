@@ -1,5 +1,5 @@
 # Diff Coverage
-## Diff: master
+## Diff: main
 
 - file1&#46;py (66.7%): Missing lines 10-11
 - subdir/file2&#46;py (66.7%): Missing lines 10-11
