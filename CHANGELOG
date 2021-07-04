@@ -1,3 +1,7 @@
+7/04/2021 v6.0.0
+
+* As github, gitlab, and git itself have been changing their default branch to main this release changes the default 'compare-branch' to 'main' as well. If your project is using 'master' as a default branch add the following to your build `--compare-branch origin/master`
+
 7/03/2021 v5.5.0
 
 * Migrate more stuff to pytest
