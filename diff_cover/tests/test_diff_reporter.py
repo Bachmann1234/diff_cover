@@ -207,10 +207,10 @@ class GitDiffReporterTest(unittest.TestCase):
         # Add some lines at the start of the diff, before any
         # source files are specified
         diff = git_diff_output({"subdir/file1.py": line_numbers(3, 10)})
-        master_diff = "\n".join(["- deleted line", "+ added line", diff])
+        main_diff = "\n".join(["- deleted line", "+ added line", diff])
 
         # Configure the git diff output
-        self._set_git_diff_output(master_diff, "", "")
+        self._set_git_diff_output(main_diff, "", "")
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed("subdir/file1.py")
@@ -302,7 +302,7 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_overlapping_lines(self):
 
-        master_diff = git_diff_output(
+        main_diff = git_diff_output(
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         )
 
@@ -312,8 +312,8 @@ class GitDiffReporterTest(unittest.TestCase):
         # Overlap, extending the beginning of the hunk (lines 34 to 47)
         overlap_2 = git_diff_output({"subdir/file1.py": line_numbers(32, 37)})
 
-        # Lines in staged / unstaged overlap with lines in master
-        self._set_git_diff_output(master_diff, overlap_1, overlap_2)
+        # Lines in staged / unstaged overlap with lines in main
+        self._set_git_diff_output(main_diff, overlap_1, overlap_2)
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed("subdir/file1.py")
@@ -323,18 +323,18 @@ class GitDiffReporterTest(unittest.TestCase):
 
     def test_git_line_within_hunk(self):
 
-        master_diff = git_diff_output(
+        main_diff = git_diff_output(
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         )
 
-        # Surround hunk in master (lines 3 to 10)
+        # Surround hunk in main (lines 3 to 10)
         surround = git_diff_output({"subdir/file1.py": line_numbers(2, 11)})
 
-        # Within hunk in master (lines 34 to 47)
+        # Within hunk in main (lines 34 to 47)
         within = git_diff_output({"subdir/file1.py": line_numbers(35, 46)})
 
-        # Lines in staged / unstaged overlap with hunks in master
-        self._set_git_diff_output(master_diff, surround, within)
+        # Lines in staged / unstaged overlap with hunks in main
+        self._set_git_diff_output(main_diff, surround, within)
 
         # Get the lines changed in the diff
         lines_changed = self.diff.lines_changed("subdir/file1.py")
@@ -373,20 +373,20 @@ class GitDiffReporterTest(unittest.TestCase):
             (added_diff, deleted_diff, deleted_diff),
         ]
 
-        for (master_diff, staged_diff, unstaged_diff) in combinations:
+        for (main_diff, staged_diff, unstaged_diff) in combinations:
 
             # Set up so we add lines, then delete them
-            self._set_git_diff_output(master_diff, staged_diff, unstaged_diff)
+            self._set_git_diff_output(main_diff, staged_diff, unstaged_diff)
 
             # Should have no lines changed, since
             # we deleted all the lines we modified
             fail_msg = dedent(
                 """
-            master_diff = {0}
+            main_diff = {0}
             staged_diff = {1}
             unstaged_diff = {2}
             """
-            ).format(master_diff, staged_diff, unstaged_diff)
+            ).format(main_diff, staged_diff, unstaged_diff)
 
             self.assertEqual(self.diff.lines_changed("file.py"), [], msg=fail_msg)
 

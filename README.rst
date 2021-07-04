@@ -407,7 +407,7 @@ Important notes:
   * ``violations()`` function that returns a list of ``Violation`` objects for
     the specified ``src_path``. For more details on this function and other
     possible reporting-related methods, see the ``BaseViolationReporter`` class
-    `here <https://github.com/Bachmann1234/diff_cover/blob/master/diff_cover/violationsreporters/base.py>`_.
+    `here <https://github.com/Bachmann1234/diff_cover/blob/main/diff_cover/violationsreporters/base.py>`_.
 
 Special Thanks
 -------------------------
@@ -426,9 +426,6 @@ Originally created with the support of `edX
 .. |conda-version| image:: https://img.shields.io/conda/vn/conda-forge/diff-cover.svg
     :target: https://anaconda.org/conda-forge/diff-cover
     :alt: Conda version
-.. |build-status| image:: https://travis-ci.com/Bachmann1234/diff_cover.svg?branch=master
-    :target: https://travis-ci.com/Bachmann1234/diff_cover
-    :alt: Build Status
-.. |coverage-status| image:: https://coveralls.io/repos/github/Bachmann1234/diff-cover/badge.svg?branch=master
-    :target: https://coveralls.io/github/Bachmann1234/diff-cover?branch=master
+.. |coverage-status| image:: https://coveralls.io/repos/github/Bachmann1234/diff-cover/badge.svg?branch=main
+    :target: https://coveralls.io/github/Bachmann1234/diff-cover?branch=main
     :alt: Coverage Status

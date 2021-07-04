@@ -44,7 +44,7 @@ class BaseReportGeneratorTest(unittest.TestCase):
     MEASURED = [1, 2, 3, 4, 7, 10, 11, 15, 20, 30]
 
     XML_REPORT_NAME = ["reports/coverage.xml"]
-    DIFF_REPORT_NAME = "master"
+    DIFF_REPORT_NAME = "main"
 
     # Subclasses override this to provide the class under test
     REPORT_GENERATOR_CLASS = None
@@ -290,7 +290,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         expected = json.dumps(
             {
                 "report_name": ["reports/coverage.xml"],
-                "diff_name": "master",
+                "diff_name": "main",
                 "src_stats": {
                     "file1.py": {
                         "percent_covered": 66.66666666666667,
@@ -323,7 +323,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         expected = json.dumps(
             {
                 "report_name": ["reports/coverage.xml"],
-                "diff_name": "master",
+                "diff_name": "main",
                 "src_stats": {
                     "file.py": {
                         "percent_covered": 100.0,
@@ -348,7 +348,7 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         expected = json.dumps(
             {
                 "report_name": ["reports/coverage.xml"],
-                "diff_name": "master",
+                "diff_name": "main",
                 "src_stats": {},
                 "total_num_lines": 0,
                 "total_num_violations": 0,
@@ -374,7 +374,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
             """
         -------------
         Diff Coverage
-        Diff: master
+        Diff: main
         -------------
         file1.py (66.7%): Missing lines 10-11
         subdir/file2.py (66.7%): Missing lines 10-11
@@ -400,7 +400,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
             """
         -------------
         Diff Coverage
-        Diff: master
+        Diff: main
         -------------
         file.py (100%)
         -------------
@@ -422,7 +422,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
             """
         -------------
         Diff Coverage
-        Diff: master
+        Diff: main
         -------------
         No lines with coverage information in this diff.
         -------------
@@ -488,7 +488,7 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent(
             """
         # Diff Coverage
-        ## Diff: master
+        ## Diff: main
 
         - file1&#46;py (66.7%): Missing lines 10-11
         - subdir/file2&#46;py (66.7%): Missing lines 10-11
@@ -514,7 +514,7 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent(
             """
         # Diff Coverage
-        ## Diff: master
+        ## Diff: main
 
         - file&#46;py (100%)
 
@@ -536,7 +536,7 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         expected = dedent(
             """
         # Diff Coverage
-        ## Diff: master
+        ## Diff: main
 
         No lines with coverage information in this diff.
         """
