@@ -1,4 +1,4 @@
-diff-cover |pypi-version| |conda-version| |build-status| |coverage-status|
+diff-cover |pypi-version| |conda-version| |build-status|
 ========================================================================================
 
 Automatically find diff lines that need test coverage.
@@ -426,6 +426,6 @@ Originally created with the support of `edX
 .. |conda-version| image:: https://img.shields.io/conda/vn/conda-forge/diff-cover.svg
     :target: https://anaconda.org/conda-forge/diff-cover
     :alt: Conda version
-.. |coverage-status| image:: https://coveralls.io/repos/github/Bachmann1234/diff-cover/badge.svg?branch=main
-    :target: https://coveralls.io/github/Bachmann1234/diff-cover?branch=main
-    :alt: Coverage Status
+.. |build-status| image:: https://github.com/bachmann1234/diff_cover/actions/workflows/verify.yaml/badge.svg?branch=main
+    :target: https://github.com/Bachmann1234/diff_cover/actions/workflows/verify.yaml
+    :alt: Build Status
