@@ -1,8 +1,9 @@
 """
 Classes for generating diff coverage reports.
 """
+import contextlib
 import json
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 from jinja2 import Environment, PackageLoader
 from jinja2_pluralize import pluralize_dj
@@ -34,12 +35,10 @@ class DiffViolations:
             self.measured_lines = set(measured_lines).intersection(diff_lines)
 
 
-class BaseReportGenerator:
+class BaseReportGenerator(ABC):
     """
     Generate a diff coverage report.
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, violations_reporter, diff_reporter):
         """
@@ -345,12 +344,10 @@ class TemplateReportGenerator(BaseReportGenerator):
         # If we cannot load the file, then fail gracefully
         formatted_snippets = {"html": [], "markdown": [], "terminal": []}
         if self.include_snippets:
-            try:
+            with contextlib.suppress(OSError):
                 formatted_snippets = Snippet.load_formatted_snippets(
                     src_path, stats["violation_lines"]
                 )
-            except OSError:
-                pass
 
         stats.update(
             {

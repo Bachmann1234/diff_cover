@@ -5,17 +5,16 @@ import fnmatch
 import glob
 import os
 import re
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 from diff_cover.git_diff import GitDiffError
 
 
-class BaseDiffReporter:
+class BaseDiffReporter(ABC):
     """
     Query information about lines changed in a diff.
     """
 
-    __metaclass__ = ABCMeta
     _exclude = None
     _include = None
 
@@ -402,8 +401,6 @@ class GitDiffReporter(BaseDiffReporter):
                     current_line_new += 1
 
                 # If we are not in a hunk, then ignore the line
-                else:
-                    pass
 
         return added_lines, deleted_lines
 
@@ -488,4 +485,4 @@ class GitDiffReporter(BaseDiffReporter):
         line_set = set(line_numbers)
 
         # Retrieve the list from the set, sort it, and return
-        return sorted([line for line in line_set])
+        return sorted(line for line in line_set)

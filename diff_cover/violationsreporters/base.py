@@ -2,7 +2,7 @@ import copy
 import os
 import re
 import sys
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
 
 from diff_cover.command_runner import execute, run_command_for_code
@@ -15,15 +15,11 @@ class QualityReporterError(Exception):
     A quality reporter command produced an error.
     """
 
-    pass
 
-
-class BaseViolationReporter:
+class BaseViolationReporter(ABC):
     """
     Query information from a coverage report.
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, name):
         """
@@ -37,7 +33,6 @@ class BaseViolationReporter:
         """
         Return a list of Violations recorded in `src_path`.
         """
-        pass
 
     def measured_lines(self, src_path):
         """
@@ -63,9 +58,7 @@ class BaseViolationReporter:
         return self._name
 
 
-class QualityDriver:
-    __metaclass__ = ABCMeta
-
+class QualityDriver(ABC):
     def __init__(
         self, name, supported_extensions, command, exit_codes=[0], output_stderr=False
     ):
@@ -94,7 +87,6 @@ class QualityDriver:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
         """
-        pass
 
     @abstractmethod
     def installed(self):
@@ -102,7 +94,6 @@ class QualityDriver:
         Method checks if the provided tool is installed.
         Returns: boolean True if installed
         """
-        pass
 
 
 class QualityReporter(BaseViolationReporter):

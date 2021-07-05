@@ -3,7 +3,7 @@ Wrapper for `git diff` command.
 """
 from textwrap import dedent
 
-from diff_cover.command_runner import execute, CommandError
+from diff_cover.command_runner import CommandError, execute
 
 
 class GitDiffError(Exception):
@@ -79,8 +79,7 @@ class GitDiffTool:
                     """
                     )
                 )
-            else:
-                raise
+            raise
 
     def diff_unstaged(self):
         """

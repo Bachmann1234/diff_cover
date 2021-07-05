@@ -2,6 +2,7 @@
 Load snippets from source files to show violation lines
 in HTML reports.
 """
+import contextlib
 from tokenize import open as openpy
 
 import chardet
@@ -196,10 +197,8 @@ class Snippet:
 
         if isinstance(contents, bytes):
             encoding = chardet.detect(contents).get("encoding", "utf-8")
-            try:
+            with contextlib.suppress(UnicodeDecodeError):
                 contents = contents.decode(encoding)
-            except UnicodeDecodeError:
-                pass
 
         if isinstance(contents, bytes):
             # We failed to decode the file.
