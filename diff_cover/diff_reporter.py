@@ -213,7 +213,7 @@ class GitDiffReporter(BaseDiffReporter):
                 # Parse the output of the diff string
                 diff_dict = self._parse_diff_str(diff_str)
 
-                for src_path in diff_dict:
+                for src_path, (added_lines, deleted_lines) in diff_dict.items():
                     if self._is_path_excluded(src_path):
                         continue
                     # If no _supported_extensions provided, or extension present: process
@@ -224,8 +224,6 @@ class GitDiffReporter(BaseDiffReporter):
                         not self._supported_extensions
                         or extension in self._supported_extensions
                     ):
-                        added_lines, deleted_lines = diff_dict[src_path]
-
                         # Remove any lines from the dict that have been deleted
                         # Include any lines that have been added
                         result_dict[src_path] = [

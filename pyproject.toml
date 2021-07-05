@@ -36,6 +36,8 @@ disable = [
     "no-self-use",
     # currently some code seems duplicated for pylint
     "duplicate-code",
+    # we are a command line tool and don't want to show all internals
+    "raise-missing-from",
 ]
 
 [tool.pylint.basic]
@@ -48,6 +50,3 @@ good-names = [
     "ex",
 ]
 no-docstring-rgx = "^_"
-
-[tool.pylint.similarities]
-ignore-imports = true

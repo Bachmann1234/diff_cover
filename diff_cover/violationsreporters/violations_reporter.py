@@ -23,7 +23,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura|Clover|JaCoCo XML coverage report.
     """
 
-    def __init__(self, xml_roots, src_roots=[""]):
+    def __init__(self, xml_roots, src_roots=None):
         """
         Load the XML coverage report represented
         by the cElementTree with root element `xml_root`.
@@ -35,7 +35,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
 
-        self._src_roots = src_roots
+        self._src_roots = src_roots or [""]
 
     @staticmethod
     def _to_unix_path(path):
@@ -128,7 +128,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         files = [
             file_tree
             for file_tree in xml_document.findall(".//file")
-            if GitPathTool.relative_path(file_tree.get("path")) == src_path or []
+            if GitPathTool.relative_path(file_tree.get("path")) == src_path
         ]
         if not files:
             return None
@@ -141,7 +141,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     def _measured_source_path_matches(self, package_name, file_name, src_path):
         # find src_path in any of the source roots
         if not src_path.endswith(file_name):
-            return None
+            return False
 
         norm_src_path = os.path.normcase(src_path)
         for root in self._src_roots:
@@ -154,6 +154,7 @@ class XmlCoverageReporter(BaseViolationReporter):
                 == norm_src_path
             ):
                 return True
+        return False
 
     def get_src_path_line_nodes_jacoco(self, xml_document, src_path):
         """
@@ -164,7 +165,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         """
 
         files = []
-        packages = [pkg for pkg in xml_document.findall(".//package")]
+        packages = list(xml_document.findall(".//package"))
         for pkg in packages:
             _files = [
                 _file
@@ -172,7 +173,6 @@ class XmlCoverageReporter(BaseViolationReporter):
                 if self._measured_source_path_matches(
                     pkg.get("name"), _file.get("name"), src_path
                 )
-                or []
             ]
             files.extend(_files)
 
