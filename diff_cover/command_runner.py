@@ -8,7 +8,7 @@ class CommandError(Exception):
     """
 
 
-def execute(command, exit_codes=[0]):
+def execute(command, exit_codes=None):
     """Execute provided command returning the stdout
     Args:
         command (list[str]): list of tokens to execute as your command.
@@ -20,6 +20,9 @@ def execute(command, exit_codes=[0]):
     Raises:
         ValueError if there is a error running the command
     """
+    if exit_codes is None:
+        exit_codes = [0]
+
     stdout_pipe = subprocess.PIPE
     process = subprocess.Popen(command, stdout=stdout_pipe, stderr=stdout_pipe)
     try:
