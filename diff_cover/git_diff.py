@@ -102,3 +102,7 @@ class GitDiffTool:
         return execute(self._default_git_args + self._default_diff_args + ["--cached"])[
             0
         ]
+
+    def git_untracked(self):
+        output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
+        return output.split("\n")[0:-1]
