@@ -162,6 +162,10 @@ class GitDiffReporter(BaseDiffReporter):
         # Get the diff dictionary
         diff_dict = self._git_diff()
 
+        for path in self._git_diff_tool.git_untracked():
+            num_lines = sum(1 for _ in open(path))
+            diff_dict[path] = range(1, num_lines+1)
+
         # Return the changed file paths (dict keys)
         # in alphabetical order
         return sorted(diff_dict.keys(), key=lambda x: x.lower())
