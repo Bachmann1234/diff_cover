@@ -7,7 +7,7 @@ from unittest import mock
 
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffError, GitDiffTool
-from diff_cover.tests.helpers import git_diff_output, line_numbers
+from tests.helpers import git_diff_output, line_numbers
 
 
 class GitDiffReporterTest(unittest.TestCase):
