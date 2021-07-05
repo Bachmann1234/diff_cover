@@ -81,7 +81,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         # within it. If we have that we outta use it
         sources = xml_document.findall("sources/source")
         sources = [source.text for source in sources if source.text]
-        classes = [class_tree for class_tree in xml_document.findall(".//class") or []]
+        classes = xml_document.findall(".//class") or []
 
         classes = (
             [
@@ -113,9 +113,8 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         if not classes:
             return None
-        else:
-            lines = [clazz.findall("./lines/line") for clazz in classes]
-            return [elem for elem in itertools.chain(*lines)]
+        lines = [clazz.findall("./lines/line") for clazz in classes]
+        return list(itertools.chain(*lines))
 
     @staticmethod
     def get_src_path_line_nodes_clover(xml_document, src_path):
@@ -137,7 +136,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         for file_tree in files:
             lines.append(file_tree.findall('./line[@type="stmt"]'))
             lines.append(file_tree.findall('./line[@type="cond"]'))
-        return [elem for elem in itertools.chain(*lines)]
+        return list(itertools.chain(*lines))
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
         # find src_path in any of the source roots
@@ -180,7 +179,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         if not files:
             return None
         lines = [file_tree.findall("./line") for file_tree in files]
-        return [elem for elem in itertools.chain(*lines)]
+        return list(itertools.chain(*lines))
 
     def _cache_file(self, src_path):
         """

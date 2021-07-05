@@ -6,3 +6,48 @@ exclude = "diff_cover/tests/fixtures/*"
 
 [tool.isort]
 profile = "black"
+
+[tool.pylint.master]
+max-line-length = 100
+load-plugins = [
+    "pylint_pytest",
+]
+
+[tool.pylint."messages control"]
+enable = ["all"]
+disable = [
+    # allow TODO comments
+    "fixme",
+    # allow disables
+    "locally-disabled",
+    "suppressed-message",
+    # covered by isort
+    "ungrouped-imports",
+    # allow classes and functions w/o docstring
+    "missing-docstring",
+    # hard number checks can be ignored, because they are covered in code reviews
+    "too-many-instance-attributes",
+    "too-many-arguments",
+    "too-many-locals",
+    "too-many-branches",
+    "too-few-public-methods",
+    "too-many-nested-blocks",
+    # allow methods not to use self
+    "no-self-use",
+    # currently some code seems duplicated for pylint
+    "duplicate-code",
+]
+
+[tool.pylint.basic]
+good-names = [
+    "_",
+    "i",
+    "setUp",
+    "tearDown",
+    "e",
+    "ex",
+]
+no-docstring-rgx = "^_"
+
+[tool.pylint.similarities]
+ignore-imports = true

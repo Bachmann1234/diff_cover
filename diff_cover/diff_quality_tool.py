@@ -253,10 +253,14 @@ def main(argv=None, directory=None):
     if driver is None:
         # The requested tool is not built into diff_cover. See if another Python
         # package provides it.
-        pm = pluggy.PluginManager("diff_cover")
-        pm.add_hookspecs(hookspecs)
-        pm.load_setuptools_entrypoints("diff_cover")
-        for hookimpl in pm.hook.diff_cover_report_quality.get_hookimpls():
+        plugin_manager = pluggy.PluginManager("diff_cover")
+        plugin_manager.add_hookspecs(hookspecs)
+        plugin_manager.load_setuptools_entrypoints("diff_cover")
+
+        hooks = (
+            plugin_manager.hook.diff_cover_report_quality  # pylint: disable=no-member
+        )
+        for hookimpl in hooks.get_hookimpls():
             if hookimpl.plugin_name == tool:
                 reporter = hookimpl.function()
                 break
@@ -272,7 +276,7 @@ def main(argv=None, directory=None):
                     try:
                         input_reports.append(open(path, "rb"))
                     except OSError:
-                        LOGGER.warning(f"Could not load '{path}'")
+                        LOGGER.warning("Could not load '%s'", path)
                 reporter = QualityReporter(driver, input_reports, user_options)
 
             percent_passing = generate_quality_report(
