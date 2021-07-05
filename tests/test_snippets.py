@@ -9,7 +9,7 @@ from pygments.token import Token
 
 from diff_cover.git_path import GitPathTool
 from diff_cover.snippets import Snippet
-from diff_cover.tests.helpers import assert_long_str_equal, fixture_path, load_fixture
+from tests.helpers import assert_long_str_equal, fixture_path, load_fixture
 
 SRC_TOKENS = [
     (Token.Comment, "# Test source"),
