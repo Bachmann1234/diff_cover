@@ -112,6 +112,7 @@ class GitDiffReporter(BaseDiffReporter):
         git_diff=None,
         ignore_staged=None,
         ignore_unstaged=None,
+        include_untracked=False,
         supported_extensions=None,
         exclude=None,
         include=None,
@@ -142,6 +143,7 @@ class GitDiffReporter(BaseDiffReporter):
         self._git_diff_tool = git_diff
         self._ignore_staged = ignore_staged
         self._ignore_unstaged = ignore_unstaged
+        self._include_untracked = include_untracked
         self._supported_extensions = supported_extensions
 
         # Cache diff information as a dictionary
@@ -162,9 +164,12 @@ class GitDiffReporter(BaseDiffReporter):
         # Get the diff dictionary
         diff_dict = self._git_diff()
 
-        for path in self._git_diff_tool.git_untracked():
-            num_lines = sum(1 for _ in open(path))
-            diff_dict[path] = range(1, num_lines+1)
+        # include untracked files
+        if self._include_untracked:
+            for path in self._git_diff_tool.untracked():
+                with open(path) as file_handle:
+                    num_lines = sum(1 for _ in file_handle)
+                diff_dict[path] = range(1, num_lines + 1)
 
         # Return the changed file paths (dict keys)
         # in alphabetical order

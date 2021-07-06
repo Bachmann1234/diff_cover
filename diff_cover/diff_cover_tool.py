@@ -36,6 +36,7 @@ DIFF_RANGE_NOTATION_HELP = (
 )
 QUIET_HELP = "Only print errors and failures"
 SHOW_UNCOVERED = "Show uncovered lines on the console"
+INCLUDE_UNTRACKED_HELP = "Include untracked files"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -120,6 +121,13 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
+        "--include-untracked",
+        action="store_true",
+        default=False,
+        help=INCLUDE_UNTRACKED_HELP,
+    )
+
+    parser.add_argument(
         "--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP
     )
 
@@ -164,6 +172,7 @@ def generate_coverage_report(
     markdown_report=None,
     ignore_staged=False,
     ignore_unstaged=False,
+    include_untracked=False,
     exclude=None,
     src_roots=None,
     diff_range_notation=None,
@@ -179,6 +188,7 @@ def generate_coverage_report(
         git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
+        include_untracked=include_untracked,
         exclude=exclude,
     )
 
@@ -242,6 +252,7 @@ def main(argv=None, directory=None):
         css_file=arg_dict["external_css_file"],
         ignore_staged=arg_dict["ignore_staged"],
         ignore_unstaged=arg_dict["ignore_unstaged"],
+        include_untracked=arg_dict["include_untracked"],
         exclude=arg_dict["exclude"],
         src_roots=arg_dict["src_roots"],
         diff_range_notation=arg_dict["diff_range_notation"],

@@ -22,6 +22,7 @@ from diff_cover.diff_cover_tool import (
     IGNORE_STAGED_HELP,
     IGNORE_UNSTAGED_HELP,
     IGNORE_WHITESPACE,
+    INCLUDE_UNTRACKED_HELP,
     QUIET_HELP,
 )
 from diff_cover.diff_reporter import GitDiffReporter
@@ -142,6 +143,13 @@ def parse_quality_args(argv):
     )
 
     parser.add_argument(
+        "--include-untracked",
+        action="store_true",
+        default=False,
+        help=INCLUDE_UNTRACKED_HELP,
+    )
+
+    parser.add_argument(
         "--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP
     )
 
@@ -181,6 +189,7 @@ def generate_quality_report(
     css_file=None,
     ignore_staged=False,
     ignore_unstaged=False,
+    include_untracked=False,
     exclude=None,
     include=None,
     diff_range_notation=None,
@@ -198,6 +207,7 @@ def generate_quality_report(
         git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
+        include_untracked=include_untracked,
         supported_extensions=supported_extensions,
         exclude=exclude,
         include=include,
@@ -287,6 +297,7 @@ def main(argv=None, directory=None):
                 css_file=arg_dict["external_css_file"],
                 ignore_staged=arg_dict["ignore_staged"],
                 ignore_unstaged=arg_dict["ignore_unstaged"],
+                include_untracked=arg_dict["include_untracked"],
                 exclude=arg_dict["exclude"],
                 include=arg_dict["include"],
                 diff_range_notation=arg_dict["diff_range_notation"],

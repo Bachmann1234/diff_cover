@@ -103,6 +103,7 @@ class GitDiffTool:
             0
         ]
 
-    def git_untracked(self):
+    def untracked(self):
+        """Return the untracked files."""
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
-        return output.split("\n")[0:-1]
+        return output.strip().split("\n") if output else []
