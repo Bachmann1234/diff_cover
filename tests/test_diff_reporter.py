@@ -56,6 +56,13 @@ class GitDiffReporterTest(unittest.TestCase):
             "origin/main...HEAD",
         )
 
+    def test_name_include_untracked(self):
+        # Override the default branch
+        self.assertEqual(
+            GitDiffReporter(git_diff=self._git_diff, include_untracked=True).name(),
+            "origin/main...HEAD, staged, unstaged and untracked changes",
+        )
+
     def test_git_path_selection(self):
         for include, exclude, expected in [
             # no include/exclude --> use all paths
@@ -589,7 +596,26 @@ class GitDiffReporterTest(unittest.TestCase):
         sentinel = object()
         self.assertTrue(self.diff._fnmatch("file.py", [], default=sentinel) is sentinel)
 
-    def _set_git_diff_output(self, committed_diff, staged_diff, unstaged_diff):
+    def test_include_untracked(self):
+        self.diff = GitDiffReporter(git_diff=self._git_diff, include_untracked=True)
+
+        diff = git_diff_output(
+            {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        )
+        self._set_git_diff_output(staged_diff=diff, untracked=["foo.py"])
+
+        open_mock = mock.mock_open(read_data="1\n2\n3\n")
+        with mock.patch("diff_cover.diff_reporter.open", open_mock):
+            changed = self.diff.src_paths_changed()
+
+        self.assertEqual(2, len(changed))
+        assert "subdir/file1.py" in changed
+        assert "foo.py" in changed
+        assert self.diff.lines_changed("foo.py") == [1, 2, 3]
+
+    def _set_git_diff_output(
+        self, committed_diff="", staged_diff="", unstaged_diff="", untracked=None
+    ):
         """
         Configure the git diff tool to return `committed_diff`,
         `staged_diff`, and `unstaged_diff` as outputs from
@@ -599,3 +625,4 @@ class GitDiffReporterTest(unittest.TestCase):
         self._git_diff.diff_committed.return_value = committed_diff
         self._git_diff.diff_staged.return_value = staged_diff
         self._git_diff.diff_unstaged.return_value = unstaged_diff
+        self._git_diff.untracked.return_value = untracked

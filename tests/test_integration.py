@@ -18,8 +18,8 @@ from diff_cover.diff_cover_tool import main as diff_cover_main
 from diff_cover.diff_quality_tool import QUALITY_DRIVERS
 from diff_cover.diff_quality_tool import main as diff_quality_main
 from diff_cover.git_path import GitPathTool
-from tests.helpers import assert_long_str_equal, fixture_path
 from diff_cover.violationsreporters.base import QualityDriver
+from tests.helpers import assert_long_str_equal, fixture_path
 
 
 class ToolsIntegrationBase(unittest.TestCase):
