@@ -181,3 +181,17 @@ def test_errors(set_git_diff_output, tool):
 
     with pytest.raises(CommandError):
         tool.diff_unstaged()
+
+
+@pytest.mark.parametrize(
+    "output,expected",
+    [
+        ("", []),
+        ("\n", []),
+        ("a.py\n", ["a.py"]),
+        ("a.py\nb.py\n", ["a.py", "b.py"]),
+    ],
+)
+def test_untracked(tool, set_git_diff_output, output, expected):
+    set_git_diff_output(output, b"")
+    assert tool.untracked() == expected

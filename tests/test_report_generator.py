@@ -13,11 +13,11 @@ from diff_cover.report_generator import (
     StringReportGenerator,
     TemplateReportGenerator,
 )
-from tests.helpers import assert_long_str_equal, load_fixture
 from diff_cover.violationsreporters.violations_reporter import (
     BaseViolationReporter,
     Violation,
 )
+from tests.helpers import assert_long_str_equal, load_fixture
 
 
 class SimpleReportGenerator(BaseReportGenerator):

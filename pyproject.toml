@@ -2,10 +2,11 @@
 line-length = 88
 target-version = ['py37']
 include = '\.pyi?$'
-exclude = "diff_cover/tests/fixtures/*"
+exclude = "tests/fixtures/*"
 
 [tool.isort]
 profile = "black"
+extend_skip = "tests/fixtures/"
 
 [tool.pylint.master]
 max-line-length = 100

@@ -127,6 +127,8 @@ class GitDiffReporter(BaseDiffReporter):
             options.append("staged")
         if not ignore_unstaged:
             options.append("unstaged")
+        if include_untracked:
+            options.append("untracked")
 
         # Branch is always present, so use as basis for name
         name = f"{compare_branch}...HEAD"
@@ -169,7 +171,7 @@ class GitDiffReporter(BaseDiffReporter):
             for path in self._git_diff_tool.untracked():
                 with open(path) as file_handle:
                     num_lines = sum(1 for _ in file_handle)
-                diff_dict[path] = range(1, num_lines + 1)
+                diff_dict[path] = list(range(1, num_lines + 1))
 
         # Return the changed file paths (dict keys)
         # in alphabetical order
