@@ -170,7 +170,7 @@ class GitDiffReporter(BaseDiffReporter):
         if self._include_untracked:
             for path in self._git_diff_tool.untracked():
                 with open(path) as file_handle:
-                    num_lines = sum(1 for _ in file_handle)
+                    num_lines = len(file_handle.readlines())
                 diff_dict[path] = list(range(1, num_lines + 1))
 
         # Return the changed file paths (dict keys)
