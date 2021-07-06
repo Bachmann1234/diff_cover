@@ -224,6 +224,15 @@ The following is executed for every changed file:
 #. if yes, check if the changed file is part of at least one include pattern
 #. check if the file is part of any exclude pattern
 
+Ignore/Include based on file status in git
+------------------------------------------
+Both ``diff-cover`` and ``diff-quality`` allow users to ignore and include files based on the git
+status: staged, unstaged, untracked:
+
+* ``--ignore-staged``: ignore all staged files (by default include them)
+* ``--ignore-unstaged``: ignore all unstaged files (by default include them)
+* ``--include-untracked``: include all untracked files (by default ignore them)
+
 Quiet mode
 ----------
 Both ``diff-cover`` and ``diff-quality`` support a quiet mode which is disable by default.
