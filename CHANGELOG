@@ -1,3 +1,13 @@
+7/08/2021 v6.1.0
+
+* New flag `--include-untracked` to give people the option to run against files that are not being tracked by git currently Thanks @kasium
+* Improved handling when the user provides a report file that does not exist (the app will fail instead of just saying there were no results) Thanks @kasium
+* More progress to moving tests to pytest style tests Thanks @kasium
+* More static analysis clean up. Thanks @kasium again! 
+
+Another all @kasium release!
+
+
 7/04/2021 v6.0.0
 
 * As github, gitlab, and git itself have been changing their default branch to main this release changes the default 'compare-branch' to 'main' as well. If your project is using 'master' as a default branch add the following to your build `--compare-branch origin/master`
