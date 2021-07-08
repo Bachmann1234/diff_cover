@@ -8,7 +8,7 @@ from diff_cover.git_path import GitPathTool
 
 
 @pytest.fixture(autouse=True)
-def path_git_path_tool(mocker):
+def patch_git_path_tool(mocker):
     mocker.patch.object(GitPathTool, "_root", None)
     mocker.patch.object(GitPathTool, "_cwd", None)
 
@@ -20,7 +20,7 @@ def process(mocker):
     return process_
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def subprocess(mocker, process):
     subprocess_ = mocker.patch("diff_cover.command_runner.subprocess")
     subprocess_.Popen.return_value = process
