@@ -276,7 +276,8 @@ def main(argv=None, directory=None):
                     try:
                         input_reports.append(open(path, "rb"))
                     except OSError:
-                        LOGGER.warning("Could not load '%s'", path)
+                        LOGGER.error("Could not load report '%s'", path)
+                        return 1
                 reporter = QualityReporter(driver, input_reports, user_options)
 
             percent_passing = generate_quality_report(

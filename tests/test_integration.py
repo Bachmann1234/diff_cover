@@ -540,7 +540,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         self._check_console_report(
             "git_diff_violations.txt",
             "pyflakes_violations_report.txt",
-            ["diff-quality", "--violations=pyflakes", "pyflakes_report.txt"],
+            ["diff-quality", "--violations=pyflakes", "pyflakes_violations_report.txt"],
         )
 
     def test_pre_generated_pylint_report(self):
@@ -571,7 +571,9 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         """
         with open("git_diff_add.txt", encoding="utf-8") as git_diff_file:
             self._set_git_diff_output(git_diff_file.read(), "")
-        argv = ["diff-quality", f"--violations={tool_name}", report_arg]
+        argv = ["diff-quality", f"--violations={tool_name}"]
+        if report_arg:
+            argv.append(report_arg)
 
         with patch("diff_cover.diff_quality_tool.LOGGER") as logger:
             exit_value = diff_quality_main(argv)
@@ -592,7 +594,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             self._call_quality_expecting_error(
                 "not_installed",
                 ("Failure: '%s'", "not_installed is not installed"),
-                report_arg="",
+                report_arg=None,
             )
         finally:
             # Cleaning is good for the soul... and other tests

@@ -273,6 +273,11 @@ __ http://travis-ci.org
 **Solution**: ``diff-quality`` assumes you have the tool you wish to run against your diff installed. If you do not have it
 then install it with your favorite package manager.
 
+**Issue**: ``diff-quality`` reports no quality issues
+
+**Solution**: You might use a pattern like ``diff-quality --violations foo *.py``. The last argument
+is not used to specify the files but for the quality tool report. Remove it to resolve the issue
+
 License
 -------
 
