@@ -34,7 +34,6 @@ class BaseViolationReporter(ABC):
         Return a list of Violations recorded in `src_path`.
         """
 
-    @abstractmethod
     def measured_lines(self, src_path):
         """
         Return a list of the lines in src_path that were measured
@@ -46,6 +45,9 @@ class BaseViolationReporter(ABC):
         The diff reporter generator will then use all changed lines
         provided by the diff.
         """
+        # An existing quality plugin "sqlfluff" depends on this
+        # being not abstract and returning None
+        return None
 
     def name(self):
         """
