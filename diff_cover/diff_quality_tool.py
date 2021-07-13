@@ -23,6 +23,8 @@ from diff_cover.diff_cover_tool import (
     IGNORE_UNSTAGED_HELP,
     IGNORE_WHITESPACE,
     INCLUDE_UNTRACKED_HELP,
+    JSON_REPORT_HELP,
+    MARKDOWN_REPORT_HELP,
     QUIET_HELP,
 )
 from diff_cover.diff_reporter import GitDiffReporter
@@ -30,6 +32,8 @@ from diff_cover.git_diff import GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.report_generator import (
     HtmlQualityReportGenerator,
+    JsonReportGenerator,
+    MarkdownQualityReportGenerator,
     StringQualityReportGenerator,
 )
 from diff_cover.violationsreporters.base import QualityReporter
@@ -101,6 +105,22 @@ def parse_quality_args(argv):
         type=str,
         default=None,
         help=HTML_REPORT_HELP,
+    )
+
+    parser.add_argument(
+        "--json-report",
+        metavar="FILENAME",
+        type=str,
+        default=None,
+        help=JSON_REPORT_HELP,
+    )
+
+    parser.add_argument(
+        "--markdown-report",
+        metavar="FILENAME",
+        type=str,
+        default=None,
+        help=MARKDOWN_REPORT_HELP,
     )
 
     parser.add_argument(
@@ -186,6 +206,8 @@ def generate_quality_report(
     tool,
     compare_branch,
     html_report=None,
+    json_report=None,
+    markdown_report=None,
     css_file=None,
     ignore_staged=False,
     ignore_unstaged=False,
@@ -224,11 +246,21 @@ def generate_quality_report(
             with open(css_file, "wb") as output_file:
                 reporter.generate_css(output_file)
 
+    if json_report is not None:
+        reporter = JsonReportGenerator(tool, diff)
+        with open(json_report, "wb") as output_file:
+            reporter.generate_report(output_file)
+
+    if markdown_report is not None:
+        reporter = MarkdownQualityReportGenerator(tool, diff)
+        with open(markdown_report, "wb") as output_file:
+            reporter.generate_report(output_file)
+
     # Generate the report for stdout
     reporter = StringQualityReportGenerator(tool, diff)
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
-
     reporter.generate_report(output_file)
+
     return reporter.total_percent_covered()
 
 
@@ -294,6 +326,8 @@ def main(argv=None, directory=None):
                 reporter,
                 arg_dict["compare_branch"],
                 html_report=arg_dict["html_report"],
+                json_report=arg_dict["json_report"],
+                markdown_report=arg_dict["markdown_report"],
                 css_file=arg_dict["external_css_file"],
                 ignore_staged=arg_dict["ignore_staged"],
                 ignore_unstaged=arg_dict["ignore_unstaged"],
