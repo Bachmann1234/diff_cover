@@ -1,6 +1,7 @@
 7/13/2021 v6.2.0
 
 * Adds JSON and Markdown reports for diff-quality Thanks @kasium!
+* Switch the tool over to use main as the default branch
 
 
 7/09/2021 v6.1.1
