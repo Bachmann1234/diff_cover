@@ -1,6 +1,6 @@
 # Common requirements for developing on all supported python versions
-mock
 pytest-cov
+pytest-datadir
 pytest-mock
 pycodestyle>=2.4.0
 flake8
