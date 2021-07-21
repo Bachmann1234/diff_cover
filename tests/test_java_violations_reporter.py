@@ -52,7 +52,7 @@ class TestCheckstyleQualityReporterTest:
         file_paths = ["file1.coffee", "subdir/file2.js"]
         for path in file_paths:
             result = quality.violations(path)
-            assert not result
+            assert result == []
 
     def test_quality(self, process_patcher):
         """Integration test."""
