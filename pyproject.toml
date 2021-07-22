@@ -51,3 +51,10 @@ good-names = [
     "ex",
 ]
 no-docstring-rgx = "^_"
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+xfail_strict = true
+markers = [
+    "disable_all_files_exist: disables the fixture patch_so_all_files_exist",
+]
