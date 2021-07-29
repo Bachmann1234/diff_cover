@@ -33,6 +33,7 @@ disable = [
     "too-many-branches",
     "too-few-public-methods",
     "too-many-nested-blocks",
+    "too-many-public-methods",
     # allow methods not to use self
     "no-self-use",
     # currently some code seems duplicated for pylint

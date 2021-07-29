@@ -1,41 +1,12 @@
 """
 Test helper functions.
 """
-import difflib
 import os.path
 import random
 
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
 LINE_STRINGS = ["test", "+ has a plus sign", "- has a minus sign"]
-
-
-def assert_long_str_equal(expected, actual, strip=False):
-    """
-    Assert that two strings are equal and
-    print the diff if they are not.
-
-    If `strip` is True, strip both strings before comparing.
-    """
-    # If we've been given a byte string, we need to convert
-    # it back to unicode.  Otherwise, Python3 won't
-    # let us use string methods!
-    if isinstance(expected, bytes):
-        expected = expected.decode("utf-8")
-    if isinstance(actual, bytes):
-        actual = actual.decode("utf-8")
-
-    if strip:
-        expected = expected.strip()
-        actual = actual.strip()
-
-    if expected != actual:
-
-        # Print a human-readable diff
-        diff = difflib.Differ().compare(expected.split("\n"), actual.split("\n"))
-
-        # Fail the test
-        assert False, "\n\n" + "\n".join(diff)
 
 
 def fixture_path(rel_path):
