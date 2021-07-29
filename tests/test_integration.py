@@ -1,59 +1,56 @@
-"""
-High-level integration tests of diff-cover tool.
-"""
+# pylint: disable=attribute-defined-outside-init
+
+"""High-level integration tests of diff-cover tool."""
 
 import os
 import os.path
 import re
-import shutil
-import tempfile
-import unittest
 from collections import defaultdict
 from io import BytesIO
 from subprocess import Popen
-from unittest.mock import Mock, patch
 
+import pytest
+
+from diff_cover import diff_cover_tool, diff_quality_tool
 from diff_cover.command_runner import CommandError
-from diff_cover.diff_cover_tool import main as diff_cover_main
-from diff_cover.diff_quality_tool import QUALITY_DRIVERS
-from diff_cover.diff_quality_tool import main as diff_quality_main
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import QualityDriver
-from tests.helpers import assert_long_str_equal, fixture_path
+from tests.helpers import fixture_path
 
 
-class ToolsIntegrationBase(unittest.TestCase):
-    """
-    Base class for diff-cover and diff-quality integration tests
-    """
+class ToolsIntegrationBase:
+    """Base class for diff-cover and diff-quality integration tests."""
 
-    _old_cwd = None
+    tool_module = None
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def capture_fixtures(self, mocker, tmp_path):
+        self.mocker = mocker
+        self.tmp_path = tmp_path
+
+    @pytest.fixture(autouse=True)
+    def setup(self, mocker):
         """
         Patch the output of `git` commands and `os.getcwd`
         set the cwd to the fixtures dir
         """
         # Set the CWD to the fixtures dir
-        self._old_cwd = os.getcwd()
+        old_cwd = os.getcwd()
         os.chdir(fixture_path(""))
         cwd = os.getcwd()
 
-        self._mock_popen = patch("subprocess.Popen").start()
-        self._mock_sys = patch(f"{self.tool_module}.sys").start()
+        self._mock_popen = mocker.patch("subprocess.Popen")
+        self._mock_sys = mocker.patch(f"{self.tool_module}.sys")
         try:
-            self._mock_getcwd = patch(f"{self.tool_module}.os.getcwdu").start()
+            self._mock_getcwd = mocker.patch(f"{self.tool_module}.os.getcwdu")
         except AttributeError:
-            self._mock_getcwd = patch(f"{self.tool_module}.os.getcwd").start()
+            self._mock_getcwd = mocker.patch(f"{self.tool_module}.os.getcwd")
         self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
-    def tearDown(self):
-        """
-        Undo all patches and reset the cwd
-        """
-        patch.stopall()
-        os.chdir(self._old_cwd)
+        yield
+
+        os.chdir(old_cwd)
 
     def _clear_css(self, content):
         """
@@ -94,8 +91,9 @@ class ToolsIntegrationBase(unittest.TestCase):
 
         # Create a temporary directory to hold the output HTML report
         # Add a cleanup to ensure the directory gets deleted
-        temp_dir = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(temp_dir))
+        temp_dir = self.tmp_path / "dummy"
+        temp_dir.mkdir()
+
         html_report_path = os.path.join(temp_dir, "diff_coverage.html")
 
         args = tool_args + ["--html-report", html_report_path]
@@ -106,11 +104,11 @@ class ToolsIntegrationBase(unittest.TestCase):
 
         # Execute the tool
         if "diff-cover" in args[0]:
-            code = diff_cover_main(args)
+            code = diff_cover_tool.main(args)
         else:
-            code = diff_quality_main(args)
+            code = diff_quality_tool.main(args)
 
-        self.assertEqual(code, expected_status)
+        assert code == expected_status
 
         # Check the HTML report
         with open(expected_html_path, encoding="utf-8") as expected_file:
@@ -120,7 +118,7 @@ class ToolsIntegrationBase(unittest.TestCase):
                 if css_file is None:
                     html = self._clear_css(html)
                     expected = self._clear_css(expected)
-                assert_long_str_equal(expected, html, strip=True)
+                assert expected.strip() == html.strip()
 
         return temp_dir
 
@@ -151,17 +149,17 @@ class ToolsIntegrationBase(unittest.TestCase):
 
         # Execute the tool
         if "diff-cover" in tool_args[0]:
-            code = diff_cover_main(tool_args)
+            code = diff_cover_tool.main(tool_args)
         else:
-            code = diff_quality_main(tool_args)
+            code = diff_quality_tool.main(tool_args)
 
-        self.assertEqual(code, expected_status)
+        assert code == expected_status
 
         # Check the console report
         with open(expected_console_path) as expected_file:
             report = string_buffer.getvalue()
             expected = expected_file.read()
-            assert_long_str_equal(expected, report, strip=True)
+            assert expected.strip() == report.strip().decode("utf-8")
 
     def _capture_stdout(self, string_buffer):
         """
@@ -187,23 +185,22 @@ class ToolsIntegrationBase(unittest.TestCase):
                 "diff.noprefix=no",
                 "diff",
             ]:
-                mock = Mock()
+                mock = self.mocker.Mock()
                 mock.communicate.return_value = (stdout, stderr)
                 mock.returncode = returncode
                 return mock
-            elif command[0:2] == ["git", "rev-parse"]:
-                mock = Mock()
+            if command[0:2] == ["git", "rev-parse"]:
+                mock = self.mocker.Mock()
                 mock.communicate.return_value = (self._git_root_path, "")
                 mock.returncode = returncode
                 return mock
-            else:
-                process = Popen(command, **kwargs)
-                return process
+
+            return Popen(command, **kwargs)
 
         self._mock_popen.side_effect = patch_diff
 
 
-class DiffCoverIntegrationTest(ToolsIntegrationBase):
+class TestDiffCoverIntegration(ToolsIntegrationBase):
     """
     High-level integration test.
     The `git diff` is a mock, but everything else is our code.
@@ -358,12 +355,12 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
     def test_dot_net_diff(self):
         mock_path = "/code/samplediff/"
         self._mock_getcwd.return_value = mock_path
-        with patch.object(GitPathTool, "_git_root", return_value=mock_path):
-            self._check_console_report(
-                "git_diff_dotnet.txt",
-                "dotnet_coverage_console_report.txt",
-                ["diff-cover", "dotnet_coverage.xml"],
-            )
+        self.mocker.patch.object(GitPathTool, "_git_root", return_value=mock_path)
+        self._check_console_report(
+            "git_diff_dotnet.txt",
+            "dotnet_coverage_console_report.txt",
+            ["diff-cover", "dotnet_coverage.xml"],
+        )
 
     def test_unicode_html(self):
         self._check_html_report(
@@ -379,16 +376,15 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
             ["diff-cover", "coverage.xml"],
             css_file="external_style.css",
         )
-        self.assertTrue(os.path.exists(os.path.join(temp_dir, "external_style.css")))
+        assert os.path.exists(os.path.join(temp_dir, "external_style.css"))
 
     def test_git_diff_error(self):
-
         # Patch the output of `git diff` to return an error
         self._set_git_diff_output("", "fatal error", 1)
 
         # Expect an error
-        with self.assertRaises(CommandError):
-            diff_cover_main(["diff-cover", "coverage.xml"])
+        with pytest.raises(CommandError):
+            diff_cover_tool.main(["diff-cover", "coverage.xml"])
 
     def test_quiet_mode(self):
         self._check_console_report(
@@ -405,7 +401,7 @@ class DiffCoverIntegrationTest(ToolsIntegrationBase):
         )
 
 
-class DiffQualityIntegrationTest(ToolsIntegrationBase):
+class TestDiffQualityIntegration(ToolsIntegrationBase):
     """
     High-level integration test.
     """
@@ -418,8 +414,8 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         self._set_git_diff_output("", "fatal error", 1)
 
         # Expect an error
-        with self.assertRaises(CommandError):
-            diff_quality_main(["diff-quality", "--violations", "pycodestyle"])
+        with pytest.raises(CommandError):
+            diff_quality_tool.main(["diff-quality", "--violations", "pycodestyle"])
 
     def test_added_file_pycodestyle_html(self):
         self._check_html_report(
@@ -465,7 +461,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
             ["diff-quality", "--violations=pycodestyle"],
             css_file="external_style.css",
         )
-        self.assertTrue(os.path.exists(os.path.join(temp_dir, "external_style.css")))
+        assert os.path.exists(os.path.join(temp_dir, "external_style.css"))
 
     def test_added_file_pycodestyle_console(self):
         self._check_console_report(
@@ -575,10 +571,10 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         if report_arg:
             argv.append(report_arg)
 
-        with patch("diff_cover.diff_quality_tool.LOGGER") as logger:
-            exit_value = diff_quality_main(argv)
-            logger.error.assert_called_with(*expected_error)
-            self.assertEqual(exit_value, 1)
+        logger = self.mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        exit_value = diff_quality_tool.main(argv)
+        logger.error.assert_called_with(*expected_error)
+        assert exit_value == 1
 
     def test_tool_not_recognized(self):
         self._call_quality_expecting_error(
@@ -587,18 +583,20 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
 
     def test_tool_not_installed(self):
         # Pretend we support a tool named not_installed
-        QUALITY_DRIVERS["not_installed"] = DoNothingDriver(
-            "not_installed", ["txt"], ["not_installed"]
+        self.mocker.patch.dict(
+            diff_quality_tool.QUALITY_DRIVERS,
+            {
+                "not_installed": DoNothingDriver(
+                    "not_installed", ["txt"], ["not_installed"]
+                )
+            },
         )
-        try:
-            self._call_quality_expecting_error(
-                "not_installed",
-                ("Failure: '%s'", "not_installed is not installed"),
-                report_arg=None,
-            )
-        finally:
-            # Cleaning is good for the soul... and other tests
-            del QUALITY_DRIVERS["not_installed"]
+
+        self._call_quality_expecting_error(
+            "not_installed",
+            ("Failure: '%s'", "not_installed is not installed"),
+            report_arg=None,
+        )
 
     def test_do_nothing_reporter(self):
         # Pedantic, but really. This reporter
@@ -606,7 +604,7 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
         # Does demonstrate a reporter can take in any tool
         # name though which is cool
         reporter = DoNothingDriver("pycodestyle", [], [])
-        self.assertEqual(reporter.parse_reports(""), {})
+        assert reporter.parse_reports("") == {}
 
     def test_quiet_mode(self):
         self._check_console_report(
@@ -617,15 +615,9 @@ class DiffQualityIntegrationTest(ToolsIntegrationBase):
 
 
 class DoNothingDriver(QualityDriver):
-    """
-    Dummy class that implements necessary abstract
-    function
-    """
+    """Dummy class that implements necessary abstract functions."""
 
-    def __init__(self, name, supported_extensions, command):
-        super().__init__(name, supported_extensions, command)
-
-    def parse_reports(self, parse_reports):
+    def parse_reports(self, reports):
         return defaultdict(list)
 
     def installed(self):
