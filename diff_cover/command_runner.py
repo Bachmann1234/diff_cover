@@ -53,8 +53,7 @@ def run_command_for_code(command):
     """
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process.communicate()
-    exit_code = process.returncode
-    return exit_code
+    return process.returncode
 
 
 def _ensure_unicode(text):
