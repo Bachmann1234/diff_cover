@@ -9,7 +9,7 @@ from pygments.token import Token
 
 from diff_cover.git_path import GitPathTool
 from diff_cover.snippets import Snippet
-from tests.helpers import assert_long_str_equal, fixture_path, load_fixture
+from tests.helpers import fixture_path, load_fixture
 
 SRC_TOKENS = [
     (Token.Comment, "# Test source"),
@@ -92,7 +92,7 @@ def _assert_format(
 
     expected_str = load_fixture(expected_fixture, encoding="utf-8")
 
-    assert_long_str_equal(expected_str, result, strip=True)
+    assert expected_str.strip() == result.strip()
     assert isinstance(result, str)
 
 
@@ -109,7 +109,7 @@ def _compare_snippets_output(format_, filename, violations, expected_out_filenam
             expected = expected.decode("utf-8")
 
     # Check that we got what we expected
-    assert_long_str_equal(expected, snippets_selected, strip=True)
+    assert expected.strip() == snippets_selected.strip()
 
 
 @pytest.fixture

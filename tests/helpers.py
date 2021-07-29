@@ -68,7 +68,7 @@ def line_numbers(start, end):
     """
     Return a list of line numbers, in [start, end] (inclusive).
     """
-    return [line for line in range(start, end + 1)]
+    return list(range(start, end + 1))
 
 
 def git_diff_output(diff_dict, deleted_files=None):
@@ -180,8 +180,7 @@ def _hunk_entry(start, end, modified_lines):
     start -= HUNK_BUFFER
     end += HUNK_BUFFER
 
-    if start < 0:
-        start = 0
+    start = max(start, 0)
 
     # Hunk definition line
     # Real `git diff` output would have different line numbers

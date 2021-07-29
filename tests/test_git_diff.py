@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,missing-class-docstring
+# pylint: disable=missing-function-docstring
 
 """Test for diff_cover.git_diff"""
 
@@ -72,7 +72,7 @@ def check_diff_committed(subprocess, set_git_diff_output):
     return _inner
 
 
-def test_diff_commited(check_diff_committed):
+def test_diff_committed(check_diff_committed):
     check_diff_committed("...", ignore_whitespace=False)
     check_diff_committed("...", ignore_whitespace=True)
     check_diff_committed("..", ignore_whitespace=False)
