@@ -115,7 +115,7 @@ reports:
 
 .. code:: bash
 
-	diff-cover coverage1.xml coverage2.xml
+    diff-cover coverage1.xml coverage2.xml
 
 Quality Coverage
 -----------------
@@ -213,6 +213,7 @@ Include options should be wrapped in double quotes to prevent shell globbing. Al
 the current git directory.
 
 .. code:: bash
+
     diff-cover coverage.xml --exclude setup.py
     diff-quality --violations=pycodestyle --exclude setup.py
 
@@ -239,6 +240,7 @@ Both ``diff-cover`` and ``diff-quality`` support a quiet mode which is disable b
 It can be enabled by using the ``-q``/``--quiet`` flag:
 
 .. code:: bash
+
     diff-cover coverage.xml -q
     diff-quality --violations=pycodestyle -q
 
@@ -273,14 +275,16 @@ __ http://travis-ci.org
 
     git fetch origin master:refs/remotes/origin/main
 
-**Issue**: ``diff-quality`` reports "diff_cover.violations_reporter.QualityReporterError: No config file found, using default configuration"
+**Issue**: ``diff-quality`` reports "diff_cover.violations_reporter.QualityReporterError:
+No config file found, using default configuration"
 
-**Solution**: Your project needs a `pylintrc` file. Provide this file (it can be empty) and ``diff-quality`` should run without issue.
+**Solution**: Your project needs a `pylintrc` file.
+Provide this file (it can be empty) and ``diff-quality`` should run without issue.
 
 **Issue**: ``diff-quality`` reports "Quality tool not installed"
 
-**Solution**: ``diff-quality`` assumes you have the tool you wish to run against your diff installed. If you do not have it
-then install it with your favorite package manager.
+**Solution**: ``diff-quality`` assumes you have the tool you wish to run against your diff installed.
+If you do not have it then install it with your favorite package manager.
 
 **Issue**: ``diff-quality`` reports no quality issues
 
