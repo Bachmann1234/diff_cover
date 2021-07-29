@@ -45,3 +45,4 @@ pip-log.txt
 # VS Code
 .vscode/*
 *.code-workspaces
+.history/

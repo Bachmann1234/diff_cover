@@ -58,3 +58,6 @@ xfail_strict = true
 markers = [
     "disable_all_files_exist: disables the fixture patch_so_all_files_exist",
 ]
+
+[tool.doc8]
+max_line_length = 120
