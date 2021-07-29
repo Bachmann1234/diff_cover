@@ -309,7 +309,7 @@ class Snippet:
                     # Filter out lines that are not in this range
                     include_vals = [
                         val_lines[i]
-                        for i in range(0, len(val_lines))
+                        for i in range(len(val_lines))
                         if i + line_num in range(start, end + 1)
                     ]
 

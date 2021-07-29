@@ -83,7 +83,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         sources = [source.text for source in sources if source.text]
         classes = xml_document.findall(".//class") or []
 
-        classes = (
+        return (
             [
                 clazz
                 for clazz in classes
@@ -106,7 +106,6 @@ class XmlCoverageReporter(BaseViolationReporter):
                 if self._to_unix_path(clazz.get("filename")) == src_rel_path
             ]
         )
-        return classes
 
     def get_src_path_line_nodes_cobertura(self, xml_document, src_path):
         classes = self._get_classes(xml_document, src_path)

@@ -97,8 +97,7 @@ class BaseDiffReporter(ABC):
             return True
 
         absolute_path = os.path.abspath(path)
-        match = self._fnmatch(absolute_path, exclude)
-        return match
+        return self._fnmatch(absolute_path, exclude)
 
 
 class GitDiffReporter(BaseDiffReporter):
@@ -122,7 +121,7 @@ class GitDiffReporter(BaseDiffReporter):
         for the `git diff` tool.  (Should have same interface
         as `git_diff.GitDiffTool`)
         """
-        options = list()
+        options = []
         if not ignore_staged:
             options.append("staged")
         if not ignore_unstaged:
@@ -218,7 +217,7 @@ class GitDiffReporter(BaseDiffReporter):
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
 
-            result_dict = dict()
+            result_dict = {}
 
             for diff_str in self._get_included_diff_results():
                 # Parse the output of the diff string
@@ -271,7 +270,7 @@ class GitDiffReporter(BaseDiffReporter):
         """
 
         # Create a dict to hold results
-        diff_dict = dict()
+        diff_dict = {}
 
         # Parse the diff string into sections by source file
         sections_dict = self._parse_source_sections(diff_str)
@@ -295,7 +294,7 @@ class GitDiffReporter(BaseDiffReporter):
         """
 
         # Create a dict to map source files to lines in the diff output
-        source_dict = dict()
+        source_dict = {}
 
         # Keep track of the current source file
         src_path = None
