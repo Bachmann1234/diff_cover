@@ -1,8 +1,10 @@
+# pylint: disable=attribute-defined-outside-init,not-callable
+
 import json
-import unittest
 from io import BytesIO
 from textwrap import dedent
-from unittest import mock
+
+import pytest
 
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.report_generator import (
@@ -17,25 +19,18 @@ from diff_cover.violationsreporters.violations_reporter import (
     BaseViolationReporter,
     Violation,
 )
-from tests.helpers import assert_long_str_equal, load_fixture
+from tests.helpers import load_fixture
 
 
 class SimpleReportGenerator(BaseReportGenerator):
-    """
-    Bare-bones concrete implementation of a report generator.
-    """
-
-    def __init__(self, cover, diff):
-        super().__init__(cover, diff)
+    """Bare-bones concrete implementation of a report generator."""
 
     def generate_report(self, output_file):
         pass
 
 
-class BaseReportGeneratorTest(unittest.TestCase):
-    """
-    Base class for constructing test cases of report generators.
-    """
+class BaseReportGeneratorTest:
+    """Base class for constructing test cases of report generators."""
 
     # Test data, returned by default from the mocks
     SRC_PATHS = {"file1.py", "subdir/file2.py"}
@@ -55,23 +50,21 @@ class BaseReportGeneratorTest(unittest.TestCase):
     SNIPPET_STYLE = ".css { color:red }"
     SNIPPET_TERMINAL = SNIPPET_MARKDOWN
 
-    def setUp(self):
-
+    @pytest.fixture(autouse=True)
+    def base_setup(self, mocker):
         # Create mocks of the dependencies
-        self.coverage = mock.MagicMock(BaseViolationReporter)
-        self.diff = mock.MagicMock(BaseDiffReporter)
-
-        self.addCleanup(mock.patch.stopall)
+        self.coverage = mocker.MagicMock(BaseViolationReporter)
+        self.diff = mocker.MagicMock(BaseDiffReporter)
 
         # Patch snippet loading to always return the same string
-        self._load_formatted_snippets = mock.patch(
+        self._load_formatted_snippets = mocker.patch(
             "diff_cover.snippets.Snippet.load_formatted_snippets"
-        ).start()
+        )
 
         self.set_num_snippets(0)
 
         # Patch snippet style
-        style_defs = mock.patch("diff_cover.snippets.Snippet.style_defs").start()
+        style_defs = mocker.patch("diff_cover.snippets.Snippet.style_defs")
 
         style_defs.return_value = self.SNIPPET_STYLE
 
@@ -167,28 +160,27 @@ class BaseReportGeneratorTest(unittest.TestCase):
 
     def assert_report(self, expected):
         output_report_string = self.get_report()
-        assert_long_str_equal(expected, output_report_string, strip=True)
+        assert expected.strip() == output_report_string.strip()
 
 
-class SimpleReportGeneratorTest(BaseReportGeneratorTest):
+class TestSimpleReportGenerator(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = SimpleReportGenerator
 
-    def setUp(self):
-        super().setUp()
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.use_default_values()
 
     def test_src_paths(self):
-        self.assertEqual(self.report.src_paths(), self.SRC_PATHS)
+        assert self.report.src_paths() == self.SRC_PATHS
 
     def test_coverage_name(self):
-        self.assertEqual(self.report.coverage_report_name(), self.XML_REPORT_NAME)
+        assert self.report.coverage_report_name() == self.XML_REPORT_NAME
 
     def test_diff_name(self):
-        self.assertEqual(self.report.diff_report_name(), self.DIFF_REPORT_NAME)
+        assert self.report.diff_report_name() == self.DIFF_REPORT_NAME
 
     def test_percent_covered(self):
-
         # Check that we get the expected coverage percentages
         # By construction, both files have the same diff line
         # and coverage information
@@ -196,62 +188,55 @@ class SimpleReportGeneratorTest(BaseReportGeneratorTest):
         # There are 6 lines that are both in the diff and measured,
         # and 4 of those are covered.
         for src_path in self.SRC_PATHS:
-            self.assertAlmostEqual(self.report.percent_covered(src_path), 4.0 / 6 * 100)
+            assert pytest.approx(self.report.percent_covered(src_path), 4.0 / 6 * 100)
 
     def test_violation_lines(self):
-
         # By construction, each file has the same coverage information
         expected = [10, 11]
         for src_path in self.SRC_PATHS:
-            self.assertEqual(self.report.violation_lines(src_path), expected)
+            assert self.report.violation_lines(src_path) == expected
 
     def test_src_with_no_info(self):
-
-        self.assertNotIn("unknown.py", self.report.src_paths())
-        self.assertIs(self.report.percent_covered("unknown.py"), None)
-        self.assertEqual(self.report.violation_lines("unknown.py"), [])
+        assert "unknown.py" not in self.report.src_paths()
+        assert self.report.percent_covered("unknown.py") is None
+        assert self.report.violation_lines("unknown.py") == []
 
     def test_src_paths_not_measured(self):
-
         # Configure one of the source files to have no coverage info
         self.set_measured("file1.py", [])
         self.set_violations("file1.py", [])
 
         # Expect that we treat the file like it doesn't exist
-        self.assertNotIn("file1.py", self.report.src_paths())
-        self.assertIs(self.report.percent_covered("file1.py"), None)
-        self.assertEqual(self.report.violation_lines("file1.py"), [])
+        assert "file1.py" not in self.report.src_paths()
+        assert self.report.percent_covered("file1.py") is None
+        assert self.report.violation_lines("file1.py") == []
 
     def test_total_num_lines(self):
-
         # By construction, each source file has the same coverage info
         num_lines_in_file = len(set(self.MEASURED).intersection(self.LINES))
         expected = len(self.SRC_PATHS) * num_lines_in_file
-        self.assertEqual(self.report.total_num_lines(), expected)
+        assert self.report.total_num_lines() == expected
 
     def test_total_num_missing(self):
-
         # By construction, each source file has the same coverage info,
         # in which 3 lines are uncovered, 2 of which are changed
         expected = len(self.SRC_PATHS) * 2
-        self.assertEqual(self.report.total_num_violations(), expected)
+        assert self.report.total_num_violations() == expected
 
     def test_total_percent_covered(self):
-
         # Since each file has the same coverage info,
         # the total percent covered is the same as each file
         # individually.
-        self.assertEqual(self.report.total_percent_covered(), 66)
+        assert self.report.total_percent_covered() == 66
 
 
-class TemplateReportGeneratorTest(BaseReportGeneratorTest):
+class TestTemplateReportGenerator(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = TemplateReportGenerator
 
     def _test_input_expected_output(self, input_with_expected_output):
         for test_input, expected_output in input_with_expected_output:
-            self.assertEqual(
-                expected_output,
-                TemplateReportGenerator.combine_adjacent_lines(test_input),
+            assert expected_output == TemplateReportGenerator.combine_adjacent_lines(
+                test_input
             )
 
     def test_combine_adjacent_lines_no_adjacent(self):
@@ -267,22 +252,21 @@ class TemplateReportGeneratorTest(BaseReportGeneratorTest):
         self._test_input_expected_output(in_out)
 
     def test_empty_list(self):
-        self.assertEqual([], TemplateReportGenerator.combine_adjacent_lines([]))
+        assert [] == TemplateReportGenerator.combine_adjacent_lines([])
 
     def test_one_number(self):
-        self.assertEqual(["1"], TemplateReportGenerator.combine_adjacent_lines([1]))
+        assert ["1"] == TemplateReportGenerator.combine_adjacent_lines([1])
 
 
-class JsonReportGeneratorTest(BaseReportGeneratorTest):
+class TestJsonReportGenerator(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = JsonReportGenerator
 
     def assert_report(self, expected):
         output_report_string = self.get_report()
-        self.assertDictEqual(json.loads(expected), json.loads(output_report_string))
+        assert json.loads(expected) == json.loads(output_report_string)
 
     def test_generate_report(self):
-
         # Generate a default report
         self.use_default_values()
 
@@ -313,10 +297,9 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_hundred_percent(self):
-
         # Have the dependencies return an empty report
         self.set_src_paths_changed(["file.py"])
-        self.set_lines_changed("file.py", [line for line in range(0, 100)])
+        self.set_lines_changed("file.py", list(range(0, 100)))
         self.set_violations("file.py", [])
         self.set_measured("file.py", [2])
 
@@ -341,7 +324,6 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_empty_report(self):
-
         # Have the dependencies return an empty report
         # (this is the default)
 
@@ -360,12 +342,11 @@ class JsonReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
 
-class StringReportGeneratorTest(BaseReportGeneratorTest):
+class TestStringReportGenerator(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = StringReportGenerator
 
     def test_generate_report(self):
-
         # Generate a default report
         self.use_default_values()
 
@@ -389,10 +370,9 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_hundred_percent(self):
-
         # Have the dependencies return an empty report
         self.set_src_paths_changed(["file.py"])
-        self.set_lines_changed("file.py", [line for line in range(0, 100)])
+        self.set_lines_changed("file.py", list(range(0, 100)))
         self.set_violations("file.py", [])
         self.set_measured("file.py", [2])
 
@@ -414,7 +394,6 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_empty_report(self):
-
         # Have the dependencies return an empty report
         # (this is the default)
 
@@ -432,7 +411,7 @@ class StringReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
 
-class HtmlReportGeneratorTest(BaseReportGeneratorTest):
+class TestHtmlReportGenerator(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = HtmlReportGenerator
 
@@ -442,7 +421,6 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_empty_report(self):
-
         # Have the dependencies return an empty report
         # (this is the default)
 
@@ -451,7 +429,6 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_one_snippet(self):
-
         self.use_default_values()
 
         # Have the snippet loader always report
@@ -463,7 +440,6 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_multiple_snippets(self):
-
         self.use_default_values()
 
         # Have the snippet loader always report
@@ -475,12 +451,11 @@ class HtmlReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
 
-class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
+class TestMarkdownReportGenerator(BaseReportGeneratorTest):
 
     REPORT_GENERATOR_CLASS = MarkdownReportGenerator
 
     def test_generate_report(self):
-
         # Generate a default report
         self.use_default_values()
 
@@ -504,10 +479,9 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_hundred_percent(self):
-
         # Have the dependencies return an empty report
         self.set_src_paths_changed(["file.py"])
-        self.set_lines_changed("file.py", [line for line in range(0, 100)])
+        self.set_lines_changed("file.py", list(range(0, 100)))
         self.set_violations("file.py", [])
         self.set_measured("file.py", [2])
 
@@ -529,7 +503,6 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_empty_report(self):
-
         # Have the dependencies return an empty report
         # (this is the default)
 
@@ -545,7 +518,6 @@ class MarkdownReportGeneratorTest(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_one_snippet(self):
-
         self.use_default_values()
 
         # Have the snippet loader always report

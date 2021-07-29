@@ -1718,14 +1718,14 @@ class TestSimpleCommandTestCase:
         self.subproc_mock.returncode = 127
         self._mock_communicate.return_value = self.subproc_mock
         # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
-        bad_command = run_command_for_code("foo")  # pylint: disable=protected-access
+        bad_command = run_command_for_code("foo")
         assert bad_command == 127
 
     def test_run_simple_success(self):
         self.subproc_mock.returncode = 0
         self._mock_communicate.return_value = self.subproc_mock
         # Create an implementation of BaseQualityReporter and explicitly call _run_command_simple
-        good_command = run_command_for_code("foo")  # pylint: disable=protected-access
+        good_command = run_command_for_code("foo")
         assert good_command == 0
 
 

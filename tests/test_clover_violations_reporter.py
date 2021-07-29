@@ -3,7 +3,6 @@
 """Test for diff_cover.violationsreporters - clover"""
 
 import xml.etree.ElementTree as etree
-from io import StringIO
 
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter

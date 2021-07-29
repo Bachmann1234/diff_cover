@@ -558,14 +558,14 @@ def test_ignore_staged_inclusion(git_diff):
 
 
 def test_ignore_unstaged_inclusion(git_diff):
-    repoter = GitDiffReporter(git_diff=git_diff, ignore_unstaged=True)
+    reporter = GitDiffReporter(git_diff=git_diff, ignore_unstaged=True)
 
     unstaged_input = git_diff_output(
         {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
     )
-    _set_git_diff_output(repoter, git_diff, "", "", unstaged_input)
+    _set_git_diff_output(reporter, git_diff, "", "", unstaged_input)
 
-    assert repoter._get_included_diff_results() == ["", ""]
+    assert reporter._get_included_diff_results() == ["", ""]
 
 
 def test_ignore_staged_and_unstaged_inclusion(git_diff):
