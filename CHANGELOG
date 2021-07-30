@@ -1,3 +1,8 @@
+7/30/2021 v6.2.1
+
+* Some minor code refactorings and and attempting to set the long description
+in pypi. Thanks @kasium!
+
 7/13/2021 v6.2.0
 
 * Adds JSON and Markdown reports for diff-quality Thanks @kasium!
