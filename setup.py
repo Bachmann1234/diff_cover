@@ -2,8 +2,14 @@
 
 from setuptools import setup
 from diff_cover import VERSION, DESCRIPTION
+from os import path
 
 REQUIREMENTS = [line.strip() for line in open("requirements.txt").readlines()]
+this_directory = path.abspath(path.dirname(__file__))
+
+with open(path.join(this_directory, "README.rst"), encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
     name="diff_cover",
     version=VERSION,
@@ -11,6 +17,8 @@ setup(
     url="https://github.com/Bachmann1234/diff-cover",
     test_suite="nose.collector",
     description=DESCRIPTION,
+    long_description=long_description,
+    long_description_content_type="text/x-rst",
     license="Apache 2.0",
     python_requires=">= 3.6",
     classifiers=[
