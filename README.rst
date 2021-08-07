@@ -315,7 +315,7 @@ This project is managed with `poetry` this can be installed with `pip`
 poetry manages a python virtual environment and organizes dependencies. It also
 packages this project.
 
-.. code:: pip
+.. code:: bash
 
     pip install poetry
 
