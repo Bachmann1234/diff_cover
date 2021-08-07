@@ -323,9 +323,6 @@ packages this project.
 
     poetry install
 
-Now by simply running ``poetry run tox`` from the project root you will have environments
-for all the supported Python versions. These will be in the ``.tox`` directory.
-
 I would also suggest running this command after. This will make it so git blame ignores the commit
 that formatted the entire codebase.
 
