@@ -228,7 +228,7 @@ def generate_coverage_report(
 
 def main(argv=None, directory=None):
     """
-    Main entry point for the tool, used by setup.py
+    Main entry point for the tool, script installed via pyproject.toml
     Returns a value that can be passed into exit() specifying
     the exit code.
     1 is an error

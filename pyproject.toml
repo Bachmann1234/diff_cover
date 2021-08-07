@@ -68,6 +68,40 @@ name = "diff_cover"
 version = "6.2.1"
 description = "Run coverage and linting reports on diffs"
 authors = ["See Contributors"]
+homepage = "https://github.com/Bachmann1234/diff-cover"
+repository = "https://github.com/Bachmann1234/diff-cover"
+license = "Apache 2.0"
+readme = "README.rst"
+classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Software Development :: Testing",
+        "Topic :: Software Development :: Quality Assurance",
+]
+packages = [
+    { include = "diff_cover" },
+    { include = "diff_cover/violationsreporters" },
+]
+include = [
+    "templates/*.txt",
+    "templates/*.html",
+    "templates/*.css",
+    "templates/*.md"
+]
+
+[tool.poetry.scripts]
+diff-cover = 'diff_cover.diff_cover_tool:main'
+diff-quality = 'diff_cover.diff_quality_tool:main'
 
 [tool.poetry.dependencies]
 python = "^3.9"
