@@ -311,27 +311,20 @@ Support for a New Quality Checker".
 Setting Up For Development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-diff-cover is written to support many versions of Python. The best way to set
-your machine up for development is to make sure you have ``tox`` installed which
-can be installed using ``pip``.
+This project is managed with `poetry` this can be installed with `pip`
+poetry manages a python virtual environment and organizes dependencies. It also
+packages this project.
+
+.. code:: pip
+
+    pip install poetry
 
 .. code:: bash
 
-    pip install tox
+    poetry install
 
-Now by simply running ``tox`` from the project root you will have environments
+Now by simply running ``poetry run tox`` from the project root you will have environments
 for all the supported Python versions. These will be in the ``.tox`` directory.
-
-To create a specific Python dev environment just make a virtualenv for your Python
-version and then install the appropriate ``test-requirements`` file.
-
-For example, setting up Python 3:
-
-.. code:: bash
-
-    pyvenv venv
-    source venv/bin/activate
-    pip install -r test-requirements.txt
 
 I would also suggest running this command after. This will make it so git blame ignores the commit
 that formatted the entire codebase.
