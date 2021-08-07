@@ -111,6 +111,7 @@ jinja2_pluralize = "^0.3.0"
 pluggy = "^0.13.1"
 chardet = ">=3.0.0"
 tomli = {version = "^1.2.1", optional = true}
+setuptools = ">=17.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest-cov = "^2.12.1"
