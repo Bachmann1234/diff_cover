@@ -32,5 +32,5 @@ jobs:
         run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run The lints and tests
-        run: poetry run tox -e py
+        run: poetry run bash -x verify.sh
       - run: echo "🍏 This job's status is ${{ job.status }}."
