@@ -1,5 +1,5 @@
-# This file is imported in setup.py and cannot use any external dependencies
+import pkg_resources
 
-VERSION = "6.2.1"
+VERSION = pkg_resources.get_distribution('diff_cover').version
 DESCRIPTION = "Automatically find diff lines that need test coverage."
 QUALITY_DESCRIPTION = "Automatically find diff lines with quality violations."
