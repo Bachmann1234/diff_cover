@@ -1,3 +1,8 @@
+8/08/2021 v6.2.2
+
+* Replace setup.py with a pyproject.toml based packaging project managed by
+poetry. No user facing changes are expected
+
 7/30/2021 v6.2.1
 
 * Some minor code refactorings and and attempting to set the long description
