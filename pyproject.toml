@@ -62,6 +62,9 @@ black = "^21.7b0"
 isort = "^5.9.3"
 doc8 = "0.9.0"
 
+[tool.poetry.extras]
+toml = ["tomli"]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
