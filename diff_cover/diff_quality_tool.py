@@ -12,8 +12,10 @@ import pluggy
 
 import diff_cover
 from diff_cover import hookspecs
+from diff_cover.config_parser import Tool, get_config
 from diff_cover.diff_cover_tool import (
     COMPARE_BRANCH_HELP,
+    CONFIG_FILE_HELP,
     CSS_FILE_HELP,
     DIFF_RANGE_NOTATION_HELP,
     EXCLUDE_HELP,
@@ -103,7 +105,6 @@ def parse_quality_args(argv):
         "--html-report",
         metavar="FILENAME",
         type=str,
-        default=None,
         help=HTML_REPORT_HELP,
     )
 
@@ -111,7 +112,6 @@ def parse_quality_args(argv):
         "--json-report",
         metavar="FILENAME",
         type=str,
-        default=None,
         help=JSON_REPORT_HELP,
     )
 
@@ -119,7 +119,6 @@ def parse_quality_args(argv):
         "--markdown-report",
         metavar="FILENAME",
         type=str,
-        default=None,
         help=MARKDOWN_REPORT_HELP,
     )
 
@@ -127,7 +126,6 @@ def parse_quality_args(argv):
         "--external-css-file",
         metavar="FILENAME",
         type=str,
-        default=None,
         help=CSS_FILE_HELP,
     )
 
@@ -135,37 +133,32 @@ def parse_quality_args(argv):
         "--compare-branch",
         metavar="BRANCH",
         type=str,
-        default="origin/main",
         help=COMPARE_BRANCH_HELP,
     )
 
+    parser.add_argument("input_reports", type=str, nargs="*", help=INPUT_REPORTS_HELP)
+
+    parser.add_argument("--options", type=str, nargs="?", help=OPTIONS_HELP)
+
     parser.add_argument(
-        "input_reports", type=str, nargs="*", default=[], help=INPUT_REPORTS_HELP
+        "--fail-under", metavar="SCORE", type=float, help=FAIL_UNDER_HELP
     )
 
     parser.add_argument(
-        "--options", type=str, nargs="?", default=None, help=OPTIONS_HELP
-    )
-
-    parser.add_argument(
-        "--fail-under", metavar="SCORE", type=float, default="0", help=FAIL_UNDER_HELP
-    )
-
-    parser.add_argument(
-        "--ignore-staged", action="store_true", default=False, help=IGNORE_STAGED_HELP
+        "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
     )
 
     parser.add_argument(
         "--ignore-unstaged",
         action="store_true",
-        default=False,
+        default=None,
         help=IGNORE_UNSTAGED_HELP,
     )
 
     parser.add_argument(
         "--include-untracked",
         action="store_true",
-        default=False,
+        default=None,
         help=INCLUDE_UNTRACKED_HELP,
     )
 
@@ -181,7 +174,6 @@ def parse_quality_args(argv):
         "--diff-range-notation",
         metavar="RANGE_NOTATION",
         type=str,
-        default="...",
         help=DIFF_RANGE_NOTATION_HELP,
     )
 
@@ -193,13 +185,33 @@ def parse_quality_args(argv):
     parser.add_argument(
         "--ignore-whitespace",
         action="store_true",
-        default=False,
+        default=None,
         help=IGNORE_WHITESPACE,
     )
 
-    parser.add_argument("-q", "--quiet", action="store_true", help=QUIET_HELP)
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", default=None, help=QUIET_HELP
+    )
 
-    return vars(parser.parse_args(argv))
+    parser.add_argument(
+        "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
+    )
+
+    defaults = {
+        "ignore_whitespace": False,
+        "compare_branch": "origin/main",
+        "diff_range_notation": "...",
+        "input_reports": [],
+        "fail_under": 0,
+        "ignore_staged": False,
+        "ignore_unstaged": False,
+        "ignore_untracked": False,
+        "quiet": False,
+    }
+
+    return get_config(
+        parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_QUALITY
+    )
 
 
 def generate_quality_report(

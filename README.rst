@@ -246,6 +246,40 @@ It can be enabled by using the ``-q``/``--quiet`` flag:
 
 If enabled, the tool will only print errors and failures but no information or warning messages.
 
+Configuration files
+-------------------
+Both tools allow users to specify the options in a configuration file with `--config-file`/`-c`:
+
+.. code:: bash
+
+    diff-cover coverage.xml --config-file myconfig.toml
+    diff-quality --violations=pycodestyle --config-file myconfig.toml
+
+Currently, only TOML files are supported.
+Please note, that only non-mandatory options are supported.
+If an option is specified in the configuration file and over the command line, the value of the
+command line is used.
+
+TOML configuration
+~~~~~~~~~~~~~~~~~~
+
+The parser will only react to configuration files ending with `.toml`.
+To use it, install `diff-cover` with the extra requirement `toml`.
+
+The option names are the same as on the command line, but all dashes should be underscores.
+If an option can be specified multiple times, the configuration value should be specified as a list.
+
+.. code:: toml
+
+    [tool.diff_quality]
+    compare_branch = "origin/feature"
+    quiet = true
+
+    [tool.diff_quality]
+    compare_branch = "origin/feature"
+    ignore_staged = true
+
+
 Troubleshooting
 ----------------------
 
