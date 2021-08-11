@@ -1,3 +1,7 @@
+8/11/2021 v6.3.0
+
+* Add support for TOML based file config thanks @kasium!
+
 8/08/2021 v6.2.2
 
 * Replace setup.py with a pyproject.toml based packaging project managed by
