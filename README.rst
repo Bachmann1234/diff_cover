@@ -271,7 +271,7 @@ If an option can be specified multiple times, the configuration value should be 
 
 .. code:: toml
 
-    [tool.diff_quality]
+    [tool.diff_cover]
     compare_branch = "origin/feature"
     quiet = true
 
