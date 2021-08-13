@@ -1,11 +1,10 @@
-# pylint: disable=missing-function-docstring,line-too-long,protected-access
+# pylint: disable=missing-function-docstring,line-too-long
 # pylint: disable=too-many-lines,attribute-defined-outside-init
 
 """Test for diff_cover.violations_reporter"""
 
 import os
 import subprocess
-import sys
 from io import BytesIO, StringIO
 
 try:
@@ -322,16 +321,6 @@ class TestXmlCoverageReporterTest:
                 line.set("number", str(line_num))
 
         return root
-
-    def test_to_unix_path(self):
-        """
-        Ensure the _to_unix_path static function handles paths properly.
-        """
-        to_unix_path = XmlCoverageReporter._to_unix_path
-        assert to_unix_path("foo/bar") == "foo/bar"
-        assert to_unix_path("foo\\bar") == "foo/bar"
-        if sys.platform.startswith("win"):
-            assert to_unix_path("FOO\\bar") == "foo/bar"
 
 
 class TestCloverXmlCoverageReporterTest:
@@ -1501,6 +1490,15 @@ class TestPylintQualityReporterTest:
 
         # Expect that the char is replaced
         assert violations == [Violation(2, "W1401: Invalid char '\ufffd'")]
+
+    def test_windows_paths(self, process_patcher):
+        process_patcher(
+            ("this\\is\\win.py:42: [C0111] Missing docstring", ""),
+            0,
+        )
+        quality = QualityReporter(PylintDriver())
+        violations = quality.violations("this/is/win.py")
+        assert violations == [Violation(42, "C0111: Missing docstring")]
 
 
 class JsQualityBaseReporterMixin:
