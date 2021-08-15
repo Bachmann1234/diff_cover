@@ -1,3 +1,8 @@
+8/15/2021 v6.3.1
+
+* Fix issue with pylint and windows based file paths (thanks @kasium) Issue
+#237
+
 8/11/2021 v6.3.0
 
 * Add support for TOML based file config thanks @kasium!
