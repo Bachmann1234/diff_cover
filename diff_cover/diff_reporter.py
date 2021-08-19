@@ -168,6 +168,8 @@ class GitDiffReporter(BaseDiffReporter):
         # include untracked files
         if self._include_untracked:
             for path in self._git_diff_tool.untracked():
+                if not path.endswith(".py"):
+                    continue
                 with open(path) as file_handle:
                     num_lines = len(file_handle.readlines())
                 diff_dict[path] = list(range(1, num_lines + 1))

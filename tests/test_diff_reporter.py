@@ -601,10 +601,10 @@ def test_fnmatch_returns_the_default_with_empty_default(diff):
 def test_include_untracked(mocker, git_diff):
     reporter = GitDiffReporter(git_diff=git_diff, include_untracked=True)
     diff_output = git_diff_output(
-        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)},
     )
     _set_git_diff_output(
-        reporter, git_diff, staged_diff=diff_output, untracked=["foo.py"]
+        reporter, git_diff, staged_diff=diff_output, untracked=["foo.py", "baz.txt"]
     )
 
     open_mock = mocker.mock_open(read_data="1\n2\n3\n")
