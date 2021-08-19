@@ -253,8 +253,8 @@ class GitDiffReporter(BaseDiffReporter):
         return self._diff_dict
 
     # Regular expressions used to parse the diff output
-    SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^ \n"]*)"?')
-    MERGE_CONFLICT_RE = re.compile(r"^diff --cc ([^ \n]*)")
+    SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^\n"]*)"?')
+    MERGE_CONFLICT_RE = re.compile(r"^diff --cc ([^\n]*)")
     HUNK_LINE_RE = re.compile(r"\+([0-9]*)")
 
     def _parse_diff_str(self, diff_str):
