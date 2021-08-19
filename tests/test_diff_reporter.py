@@ -604,17 +604,16 @@ def test_include_untracked(mocker, git_diff):
         {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
     )
     _set_git_diff_output(
-        reporter, git_diff, staged_diff=diff_output, untracked=["foo.py"]
+        reporter, git_diff, staged_diff=diff_output, untracked=["u1.py", " u2.py"]
     )
 
     open_mock = mocker.mock_open(read_data="1\n2\n3\n")
     mocker.patch("diff_cover.diff_reporter.open", open_mock)
     changed = reporter.src_paths_changed()
 
-    assert len(changed) == 2
-    assert "subdir/file1.py" in changed
-    assert "foo.py" in changed
-    assert reporter.lines_changed("foo.py") == [1, 2, 3]
+    assert sorted(changed) == [" u2.py", "subdir/file1.py", "u1.py"]
+    assert reporter.lines_changed("u1.py") == [1, 2, 3]
+    assert reporter.lines_changed(" u2.py") == [1, 2, 3]
 
 
 def _set_git_diff_output(
