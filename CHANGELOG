@@ -1,3 +1,8 @@
+8/19/2021 v6.3.3
+
+* Fix issue where files that start with a space will trigger a crash.
+* Fix issue where source dist had a setup.py that would not build properly
+
 8/19/2021 v6.3.2
 
 * Fix issue where untracked files that start with space would trigger a crash. (Thanks
