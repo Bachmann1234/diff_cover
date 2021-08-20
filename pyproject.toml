@@ -24,8 +24,7 @@ classifiers=[
         "Topic :: Software Development :: Quality Assurance",
 ]
 packages = [
-    { include = "diff_cover" },
-    { include = "diff_cover/violationsreporters" },
+    { include = "diff_cover" }
 ]
 include = [
     "templates/*.txt",
