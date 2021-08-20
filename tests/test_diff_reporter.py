@@ -160,6 +160,19 @@ def test_git_source_paths(diff, git_diff):
     assert source_paths[3] == "subdir/file2.py"
 
 
+def test_git_source_paths_with_space(diff, git_diff):
+    _set_git_diff_output(
+        diff,
+        git_diff,
+        git_diff_output({" weird.py": [0]}),
+    )
+
+    source_paths = diff.src_paths_changed()
+
+    assert len(source_paths) == 1
+    assert source_paths[0] == " weird.py"
+
+
 def test_duplicate_source_paths(diff, git_diff):
     # Duplicate the output for committed, staged, and unstaged changes
     diff_output = git_diff_output(
