@@ -1,3 +1,7 @@
+8/24/2021 v6.3.4
+
+* Ensures tests are in the dist files
+
 8/19/2021 v6.3.3
 
 * Fix issue where files that start with a space will trigger a crash.
