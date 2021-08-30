@@ -1,3 +1,8 @@
+8/29/2021 v6.3.5
+
+* Including the tests dir pollutes the namespace so for now they are removed
+again 
+
 8/24/2021 v6.3.4
 
 * Ensures tests are in the dist files

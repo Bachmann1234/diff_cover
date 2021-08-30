@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diff_cover"
-version = "6.3.4"
+version = "6.3.5"
 description = "Run coverage and linting reports on diffs"
 authors = ["See Contributors"]
 homepage = "https://github.com/Bachmann1234/diff-cover"
@@ -24,8 +24,7 @@ classifiers=[
         "Topic :: Software Development :: Quality Assurance",
 ]
 packages = [
-    { include = "diff_cover" },
-    { include = "tests" }
+    { include = "diff_cover" }
 ]
 include = [
     "templates/*.txt",
