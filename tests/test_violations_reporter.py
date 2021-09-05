@@ -27,7 +27,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     PylintDriver,
     Violation,
     XmlCoverageReporter,
-    eslint_driver,
+    EslintDriver,
     flake8_driver,
     jshint_driver,
     pycodestyle_driver,
@@ -1698,7 +1698,7 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
     quality_name = "eslint"
 
     def _get_out(self):
-        return eslint_driver
+        return EslintDriver()
 
 
 class TestSimpleCommandTestCase:
