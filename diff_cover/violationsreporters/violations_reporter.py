@@ -303,13 +303,23 @@ jshint_driver = RegexBasedDriver(
     command_to_check_install=["jshint", "-v"],
 )
 
-eslint_driver = RegexBasedDriver(
-    name="eslint",
-    supported_extensions=["js"],
-    command=["eslint", "--format=compact"],
-    expression=r"^([^:]+): line (\d+), col \d+, (.*)$",
-    command_to_check_install=["eslint", "-v"],
-)
+
+class EslintDriver(RegexBasedDriver):
+    def __init__(self):
+        super().__init__(
+            name="eslint",
+            supported_extensions=["js"],
+            command=["eslint", "--format=compact"],
+            expression=r"^([^:]+): line (\d+), col \d+, (.*)$",
+            command_to_check_install=["eslint", "-v"],
+        )
+
+    def parse_reports(self, reports, **kwargs):
+        violations_dict = super().parse_reports(reports)
+        if "report_root_path" in kwargs:
+            pass  # TODO make path relative to report_root_path
+        return violations_dict
+
 
 """
     Report pydocstyle violations.

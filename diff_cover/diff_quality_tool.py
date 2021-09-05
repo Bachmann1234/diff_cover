@@ -48,7 +48,7 @@ from diff_cover.violationsreporters.java_violations_reporter import (
 from diff_cover.violationsreporters.violations_reporter import (
     CppcheckDriver,
     PylintDriver,
-    eslint_driver,
+    EslintDriver,
     flake8_driver,
     jshint_driver,
     pycodestyle_driver,
@@ -63,7 +63,7 @@ QUALITY_DRIVERS = {
     "pylint": PylintDriver(),
     "flake8": flake8_driver,
     "jshint": jshint_driver,
-    "eslint": eslint_driver,
+    "eslint": EslintDriver(),
     "pydocstyle": pydocstyle_driver,
     "checkstyle": checkstyle_driver,
     "checkstylexml": CheckstyleXmlDriver(),
@@ -77,6 +77,7 @@ VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(
 INPUT_REPORTS_HELP = "Which violations reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 INCLUDE_HELP = "Files to include (glob pattern)"
+REPORT_ROOT_PATH_HELP = "The root path used to generate a report"
 
 
 LOGGER = logging.getLogger(__name__)
@@ -197,6 +198,10 @@ def parse_quality_args(argv):
         "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
     )
 
+    parser.add_argument(
+        "--report-root-path", help=REPORT_ROOT_PATH_HELP, metavar="ROOT_PATH"
+    )
+
     defaults = {
         "ignore_whitespace": False,
         "compare_branch": "origin/main",
@@ -229,6 +234,7 @@ def generate_quality_report(
     diff_range_notation=None,
     ignore_whitespace=False,
     quiet=False,
+    report_root_path=None,
 ):
     """
     Generate the quality report, using kwargs from `parse_args()`.
@@ -349,6 +355,7 @@ def main(argv=None, directory=None):
                 diff_range_notation=arg_dict["diff_range_notation"],
                 ignore_whitespace=arg_dict["ignore_whitespace"],
                 quiet=quiet,
+                report_root_path=arg_dict["report_root_path"],
             )
             if percent_passing >= fail_under:
                 return 0
