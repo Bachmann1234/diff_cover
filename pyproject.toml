@@ -42,7 +42,7 @@ python = "^3.6.2"
 Pygments = "^2.9.0"
 Jinja2 = ">=2.7.1"
 jinja2_pluralize = "^0.3.0"
-pluggy = "^0.13.1"
+pluggy = ">=0.13.1,<2"
 chardet = ">=3.0.0"
 tomli = {version = "^1.2.1", optional = true}
 setuptools = ">=17.0.0"
