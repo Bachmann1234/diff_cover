@@ -1700,7 +1700,7 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
     def _get_out(self):
         return EslintDriver()
 
-    def test_quality_pregenerated_report2(self):
+    def test_report_root_path(self):
         reports = [
             BytesIO(
                 "foo/bar/path/to/file.js: line 3, col 9, Found issue".encode("utf-8")
