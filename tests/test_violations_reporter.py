@@ -24,10 +24,10 @@ from diff_cover.violationsreporters import base
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
     CppcheckDriver,
+    EslintDriver,
     PylintDriver,
     Violation,
     XmlCoverageReporter,
-    EslintDriver,
     flake8_driver,
     jshint_driver,
     pycodestyle_driver,
@@ -1699,6 +1699,21 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
 
     def _get_out(self):
         return EslintDriver()
+
+    def test_quality_pregenerated_report2(self):
+        reports = [
+            BytesIO(
+                "foo/bar/path/to/file.js: line 3, col 9, Found issue".encode("utf-8")
+            ),
+        ]
+
+        driver = self._get_out()
+        driver.add_driver_args(report_root_path="foo/bar")
+        quality = QualityReporter(driver, reports=reports)
+
+        expected_violation = Violation(3, "Found issue")
+        actual_violations = quality.violations("path/to/file.js")
+        assert actual_violations == [expected_violation]
 
 
 class TestSimpleCommandTestCase:

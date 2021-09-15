@@ -47,8 +47,8 @@ from diff_cover.violationsreporters.java_violations_reporter import (
 )
 from diff_cover.violationsreporters.violations_reporter import (
     CppcheckDriver,
-    PylintDriver,
     EslintDriver,
+    PylintDriver,
     flake8_driver,
     jshint_driver,
     pycodestyle_driver,
@@ -234,7 +234,6 @@ def generate_quality_report(
     diff_range_notation=None,
     ignore_whitespace=False,
     quiet=False,
-    report_root_path=None,
 ):
     """
     Generate the quality report, using kwargs from `parse_args()`.
@@ -338,6 +337,12 @@ def main(argv=None, directory=None):
                     except OSError:
                         LOGGER.error("Could not load report '%s'", path)
                         return 1
+
+                if arg_dict["report_root_path"]:
+                    driver.add_driver_args(
+                        report_root_path=arg_dict["report_root_path"]
+                    )
+
                 reporter = QualityReporter(driver, input_reports, user_options)
 
             percent_passing = generate_quality_report(
@@ -355,7 +360,6 @@ def main(argv=None, directory=None):
                 diff_range_notation=arg_dict["diff_range_notation"],
                 ignore_whitespace=arg_dict["ignore_whitespace"],
                 quiet=quiet,
-                report_root_path=arg_dict["report_root_path"],
             )
             if percent_passing >= fail_under:
                 return 0
