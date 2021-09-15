@@ -4,6 +4,7 @@ Classes for querying the information in a test coverage report.
 
 import itertools
 import os
+import os.path
 import re
 from collections import defaultdict
 
@@ -313,11 +314,20 @@ class EslintDriver(RegexBasedDriver):
             expression=r"^([^:]+): line (\d+), col \d+, (.*)$",
             command_to_check_install=["eslint", "-v"],
         )
+        self.report_root_path = None
 
-    def parse_reports(self, reports, **kwargs):
+    def add_driver_args(self, **kwargs):
+        self.report_root_path = kwargs.pop("report_root_path", None)
+        if kwargs:
+            super().add_driver_args(**kwargs)
+
+    def parse_reports(self, reports):
         violations_dict = super().parse_reports(reports)
-        if "report_root_path" in kwargs:
-            pass  # TODO make path relative to report_root_path
+        if self.report_root_path:
+            keys = list(violations_dict.keys())
+            for key in keys:
+                new_key = os.path.relpath(key, self.report_root_path)
+                violations_dict[new_key] = violations_dict.pop(key)
         return violations_dict
 
 

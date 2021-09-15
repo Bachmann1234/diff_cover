@@ -97,6 +97,13 @@ class QualityDriver(ABC):
         Returns: boolean True if installed
         """
 
+    def add_driver_args(self, **kwargs):
+        """Inject additional driver related arguments.
+
+        A driver can override the method. By default an exception is raised.
+        """
+        raise ValueError(f"Unsupported argument(s) {kwargs.keys()}")
+
 
 class QualityReporter(BaseViolationReporter):
     def __init__(self, driver, reports=None, options=None):
