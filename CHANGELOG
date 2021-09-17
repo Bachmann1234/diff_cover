@@ -1,3 +1,9 @@
+9/16/2021 v6.4.0
+
+* Allows passing a root path in for ESLint with --report_root_path 
+* Bump pluggy to 1.0
+Thanks @kasium for both of these!
+
 8/29/2021 v6.3.5
 
 * Including the tests dir pollutes the namespace so for now they are removed
