@@ -27,10 +27,11 @@ packages = [
     { include = "diff_cover" }
 ]
 include = [
-    "templates/*.txt",
-    "templates/*.html",
-    "templates/*.css",
-    "templates/*.md"
+    {path = 'templates/*.txt'},
+    {path = 'templates/*.html'},
+    {path = 'templates/*.css'},
+    {path = 'templates/*.md'},
+    {path = 'tests/*', format = 'sdist'},
 ]
 
 [tool.poetry.scripts]
