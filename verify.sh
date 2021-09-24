@@ -6,6 +6,8 @@ black diff_cover tests
 isort diff_cover tests
 python -m pytest --cov --cov-report=xml tests
 git fetch origin main:refs/remotes/origin/main
+diff-cover --version
+diff-quality --version
 diff-cover coverage.xml --include-untracked
 diff-quality --violations flake8 --include-untracked
 diff-quality --violations pylint --include-untracked
