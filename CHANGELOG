@@ -1,3 +1,9 @@
+9/26/2021 v6.4.1
+
+* Re add tests to the *source* distribution. Should not pollute namespace this
+time. Thanks @dvzrv !
+* Only require setuptools if you are using python < 3.8
+
 9/16/2021 v6.4.0
 
 * Allows passing a root path in for ESLint with --report_root_path 
