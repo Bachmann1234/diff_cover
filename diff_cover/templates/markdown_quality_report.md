@@ -14,8 +14,10 @@
 {% endif %}
 {% endfor %}
 
-- **Total**:   {{ total_num_lines }} line{{ total_num_lines|pluralize }}
-- **Violations**: {{ total_num_violations }} line{{ total_num_violations|pluralize }}
+- **Total**:   {{ total_num_lines }} {% trans count=total_num_lines %}line{% pluralize %}lines{% endtrans %}
+
+- **Violations**: {{ total_num_violations }} {% trans count=total_num_violations %}line{% pluralize %}lines{% endtrans %}
+
 - **% Quality**: {{ total_percent_covered }}%
 
 {% else %}
