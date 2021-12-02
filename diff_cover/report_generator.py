@@ -2,9 +2,9 @@
 Classes for generating diff coverage reports.
 """
 import contextlib
-from gettext import gettext, ngettext
 import json
 from abc import ABC, abstractmethod
+from gettext import gettext, ngettext
 
 from jinja2 import Environment, PackageLoader
 
@@ -220,7 +220,9 @@ TEMPLATE_ENV = Environment(
     trim_blocks=True,
     lstrip_blocks=True,
 )
-TEMPLATE_ENV.install_gettext_callables(
+
+# pylint thinks this callable does not exist, I assure you it does
+TEMPLATE_ENV.install_gettext_callables(  # pylint: disable=no-member
     gettext=gettext, ngettext=ngettext, newstyle=True
 )
 
