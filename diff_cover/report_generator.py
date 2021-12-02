@@ -2,11 +2,11 @@
 Classes for generating diff coverage reports.
 """
 import contextlib
+from gettext import gettext, ngettext
 import json
 from abc import ABC, abstractmethod
 
 from jinja2 import Environment, PackageLoader
-from jinja2_pluralize import pluralize_dj
 
 from diff_cover.snippets import Snippet
 
@@ -214,8 +214,15 @@ class BaseReportGenerator(ABC):
 
 # Set up the template environment
 TEMPLATE_LOADER = PackageLoader(__package__)
-TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, trim_blocks=True, lstrip_blocks=True)
-TEMPLATE_ENV.filters["pluralize"] = pluralize_dj
+TEMPLATE_ENV = Environment(
+    extensions=["jinja2.ext.i18n"],
+    loader=TEMPLATE_LOADER,
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
+TEMPLATE_ENV.install_gettext_callables(
+    gettext=gettext, ngettext=ngettext, newstyle=True
+)
 
 
 class JsonReportGenerator(BaseReportGenerator):

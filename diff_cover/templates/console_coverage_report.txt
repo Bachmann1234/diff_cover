@@ -11,8 +11,10 @@ Diff: {{ diff_name }}
 {% endif %}
 {% endfor %}
 -------------
-Total:   {{ total_num_lines }} line{{ total_num_lines|pluralize }}
-Missing: {{ total_num_violations }} line{{ total_num_violations|pluralize }}
+Total:   {{ total_num_lines }} {% trans count=total_num_lines %}line{% pluralize %}lines{% endtrans %}
+
+Missing: {{ total_num_violations }} {% trans count=total_num_violations %}line{% pluralize %}lines{% endtrans %}
+
 Coverage: {{ total_percent_covered }}%
 -------------
 {% else %}

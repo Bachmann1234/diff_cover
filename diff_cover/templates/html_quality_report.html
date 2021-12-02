@@ -39,8 +39,8 @@
             {% endfor %}
         </table>
         <ul>
-            <li><b>Total</b>: {{ total_num_lines }} line{{ total_num_lines|pluralize }}</li>
-            <li><b>Violation</b>: {{ total_num_violations }} line{{ total_num_violations|pluralize }}</li>
+            <li><b>Total</b>: {{ total_num_lines }} {% trans count=total_num_lines %}line{% pluralize %}lines{% endtrans %}</li>
+            <li><b>Violation</b>: {{ total_num_violations }} {% trans count=total_num_violations %}line{% pluralize %}lines{% endtrans %}</li>
             <li><b>% Quality</b>: {{ total_percent_covered }}%</li>
         </ul>
         {% else %}
