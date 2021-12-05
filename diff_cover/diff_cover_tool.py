@@ -164,7 +164,7 @@ def parse_coverage_args(argv):
     defaults = {
         "show_uncovered": False,
         "compare_branch": "origin/main",
-        "fail_under": "0",
+        "fail_under": 0,
         "ignore_staged": False,
         "ignore_unstaged": False,
         "ignore_untracked": False,
