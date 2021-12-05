@@ -103,7 +103,7 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
-        "--fail-under", metavar="SCORE", type=float, default="0", help=FAIL_UNDER_HELP
+        "--fail-under", metavar="SCORE", type=float, default=None, help=FAIL_UNDER_HELP
     )
 
     parser.add_argument(
