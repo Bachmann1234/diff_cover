@@ -188,7 +188,7 @@ class TestSimpleReportGenerator(BaseReportGeneratorTest):
         # There are 6 lines that are both in the diff and measured,
         # and 4 of those are covered.
         for src_path in self.SRC_PATHS:
-            assert pytest.approx(self.report.percent_covered(src_path), 4.0 / 6 * 100)
+            assert self.report.percent_covered(src_path) == pytest.approx(4.0 / 6 * 100)
 
     def test_violation_lines(self):
         # By construction, each file has the same coverage information
