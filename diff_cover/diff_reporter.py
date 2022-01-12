@@ -235,7 +235,9 @@ class GitDiffReporter(BaseDiffReporter):
                         or extension in self._supported_extensions
                     ):
                         # All affected lines are reportable
-                        result_dict[src_path] = result_dict.get(src_path, []) + added_lines + deleted_lines
+                        result_dict[src_path] = (
+                            result_dict.get(src_path, []) + added_lines + deleted_lines
+                        )
 
             # Eliminate repeats and order line numbers
             for (src_path, lines) in result_dict.items():
