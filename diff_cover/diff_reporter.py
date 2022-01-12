@@ -234,13 +234,8 @@ class GitDiffReporter(BaseDiffReporter):
                         not self._supported_extensions
                         or extension in self._supported_extensions
                     ):
-                        # Remove any lines from the dict that have been deleted
-                        # Include any lines that have been added
-                        result_dict[src_path] = [
-                            line
-                            for line in result_dict.get(src_path, [])
-                            if line not in deleted_lines
-                        ] + added_lines
+                        # All affected lines are reportable
+                        result_dict[src_path] = result_dict.get(src_path, []) + added_lines + deleted_lines
 
             # Eliminate repeats and order line numbers
             for (src_path, lines) in result_dict.items():
