@@ -3,6 +3,8 @@
 * Updates deps to allow newer Tomli versions Thanks @kasium (PR by me cuse I
 had to debug it some. He pointed out the original issue.)
 * Fix to the tests to support a new version of pygments
+* Fixed a test that was not asserting properly (thanks @kalekundert
+https://github.com/Bachmann1234/diff_cover/pull/264)
 
 12/5/2021 v6.4.4
 
