@@ -402,7 +402,7 @@ class PylintDriver(QualityDriver):
         # Match lines of the form:
         # path/to/file.py:123: [C0111] Missing docstring
         # path/to/file.py:456: [C0111, Foo.bar] Missing docstring
-        self.multi_line_violation_regex = re.compile(r"==(\w|.+):(.*)")
+        self.multi_line_violation_regex = re.compile(r"==((?:\w|\.)+?):\[?(\d+)")
         self.dupe_code_violation_regex = re.compile(r"Similar lines in (\d+) files")
 
     def _process_dupe_code_violation(self, lines, current_line, message):

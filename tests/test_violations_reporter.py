@@ -1279,6 +1279,11 @@ class TestPylintQualityReporterTest:
             import json
             import logging
             import random
+            file2.py:170: [R0801] Similar lines in 2 files
+            ==file1:[170:172]
+            ==student.views:[4:6]
+            import foo
+            import bar
             path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
             """
                 )
@@ -1300,6 +1305,7 @@ class TestPylintQualityReporterTest:
             ),
             Violation(149, "C0324: Foo.__dict__: Comma not followed by a space"),
             Violation(162, "R0801: Similar lines in 2 files"),
+            Violation(170, "R0801: Similar lines in 2 files"),
             Violation(113, "W0613: cache_relation.clear_pk: Unused argument 'cls'"),
         ]
 
