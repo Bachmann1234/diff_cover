@@ -1,3 +1,8 @@
+4/15/2022 v6.5.0
+
+* Fixes issues when pylint identifies a multi line issue. Issue
+[#276](https://github.com/Bachmann1234/diff_cover/issues/276) Thanks @kozlovsky 
+
 3/24/2022 v6.4.5
 
 * Updates deps to allow newer Tomli versions Thanks @kasium (PR by me cuse I
