@@ -4,7 +4,7 @@
             <div class="src-name">{{ src_path }}</div>
             <div class="snippets">
             {% for snippet in stats.snippets_html %}
-            {{ snippet }}
+            {{ snippet | safe }}
             {% endfor %}
             </div>
         </div>

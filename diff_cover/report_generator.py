@@ -6,7 +6,7 @@ import json
 from abc import ABC, abstractmethod
 from gettext import gettext, ngettext
 
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 from diff_cover.snippets import Snippet
 
@@ -219,6 +219,7 @@ TEMPLATE_ENV = Environment(
     loader=TEMPLATE_LOADER,
     trim_blocks=True,
     lstrip_blocks=True,
+    autoescape=select_autoescape(),
 )
 
 # pylint thinks this callable does not exist, I assure you it does
