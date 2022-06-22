@@ -11,5 +11,5 @@ diff-quality --version
 diff-cover coverage.xml --include-untracked
 diff-quality --violations flake8 --include-untracked
 diff-quality --violations pylint --include-untracked
-doc8 README.rst
+doc8 README.rst --ignore D001
 
