@@ -39,7 +39,7 @@ class GitDiffTool:
          :param bool ignore_whitespace:
             Perform a diff but ignore any and all whitespace.
         """
-        self._range_notation = range_notation
+        self.range_notation = range_notation
         self._default_git_args = [
             "git",
             "-c",
@@ -63,7 +63,7 @@ class GitDiffTool:
         to stderr.
         """
         diff_range = "{branch}{notation}HEAD".format(
-            branch=compare_branch, notation=self._range_notation
+            branch=compare_branch, notation=self.range_notation
         )
         try:
             return execute(

@@ -16,7 +16,9 @@ from tests.helpers import git_diff_output, line_numbers
 
 @pytest.fixture
 def git_diff(mocker):
-    return mocker.MagicMock(GitDiffTool)
+    m = mocker.MagicMock(GitDiffTool)
+    m.range_notation = "..."
+    return m
 
 
 @pytest.fixture
@@ -647,3 +649,15 @@ def _set_git_diff_output(
     diff_tool.diff_staged.return_value = staged_diff
     diff_tool.diff_unstaged.return_value = unstaged_diff
     diff_tool.untracked.return_value = untracked
+
+
+def test_name_with_default_range(git_diff):
+    reporter = GitDiffReporter(git_diff=git_diff, ignore_staged=True)
+    assert reporter.name() == "origin/main...HEAD and unstaged changes"
+
+
+def test_name_different_range(mocker):
+    diff = mocker.MagicMock(GitDiffTool)
+    diff.range_notation = ".."
+    reporter = GitDiffReporter(git_diff=diff, ignore_staged=True)
+    assert reporter.name() == "origin/main..HEAD and unstaged changes"
