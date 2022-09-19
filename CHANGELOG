@@ -1,3 +1,10 @@
+9/19/2022 v7.0.0
+
+* Fixes issue where report name would not respoect diff notation
+https://github.com/Bachmann1234/diff_cover/issues/288 Thanks @prescod for the
+report.
+* Drops Python 3.6 (This is why I bumped the major)
+
 6/22/2022 v6.5.1
 
 * Updates lockfile and tests to work with new pygment. Resolves [#281](https://github.com/Bachmann1234/diff_cover/issues/281)
