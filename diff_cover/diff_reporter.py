@@ -130,7 +130,7 @@ class GitDiffReporter(BaseDiffReporter):
             options.append("untracked")
 
         # Branch is always present, so use as basis for name
-        name = f"{compare_branch}...HEAD"
+        name = f"{compare_branch}{git_diff.range_notation if git_diff else '...'}HEAD"
         if len(options) > 0:
             # If more options are present separate them by comma's, except the last one
             for item in options[:-1]:
