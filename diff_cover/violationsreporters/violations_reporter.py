@@ -273,7 +273,7 @@ pyflakes_driver = RegexBasedDriver(
     # Match lines of the form:
     # path/to/file.py:328: undefined name '_thing'
     # path/to/file.py:418: 'random' imported but unused
-    expression=r"^([^:]+):(\d+):\d* (.*)$",
+    expression=r"^([^:]+):(\d+):\d*:? (.*)$",
     command_to_check_install=["pyflakes", "--version"],
     # pyflakes exit code is 1 if there are violations
     # https://github.com/PyCQA/pyflakes/blob/master/pyflakes/api.py#L211
