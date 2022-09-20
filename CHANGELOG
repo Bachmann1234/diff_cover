@@ -1,3 +1,11 @@
+9/19/2022 v7.0.1
+
+* Updates dependencies and updates pylint driver to support 2.5 in a backwards
+compatible way
+* Fixes the broken tests reported in
+https://github.com/Bachmann1234/diff_cover/issues/290 Thanks @kloczek for the
+report
+
 9/19/2022 v7.0.0
 
 * Fixes issue where report name would not respoect diff notation
