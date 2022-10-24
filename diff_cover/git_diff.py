@@ -62,7 +62,7 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        diff_range = "{branch}{notation}HEAD".format(
+        diff_range = compare_branch if self.range_notation in compare_branch else "{branch}{notation}HEAD".format(
             branch=compare_branch, notation=self.range_notation
         )
         try:
