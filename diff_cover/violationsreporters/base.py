@@ -147,7 +147,8 @@ class QualityReporter(BaseViolationReporter):
                     raise OSError(f"{self.driver.name} is not installed")
                 command = copy.deepcopy(self.driver.command)
                 if self.options:
-                    command.append(self.options)
+                    for arg in self.options.split():
+                        command.append(arg)
                 if os.path.exists(src_path):
                     command.append(src_path.encode(sys.getfilesystemencoding()))
 
