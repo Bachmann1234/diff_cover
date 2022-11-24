@@ -23,9 +23,9 @@ Currently, ``diff-cover`` requires that:
 
 - You are using ``git`` for version control.
 - Your test runner generates coverage reports in Cobertura, Clover
-  or JaCoCo XML format.
+  or JaCoCo XML format, or LCov format.
 
-Supported XML coverage reports can be generated with many coverage tools,
+Supported XML or LCov coverage reports can be generated with many coverage tools,
 including:
 
 - Cobertura__ (Java)
@@ -33,14 +33,14 @@ including:
 - JaCoCo__ (Java)
 - coverage.py__ (Python)
 - JSCover__ (JavaScript)
-- lcov_to_cobertura__ (C/C++)
+- lcov__ (C/C++)
 
 __ http://cobertura.sourceforge.net/
 __ http://openclover.org/
 __ https://www.jacoco.org/
 __ http://nedbatchelder.com/code/coverage/
 __ http://tntim96.github.io/JSCover/
-__ https://github.com/eriwen/lcov-to-cobertura-xml
+__ https://ltp.sourceforge.net/coverage/lcov.php
 
 
 ``diff-cover`` is designed to be extended.  If you are interested
