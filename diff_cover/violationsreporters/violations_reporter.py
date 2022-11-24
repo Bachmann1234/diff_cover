@@ -274,7 +274,6 @@ class LcovCoverageReporter(BaseViolationReporter):
 
         self._src_roots = src_roots or [""]
 
-
     @staticmethod
     def parse(lcov_file):
         """
@@ -282,12 +281,12 @@ class LcovCoverageReporter(BaseViolationReporter):
         File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
         """
         lcov_report = defaultdict(dict)
-        lcov = open(lcov_file, 'r')
+        lcov = open(lcov_file, "r")
         while True:
             line = lcov.readline()
             if not line:
                 break
-            directive, _, content = line.strip().partition(':')
+            directive, _, content = line.strip().partition(":")
             # we're only interested in file name and line coverage
             if directive == "SF":
                 # SF:<absolute path to the source file>
@@ -295,17 +294,29 @@ class LcovCoverageReporter(BaseViolationReporter):
                 continue
             elif directive == "DA":
                 # DA:<line number>,<execution count>[,<checksum>]
-                args = content.split(',')
+                args = content.split(",")
                 if len(args) < 2 or len(args) > 3:
                     raise ValueError(f"Unknown syntax in lcov report: {line}")
                 line_no = int(args[0])
                 num_executions = int(args[1])
                 if source_file is None:
-                    raise ValueError(f"No source file specified for line coverage: {line}")
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
                 if line_no not in lcov_report[source_file]:
                     lcov_report[source_file][line_no] = 0
                 lcov_report[source_file][line_no] += num_executions
-            elif directive in ["TN", "FNF", "FNH", "FN", "FNDA", "LH", "LF", "BRF", "BRH"]:
+            elif directive in [
+                "TN",
+                "FNF",
+                "FNH",
+                "FN",
+                "FNDA",
+                "LH",
+                "LF",
+                "BRF",
+                "BRH",
+            ]:
                 # these are valid lines, but not we don't need them
                 continue
             elif directive == "end_of_record":
@@ -355,13 +366,15 @@ class LcovCoverageReporter(BaseViolationReporter):
                 src_search_path = src_abs_path
                 if src_search_path not in lcov_document:
                     src_search_path = src_rel_path
-                print("search: "+src_search_path)
+                print("search: " + src_search_path)
 
                 # First case, need to define violations initially
                 if violations is None:
                     violations = {
                         Violation(int(line_no), None)
-                        for line_no, num_executions in lcov_document[src_search_path].items()
+                        for line_no, num_executions in lcov_document[
+                            src_search_path
+                        ].items()
                         if int(num_executions) == 0
                     }
 
@@ -371,15 +384,19 @@ class LcovCoverageReporter(BaseViolationReporter):
                 else:
                     violations = violations & {
                         Violation(int(line_no), None)
-                        for line_no, num_executions in lcov_document[src_search_path].items()
+                        for line_no, num_executions in lcov_document[
+                            src_search_path
+                        ].items()
                         if int(num_executions) == 0
                     }
 
                 # Measured is the union of itself and the new measured
                 # measured = measured | {int(line.get(_number)) for line in line_nodes}
                 measured = measured | {
-                        int(line_no) for line_no, num_executions
-                        in lcov_document[src_search_path].items()
+                    int(line_no)
+                    for line_no, num_executions in lcov_document[
+                        src_search_path
+                    ].items()
                 }
 
             # If we don't have any information about the source file,
@@ -405,7 +422,6 @@ class LcovCoverageReporter(BaseViolationReporter):
         """
         self._cache_file(src_path)
         return self._info_cache[src_path][1]
-
 
 
 pycodestyle_driver = RegexBasedDriver(
