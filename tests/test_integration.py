@@ -218,6 +218,12 @@ class TestDiffCoverIntegration(ToolsIntegrationBase):
             "git_diff_add.txt", "add_console_report.txt", ["diff-cover", "coverage.xml"]
         )
 
+    def test_added_file_console_lcov(self):
+        self._check_console_report(
+            "git_diff_add.txt", "add_console_report.txt", ["diff-cover", "lcov.info"]
+        )
+
+
     def test_lua_coverage(self):
         """
         coverage report shows that diff-cover needs to normalize
@@ -316,6 +322,14 @@ class TestDiffCoverIntegration(ToolsIntegrationBase):
             "mult_inputs_console_report.txt",
             ["diff-cover", "coverage1.xml", "coverage2.xml"],
         )
+
+    def test_changed_file_lcov_console(self):
+        self._check_console_report(
+            "git_diff_changed.txt",
+            "changed_console_report.txt",
+            ["diff-cover", "lcov.info"],
+        )
+
 
     def test_subdir_coverage_html(self):
         """

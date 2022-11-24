@@ -16,7 +16,7 @@ from diff_cover.report_generator import (
     MarkdownReportGenerator,
     StringReportGenerator,
 )
-from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter
+from diff_cover.violationsreporters.violations_reporter import XmlCoverageReporter, LcovCoverageReporter
 
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
@@ -31,7 +31,7 @@ IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
 SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
-COVERAGE_XML_HELP = "XML coverage report"
+COVERAGE_FILE_HELP = "coverage report (XML or lcov.info)"
 DIFF_RANGE_NOTATION_HELP = (
     "Git diff range notation to use when comparing branches, defaults to '...'"
 )
@@ -49,19 +49,19 @@ def parse_coverage_args(argv):
     valid options:
 
         {
-            'coverage_xml': COVERAGE_XML,
+            'coverage_file': COVERAGE_FILE,
             'html_report': None | HTML_REPORT,
             'json_report': None | JSON_REPORT,
             'external_css_file': None | CSS_FILE,
         }
 
-    where `COVERAGE_XML`, `HTML_REPORT`, `JSON_REPORT`, and `CSS_FILE` are paths.
+    where `COVERAGE_FILE`, `HTML_REPORT`, `JSON_REPORT`, and `CSS_FILE` are paths.
 
     The path strings may or may not exist.
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
 
-    parser.add_argument("coverage_xml", type=str, help=COVERAGE_XML_HELP, nargs="+")
+    parser.add_argument("coverage_file", type=str, help=COVERAGE_FILE_HELP, nargs="+")
 
     parser.add_argument(
         "--html-report",
@@ -178,7 +178,7 @@ def parse_coverage_args(argv):
 
 
 def generate_coverage_report(
-    coverage_xml,
+    coverage_files,
     compare_branch,
     html_report=None,
     css_file=None,
@@ -206,8 +206,14 @@ def generate_coverage_report(
         exclude=exclude,
     )
 
-    xml_roots = [etree.parse(xml_root) for xml_root in coverage_xml]
-    coverage = XmlCoverageReporter(xml_roots, src_roots)
+    xml_roots = [etree.parse(coverage_file) for coverage_file in coverage_files if coverage_file.endswith('.xml')]
+    lcov_roots = [LcovCoverageReporter.parse(coverage_file) for coverage_file in coverage_files if not coverage_file.endswith('.xml')]
+    if (len(xml_roots) > 0 and len(lcov_roots) > 0):
+        raise ValueError(f"Mixing LCov and XML reports is not supported yet")
+    elif (len(xml_roots) > 0):
+        coverage = XmlCoverageReporter(xml_roots, src_roots)
+    else:
+        coverage = LcovCoverageReporter(lcov_roots, src_roots)
 
     # Build a report generator
     if html_report is not None:
@@ -258,7 +264,7 @@ def main(argv=None, directory=None):
     GitPathTool.set_cwd(directory)
     fail_under = arg_dict.get("fail_under")
     percent_covered = generate_coverage_report(
-        arg_dict["coverage_xml"],
+        arg_dict["coverage_file"],
         arg_dict["compare_branch"],
         html_report=arg_dict["html_report"],
         json_report=arg_dict["json_report"],
