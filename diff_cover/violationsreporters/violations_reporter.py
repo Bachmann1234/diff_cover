@@ -255,6 +255,175 @@ class XmlCoverageReporter(BaseViolationReporter):
         return self._info_cache[src_path][1]
 
 
+class LcovCoverageReporter(BaseViolationReporter):
+    """
+    Query information from a Cobertura|Clover|JaCoCo XML coverage report.
+    """
+
+    def __init__(self, lcov_roots, src_roots=None):
+        """
+        Load the lcov.info coverage report represented
+        """
+        super().__init__("LCOV")
+        self._lcov_roots = lcov_roots
+        self._lcov_report = defaultdict(list)
+
+        # Create a dict to cache violations dict results
+        # Keys are source file paths, values are output of `violations()`
+        self._info_cache = defaultdict(list)
+
+        self._src_roots = src_roots or [""]
+
+    @staticmethod
+    def parse(lcov_file):
+        """
+        Parse a single LCov coverage report
+        File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
+        """
+        lcov_report = defaultdict(dict)
+        lcov = open(lcov_file, "r")
+        while True:
+            line = lcov.readline()
+            if not line:
+                break
+            directive, _, content = line.strip().partition(":")
+            # we're only interested in file name and line coverage
+            if directive == "SF":
+                # SF:<absolute path to the source file>
+                source_file = content
+                continue
+            elif directive == "DA":
+                # DA:<line number>,<execution count>[,<checksum>]
+                args = content.split(",")
+                if len(args) < 2 or len(args) > 3:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                line_no = int(args[0])
+                num_executions = int(args[1])
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                if line_no not in lcov_report[source_file]:
+                    lcov_report[source_file][line_no] = 0
+                lcov_report[source_file][line_no] += num_executions
+            elif directive in [
+                "TN",
+                "FNF",
+                "FNH",
+                "FN",
+                "FNDA",
+                "LH",
+                "LF",
+                "BRF",
+                "BRH",
+            ]:
+                # these are valid lines, but not we don't need them
+                continue
+            elif directive == "end_of_record":
+                source_file = None
+            else:
+                raise ValueError(f"Unknown syntax in lcov report: {line}")
+
+        lcov.close()
+        print(lcov_report)
+        return lcov_report
+
+    def _cache_file(self, src_path):
+        """
+        Load the data from `self._lcov_roots`
+        for `src_path`, if it hasn't been already.
+        """
+        # If we have not yet loaded this source file
+        if src_path not in self._info_cache:
+            # We only want to keep violations that show up in each xml source.
+            # Thus, each time, we take the intersection.  However, to do this
+            # we must treat the first time as a special case and just add all
+            # the violations from the first xml report.
+            violations = None
+
+            # A line is measured if it is measured in any of the reports, so
+            # we take set union each time and can just start with the empty set
+            measured = set()
+
+            # Remove git_root from src_path for searching the correct filename
+            # If cwd is `/home/user/work/diff-cover/diff_cover`
+            # and src_path is `diff_cover/violations_reporter.py`
+            # search for `violations_reporter.py`
+            src_rel_path = util.to_unix_path(GitPathTool.relative_path(src_path))
+
+            # If cwd is `/home/user/work/diff-cover/diff_cover`
+            # and src_path is `other_package/some_file.py`
+            # search for `/home/user/work/diff-cover/other_package/some_file.py`
+            src_abs_path = util.to_unix_path(GitPathTool.absolute_path(src_path))
+
+            print(src_rel_path)
+            print(src_abs_path)
+            print(self._lcov_roots)
+
+            # Loop through the files that contain the xml roots
+            for lcov_document in self._lcov_roots:
+
+                src_search_path = src_abs_path
+                if src_search_path not in lcov_document:
+                    src_search_path = src_rel_path
+                print("search: " + src_search_path)
+
+                # First case, need to define violations initially
+                if violations is None:
+                    violations = {
+                        Violation(int(line_no), None)
+                        for line_no, num_executions in lcov_document[
+                            src_search_path
+                        ].items()
+                        if int(num_executions) == 0
+                    }
+
+                # If we already have a violations set,
+                # take the intersection of the new
+                # violations set and its old self
+                else:
+                    violations = violations & {
+                        Violation(int(line_no), None)
+                        for line_no, num_executions in lcov_document[
+                            src_search_path
+                        ].items()
+                        if int(num_executions) == 0
+                    }
+
+                # Measured is the union of itself and the new measured
+                # measured = measured | {int(line.get(_number)) for line in line_nodes}
+                measured = measured | {
+                    int(line_no)
+                    for line_no, num_executions in lcov_document[
+                        src_search_path
+                    ].items()
+                }
+
+            # If we don't have any information about the source file,
+            # don't report any violations
+            if violations is None:
+                violations = set()
+
+            self._info_cache[src_path] = (violations, measured)
+
+    def violations(self, src_path):
+        """
+        See base class comments.
+        """
+
+        self._cache_file(src_path)
+
+        # Yield all lines not covered
+        return self._info_cache[src_path][0]
+
+    def measured_lines(self, src_path):
+        """
+        See base class docstring.
+        """
+        self._cache_file(src_path)
+        return self._info_cache[src_path][1]
+
+
 pycodestyle_driver = RegexBasedDriver(
     name="pycodestyle",
     supported_extensions=["py"],

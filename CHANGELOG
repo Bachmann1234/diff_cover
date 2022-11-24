@@ -1,3 +1,7 @@
+11/24/2022 v7.0.3
+
+* Native support for lcov coverage reports
+
 11/13/2022 v7.0.2
 
 * Ensures multiple options get passed to cpp check properly. Thanks @ptzz [Issue 293](https://github.com/Bachmann1234/diff_cover/issues/293)
