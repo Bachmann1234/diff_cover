@@ -1,6 +1,7 @@
-11/24/2022 v7.0.3
+11/26/2022 v7.1.0
 
-* Native support for lcov coverage reports
+* Native support for lcov coverage reports (thanks @peterg79) [PR
+297](https://github.com/Bachmann1234/diff_cover/pull/297)
 
 11/13/2022 v7.0.2
 
