@@ -53,7 +53,10 @@ class BaseReportGeneratorTest:
     @pytest.fixture(autouse=True)
     def base_setup(self, mocker):
         # Create mocks of the dependencies
-        self.coverage = mocker.MagicMock(BaseViolationReporter)
+        self.coverage = mocker.MagicMock(
+            BaseViolationReporter,
+            violations_batch=mocker.Mock(side_effect=NotImplementedError),
+        )
         self.diff = mocker.MagicMock(BaseDiffReporter)
 
         # Patch snippet loading to always return the same string

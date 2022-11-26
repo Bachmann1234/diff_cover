@@ -64,7 +64,8 @@ To install the development version:
 
     git clone https://github.com/Bachmann1234/diff-cover.git
     cd diff-cover
-    python setup.py install
+    poetry install
+    poetry shell
 
 
 Getting Started
