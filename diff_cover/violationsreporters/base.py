@@ -38,7 +38,7 @@ class BaseViolationReporter(ABC):
         """
         Return a dict of Violations recorded in `src_paths`.
 
-        src_paths: List[str] - list of paths to source files
+        src_paths: Sequence[str] - sequence of paths to source files
 
         Returns a Dict[str, List[Violation]]. Keys are paths to source files.
 
