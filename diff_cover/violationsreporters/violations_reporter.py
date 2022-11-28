@@ -316,6 +316,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 "LF",
                 "BRF",
                 "BRH",
+                "BRDA",
             ]:
                 # these are valid lines, but not we don't need them
                 continue
