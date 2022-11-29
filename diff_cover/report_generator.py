@@ -176,7 +176,6 @@ class BaseReportGenerator(ABC):
             violations = None
             src_paths_changed = self._diff.src_paths_changed()
             try:
-                # Use violations_batch() if it's implemented.
                 violations = self._violations.violations_batch(src_paths_changed)
             except NotImplementedError:
                 pass
