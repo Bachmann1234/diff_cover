@@ -326,7 +326,6 @@ class LcovCoverageReporter(BaseViolationReporter):
                 raise ValueError(f"Unknown syntax in lcov report: {line}")
 
         lcov.close()
-        print(lcov_report)
         return lcov_report
 
     def _cache_file(self, src_path):
@@ -357,17 +356,12 @@ class LcovCoverageReporter(BaseViolationReporter):
             # search for `/home/user/work/diff-cover/other_package/some_file.py`
             src_abs_path = util.to_unix_path(GitPathTool.absolute_path(src_path))
 
-            print(src_rel_path)
-            print(src_abs_path)
-            print(self._lcov_roots)
-
             # Loop through the files that contain the xml roots
             for lcov_document in self._lcov_roots:
 
                 src_search_path = src_abs_path
                 if src_search_path not in lcov_document:
                     src_search_path = src_rel_path
-                print("search: " + src_search_path)
 
                 # First case, need to define violations initially
                 if violations is None:
