@@ -172,23 +172,29 @@ class BaseReportGenerator(ABC):
 
         To make this efficient, we cache and reuse the result.
         """
+        src_paths_changed = self._diff.src_paths_changed()
         if not self._diff_violations_dict:
-            violations = None
-            src_paths_changed = self._diff.src_paths_changed()
             try:
-                violations = self._violations.violations_batch(src_paths_changed)
-            except NotImplementedError:
-                pass
-            self._diff_violations_dict = {
-                src_path: DiffViolations(
-                    violations.get(src_path, [])
-                    if violations is not None
-                    else self._violations.violations(src_path),
-                    self._violations.measured_lines(src_path),
-                    self._diff.lines_changed(src_path),
+                violations = self._violations.violations_batch(
+                    src_paths_changed
                 )
-                for src_path in src_paths_changed
-            }
+                self._diff_violations_dict = {
+                    src_path: DiffViolations(
+                        violations.get(src_path, []),
+                        self._violations.measured_lines(src_path),
+                        self._diff.lines_changed(src_path),
+                    )
+                    for src_path in src_paths_changed
+                }
+            except NotImplementedError:
+                self._diff_violations_dict = {
+                    src_path: DiffViolations(
+                        self._violations.violations(src_path),
+                        self._violations.measured_lines(src_path),
+                        self._diff.lines_changed(src_path),
+                    )
+                    for src_path in src_paths_changed
+                }
         return self._diff_violations_dict
 
     def report_dict(self):
