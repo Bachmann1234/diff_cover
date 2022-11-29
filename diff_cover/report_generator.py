@@ -184,7 +184,7 @@ class BaseReportGenerator(ABC):
                         self._violations.measured_lines(src_path),
                         self._diff.lines_changed(src_path),
                     )
-                    for src_path in src_paths_changed
+                for src_path in src_paths_changed
                 }
             except NotImplementedError:
                 self._diff_violations_dict = {
@@ -193,7 +193,7 @@ class BaseReportGenerator(ABC):
                         self._violations.measured_lines(src_path),
                         self._diff.lines_changed(src_path),
                     )
-                    for src_path in src_paths_changed
+                for src_path in src_paths_changed
                 }
         return self._diff_violations_dict
 
