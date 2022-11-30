@@ -51,15 +51,11 @@ class BaseReportGeneratorTest:
     SNIPPET_STYLE = ".css { color:red }"
     SNIPPET_TERMINAL = SNIPPET_MARKDOWN
 
-    # def violations_batch(*args, **kwargs):
-    #     raise NotImplementedError
-
     @pytest.fixture(autouse=True)
     def base_setup(self, mocker):
         # Create mocks of the dependencies
         self.coverage = mocker.MagicMock(
             BaseViolationReporter,
-            # violations_batch=self.violations_batch,
         )
         self.diff = mocker.MagicMock(BaseDiffReporter)
 
