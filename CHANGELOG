@@ -1,3 +1,8 @@
+11/29/2022 v7.1.2
+
+* Remove some annoying prints (thanks @peterg79) [PR
+302](https://github.com/Bachmann1234/diff_cover/pull/302)
+
 11/28/2022 v7.1.1
 
 * Handle branch coverage in lcov reports (thanks @peterg79)
