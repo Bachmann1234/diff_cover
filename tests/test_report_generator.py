@@ -1,5 +1,6 @@
 # pylint: disable=attribute-defined-outside-init,not-callable
 
+import copy
 import json
 from io import BytesIO
 from textwrap import dedent
@@ -53,7 +54,9 @@ class BaseReportGeneratorTest:
     @pytest.fixture(autouse=True)
     def base_setup(self, mocker):
         # Create mocks of the dependencies
-        self.coverage = mocker.MagicMock(BaseViolationReporter)
+        self.coverage = mocker.MagicMock(
+            BaseViolationReporter,
+        )
         self.diff = mocker.MagicMock(BaseDiffReporter)
 
         # Patch snippet loading to always return the same string
@@ -80,6 +83,8 @@ class BaseReportGeneratorTest:
 
         self._violations_dict = dict()
         self.coverage.violations.side_effect = self._violations_dict.get
+
+        self.coverage.violations_batch.side_effect = NotImplementedError
 
         self._measured_dict = dict()
         self.coverage.measured_lines.side_effect = self._measured_dict.get
@@ -539,3 +544,26 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         # Verify that we got the expected string
         expected = load_fixture("markdown_report_two_snippets.md").strip()
         self.assert_report(expected)
+
+
+class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTest):
+    REPORT_GENERATOR_CLASS = SimpleReportGenerator
+
+    @pytest.fixture(autouse=True)
+    def setup(self):
+        self.use_default_values()
+        # Have violations_batch() return the violations.
+        self.coverage.violations_batch.side_effect = None
+        self.coverage.violations_batch.return_value = copy.deepcopy(
+            self._violations_dict
+        )
+        # Have violations() return an empty list to ensure violations_batch()
+        # is used.
+        for src in self.SRC_PATHS:
+            self.set_violations(src, [])
+
+    def test_violation_lines(self):
+        # By construction, each file has the same coverage information
+        expected = [10, 11]
+        for src_path in self.SRC_PATHS:
+            assert self.report.violation_lines(src_path) == expected

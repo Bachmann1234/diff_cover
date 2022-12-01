@@ -34,6 +34,19 @@ class BaseViolationReporter(ABC):
         Return a list of Violations recorded in `src_path`.
         """
 
+    def violations_batch(self, src_paths):
+        """
+        Return a dict of Violations recorded in `src_paths`.
+
+        src_paths: Sequence[str] - sequence of paths to source files
+
+        Returns a Dict[str, List[Violation]]. Keys are paths to source files.
+
+        If a subclass does not implement this function, violations() will be
+        called instead, once for each src_path in src_paths.
+        """
+        raise NotImplementedError
+
     def measured_lines(self, src_path):
         """
         Return a list of the lines in src_path that were measured
