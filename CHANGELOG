@@ -1,3 +1,9 @@
+11/30/2022 v7.2.0
+
+* Add for the ability for diff-quality report generator plugins to process
+modified files as a batch (Thanks @barrywhart) [PR
+300](https://github.com/Bachmann1234/diff_cover/pull/300)
+
 11/29/2022 v7.1.2
 
 * Remove some annoying prints (thanks @peterg79) [PR
