@@ -1,3 +1,8 @@
+12/09/2022 v7.3.0
+
+* Plugins now Support '--options' and report files (Thanks @barrywhart) [PR
+305](https://github.com/Bachmann1234/diff_cover/pull/305)
+
 11/30/2022 v7.2.0
 
 * Add for the ability for diff-quality report generator plugins to process
