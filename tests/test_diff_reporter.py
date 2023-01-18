@@ -135,8 +135,8 @@ def test_git_path_selection(diff, git_diff, include, exclude, expected):
         # They should be in alphabetical order
         assert source_paths == expected
 
-    # change back to the previous working directory
-    os.chdir(old_cwd)
+        # change back to the previous working directory
+        os.chdir(old_cwd)
 
 
 def test_git_source_paths(diff, git_diff):
