@@ -6,6 +6,7 @@ import os
 import tempfile
 from pathlib import Path
 from textwrap import dedent
+from unittest.mock import patch
 
 import pytest
 
@@ -96,7 +97,7 @@ def test_name_include_untracked(git_diff):
         ),
     ],
 )
-def test_git_path_selection(mocker, diff, git_diff, include, exclude, expected):
+def test_git_path_selection(diff, git_diff, include, exclude, expected):
     old_cwd = os.getcwd()
     with tempfile.TemporaryDirectory() as tmp_dir:
         # change the working directory into the temp directory so that globs are working
@@ -127,8 +128,8 @@ def test_git_path_selection(mocker, diff, git_diff, include, exclude, expected):
         )
 
         # Get the source paths in the diff
-        mocker.patch.object(os.path, "abspath", lambda path: f"{tmp_dir}/{path}")
-        source_paths = diff.src_paths_changed()
+        with patch.object(os.path, "abspath", lambda path: f"{tmp_dir}/{path}"):
+            source_paths = diff.src_paths_changed()
 
         # Validate the source paths
         # They should be in alphabetical order
