@@ -1,3 +1,10 @@
+01/18/2023 v7.3.1
+
+* Fixes case where bundled tests fail in Solaris and other OSs that dont
+support deleting the directory you are currently residing in.
+[PR 309](https://github.com/Bachmann1234/diff_cover/pull/309) Reported by
+mtelka [Issue 308](https://github.com/Bachmann1234/diff_cover/issues/308)
+
 12/09/2022 v7.3.0
 
 * Plugins now Support '--options' and report files (Thanks @barrywhart) [PR
