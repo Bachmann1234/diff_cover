@@ -2,11 +2,19 @@ import abc
 import enum
 
 try:
-    import tomli
+    import tomli as toml
 
     _HAS_TOML = True
 except ImportError:  # pragma: no cover
     _HAS_TOML = False
+
+if not _HAS_TOML:
+    try:
+        import tomllib as toml
+
+        _HAS_TOML = True
+    except ImportError:  # pragma: no cover
+        pass
 
 
 class Tool(enum.Enum):
@@ -38,10 +46,10 @@ class TOMLParser(ConfigParser):
             return None
 
         if not _HAS_TOML:
-            raise ParserError("tomli is not installed")
+            raise ParserError("No Toml lib installed")
 
         with open(self._file_name, "rb") as file_handle:
-            config = tomli.load(file_handle)
+            config = toml.load(file_handle)
 
         config = config.get("tool", {}).get(self._section, {})
         if not config:
