@@ -344,7 +344,9 @@ def main(argv=None, directory=None):
 
                 reporter = QualityReporter(driver, input_reports, user_options)
             elif reporter_factory_fn:
-                reporter = reporter_factory_fn(reports=input_reports, options=user_options)
+                reporter = reporter_factory_fn(
+                    reports=input_reports, options=user_options
+                )
 
             percent_passing = generate_quality_report(
                 reporter,
