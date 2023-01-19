@@ -1,3 +1,8 @@
+01/18/2023 v7.3.2
+
+* Update dependencies in the lockfile, adds python 3.11 support.
+   Triggered by [Issue 310](https://github.com/Bachmann1234/diff_cover/issues/310) reported by kloczek
+
 01/18/2023 v7.3.1
 
 * Fixes case where bundled tests fail in Solaris and other OSs that dont
