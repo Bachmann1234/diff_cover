@@ -6,7 +6,6 @@ import itertools
 import os
 import os.path
 import re
-import time
 from collections import defaultdict
 
 from diff_cover import util
