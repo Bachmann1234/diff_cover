@@ -97,10 +97,8 @@ class XmlCoverageReporter(BaseViolationReporter):
         if not self._xml_cache[index]:
             self._xml_cache[index] = self._get_xml_classes(xml_document)
 
-        return (
-            self._xml_cache[index].get(src_abs_path)
-            or
-            self._xml_cache[index].get(src_rel_path)
+        return self._xml_cache[index].get(src_abs_path) or self._xml_cache[index].get(
+            src_rel_path
         )
 
     def get_src_path_line_nodes_cobertura(self, index, xml_document, src_path):
