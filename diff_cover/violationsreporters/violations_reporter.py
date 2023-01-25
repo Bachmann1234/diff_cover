@@ -36,9 +36,38 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Keys are source file paths, values are output of `violations()`
         self._info_cache = defaultdict(list)
 
+        # Create a list to cache xml classes list results
+        # Values are output of `self._get_xml_classes()`
+        self._xml_cache = [{} for i in range(len(xml_roots))]
+
         self._src_roots = src_roots or [""]
 
-    def _get_classes(self, xml_document, src_path):
+    def _get_xml_classes(self, xml_document):
+        """
+        Return a dict of classes in `xml_document`.
+        Keys are `filename`, values are list of `class`
+
+        If `class` is not present in `xml_document`,
+        return empty defaultdict(list)
+        """
+        # cobertura sometimes provides the sources for the measurements
+        # within it. If we have that we outta use it
+        sources = xml_document.findall("sources/source")
+        sources = [source.text for source in sources if source.text]
+        classes = xml_document.findall(".//class") or []
+
+        res = defaultdict(list)
+        for clazz in classes:
+            f = clazz.get("filename")
+            if not f:
+                continue
+            res[util.to_unix_path(f)].append(clazz)
+            for source in sources:
+                abs_f = util.to_unix_path(os.path.join(source.strip(), f))
+                res[abs_f].append(clazz)
+        return res
+
+    def _get_classes(self, index, xml_document, src_path):
         """
         Given a path and parsed xml_document provides class nodes
         with the relevant lines
@@ -63,38 +92,16 @@ class XmlCoverageReporter(BaseViolationReporter):
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
         src_abs_path = util.to_unix_path(GitPathTool.absolute_path(src_path))
 
-        # cobertura sometimes provides the sources for the measurements
-        # within it. If we have that we outta use it
-        sources = xml_document.findall("sources/source")
-        sources = [source.text for source in sources if source.text]
-        classes = xml_document.findall(".//class") or []
+        # Create a cache for `classes` in `xml_document` if cache exists
+        if not self._xml_cache[index]:
+            self._xml_cache[index] = self._get_xml_classes(xml_document)
 
-        return (
-            [
-                clazz
-                for clazz in classes
-                if src_abs_path
-                in [
-                    util.to_unix_path(
-                        os.path.join(source.strip(), clazz.get("filename"))
-                    )
-                    for source in sources
-                ]
-            ]
-            or [
-                clazz
-                for clazz in classes
-                if util.to_unix_path(clazz.get("filename")) == src_abs_path
-            ]
-            or [
-                clazz
-                for clazz in classes
-                if util.to_unix_path(clazz.get("filename")) == src_rel_path
-            ]
+        return self._xml_cache[index].get(src_abs_path) or self._xml_cache[index].get(
+            src_rel_path
         )
 
-    def get_src_path_line_nodes_cobertura(self, xml_document, src_path):
-        classes = self._get_classes(xml_document, src_path)
+    def get_src_path_line_nodes_cobertura(self, index, xml_document, src_path):
+        classes = self._get_classes(index, xml_document, src_path)
 
         if not classes:
             return None
@@ -184,7 +191,7 @@ class XmlCoverageReporter(BaseViolationReporter):
             measured = set()
 
             # Loop through the files that contain the xml roots
-            for xml_document in self._xml_roots:
+            for i, xml_document in enumerate(self._xml_roots):
                 if xml_document.findall(".[@clover]"):
                     # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
                     line_nodes = self.get_src_path_line_nodes_clover(
@@ -202,7 +209,7 @@ class XmlCoverageReporter(BaseViolationReporter):
                 else:
                     # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
                     line_nodes = self.get_src_path_line_nodes_cobertura(
-                        xml_document, src_path
+                        i, xml_document, src_path
                     )
                     _number = "number"
                     _hits = "hits"
