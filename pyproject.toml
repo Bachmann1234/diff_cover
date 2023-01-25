@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diff_cover"
-version = "7.3.2"
+version = "7.4.0"
 description = "Run coverage and linting reports on diffs"
 authors = ["See Contributors"]
 homepage = "https://github.com/Bachmann1234/diff-cover"

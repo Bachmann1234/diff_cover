@@ -1,3 +1,7 @@
+01/24/2023 v7.4.0
+
+* Significant performance improvement when processing cobertura reports! Thanks @madest92 [PR 134](https://github.com/Bachmann1234/diff_cover/pull/314)
+
 01/18/2023 v7.3.2
 
 * Update dependencies in the lockfile, adds python 3.11 support.
