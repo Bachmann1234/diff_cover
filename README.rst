@@ -280,6 +280,25 @@ If an option can be specified multiple times, the configuration value should be 
     compare_branch = "origin/feature"
     ignore_staged = true
 
+Integrating with Pre-commit
+----------------------
+Use pre-commit. Once you have it installed, add this to the ``.pre-commit-config.yaml`` in your repository:
+
+.. code:: yaml
+
+    repos:
+      - repo: https://github.com/psf/black
+        rev: 'main'
+        hooks:
+          - id: run-diff-cover
+            # You can add args here
+            # args: ['coverage.xml', '--fail-under=80', '-q']
+          - id: run-diff-quality
+            # You can add args here
+            # args: ['--violations=pycodestyle', '--fail-under=80', '-q']
+
+
+Feel free to switch out the rev value to something else, like another tag/version or even a specific commit.
 
 Troubleshooting
 ----------------------

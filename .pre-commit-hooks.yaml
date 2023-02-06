@@ -1,0 +1,19 @@
+- id: run-diff-cover
+  name: run-diff-cover
+  description: This will compare the current git branch to origin/main and print the diff coverage report to the console.
+  entry: diff-cover
+  args: ['coverage.xml', '--fail-under=80', '-q']
+  stages: [commit]
+  language: python
+  language_version: python3
+  pass_filenames: false
+
+- id: run-diff-quality
+  name: run-diff-quality
+  description: This will compare the current git branch to origin/main and print the quality coverage report to the console.
+  entry: diff-quality
+  args: ['--violations=pycodestyle', '--fail-under=80', '-q']
+  stages: [commit]
+  language: python
+  language_version: python3
+  pass_filenames: false
