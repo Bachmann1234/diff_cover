@@ -58,7 +58,6 @@ def process_patcher(mocker):
 
 
 class TestXmlCoverageReporterTest:
-
     MANY_VIOLATIONS = {
         Violation(3, None),
         Violation(7, None),
@@ -304,7 +303,6 @@ class TestXmlCoverageReporterTest:
         violation_lines = {violation.line for violation in violations}
 
         for path in file_paths:
-
             src_node = etree.SubElement(classes, "class")
             src_node.set("filename", path)
 
@@ -324,7 +322,6 @@ class TestXmlCoverageReporterTest:
 
 
 class TestCloverXmlCoverageReporterTest:
-
     MANY_VIOLATIONS = {
         Violation(3, None),
         Violation(7, None),
@@ -349,7 +346,6 @@ class TestCloverXmlCoverageReporterTest:
         _git_path_mock.absolute_path = lambda path: path
 
     def test_violations(self):
-
         # Construct the XML report
         file_paths = ["file1.java", "subdir/file2.java"]
         violations = self.MANY_VIOLATIONS
@@ -520,7 +516,6 @@ class TestCloverXmlCoverageReporterTest:
         violation_lines = {violation.line for violation in violations}
 
         for path in file_paths:
-
             src_node = etree.SubElement(package, "file")
             src_node.set("path", path)
 
@@ -537,7 +532,6 @@ class TestCloverXmlCoverageReporterTest:
 
 
 class TestJacocoXmlCoverageReporterTest:
-
     MANY_VIOLATIONS = {
         Violation(3, None),
         Violation(7, None),
@@ -733,7 +727,6 @@ class TestJacocoXmlCoverageReporterTest:
         violation_lines = {violation.line for violation in violations}
 
         for path in file_paths:
-
             package = etree.SubElement(root, "package")
             package.set("name", os.path.dirname(path))
             src_node = etree.SubElement(package, "sourcefile")
@@ -964,7 +957,6 @@ class TestPyflakesQualityReporterTest:
             assert result == []
 
     def test_quality_pregenerated_report(self):
-
         # When the user provides us with a pre-generated pyflakes report
         # then use that instead of calling pyflakes directly.
         pyflakes_reports = [
@@ -1486,7 +1478,6 @@ class TestPylintQualityReporterTest:
             assert expected in actual_violations
 
     def test_quality_pregenerated_report_continuation_char(self):
-
         # The report contains a non-ASCII continuation char
         pylint_reports = [BytesIO(b"file.py:2: [W1401] Invalid char '\xc3'")]
 
@@ -1616,7 +1607,6 @@ class JsQualityBaseReporterMixin:
             assert result == []
 
     def test_quality_pregenerated_report(self):
-
         # When the user provides us with a pre-generated linter report
         # then use that instead of calling linter directly.
         reports = [

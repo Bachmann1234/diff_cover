@@ -359,7 +359,6 @@ class TemplateReportGenerator(BaseReportGenerator):
         return combined_list
 
     def _src_path_stats(self, src_path):
-
         stats = super()._src_path_stats(src_path)
 
         # Load source snippets (if the report will display them)

@@ -69,8 +69,7 @@ def git_diff_output(diff_dict, deleted_files=None):
     output.extend(_deleted_file_entries(deleted_files))
 
     # Entries for source files
-    for (src_file, modified_lines) in diff_dict.items():
-
+    for src_file, modified_lines in diff_dict.items():
         output.extend(_source_file_entry(src_file, modified_lines))
 
     return "\n".join(output)
@@ -89,7 +88,6 @@ def _deleted_file_entries(deleted_files):
     output = []
 
     if deleted_files is not None:
-
         for src_file in deleted_files:
             # File information
             output.append(f"diff --git a/{src_file} b/{src_file}")
@@ -130,7 +128,7 @@ def _source_file_entry(src_file, modified_lines):
     output.append(f"+++ b/{src_file}")
 
     # Hunk information
-    for (start, end) in _hunks(modified_lines):
+    for start, end in _hunks(modified_lines):
         output.extend(_hunk_entry(start, end, modified_lines))
 
     return output
@@ -162,10 +160,8 @@ def _hunk_entry(start, end, modified_lines):
 
     # Output line modifications
     for line_number in range(start, end + 1):
-
         # This is a changed line, so prepend a + sign
         if line_number in modified_lines:
-
             # Delete the old line
             output.append("-" + _random_string())
 
@@ -191,7 +187,6 @@ def _hunks(modified_lines):
     last_line = None
 
     for line in sorted(modified_lines):
-
         # If this is contiguous with the last line, continue the hunk
         # We're guaranteed at this point to have at least one hunk
         if (line - 1) == last_line:
