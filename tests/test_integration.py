@@ -421,7 +421,6 @@ class TestDiffQualityIntegration(ToolsIntegrationBase):
     tool_module = "diff_cover.diff_quality_tool"
 
     def test_git_diff_error_diff_quality(self):
-
         # Patch the output of `git diff` to return an error
         self._set_git_diff_output("", "fatal error", 1)
 
@@ -532,7 +531,6 @@ class TestDiffQualityIntegration(ToolsIntegrationBase):
         )
 
     def test_pre_generated_pycodestyle_report(self):
-
         # Pass in a pre-generated pycodestyle report instead of letting
         # the tool call pycodestyle itself.
         self._check_console_report(
@@ -542,7 +540,6 @@ class TestDiffQualityIntegration(ToolsIntegrationBase):
         )
 
     def test_pre_generated_pyflakes_report(self):
-
         # Pass in a pre-generated pyflakes report instead of letting
         # the tool call pyflakes itself.
         self._check_console_report(
@@ -552,7 +549,6 @@ class TestDiffQualityIntegration(ToolsIntegrationBase):
         )
 
     def test_pre_generated_pylint_report(self):
-
         # Pass in a pre-generated pylint report instead of letting
         # the tool call pylint itself.
         self._check_console_report(

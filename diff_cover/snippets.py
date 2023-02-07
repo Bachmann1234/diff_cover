@@ -295,7 +295,6 @@ class Snippet:
         line_num = 1
 
         for ttype, val in token_stream:
-
             # If there are newlines in this token,
             # we need to split it up and check whether
             # each line within the token is within one
@@ -305,7 +304,6 @@ class Snippet:
 
                 # Check if the tokens match each range
                 for (start, end), filtered_tokens in token_map.items():
-
                     # Filter out lines that are not in this range
                     include_vals = [
                         val_lines[i]
@@ -327,7 +325,6 @@ class Snippet:
             else:
                 # Check if the tokens match each range
                 for (start, end), filtered_tokens in token_map.items():
-
                     # If we got a match, store the token
                     if line_num in range(start, end + 1):
                         filtered_tokens.append((ttype, val))
@@ -351,12 +348,10 @@ class Snippet:
         lines_since_last_violation = 0
         snippet_ranges = []
         for line_num in range(1, num_src_lines + 1):
-
             # If we have not yet started a snippet,
             # check if we can (is this line a violation?)
             if current_range[0] is None:
                 if line_num in violation_lines:
-
                     # Expand to include extra context, but not before line 1
                     snippet_start = max(1, line_num - cls.NUM_CONTEXT_LINES)
                     current_range = (snippet_start, None)
@@ -370,7 +365,6 @@ class Snippet:
                     lines_since_last_violation = 0
 
                 elif lines_since_last_violation > cls.MAX_GAP_IN_SNIPPET:
-
                     # Expand to include extra context, but not after last line
                     snippet_end = line_num - lines_since_last_violation
                     snippet_end = min(

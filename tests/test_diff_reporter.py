@@ -384,7 +384,6 @@ def test_inter_diff_conflict(diff, git_diff):
     # Delete the lines we modified
     deleted_lines = []
     for line in added_diff.split("\n"):
-
         # Any added line becomes a deleted line
         if line.startswith("+"):
             deleted_lines.append(line.replace("+", "-"))
@@ -407,7 +406,7 @@ def test_inter_diff_conflict(diff, git_diff):
         (added_diff, deleted_diff, deleted_diff),
     ]
 
-    for (main_diff, staged_diff, unstaged_diff) in combinations:
+    for main_diff, staged_diff, unstaged_diff in combinations:
         # Set up so we add lines, then delete them
         _set_git_diff_output(diff, git_diff, main_diff, staged_diff, unstaged_diff)
         assert diff.lines_changed("file.py") == []
@@ -474,7 +473,6 @@ def test_git_diff_error(
     ]
 
     for diff_str in err_outputs:
-
         # Configure the git diff output
         _set_git_diff_output(diff, git_diff, diff_str, "", "")
 

@@ -216,7 +216,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
-
             result_dict = {}
 
             for diff_str in self._get_included_diff_results():
@@ -243,7 +242,7 @@ class GitDiffReporter(BaseDiffReporter):
                         ] + added_lines
 
             # Eliminate repeats and order line numbers
-            for (src_path, lines) in result_dict.items():
+            for src_path, lines in result_dict.items():
                 result_dict[src_path] = self._unique_ordered_lines(lines)
 
             # Store the resulting dict
@@ -274,8 +273,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Parse the diff string into sections by source file
         sections_dict = self._parse_source_sections(diff_str)
-        for (src_path, diff_lines) in sections_dict.items():
-
+        for src_path, diff_lines in sections_dict.items():
             # Parse the hunk information for the source file
             # to determine lines changed for the source file
             diff_dict[src_path] = self._parse_lines(diff_lines)
@@ -304,12 +302,10 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Parse the diff string into sections by source file
         for line in diff_str.split("\n"):
-
             # If the line starts with "diff --git"
             # or "diff --cc" (in the case of a merge conflict)
             # then it is the start of a new source file
             if line.startswith("diff --git") or line.startswith("diff --cc"):
-
                 # Retrieve the name of the source file
                 src_path = self._parse_source_line(line)
 
@@ -324,11 +320,9 @@ class GitDiffReporter(BaseDiffReporter):
             # Every other line is stored in the dictionary for this source file
             # once we find a hunk section
             else:
-
                 # Only add lines if we're in a hunk section
                 # (ignore index and files changed lines)
                 if found_hunk or line.startswith("@@"):
-
                     # Remember that we found a hunk
                     found_hunk = True
 
@@ -362,7 +356,6 @@ class GitDiffReporter(BaseDiffReporter):
         current_line_old = None
 
         for line in diff_lines:
-
             # If this is the start of the hunk definition, retrieve
             # the starting line number
             if line.startswith("@@"):
@@ -371,12 +364,10 @@ class GitDiffReporter(BaseDiffReporter):
 
             # This is an added/modified line, so store the line number
             elif line.startswith("+"):
-
                 # Since we parse for source file sections before
                 # calling this method, we're guaranteed to have a source
                 # file specified.  We check anyway just to be safe.
                 if current_line_new is not None:
-
                     # Store the added line
                     added_lines.append(current_line_new)
 
@@ -386,12 +377,10 @@ class GitDiffReporter(BaseDiffReporter):
             # This is a deleted line that does not exist in the final
             # version, so skip it
             elif line.startswith("-"):
-
                 # Since we parse for source file sections before
                 # calling this method, we're guaranteed to have a source
                 # file specified.  We check anyway just to be safe.
                 if current_line_old is not None:
-
                     # Store the deleted line
                     deleted_lines.append(current_line_old)
 
@@ -458,12 +447,10 @@ class GitDiffReporter(BaseDiffReporter):
         # be the hunk information, and any additional components
         # are excerpts from the code.
         if len(components) >= 2:
-
             hunk_info = components[1]
             groups = self.HUNK_LINE_RE.findall(hunk_info)
 
             if len(groups) == 1:
-
                 try:
                     return int(groups[0])
 

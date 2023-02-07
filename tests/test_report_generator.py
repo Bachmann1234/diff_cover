@@ -169,7 +169,6 @@ class BaseReportGeneratorTest:
 
 
 class TestSimpleReportGenerator(BaseReportGeneratorTest):
-
     REPORT_GENERATOR_CLASS = SimpleReportGenerator
 
     @pytest.fixture(autouse=True)
@@ -264,7 +263,6 @@ class TestTemplateReportGenerator(BaseReportGeneratorTest):
 
 
 class TestJsonReportGenerator(BaseReportGeneratorTest):
-
     REPORT_GENERATOR_CLASS = JsonReportGenerator
 
     def assert_report(self, expected):
@@ -348,7 +346,6 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
 
 
 class TestStringReportGenerator(BaseReportGeneratorTest):
-
     REPORT_GENERATOR_CLASS = StringReportGenerator
 
     def test_generate_report(self):
@@ -417,7 +414,6 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
 
 
 class TestHtmlReportGenerator(BaseReportGeneratorTest):
-
     REPORT_GENERATOR_CLASS = HtmlReportGenerator
 
     def test_generate_report(self):
@@ -457,7 +453,6 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
 
 
 class TestMarkdownReportGenerator(BaseReportGeneratorTest):
-
     REPORT_GENERATOR_CLASS = MarkdownReportGenerator
 
     def test_generate_report(self):
@@ -534,7 +529,6 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     def test_multiple_snippets(self):
-
         self.use_default_values()
 
         # Have the snippet loader always report

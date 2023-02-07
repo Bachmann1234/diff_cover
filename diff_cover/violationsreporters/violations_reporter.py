@@ -365,7 +365,6 @@ class LcovCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for lcov_document in self._lcov_roots:
-
                 src_search_path = src_abs_path
                 if src_search_path not in lcov_document:
                     src_search_path = src_rel_path
@@ -609,7 +608,6 @@ class PylintDriver(QualityDriver):
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
                 if match is not None:
-
                     (
                         pylint_src_path,
                         line_number,
@@ -692,7 +690,6 @@ class CppcheckDriver(QualityDriver):
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
                 if match is not None:
-
                     (cppcheck_src_path, line_number, message) = match.groups()
 
                     violation = Violation(int(line_number), message)

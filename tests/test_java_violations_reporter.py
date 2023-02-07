@@ -210,7 +210,6 @@ class TestCheckstyleXmlQualityReporterTest:
             quality.violations("file1.java")
 
     def test_quality_pregenerated_report(self):
-
         # When the user provides us with a pre-generated checkstyle report
         # then use that instead of calling checkstyle directly.
         checkstyle_reports = [
