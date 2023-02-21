@@ -280,11 +280,13 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
                 "diff_name": "main",
                 "src_stats": {
                     "file1.py": {
+                        "covered_lines": [2, 3, 4, 15],
                         "percent_covered": 66.66666666666667,
                         "violation_lines": [10, 11],
                         "violations": [[10, None], [11, None]],
                     },
                     "subdir/file2.py": {
+                        "covered_lines": [2, 3, 4, 15],
                         "percent_covered": 66.66666666666667,
                         "violation_lines": [10, 11],
                         "violations": [[10, None], [11, None]],
@@ -312,6 +314,7 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
                 "diff_name": "main",
                 "src_stats": {
                     "file.py": {
+                        "covered_lines": [2],
                         "percent_covered": 100.0,
                         "violation_lines": [],
                         "violations": [],
