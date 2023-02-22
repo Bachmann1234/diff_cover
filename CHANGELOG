@@ -1,6 +1,10 @@
+01/24/2023 v7.5.0
+
+* JSON report will now show lines covered in a diff. Thanks @ZSmallX [PR 325](https://github.com/Bachmann1234/diff_cover/pull/325)
+
 01/24/2023 v7.4.0
 
-* Significant performance improvement when processing cobertura reports! Thanks @madest92 [PR 134](https://github.com/Bachmann1234/diff_cover/pull/314)
+* Significant performance improvement when processing cobertura reports! Thanks @madest92 [PR 314](https://github.com/Bachmann1234/diff_cover/pull/314)
 
 01/18/2023 v7.3.2
 
