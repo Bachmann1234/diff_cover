@@ -54,6 +54,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
+    shellcheck_driver,
 )
 
 QUALITY_DRIVERS = {
@@ -69,6 +70,7 @@ QUALITY_DRIVERS = {
     "checkstylexml": CheckstyleXmlDriver(),
     "findbugs": FindbugsXmlDriver(),
     "pmd": PmdXmlDriver(),
+    "shellcheck": shellcheck_driver,
 }
 
 VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(

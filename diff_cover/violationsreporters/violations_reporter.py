@@ -474,6 +474,18 @@ jshint_driver = RegexBasedDriver(
     command_to_check_install=["jshint", "-v"],
 )
 
+shellcheck_driver = RegexBasedDriver(
+    name="shellcheck",
+    supported_extensions=["sh"],
+    # Use gcc format to ease violations parsing
+    command=["shellcheck", "-f", "gcc"],
+    expression=r"^([^:]+):(\d+):(\d+: .*)$",
+    command_to_check_install=["shellcheck", "-V"],
+    # shellcheck exit code is 1 if there are violations
+    # https://www.shellcheck.net/wiki/Integration#exit-codes
+    exit_codes=[0, 1],
+)
+
 
 class EslintDriver(RegexBasedDriver):
     def __init__(self):
