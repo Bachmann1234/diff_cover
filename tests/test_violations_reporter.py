@@ -33,6 +33,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
+    shellcheck_driver,
 )
 
 
@@ -1710,6 +1711,70 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
         expected_violation = Violation(3, "Found issue")
         actual_violations = quality.violations("path/to/file.js")
         assert actual_violations == [expected_violation]
+
+
+class TestShellCheckQualityReporterTest:
+    """Tests for shellcheck quality violations."""
+
+    def test_no_such_file(self):
+        """Expect that we get no results."""
+        quality = QualityReporter(shellcheck_driver)
+
+        result = quality.violations("")
+        assert result == []
+
+    def test_no_shell_file(self):
+        """Expect that we get no results because no shell files."""
+        quality = QualityReporter(shellcheck_driver)
+        file_paths = ["file1.coffee", "subdir/file2.hs"]
+        for path in file_paths:
+            result = quality.violations(path)
+            assert result == []
+
+    def test_quality(self, process_patcher):
+        """Integration test."""
+        process_patcher(
+            (
+                dedent(
+                    """
+            foo/bar/path/to/file.sh:2:18: note: Double quote to prevent globbing and word splitting. [SC2086]
+            foo/bar/path/to/file.sh:53:10: warning: Use 'cd ... || exit' or 'cd ... || return' in case cd fails. [SC2164]
+            """
+                )
+                .strip()
+                .encode("ascii"),
+                "",
+            )
+        )
+
+        expected_violations = [
+            Violation(
+                2,
+                "18: note: Double quote to prevent globbing and word splitting. [SC2086]",
+            ),
+            Violation(
+                53,
+                "10: warning: Use 'cd ... || exit' or 'cd ... || return' in case cd fails. [SC2164]",
+            ),
+        ]
+
+        # Parse the report
+        quality = QualityReporter(shellcheck_driver)
+
+        # Expect that the name is set
+        assert quality.name() == "shellcheck"
+
+        # Measured_lines is undefined for a
+        # quality reporter since all lines are measured
+        assert quality.measured_lines("foo/bar/path/to/file.sh") is None
+
+        # Expect that we get violations for file1.py only
+        # We're not guaranteed that the violations are returned
+        # in any particular order.
+        actual_violations = quality.violations("foo/bar/path/to/file.sh")
+        assert len(actual_violations) == len(expected_violations)
+        for expected in expected_violations:
+            assert expected in actual_violations
 
 
 class TestSimpleCommandTestCase:
