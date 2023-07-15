@@ -1,5 +1,9 @@
 07/12/2023 v7.6.1
 
+* Adds the --include option from diff-quality to diff cover. Thanks @cameronbrill [PR 355](https://github.com/Bachmann1234/diff_cover/pull/355)
+
+07/12/2023 v7.6.1
+
 * Fixes metadata so pypi reports the license properly. Thanks for the report@snydergd [Issue 353](https://github.com/Bachmann1234/diff_cover/issues/353)
 
 06/10/2023 v7.6.0
