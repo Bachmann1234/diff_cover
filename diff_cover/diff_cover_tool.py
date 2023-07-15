@@ -33,6 +33,7 @@ IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
+INCLUDE_HELP = "Files to include (glob pattern)"
 SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 COVERAGE_FILE_HELP = "coverage report (XML or lcov.info)"
 DIFF_RANGE_NOTATION_HELP = (
@@ -132,6 +133,10 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
+        "--include", metavar="INCLUDE", type=str, nargs="+", help=INCLUDE_HELP
+    )
+
+    parser.add_argument(
         "--src-roots",
         metavar="DIRECTORY",
         type=str,
@@ -191,6 +196,7 @@ def generate_coverage_report(
     ignore_unstaged=False,
     include_untracked=False,
     exclude=None,
+    include=None,
     src_roots=None,
     diff_range_notation=None,
     ignore_whitespace=False,
@@ -207,6 +213,7 @@ def generate_coverage_report(
         ignore_unstaged=ignore_unstaged,
         include_untracked=include_untracked,
         exclude=exclude,
+        include=include,
     )
 
     xml_roots = [
@@ -285,6 +292,7 @@ def main(argv=None, directory=None):
         ignore_unstaged=arg_dict["ignore_unstaged"],
         include_untracked=arg_dict["include_untracked"],
         exclude=arg_dict["exclude"],
+        include=arg_dict["include"],
         src_roots=arg_dict["src_roots"],
         diff_range_notation=arg_dict["diff_range_notation"],
         ignore_whitespace=arg_dict["ignore_whitespace"],

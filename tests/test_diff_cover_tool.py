@@ -60,15 +60,23 @@ def test_parse_invalid_arg():
             parse_coverage_args(argv)
 
 
-def test_parse_with_exclude():
+def _test_parse_with_path_patterns(name):
     argv = ["reports/coverage.xml"]
     arg_dict = parse_coverage_args(argv)
-    assert arg_dict.get("exclude") is None
+    assert arg_dict.get(f"{name}") is None
 
-    argv = ["reports/coverage.xml", "--exclude", "noneed/*.py"]
+    argv = ["reports/coverage.xml", f"--{name}", "noneed/*"]
     arg_dict = parse_coverage_args(argv)
-    assert arg_dict.get("exclude") == ["noneed/*.py"]
+    assert arg_dict.get(f"{name}") == ["noneed/*"]
 
-    argv = ["reports/coverage.xml", "--exclude", "noneed/*.py", "other/**/*.py"]
+    argv = ["reports/coverage.xml", f"--{name}", "noneed/*", "other/**/*"]
     arg_dict = parse_coverage_args(argv)
-    assert arg_dict.get("exclude") == ["noneed/*.py", "other/**/*.py"]
+    assert arg_dict.get(f"{name}") == ["noneed/*", "other/**/*"]
+
+
+def test_parse_with_include():
+    _test_parse_with_path_patterns("include")
+
+
+def test_parse_with_exclude():
+    _test_parse_with_path_patterns("exclude")
