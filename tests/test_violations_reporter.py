@@ -5,10 +5,8 @@
 
 import os
 import subprocess
-from io import BytesIO, StringIO
-
 import xml.etree.ElementTree as etree
-
+from io import BytesIO, StringIO
 from subprocess import Popen
 from textwrap import dedent
 
