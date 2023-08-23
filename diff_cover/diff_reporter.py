@@ -455,7 +455,7 @@ class GitDiffReporter(BaseDiffReporter):
                     return int(groups[0])
 
                 except ValueError:
-                    msg = "Could not parse '{}' as a line number".format(groups[0])
+                    msg = f"Could not parse '{groups[0]}' as a line number"
                     raise GitDiffError(msg)
 
             else:

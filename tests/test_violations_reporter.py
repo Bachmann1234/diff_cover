@@ -7,12 +7,7 @@ import os
 import subprocess
 from io import BytesIO, StringIO
 
-try:
-    # Needed for Python < 3.3, works up to 3.8
-    import xml.etree.cElementTree as etree
-except ImportError:
-    # Python 3.9 onwards
-    import xml.etree.ElementTree as etree
+import xml.etree.ElementTree as etree
 
 from subprocess import Popen
 from textwrap import dedent
@@ -128,12 +123,8 @@ class TestXmlCoverageReporterTest:
         )
         coverage = XmlCoverageReporter([xml])
 
-        assert violations == coverage.violations(
-            "{}/{}".format(fancy_path, file_paths[0])
-        )
-        assert measured == coverage.measured_lines(
-            "{}/{}".format(fancy_path, file_paths[0])
-        )
+        assert violations == coverage.violations(f"{fancy_path}/{file_paths[0]}")
+        assert measured == coverage.measured_lines(f"{fancy_path}/{file_paths[0]}")
 
     def test_non_python_violations_empty_path(self):
         """
@@ -1699,9 +1690,7 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
 
     def test_report_root_path(self):
         reports = [
-            BytesIO(
-                "foo/bar/path/to/file.js: line 3, col 9, Found issue".encode("utf-8")
-            ),
+            BytesIO(b"foo/bar/path/to/file.js: line 3, col 9, Found issue"),
         ]
 
         driver = self._get_out()

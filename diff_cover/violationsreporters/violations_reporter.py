@@ -288,7 +288,7 @@ class LcovCoverageReporter(BaseViolationReporter):
         File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
         """
         lcov_report = defaultdict(dict)
-        lcov = open(lcov_file, "r")
+        lcov = open(lcov_file)
         while True:
             line = lcov.readline()
             if not line:
