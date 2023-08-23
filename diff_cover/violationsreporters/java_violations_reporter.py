@@ -7,7 +7,7 @@ from collections import defaultdict
 
 try:
     # Needed for Python < 3.3, works up to 3.8
-    import xml.etree.cElementTree as etree
+    import xml.etree.ElementTree as etree
 except ImportError:
     # Python 3.9 onwards
     import xml.etree.ElementTree as etree
