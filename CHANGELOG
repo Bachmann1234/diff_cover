@@ -1,4 +1,9 @@
-07/12/2023 v7.6.1
+10/14/2023 v7.7.1
+
+* Declares python 3.12 support (no code changes required)A
+* Various dependabot dependency updates
+
+07/14/2023 v7.7.0
 
 * Adds the --include option from diff-quality to diff cover. Thanks @cameronbrill [PR 355](https://github.com/Bachmann1234/diff_cover/pull/355)
 
