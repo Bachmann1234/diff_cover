@@ -1,6 +1,7 @@
-10/14/2023 v7.7.1
+10/14/2023 v8.0.0
 
-* Declares python 3.12 support (no code changes required)A
+* Declares python 3.12 support (no code changes required)
+* Drops python 3.7 support 
 * Various dependabot dependency updates
 
 07/14/2023 v7.7.0
