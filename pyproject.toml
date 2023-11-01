@@ -51,7 +51,7 @@ setuptools = { version = ">=17.0.0", python = "<3.8" }
 [tool.poetry.dev-dependencies]
 pytest-cov = "^4.1.0"
 pytest-datadir = "^1.5.0"
-pytest-mock = "^3.11.1"
+pytest-mock = "^3.12.0"
 pycodestyle = ">=2.9.1"
 flake8 = "^5.0.4"
 pyflakes = "^2.5.0"
