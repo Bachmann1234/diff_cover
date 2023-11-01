@@ -620,13 +620,13 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-datadir"
-version = "1.4.1"
+version = "1.5.0"
 description = "pytest plugin for test data directories and files"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "pytest-datadir-1.4.1.tar.gz", hash = "sha256:9f7a3c4def6ac4cac3cc8181139ab53bd2667231052bd40cb07081748d4420f0"},
-    {file = "pytest_datadir-1.4.1-py3-none-any.whl", hash = "sha256:095f441782b1b907587eca7227fdbae94be43f1c96b4b2cbcc6801a4645be1af"},
+    {file = "pytest-datadir-1.5.0.tar.gz", hash = "sha256:1617ed92f9afda0c877e4eac91904b5f779d24ba8f5e438752e3ae39d8d2ee3f"},
+    {file = "pytest_datadir-1.5.0-py3-none-any.whl", hash = "sha256:34adf361bcc7b37961bbc1dfa8d25a4829e778bab461703c38a5c50ca9c36dc8"},
 ]
 
 [package.dependencies]
@@ -810,4 +810,4 @@ toml = ["tomli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.10"
-content-hash = "762435267683559202d8b67fca9eba1a3edbdf9b4bf30e67821a76bf8680db41"
+content-hash = "661eec60b32a86fcb7060e5b4ae9f91f9a0b179cd3dcee8f6a30bd859530f096"
