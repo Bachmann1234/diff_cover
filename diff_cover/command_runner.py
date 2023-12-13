@@ -51,7 +51,7 @@ def run_command_for_code(command):
     """
     Returns command's exit code.
     """
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     process.communicate()
     return process.returncode
 
