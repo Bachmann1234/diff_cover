@@ -1,3 +1,7 @@
+12/16/2023 v8.0.2
+
+* Improved error handling when a command is not found [#381](https://github.com/Bachmann1234/diff_cover/pull/380) Thanks @dperl-dls
+
 11/13/2023 v8.0.1
 
 * Normalize LCOV source paths [#373](https://github.com/Bachmann1234/diff_cover/pull/373) (Thanks! @matsjoyce-refeyn)
