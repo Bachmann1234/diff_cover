@@ -566,17 +566,17 @@ testutils = ["gitpython (>3)"]
 
 [[package]]
 name = "pylint-pytest"
-version = "1.1.3"
+version = "1.1.7"
 description = "A Pylint plugin to suppress pytest-related false positives."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pylint-pytest-1.1.3.tar.gz", hash = "sha256:c12831f968973b434c1f78df6acf37b9de2f0981fadbc139942eb459a9b7bca8"},
-    {file = "pylint_pytest-1.1.3-py3-none-any.whl", hash = "sha256:69de0dcf8fba357c47acc889bbd7eb423e58d8eab0274d0a5b61a895aff46bb9"},
+    {file = "pylint-pytest-1.1.7.tar.gz", hash = "sha256:7a38be02c014eb6d98791eb978e79ed292f1904d3a518289c6d7ac4fb4122e98"},
+    {file = "pylint_pytest-1.1.7-py3-none-any.whl", hash = "sha256:5d687a2f4b17e85654fc2a8f04944761efb11cb15dc46d008f420c377b149151"},
 ]
 
 [package.dependencies]
-pylint = "<3"
+pylint = ">=2"
 pytest = ">=4.6"
 
 [[package]]
@@ -811,4 +811,4 @@ toml = ["tomli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.10"
-content-hash = "ab634fe3e48e8f8ad2a5b400425a3fed4db3050eac0c5d239543ef58003233ef"
+content-hash = "176544b7fd13d88d9cc12bc0040dbf5ac2fdef27caa0802a624180398ea755cf"
