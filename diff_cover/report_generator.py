@@ -3,6 +3,7 @@ Classes for generating diff coverage reports.
 """
 import contextlib
 import json
+import os
 from abc import ABC, abstractmethod
 from gettext import gettext, ngettext
 
@@ -196,8 +197,8 @@ class BaseReportGenerator(ABC):
             try:
                 violations = self._violations.violations_batch(src_paths_changed)
                 self._diff_violations_dict = {
-                    src_path: DiffViolations(
-                        violations.get(src_path, []),
+                    os.path.normpath(src_path): DiffViolations(
+                        violations.get(os.path.normpath(src_path), []),
                         self._violations.measured_lines(src_path),
                         self._diff.lines_changed(src_path),
                     )
