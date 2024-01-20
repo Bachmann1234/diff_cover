@@ -1,3 +1,7 @@
+01/20/2023 v8.0.3
+
+* Fixes paths not being properly normalized when accessing the diff violations. Potentially fixing issues with users using diff quality in windows. [#388](https://github.com/Bachmann1234/diff_cover/pull/388) Thanks @mrcool4 for the PR! 
+
 12/16/2023 v8.0.2
 
 * Improved error handling when a command is not found [#381](https://github.com/Bachmann1234/diff_cover/pull/380) Thanks @dperl-dls
