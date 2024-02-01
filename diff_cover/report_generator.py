@@ -1,6 +1,7 @@
 """
 Classes for generating diff coverage reports.
 """
+
 import contextlib
 import json
 import os

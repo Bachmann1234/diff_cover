@@ -31,9 +31,11 @@ def execute(command, exit_codes=None):
         sys.stderr.write(
             " ".join(
                 [
-                    cmd.decode(sys.getfilesystemencoding())
-                    if isinstance(cmd, bytes)
-                    else cmd
+                    (
+                        cmd.decode(sys.getfilesystemencoding())
+                        if isinstance(cmd, bytes)
+                        else cmd
+                    )
                     for cmd in command
                 ]
             )

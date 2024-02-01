@@ -1,6 +1,7 @@
 """
 Wrapper for `git diff` command.
 """
+
 from textwrap import dedent
 
 from diff_cover.command_runner import CommandError, execute
