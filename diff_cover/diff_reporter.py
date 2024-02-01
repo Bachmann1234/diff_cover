@@ -1,6 +1,7 @@
 """
 Classes for querying which lines have changed based on a diff.
 """
+
 import fnmatch
 import glob
 import os

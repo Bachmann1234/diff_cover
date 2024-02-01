@@ -1,6 +1,7 @@
 """
 Converter for `git diff` paths
 """
+
 import os
 import sys
 

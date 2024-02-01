@@ -2,6 +2,7 @@
 Load snippets from source files to show violation lines
 in HTML reports.
 """
+
 import contextlib
 from tokenize import open as openpy
 
