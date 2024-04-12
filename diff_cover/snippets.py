@@ -121,12 +121,15 @@ class Snippet:
 
         text = ""
         for i, line in enumerate(self.text().splitlines(), start=self._start_line):
+            if i > self._start_line:
+                text += "\n"
+
             notice = " "
             if i in self._violation_lines:
                 notice = "!"
 
             format_string = "{} {:>" + str(line_number_length) + "} {}"
-            text += format_string.format(notice, i, line) + "\n"
+            text += format_string.format(notice, i, line)
 
         header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
         if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
