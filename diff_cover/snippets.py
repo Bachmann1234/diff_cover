@@ -125,7 +125,7 @@ class Snippet:
             if i in self._violation_lines:
                 notice = "!"
 
-            format_string = "{} {:>" + str(line_number_length) + "}:{}"
+            format_string = "{} {:>" + str(line_number_length) + "} {}"
             text += format_string.format(notice, i, line) + "\n"
 
         header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
