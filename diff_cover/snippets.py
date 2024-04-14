@@ -116,18 +116,33 @@ class Snippet:
         Return a Markdown representation of the snippet using Markdown fenced code blocks.
         See https://github.github.com/gfm/#fenced-code-blocks.
         """
+
+        line_number_length = len(str(self._last_line))
+
+        text = ""
+        for i, line in enumerate(self.text().splitlines(), start=self._start_line):
+            if i > self._start_line:
+                text += "\n"
+
+            notice = " "
+            if i in self._violation_lines:
+                notice = "!"
+
+            format_string = "{} {:>" + str(line_number_length) + "} {}"
+            text += format_string.format(notice, i, line)
+
         header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
         if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
             return header + (
                 "```"
                 + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
                 + "\n"
-                + self.text()
+                + text
                 + "\n```\n"
             )
 
         # unknown programming language, return a non-decorated fenced code block:
-        return "```\n" + self.text() + "\n```\n"
+        return "```\n" + text + "\n```\n"
 
     def terminal(self):
         """
