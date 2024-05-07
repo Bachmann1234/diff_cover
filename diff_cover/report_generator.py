@@ -391,7 +391,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         if self.include_snippets:
             with contextlib.suppress(OSError):
                 formatted_snippets = Snippet.load_formatted_snippets(
-                    src_path, stats["violation_lines"]
+                    src_path, stats["violation_lines"],stats["covered_lines"]
                 )
 
         stats.update(

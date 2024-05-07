@@ -50,6 +50,7 @@ class Snippet:
         last_line,
         violation_lines,
         lexer_name,
+        covered_lines
     ):
         """
         Create a source code snippet.
@@ -86,6 +87,7 @@ class Snippet:
         self._last_line = last_line
         self._violation_lines = violation_lines
         self._lexer_name = lexer_name
+        self._covered_lines = covered_lines
 
     @classmethod
     def style_defs(cls):
@@ -127,6 +129,8 @@ class Snippet:
             notice = " "
             if i in self._violation_lines:
                 notice = "!"
+            elif i in self._covered_lines:
+                notice = "^"
 
             format_string = "{} {:>" + str(line_number_length) + "} {}"
             text += format_string.format(notice, i, line)
@@ -179,7 +183,7 @@ class Snippet:
         return "".join([val for _, val in self._src_tokens])
 
     @classmethod
-    def load_formatted_snippets(cls, src_path, violation_lines):
+    def load_formatted_snippets(cls, src_path, violation_lines,covered_lines):
         """
         Load snippets from the file at `src_path` and format
         them as HTML and as plain text.
@@ -190,7 +194,7 @@ class Snippet:
         """
 
         # load once...
-        snippet_list = cls.load_snippets(src_path, violation_lines)
+        snippet_list = cls.load_snippets(src_path, violation_lines,covered_lines)
 
         # ...render twice in different formats
         return {
@@ -228,7 +232,7 @@ class Snippet:
         return contents
 
     @classmethod
-    def load_snippets(cls, src_path, violation_lines):
+    def load_snippets(cls, src_path, violation_lines,covered_lines):
         """
         Load snippets from the file at `src_path` to show
         violations on lines in the list `violation_lines`
@@ -244,7 +248,7 @@ class Snippet:
 
         # Construct a list of snippet ranges
         src_lines = contents.split("\n")
-        snippet_ranges = cls._snippet_ranges(len(src_lines), violation_lines)
+        snippet_ranges = cls._snippet_ranges(len(src_lines), violation_lines,covered_lines)
 
         # Parse the source into tokens
         token_stream, lexer = cls._parse_src(contents, src_path)
@@ -253,7 +257,8 @@ class Snippet:
         token_groups = cls._group_tokens(token_stream, snippet_ranges)
 
         return [
-            Snippet(tokens, src_path, start, end, violation_lines, lexer.name)
+            Snippet(tokens, src_path, start, end, violation_lines, lexer.name,covered_lines)
+            # 修改此处，传入 covered_lines 参数
             for (start, end), tokens in sorted(token_groups.items())
         ]
 
@@ -350,50 +355,49 @@ class Snippet:
         return token_map
 
     @classmethod
-    def _snippet_ranges(cls, num_src_lines, violation_lines):
+    def _snippet_ranges(cls, num_src_lines, violation_lines, covered_lines):
         """
-        Given the number of source file lines and list of
-        violation line numbers, return a list of snippet
-        ranges of the form `(start_line, end_line)`.
+        Given the number of source file lines, list of violation line numbers,
+        and list of covered line numbers, return a list of snippet ranges of the
+        form `(start_line, end_line)`.
 
-        Each snippet contains a few extra lines of context
-        before/after the first/last violation.  Nearby
-        violations are grouped within the same snippet.
+        Each snippet contains a few extra lines of context before/after the first/last
+        violation or covered line. Nearby violations or covered lines are grouped
+        within the same snippet.
         """
+        all_lines = set(violation_lines) | set(covered_lines)
         current_range = (None, None)
-        lines_since_last_violation = 0
+        lines_since_last_interesting_line = 0
         snippet_ranges = []
         for line_num in range(1, num_src_lines + 1):
             # If we have not yet started a snippet,
-            # check if we can (is this line a violation?)
+            # check if we can (is this line a violation or covered?)
             if current_range[0] is None:
-                if line_num in violation_lines:
+                if line_num in all_lines:
                     # Expand to include extra context, but not before line 1
                     snippet_start = max(1, line_num - cls.NUM_CONTEXT_LINES)
                     current_range = (snippet_start, None)
-                    lines_since_last_violation = 0
+                    lines_since_last_interesting_line = 0
 
             # If we are within a snippet, check if we
             # can end the snippet (have we gone enough
-            # lines without hitting a violation?)
+            # lines without hitting a violation or covered line?)
             elif current_range[1] is None:
-                if line_num in violation_lines:
-                    lines_since_last_violation = 0
+                if line_num in all_lines:
+                    lines_since_last_interesting_line = 0
 
-                elif lines_since_last_violation > cls.MAX_GAP_IN_SNIPPET:
+                elif lines_since_last_interesting_line > cls.MAX_GAP_IN_SNIPPET:
                     # Expand to include extra context, but not after last line
-                    snippet_end = line_num - lines_since_last_violation
-                    snippet_end = min(
-                        num_src_lines, snippet_end + cls.NUM_CONTEXT_LINES
-                    )
+                    snippet_end = line_num - lines_since_last_interesting_line
+                    snippet_end = min(num_src_lines, snippet_end + cls.NUM_CONTEXT_LINES)
                     current_range = (current_range[0], snippet_end)
 
                     # Store the snippet and start looking for the next one
                     snippet_ranges.append(current_range)
                     current_range = (None, None)
 
-            # Another line since the last violation
-            lines_since_last_violation += 1
+            # Another line since the last interesting line
+            lines_since_last_interesting_line += 1
 
         # If we started a snippet but didn't finish it, do so now
         if current_range[0] is not None and current_range[1] is None:
