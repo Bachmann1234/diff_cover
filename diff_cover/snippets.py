@@ -24,6 +24,7 @@ class Snippet:
 
     VIOLATION_COLOR = "#ffcccc"
     DIV_CSS_CLASS = "snippet"
+    COVERED_COLOR = "#ccffcc"
 
     # Number of extra lines to include before and after
     # each snippet to provide context.
@@ -111,7 +112,19 @@ class Snippet:
             lineanchors=self._src_filename,
         )
 
-        return pygments.format(self.src_tokens(), formatter)
+        # 使用pygments格式化源代码
+        formatted_code = pygments.format(self.src_tokens(), formatter)
+
+        # 对于每一个覆盖的行，我们需要在生成的HTML中找到对应的行，并添加样式
+        for line in self._covered_lines:
+            # 计算行号在HTML中的锚点
+            anchor = f'name="{self._src_filename}-{line}">'
+            # 构建新的带有背景色的span标签
+            new_span = f'<span style="background-color: {self.COVERED_COLOR};"> √ </span>'
+            # 替换行的HTML，添加新的span标签
+            formatted_code = formatted_code.replace(anchor, f'{anchor}{new_span}', 1)
+
+        return formatted_code
 
     def markdown(self):
         """
