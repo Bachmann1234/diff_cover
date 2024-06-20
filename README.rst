@@ -190,6 +190,33 @@ By default, ``diff-cover`` compares the current branch to ``origin/main``.  To s
 
     diff-cover coverage.xml --compare-branch=origin/release
 
+Diff File
+--------------
+
+You may provide a file containing the output of ``git diff`` to ``diff-cover`` instead of using a branch name.
+
+For example, Say you have 2 branches ``main`` and ``feature``. Lets say after creating and checking out the feature branch,
+you make commits ``A``, ``B``, and ``C`` in that order.
+
+
+If you want to see all changes between the ``feature`` and ``main`` branch, you can generate a diff file like this:
+
+.. code:: bash
+
+    git diff main..feature > diff.txt
+
+If you want to see the changes between the ``feature`` branch and the commit ``A``, you can generate a diff file using the following command:
+
+.. code:: bash
+
+    git diff A..feature > diff.txt
+
+You can then run ``diff-cover`` with the diff file as an argument:
+
+.. code:: bash
+
+    diff-cover coverage.xml --diff-file=diff.txt
+
 Fail Under
 ----------
 
