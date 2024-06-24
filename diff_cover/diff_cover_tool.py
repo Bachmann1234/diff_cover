@@ -8,7 +8,7 @@ import xml.etree.ElementTree as etree
 from diff_cover import DESCRIPTION, VERSION
 from diff_cover.config_parser import Tool, get_config
 from diff_cover.diff_reporter import GitDiffReporter
-from diff_cover.git_diff import GitDiffTool, GitDiffFileTool
+from diff_cover.git_diff import GitDiffFileTool, GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.report_generator import (
     HtmlReportGenerator,
