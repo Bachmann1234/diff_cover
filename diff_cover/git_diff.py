@@ -111,13 +111,14 @@ class GitDiffTool:
             return []
         return [line for line in output.splitlines() if line]
 
+
 class GitDiffFileTool(GitDiffTool):
 
     def __init__(self, diff_file_path):
 
         self.diff_file_path = diff_file_path
         super().__init__("...", False)
-        
+
     def diff_committed(self, compare_branch="origin/main"):
         """
         Returns the contents of a diff file.
@@ -125,7 +126,7 @@ class GitDiffFileTool(GitDiffTool):
         Raises a `GitDiffError` if the file cannot be read.
         """
         try:
-            with open(self.diff_file_path, 'r') as file:
+            with open(self.diff_file_path, "r") as file:
                 return file.read()
         except IOError as e:
             raise ValueError(
@@ -133,14 +134,14 @@ class GitDiffFileTool(GitDiffTool):
                     f"""
                     Could not read the diff file. Make sure '{self.diff_file_path}' exists?
                     """
-                    )
                 )
-        
+            )
+
     def diff_unstaged(self):
         return ""
-    
+
     def diff_staged(self):
         return ""
-    
+
     def untracked(self):
         return ""

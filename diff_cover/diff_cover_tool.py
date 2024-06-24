@@ -170,10 +170,8 @@ def parse_coverage_args(argv):
         "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
     )
 
-    parser.add_argument(
-        "--diff-file", type=str, default=None, help=DIFF_FILE_HELP
-    )
-    
+    parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
+
     defaults = {
         "show_uncovered": False,
         "compare_branch": "origin/main",
@@ -288,7 +286,9 @@ def main(argv=None, directory=None):
     diff_tool = None
 
     if not arg_dict["diff_file"]:
-        diff_tool = GitDiffTool(arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"])
+        diff_tool = GitDiffTool(
+            arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
+        )
     else:
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 
