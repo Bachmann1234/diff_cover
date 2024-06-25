@@ -8,7 +8,7 @@ import xml.etree.ElementTree as etree
 from diff_cover import DESCRIPTION, VERSION
 from diff_cover.config_parser import Tool, get_config
 from diff_cover.diff_reporter import GitDiffReporter
-from diff_cover.git_diff import GitDiffTool
+from diff_cover.git_diff import GitDiffFileTool, GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.report_generator import (
     HtmlReportGenerator,
@@ -43,6 +43,7 @@ QUIET_HELP = "Only print errors and failures"
 SHOW_UNCOVERED = "Show uncovered lines on the console"
 INCLUDE_UNTRACKED_HELP = "Include untracked files"
 CONFIG_FILE_HELP = "The configuration file to use"
+DIFF_FILE_HELP = "The diff file to use"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -169,6 +170,8 @@ def parse_coverage_args(argv):
         "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
     )
 
+    parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
+
     defaults = {
         "show_uncovered": False,
         "compare_branch": "origin/main",
@@ -188,6 +191,7 @@ def parse_coverage_args(argv):
 def generate_coverage_report(
     coverage_files,
     compare_branch,
+    diff_tool,
     html_report=None,
     css_file=None,
     json_report=None,
@@ -198,8 +202,6 @@ def generate_coverage_report(
     exclude=None,
     include=None,
     src_roots=None,
-    diff_range_notation=None,
-    ignore_whitespace=False,
     quiet=False,
     show_uncovered=False,
 ):
@@ -208,7 +210,7 @@ def generate_coverage_report(
     """
     diff = GitDiffReporter(
         compare_branch,
-        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
+        git_diff=diff_tool,
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
         include_untracked=include_untracked,
@@ -281,9 +283,19 @@ def main(argv=None, directory=None):
 
     GitPathTool.set_cwd(directory)
     fail_under = arg_dict.get("fail_under")
+    diff_tool = None
+
+    if not arg_dict["diff_file"]:
+        diff_tool = GitDiffTool(
+            arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
+        )
+    else:
+        diff_tool = GitDiffFileTool(arg_dict["diff_file"])
+
     percent_covered = generate_coverage_report(
         arg_dict["coverage_file"],
         arg_dict["compare_branch"],
+        diff_tool,
         html_report=arg_dict["html_report"],
         json_report=arg_dict["json_report"],
         markdown_report=arg_dict["markdown_report"],
@@ -294,8 +306,6 @@ def main(argv=None, directory=None):
         exclude=arg_dict["exclude"],
         include=arg_dict["include"],
         src_roots=arg_dict["src_roots"],
-        diff_range_notation=arg_dict["diff_range_notation"],
-        ignore_whitespace=arg_dict["ignore_whitespace"],
         quiet=quiet,
         show_uncovered=arg_dict["show_uncovered"],
     )
