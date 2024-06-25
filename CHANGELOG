@@ -1,8 +1,12 @@
-01/20/2023 v8.0.3
+06/25/2024 v9.1.0
+
+* Adds the ability to pass in a diff rather than use git to create one. Thanks @Jsostmann [PR 410](https://github.com/Bachmann1234/diff_cover/pull/410)
+
+04/14/2024 v9.0.0
 
 * Adds line numbers to the markdown snippets (and error indicators). Bumped major version as the format of the report changed in a significant way in this change (Thanks @walles!)  [PR 399](https://github.com/Bachmann1234/diff_cover/pull/399)
 
-01/20/2023 v8.0.3
+01/20/2024 v8.0.3
 
 * Fixes paths not being properly normalized when accessing the diff violations. Potentially fixing issues with users using diff quality in windows. [#388](https://github.com/Bachmann1234/diff_cover/pull/388) Thanks @mrcool4 for the PR! 
 
