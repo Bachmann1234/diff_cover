@@ -165,17 +165,30 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Get the diff dictionary
         diff_dict = self._git_diff()
-
         # include untracked files
         if self._include_untracked:
             for path in self._git_diff_tool.untracked():
-                with open(path) as file_handle:
-                    num_lines = len(file_handle.readlines())
+                if not self._validate_path_to_diff(path):
+                    continue
+
+                num_lines = self._get_file_lines(path)
                 diff_dict[path] = list(range(1, num_lines + 1))
 
         # Return the changed file paths (dict keys)
         # in alphabetical order
         return sorted(diff_dict.keys(), key=lambda x: x.lower())
+
+    @staticmethod
+    def _get_file_lines(path):
+        """
+        Return the number of lines in a file.
+        """
+
+        try:
+            with open(path, encoding="utf-8") as file_handle:
+                return len(file_handle.readlines())
+        except UnicodeDecodeError:
+            return 0
 
     def lines_changed(self, src_path):
         """
@@ -224,23 +237,16 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path, (added_lines, deleted_lines) in diff_dict.items():
-                    if self._is_path_excluded(src_path):
+                    if not self._validate_path_to_diff(src_path):
                         continue
-                    # If no _supported_extensions provided, or extension present: process
-                    _, extension = os.path.splitext(src_path)
-                    extension = extension[1:].lower()
-                    # 'not self._supported_extensions' tests for both None and empty list []
-                    if (
-                        not self._supported_extensions
-                        or extension in self._supported_extensions
-                    ):
-                        # Remove any lines from the dict that have been deleted
-                        # Include any lines that have been added
-                        result_dict[src_path] = [
-                            line
-                            for line in result_dict.get(src_path, [])
-                            if line not in deleted_lines
-                        ] + added_lines
+
+                    # Remove any lines from the dict that have been deleted
+                    # Include any lines that have been added
+                    result_dict[src_path] = [
+                        line
+                        for line in result_dict.get(src_path, [])
+                        if line not in deleted_lines
+                    ] + added_lines
 
             # Eliminate repeats and order line numbers
             for src_path, lines in result_dict.items():
@@ -251,6 +257,29 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Return the diff cache
         return self._diff_dict
+
+    def _validate_path_to_diff(self, src_path: str) -> bool:
+        """
+        Validate if a path should be included in the diff.
+
+        Returns True if the path should be included, otherwise False.
+
+        A path should be excluded if:
+        - If the path is excluded
+        - If the path has an extension that is not supported
+        """
+
+        if self._is_path_excluded(src_path):
+            return False
+
+        # If no _supported_extensions provided, or extension present: process
+        _, extension = os.path.splitext(src_path)
+        extension = extension[1:].lower()
+
+        if self._supported_extensions and extension not in self._supported_extensions:
+            return False
+
+        return True
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^\n"]*)"?')
