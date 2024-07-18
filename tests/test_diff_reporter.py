@@ -618,16 +618,63 @@ def test_include_untracked(mocker, git_diff):
         {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
     )
     _set_git_diff_output(
-        reporter, git_diff, staged_diff=diff_output, untracked=["u1.py", " u2.py"]
+        reporter,
+        git_diff,
+        staged_diff=diff_output,
+        untracked=["u1.py", " u2.py", "binary1.bin"],
     )
 
-    open_mock = mocker.mock_open(read_data="1\n2\n3\n")
-    mocker.patch("diff_cover.diff_reporter.open", open_mock)
+    base_open_mock = mocker.mock_open(read_data="1\n2\n3\n")
+    raise_count = 0
+
+    def open_side_effect(*args, **kwargs):
+        if args[0] == "binary1.bin":
+            nonlocal raise_count
+            raise_count += 1
+
+            raise UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte")
+        return base_open_mock(*args, **kwargs)
+
+    mocker.patch("diff_cover.diff_reporter.open", open_side_effect)
     changed = reporter.src_paths_changed()
 
-    assert sorted(changed) == [" u2.py", "subdir/file1.py", "u1.py"]
+    assert sorted(changed) == [" u2.py", "binary1.bin", "subdir/file1.py", "u1.py"]
     assert reporter.lines_changed("u1.py") == [1, 2, 3]
     assert reporter.lines_changed(" u2.py") == [1, 2, 3]
+    assert reporter.lines_changed("binary1.bin") == []
+
+    assert raise_count == 1
+
+
+@pytest.mark.parametrize(
+    "excluded, supported_extensions, path",
+    [
+        (["file.bin"], ["py"], "file.bin"),
+        ([], ["py"], "file.bin"),
+    ],
+)
+def test_include_untracked__not_valid_path__not_include_it(
+    git_diff, excluded, supported_extensions, path
+):
+    reporter = GitDiffReporter(
+        git_diff=git_diff,
+        include_untracked=True,
+        supported_extensions=supported_extensions,
+        exclude=excluded,
+    )
+    diff_output = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
+    _set_git_diff_output(
+        reporter,
+        git_diff,
+        staged_diff=diff_output,
+        untracked=[path],
+    )
+
+    changed = reporter.src_paths_changed()
+
+    assert sorted(changed) == ["subdir/file1.py"]
 
 
 def _set_git_diff_output(
