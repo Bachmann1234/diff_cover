@@ -1,3 +1,7 @@
+07/17/2024 v9.1.1
+
+* Fixes issue where binary files could cause diff-cover to crash (Thanks @MihailPereverza) [PR 413](https://github.com/Bachmann1234/diff_cover/pull/413) [Issue 412](https://github.com/Bachmann1234/diff_cover/issues/412)
+
 06/25/2024 v9.1.0
 
 * Adds the ability to pass in a diff rather than use git to create one. Thanks @Jsostmann [PR 410](https://github.com/Bachmann1234/diff_cover/pull/410)
