@@ -264,7 +264,7 @@ class XmlCoverageReporter(BaseViolationReporter):
 
 class LcovCoverageReporter(BaseViolationReporter):
     """
-    Query information from a Cobertura|Clover|JaCoCo XML coverage report.
+    Query information from a LCov coverage report.
     """
 
     def __init__(self, lcov_roots, src_roots=None):
