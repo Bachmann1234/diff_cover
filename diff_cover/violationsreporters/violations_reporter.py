@@ -264,7 +264,7 @@ class XmlCoverageReporter(BaseViolationReporter):
 
 class LcovCoverageReporter(BaseViolationReporter):
     """
-    Query information from a Cobertura|Clover|JaCoCo XML coverage report.
+    Query information from a LCov coverage report.
     """
 
     def __init__(self, lcov_roots, src_roots=None):
@@ -324,6 +324,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 "BRF",
                 "BRH",
                 "BRDA",
+                "VER",
             ]:
                 # these are valid lines, but not we don't need them
                 continue
