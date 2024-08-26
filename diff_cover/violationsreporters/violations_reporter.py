@@ -221,18 +221,19 @@ class XmlCoverageReporter(BaseViolationReporter):
                 if self._expand_coverage_report:
                     reported_line_hits = {}
                     for line in line_nodes:
-                        reported_line_hits[int(line.get(_number))] = int(line.get(_hits, 0))
+                        reported_line_hits[int(line.get(_number))] = int(
+                            line.get(_hits, 0)
+                        )
                     last_hit_number = 0
-                    for line_number in range(min(reported_line_hits.keys()), max(reported_line_hits.keys())):
+                    for line_number in range(
+                        min(reported_line_hits.keys()), max(reported_line_hits.keys())
+                    ):
                         if line_number in reported_line_hits:
                             last_hit_number = reported_line_hits[line_number]
                         else:
                             # This is an unreported line. We add it with the previous line hit score
                             line_nodes.append(
-                                {
-                                    _hits: last_hit_number,
-                                    _number: line_number
-                                }
+                                {_hits: last_hit_number, _number: line_number}
                             )
 
                 # First case, need to define violations initially

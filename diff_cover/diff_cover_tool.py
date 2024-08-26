@@ -41,7 +41,9 @@ DIFF_RANGE_NOTATION_HELP = (
 )
 QUIET_HELP = "Only print errors and failures"
 SHOW_UNCOVERED = "Show uncovered lines on the console"
-EXPAND_COVERAGE_REPORT = "Append missing lines in coverage reports based on the hits of the previous line."
+EXPAND_COVERAGE_REPORT = (
+    "Append missing lines in coverage reports based on the hits of the previous line."
+)
 INCLUDE_UNTRACKED_HELP = "Include untracked files"
 CONFIG_FILE_HELP = "The configuration file to use"
 DIFF_FILE_HELP = "The diff file to use"
@@ -95,7 +97,10 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
-       "--expand_coverage_report",  action="store_true", default=None, help=EXPAND_COVERAGE_REPORT
+        "--expand_coverage_report",
+        action="store_true",
+        default=None,
+        help=EXPAND_COVERAGE_REPORT,
     )
 
     parser.add_argument(
@@ -188,7 +193,7 @@ def parse_coverage_args(argv):
         "ignore_whitespace": False,
         "diff_range_notation": "...",
         "quiet": False,
-        "expand_coverage_report": False
+        "expand_coverage_report": False,
     }
 
     return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
@@ -210,7 +215,7 @@ def generate_coverage_report(
     src_roots=None,
     quiet=False,
     show_uncovered=False,
-    expand_coverage_report=False
+    expand_coverage_report=False,
 ):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
