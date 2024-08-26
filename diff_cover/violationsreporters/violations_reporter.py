@@ -24,7 +24,7 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura|Clover|JaCoCo XML coverage report.
     """
 
-    def __init__(self, xml_roots, src_roots=None):
+    def __init__(self, xml_roots, src_roots=None, expand_coverage_report=False):
         """
         Load the XML coverage report represented
         by the cElementTree with root element `xml_root`.
@@ -41,6 +41,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         self._xml_cache = [{} for i in range(len(xml_roots))]
 
         self._src_roots = src_roots or [""]
+        self._expand_coverage_report = expand_coverage_report
 
     def _get_xml_classes(self, xml_document):
         """
@@ -215,6 +216,24 @@ class XmlCoverageReporter(BaseViolationReporter):
                     _hits = "hits"
                 if line_nodes is None:
                     continue
+
+                # Expand coverage report with not reported lines
+                if self._expand_coverage_report:
+                    reported_line_hits = {}
+                    for line in line_nodes:
+                        reported_line_hits[int(line.get(_number))] = int(line.get(_hits, 0))
+                    last_hit_number = 0
+                    for line_number in range(min(reported_line_hits.keys()), max(reported_line_hits.keys())):
+                        if line_number in reported_line_hits:
+                            last_hit_number = reported_line_hits[line_number]
+                        else:
+                            # This is an unreported line. We add it with the previous line hit score
+                            line_nodes.append(
+                                {
+                                    _hits: last_hit_number,
+                                    _number: line_number
+                                }
+                            )
 
                 # First case, need to define violations initially
                 if violations is None:
