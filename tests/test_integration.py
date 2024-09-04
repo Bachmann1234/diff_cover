@@ -412,6 +412,20 @@ class TestDiffCoverIntegration(ToolsIntegrationBase):
             ["diff-cover", "--show-uncovered", "coverage.xml"],
         )
 
+    def test_expand_coverage_report_complete_report(self):
+        self._check_console_report(
+            "git_diff_add.txt",
+            "add_console_report.txt",
+            ["diff-cover", "coverage.xml", "--expand-coverage-report"],
+        )
+
+    def test_expand_coverage_report_uncomplete_report(self):
+        self._check_console_report(
+            "git_diff_add.txt",
+            "expand_console_report.txt",
+            ["diff-cover", "coverage_missing_lines.xml", "--expand-coverage-report"],
+        )
+
 
 class TestDiffQualityIntegration(ToolsIntegrationBase):
     """
