@@ -4,6 +4,7 @@
 .idea
 venv
 27venv
+.venv
 
 # C extensions
 *.so
