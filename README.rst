@@ -274,6 +274,18 @@ It can be enabled by using the ``-q``/``--quiet`` flag:
 
 If enabled, the tool will only print errors and failures but no information or warning messages.
 
+Compatibility with multi-line statements 
+----------
+``diff-cover`` relies on the comparison of diff reports and coverage reports, and does not report
+lines that appear in one and not in the other. While diff reports list all lines that changed,
+coverage reports usually list code statements. As a result, a change in a multi-line statement may not be analyzed by ``diff-cover``.
+
+As a workaround, you can use the argument ``--expand-coverage-report``: lines not appearing in the coverage reports will be added to them with the same number of hits as the previously reported line. ``diff-cover`` will then perform diff coverage analysis on all changed lines.
+
+Notes:
+- This argument is only available for XML coverage reports.
+- This workaround is designed under the assumption that the coverage tool reports untested statements with hits set to 0, and it reports statements based on the opening line. 
+
 Configuration files
 -------------------
 Both tools allow users to specify the options in a configuration file with `--config-file`/`-c`:
