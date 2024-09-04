@@ -97,7 +97,7 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
-        "--expand-coverage-report",
+        "--expand_coverage_report",
         action="store_true",
         default=None,
         help=EXPAND_COVERAGE_REPORT,
