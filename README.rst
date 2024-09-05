@@ -284,7 +284,7 @@ As a workaround, you can use the argument ``--expand-coverage-report``: lines no
 
 Notes:
 - This argument is only available for XML coverage reports.
-- This workaround is designed under the assumption that the coverage tool reports untested statements with hits set to 0, and it reports statements based on the opening line. 
+- This workaround is designed under the assumption that the coverage tool reports untested statements with hits set to 0, and it reports statements based on the opening line.
 
 Configuration files
 -------------------
