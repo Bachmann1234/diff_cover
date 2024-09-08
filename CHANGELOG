@@ -1,3 +1,10 @@
+09/07/2024 v9.2.0
+
+* adds expand-coverage-report to options. This helps with ensures the tool contains lines that may have been missed due to how things reported in the original report [PR 416](https://github.com/Bachmann1234/diff_cover/pull/416)
+
+* Adds VER directive for LCov reports [PR 414](https://github.com/Bachmann1234/diff_cover/pull/414) thanks @esuldin
+
+
 07/17/2024 v9.1.1
 
 * Fixes issue where binary files could cause diff-cover to crash (Thanks @MihailPereverza) [PR 413](https://github.com/Bachmann1234/diff_cover/pull/413) [Issue 412](https://github.com/Bachmann1234/diff_cover/issues/412)
