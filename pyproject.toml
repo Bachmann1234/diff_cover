@@ -60,7 +60,7 @@ pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
 black = "^24.8.0"
 isort = "^5.13.2"
-doc8 = "1.1.1"
+doc8 = "1.1.2"
 
 [tool.poetry.extras]
 toml = ["tomli"]
