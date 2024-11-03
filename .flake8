@@ -1,12 +1,17 @@
 [flake8]
 max-line-length=100
 select=
-    C901,  # flake8-mccabe
-    E,  # flake8-pycodestyle
-    F,  # flake8-pyflakes
-    W,  # flake8-pycodestyle
+    # flake8-mccabe
+    C901,
+    # flake8-pycodestyle
+    E,
+    # flake8-pyflakes
+    F,
+    # flake8-pycodestyle
+    W,
 ignore =
-    W503,E203,  # conflict with black formatter
+    # conflict with black formatter
+    W503,E203,
 per-file-ignores =
     # supression for __init__
     diff_cover/tests/*: E501
