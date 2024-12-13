@@ -1,3 +1,8 @@
+12/13/2024 v9.2.1
+
+* Adds python 3.13 support [PR #427](https://github.com/Bachmann1234/diff_cover/pull/427) Thanks @ssbarnea
+* Drops python 3.8 support
+
 09/07/2024 v9.2.0
 
 * adds expand-coverage-report to options. This helps with ensures the tool contains lines that may have been missed due to how things reported in the original report [PR 416](https://github.com/Bachmann1234/diff_cover/pull/416)
