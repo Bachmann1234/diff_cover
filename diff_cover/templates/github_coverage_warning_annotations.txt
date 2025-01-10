@@ -1,0 +1,9 @@
+{% if src_stats %}
+{% for src_path, stats in src_stats|dictsort %}
+{% if stats.percent_covered < 100 %}
+{% for line in stats.violation_lines %}
+::warning file={{ src_path }},line={{ line }},title=Missing Coverage::Line {{ line }} missing coverage
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}

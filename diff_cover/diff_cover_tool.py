@@ -15,6 +15,7 @@ from diff_cover.report_generator import (
     JsonReportGenerator,
     MarkdownReportGenerator,
     StringReportGenerator,
+    GitHubWarningAnnotationsReportGenerator,
 )
 from diff_cover.violationsreporters.violations_reporter import (
     LcovCoverageReporter,
@@ -24,6 +25,7 @@ from diff_cover.violationsreporters.violations_reporter import (
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
 MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
+GITHUB_WARNING_ANNOTATIONS_HELP = "Diff coverage GitHub warning annotations output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
@@ -90,6 +92,13 @@ def parse_coverage_args(argv):
         metavar="FILENAME",
         type=str,
         help=MARKDOWN_REPORT_HELP,
+    )
+
+    parser.add_argument(
+        "--github-warning-annotations",
+        metavar="FILENAME",
+        type=str,
+        help=GITHUB_WARNING_ANNOTATIONS_HELP,
     )
 
     parser.add_argument(
@@ -207,6 +216,7 @@ def generate_coverage_report(
     css_file=None,
     json_report=None,
     markdown_report=None,
+    github_warning_annotations=None,
     ignore_staged=False,
     ignore_unstaged=False,
     include_untracked=False,
@@ -269,6 +279,11 @@ def generate_coverage_report(
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
+    if github_warning_annotations is not None:
+        reporter = GitHubWarningAnnotationsReportGenerator(coverage, diff)
+        with open(github_warning_annotations, "wb") as output_file:
+            reporter.generate_report(output_file)
+
     # Generate the report for stdout
     reporter = StringReportGenerator(coverage, diff, show_uncovered)
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
@@ -311,6 +326,7 @@ def main(argv=None, directory=None):
         html_report=arg_dict["html_report"],
         json_report=arg_dict["json_report"],
         markdown_report=arg_dict["markdown_report"],
+        github_warning_annotations=arg_dict["github_warning_annotations"],
         css_file=arg_dict["external_css_file"],
         ignore_staged=arg_dict["ignore_staged"],
         ignore_unstaged=arg_dict["ignore_unstaged"],
