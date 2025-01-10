@@ -25,7 +25,7 @@ from diff_cover.violationsreporters.violations_reporter import (
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
 MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
-GITHUB_WARNING_ANNOTATIONS_HELP = "Diff coverage GitHub warning annotations output"
+GITHUB_WARNING_ANNOTATIONS_HELP = "Print diff coverage GitHub warning annotations to the console"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
@@ -96,8 +96,8 @@ def parse_coverage_args(argv):
 
     parser.add_argument(
         "--github-warning-annotations",
-        metavar="FILENAME",
-        type=str,
+        action="store_true",
+        default=None,
         help=GITHUB_WARNING_ANNOTATIONS_HELP,
     )
 
@@ -216,7 +216,7 @@ def generate_coverage_report(
     css_file=None,
     json_report=None,
     markdown_report=None,
-    github_warning_annotations=None,
+    github_warning_annotations=False,
     ignore_staged=False,
     ignore_unstaged=False,
     include_untracked=False,
@@ -279,10 +279,9 @@ def generate_coverage_report(
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if github_warning_annotations is not None:
+    if github_warning_annotations:
         reporter = GitHubWarningAnnotationsReportGenerator(coverage, diff)
-        with open(github_warning_annotations, "wb") as output_file:
-            reporter.generate_report(output_file)
+        reporter.generate_report(sys.stdout.buffer)
 
     # Generate the report for stdout
     reporter = StringReportGenerator(coverage, diff, show_uncovered)
