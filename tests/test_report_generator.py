@@ -426,8 +426,23 @@ class TestGitHubWarningAnnotationsReportGenerator(BaseReportGeneratorTest):
         # Verify that we got the expected string
         expected = dedent(
             """
-        ::warning file=file1.py,line=10-11,title=Missing Coverage::Line 10-11 missing coverage
-        ::warning file=subdir/file2.py,line=10-11,title=Missing Coverage::Line 10-11 missing coverage
+        ::warning file=file1.py,line=10,endLine=11,title=Missing Coverage::Line 10-11 missing coverage
+        ::warning file=subdir/file2.py,line=10,endLine=11,title=Missing Coverage::Line 10-11 missing coverage
+        """
+        ).strip()
+
+        self.assert_report(expected)
+
+    def test_single_line(self):
+        self.set_src_paths_changed(["file.py"])
+        self.set_lines_changed("file.py", list(range(0, 100)))
+        self.set_violations("file.py", [Violation(10, None)])
+        self.set_measured("file.py", [2])
+
+        # Verify that we got the expected string
+        expected = dedent(
+            """
+        ::warning file=file.py,line=10,title=Missing Coverage::Line 10 missing coverage
         """
         ).strip()
 
