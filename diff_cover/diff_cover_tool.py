@@ -96,7 +96,7 @@ def parse_coverage_args(argv):
 
     parser.add_argument(
         "--github-warning-annotations",
-        action="store_true",
+        action="store_false",
         default=None,
         help=GITHUB_WARNING_ANNOTATIONS_HELP,
     )
