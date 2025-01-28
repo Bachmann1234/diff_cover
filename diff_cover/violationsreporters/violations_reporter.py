@@ -392,6 +392,8 @@ class LcovCoverageReporter(BaseViolationReporter):
                 src_search_path = src_abs_path
                 if src_search_path not in lcov_document:
                     src_search_path = src_rel_path
+                if src_search_path not in lcov_document:
+                    continue
 
                 # First case, need to define violations initially
                 if violations is None:
