@@ -58,7 +58,7 @@ pyflakes = "^2.5.0"
 pylint = "^3.3.3"
 pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
-black = "^24.8.0"
+black = "^25.1.0"
 isort = "^5.13.2"
 doc8 = "1.1.2"
 
