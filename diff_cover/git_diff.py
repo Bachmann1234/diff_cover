@@ -5,6 +5,7 @@ Wrapper for `git diff` command.
 from textwrap import dedent
 
 from diff_cover.command_runner import CommandError, execute
+from diff_cover.util import to_unescaped_filename
 
 
 class GitDiffError(Exception):
@@ -109,7 +110,7 @@ class GitDiffTool:
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
         if not output:
             return []
-        return [line for line in output.splitlines() if line]
+        return [to_unescaped_filename(line) for line in output.splitlines() if line]
 
 
 class GitDiffFileTool(GitDiffTool):
