@@ -1,3 +1,4 @@
+import ast
 import os.path
 import posixpath
 
@@ -15,3 +16,15 @@ def to_unix_path(path):
     :return: the unix version of that path
     """
     return posixpath.normpath(os.path.normcase(path).replace("\\", "/"))
+
+
+def to_unescaped_filename(filename: str) -> str:
+    """Try to unescape the given filename.
+
+    Some filenames given by git might be escaped. They can be identified by the
+    surrounding double quotes " (ASCII 34, See man git-status). Try to unescape
+    the filename.
+    """
+    if filename.startswith(chr(34)) and filename.endswith(chr(34)):
+        filename = ast.literal_eval(filename)
+    return filename
