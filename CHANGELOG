@@ -1,3 +1,7 @@
+02/18/2025 v9.2.3
+
+* Bumps some dev dependencies and updates tests to support pygments 2.18.0 
+
 01/30/2025 v9.2.2
 
 * Fix files only covered by one LCOV report showing 100% coverage [PR #433](https://github.com/Bachmann1234/diff_cover/pull/433) Thanks @matsjoyce-refeyn!
