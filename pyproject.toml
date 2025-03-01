@@ -59,7 +59,7 @@ pylint = "^3.3.4"
 pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
 black = "^25.1.0"
-isort = "^5.13.2"
+isort = "^6.0.1"
 doc8 = "1.1.2"
 
 [tool.poetry.extras]
