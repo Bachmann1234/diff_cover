@@ -15,3 +15,42 @@ def to_unix_path(path):
     :return: the unix version of that path
     """
     return posixpath.normpath(os.path.normcase(path).replace("\\", "/"))
+
+
+def to_unescaped_filename(filename: str) -> str:
+    """Try to unescape the given filename.
+
+    Some filenames given by git might be escaped with C-style escape sequences
+    and surrounded by double quotes.
+    """
+    if not (filename.startswith('"') and filename.endswith('"')):
+        return filename
+
+    # Remove surrounding quotes
+    unquoted = filename[1:-1]
+
+    # Handle C-style escape sequences
+    result = []
+    i = 0
+    while i < len(unquoted):
+        if unquoted[i] == "\\" and i + 1 < len(unquoted):
+            # Handle common C escape sequences
+            next_char = unquoted[i + 1]
+            result.append(
+                {
+                    "\\": "\\",
+                    '"': '"',
+                    "a": "a",
+                    "n": "\n",
+                    "t": "\t",
+                    "r": "\r",
+                    "b": "\b",
+                    "f": "\f",
+                }.get(next_char, next_char)
+            )
+            i += 2
+        else:
+            result.append(unquoted[i])
+            i += 1
+
+    return "".join(result)
