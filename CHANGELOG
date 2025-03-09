@@ -1,3 +1,7 @@
+03/08/2025 v9.2.4
+
+* Improves handling of escaped characters in untracked files. [PR 440](https://github.com/Bachmann1234/diff_cover/pull/440) Thanks @buermarc!
+
 02/18/2025 v9.2.3
 
 * Bumps some dev dependencies and updates tests to support pygments 2.18.0 
