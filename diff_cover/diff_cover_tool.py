@@ -21,9 +21,10 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
 )
 
-HTML_REPORT_HELP = "Diff coverage HTML output"
-JSON_REPORT_HELP = "Diff coverage JSON output"
-MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
+FORMAT_HELP = "Format to use"
+HTML_REPORT_DEFAULT_PATH = "diff-cover.html"
+JSON_REPORT_DEFAULT_PATH = "diff-cover.json"
+MARKDOWN_REPORT_DEFAULT_PATH = "diff-cover.md"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
@@ -51,6 +52,21 @@ DIFF_FILE_HELP = "The diff file to use"
 LOGGER = logging.getLogger(__name__)
 
 
+def format_type(value):
+    """
+    accepts:
+        --format html
+        --format json
+        --format json,html
+        --format html,json:path/to/file.json
+
+        return: dict of strings to paths
+    """
+    if value:
+        return dict((item.split(":") for item in value.split(",")))
+    return {}
+
+
 def parse_coverage_args(argv):
     """
     Parse command line arguments, returning a dict of
@@ -72,24 +88,10 @@ def parse_coverage_args(argv):
     parser.add_argument("coverage_file", type=str, help=COVERAGE_FILE_HELP, nargs="+")
 
     parser.add_argument(
-        "--html-report",
-        metavar="FILENAME",
-        type=str,
-        help=HTML_REPORT_HELP,
-    )
-
-    parser.add_argument(
-        "--json-report",
-        metavar="FILENAME",
-        type=str,
-        help=JSON_REPORT_HELP,
-    )
-
-    parser.add_argument(
-        "--markdown-report",
-        metavar="FILENAME",
-        type=str,
-        help=MARKDOWN_REPORT_HELP,
+        "--format",
+        type=format_type,
+        default="",
+        help=FORMAT_HELP,
     )
 
     parser.add_argument(
@@ -203,10 +205,8 @@ def generate_coverage_report(
     coverage_files,
     compare_branch,
     diff_tool,
-    html_report=None,
+    report_formats=None,
     css_file=None,
-    json_report=None,
-    markdown_report=None,
     ignore_staged=False,
     ignore_unstaged=False,
     include_untracked=False,
@@ -248,7 +248,8 @@ def generate_coverage_report(
         coverage = LcovCoverageReporter(lcov_roots, src_roots)
 
     # Build a report generator
-    if html_report is not None:
+    if "html" in report_formats:
+        html_report = report_formats["html"] or HTML_REPORT_DEFAULT_PATH
         css_url = css_file
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
@@ -259,12 +260,14 @@ def generate_coverage_report(
             with open(css_file, "wb") as output_file:
                 reporter.generate_css(output_file)
 
-    if json_report is not None:
+    if "json" in report_formats:
+        json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
         reporter = JsonReportGenerator(coverage, diff)
         with open(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if markdown_report is not None:
+    if "markdown" in report_formats:
+        markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
         reporter = MarkdownReportGenerator(coverage, diff)
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
@@ -308,9 +311,7 @@ def main(argv=None, directory=None):
         arg_dict["coverage_file"],
         arg_dict["compare_branch"],
         diff_tool,
-        html_report=arg_dict["html_report"],
-        json_report=arg_dict["json_report"],
-        markdown_report=arg_dict["markdown_report"],
+        report_formats=arg_dict["format"],
         css_file=arg_dict["external_css_file"],
         ignore_staged=arg_dict["ignore_staged"],
         ignore_unstaged=arg_dict["ignore_unstaged"],

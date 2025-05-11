@@ -96,7 +96,7 @@ class ToolsIntegrationBase:
 
         html_report_path = os.path.join(temp_dir, "diff_coverage.html")
 
-        args = tool_args + ["--html-report", html_report_path]
+        args = tool_args + ["--format", f"html:{html_report_path}"]
 
         if css_file:
             css_file = os.path.join(temp_dir, css_file)
