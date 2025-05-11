@@ -5,8 +5,11 @@
 import os
 import os.path
 import re
+import shutil
 from collections import defaultdict
+from functools import partial
 from io import BytesIO
+from pathlib import Path
 from subprocess import Popen
 
 import pytest
@@ -200,15 +203,114 @@ class ToolsIntegrationBase:
         self._mock_popen.side_effect = patch_diff
 
 
-class TestDiffCoverIntegration(ToolsIntegrationBase):
+@pytest.fixture
+def cwd(tmp_path, monkeypatch):
+    src = Path(__file__).parent / "fixtures"
+    temp_dir = tmp_path / "dummy"
+    temp_dir.mkdir()
+
+    shutil.copytree(src, tmp_path, dirs_exist_ok=True)
+    # tmp_path.symlink_to(src, target_is_directory=True)
+    monkeypatch.chdir(tmp_path)
+
+    return temp_dir
+
+
+@pytest.fixture
+def patch_popen(mocker):
+    return mocker.patch("subprocess.Popen")
+
+
+@pytest.fixture
+def patch_git_command(patch_popen, mocker):
+    """
+    Patch the call to `git diff` to output `stdout`
+    and `stderr`.
+    Patch the `git rev-parse` command to output
+    a phony directory.
+    """
+
+    class Wrapper:
+        def __init__(self):
+            self.stdout = ""
+            self.stderr = ""
+            self.returncode = 0
+
+        def set_stdout(self, value):
+            if os.path.exists(value):
+                with open(value, encoding="utf-8") as f:
+                    self.stdout = f.read()
+                    return
+            self.stdout = value
+
+        def set_stderr(self, value):
+            if os.path.exists(value):
+                with open(value, encoding="utf-8") as f:
+                    self.stderr = f.read()
+                    return
+            self.stderr = value
+
+        def set_returncode(self, value):
+            self.returncode = value
+
+    def patch_diff(command, **kwargs):
+        if command[0:6] == [
+            "git",
+            "-c",
+            "diff.mnemonicprefix=no",
+            "-c",
+            "diff.noprefix=no",
+            "diff",
+        ]:
+            mock = mocker.Mock()
+            mock.communicate.return_value = (helper.stdout, helper.stderr)
+            mock.returncode = helper.returncode
+            return mock
+        if command[0:2] == ["git", "rev-parse"]:
+            mock = mocker.Mock()
+            mock.communicate.return_value = (os.getcwd(), "")
+            mock.returncode = helper.returncode
+            return mock
+
+        return Popen(command, **kwargs)
+
+    patch_popen.side_effect = patch_diff
+    helper = Wrapper()
+
+    return helper
+
+
+def compare_html(expected_html_path, html_report_path, css_file=None):
+    clean_content = re.compile("<style>.*</style>", flags=re.DOTALL)
+
+    with open(expected_html_path, encoding="utf-8") as expected_file:
+        with open(html_report_path, encoding="utf-8") as html_report:
+            html = html_report.read()
+            expected = expected_file.read()
+            if css_file is None:
+                html = clean_content.sub("", html)
+                expected = clean_content.sub("", expected)
+            assert expected.strip() == html.strip()
+
+
+class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
     """
     High-level integration test.
     The `git diff` is a mock, but everything else is our code.
     """
 
-    tool_module = "diff_cover.diff_cover_tool"
+    @pytest.fixture
+    def runbin(self, cwd):
+        return lambda x: diff_cover_tool.main(["diff-cover", *x])
 
-    def test_added_file_html(self):
+    def test_added_file_html(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert (
+            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+        )
+
+        compare_html("add_html_report.html", "dummy/diff_coverage.html")
+
         self._check_html_report(
             "git_diff_add.txt", "add_html_report.html", ["diff-cover", "coverage.xml"]
         )
@@ -364,10 +466,10 @@ class TestDiffCoverIntegration(ToolsIntegrationBase):
             ["diff-cover", "unicode_coverage.xml"],
         )
 
-    def test_dot_net_diff(self):
+    def test_dot_net_diff(self, mocker):
         mock_path = "/code/samplediff/"
         self._mock_getcwd.return_value = mock_path
-        self.mocker.patch.object(GitPathTool, "_git_root", return_value=mock_path)
+        mocker.patch.object(GitPathTool, "_git_root", return_value=mock_path)
         self._check_console_report(
             "git_diff_dotnet.txt",
             "dotnet_coverage_console_report.txt",
@@ -427,12 +529,10 @@ class TestDiffCoverIntegration(ToolsIntegrationBase):
         )
 
 
-class TestDiffQualityIntegration(ToolsIntegrationBase):
+class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
     """
     High-level integration test.
     """
-
-    tool_module = "diff_cover.diff_quality_tool"
 
     def test_git_diff_error_diff_quality(self):
         # Patch the output of `git diff` to return an error
