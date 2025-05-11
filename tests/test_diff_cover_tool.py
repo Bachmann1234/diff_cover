@@ -1,8 +1,11 @@
 """Test for diff_cover/diff_cover_tool."""
 
+import argparse
+import logging
+
 import pytest
 
-from diff_cover.diff_cover_tool import parse_coverage_args
+from diff_cover.diff_cover_tool import handle_old_format, parse_coverage_args
 
 
 def test_parse_with_html_report():
@@ -34,6 +37,56 @@ def test_parse_with_multiple_reports():
     assert arg_dict.get("coverage_file") == ["reports/coverage.xml"]
     assert arg_dict.get("format") == {"html": "report.html", "markdown": "report.md"}
     assert not arg_dict.get("ignore_unstaged")
+
+
+def test_parse_with_multiple_old_reports(recwarn):
+    argv = [
+        "reports/coverage.xml",
+        "--html-report",
+        "report.html",
+        "--markdown-report",
+        "report.md",
+        "--json-report",
+        "report.json",
+    ]
+    arg_dict = parse_coverage_args(handle_old_format("desc", argv))
+
+    assert arg_dict.get("format") == {
+        "html": "report.html",
+        "markdown": "report.md",
+        "json": "report.json",
+    }
+    assert [str(w.message) for w in recwarn] == [
+        "The --html-report option is deprecated. Use --format html:path instead.",
+        "The --json-report option is deprecated. Use --format json:path instead.",
+        "The --markdown-report option is deprecated. Use --format markdown:path instead.",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("old_report", "expected_error"),
+    [
+        (
+            ["--html-report", "html", "--format", "html:report.html"],
+            "Cannot use along with --format html",
+        ),
+        (
+            ["--json-report", "json", "--format", "json:report.json"],
+            "Cannot use along with --format json",
+        ),
+        (
+            ["--markdown-report", "markdown", "--format", "markdown:report.md"],
+            "Cannot use along with --format markdown",
+        ),
+    ],
+)
+def test_parse_mixing_new_with_old_reports(recwarn, old_report, expected_error):
+    argv = [
+        "reports/coverage.xml",
+        *old_report,
+    ]
+    with pytest.raises(argparse.ArgumentError, match=expected_error):
+        parse_coverage_args(handle_old_format("desc", argv))
 
 
 def test_parse_with_ignored_unstaged():

@@ -86,6 +86,20 @@ load-plugins = [
     "pylint_pytest",
 ]
 
+[tool.coverage.run]
+branch = true
+relative_files = true
+parallel = true
+source = ["diff_cover"]
+omit = ["./tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+show_contexts = true
+skip_covered = false
+
 [tool.pylint."messages control"]
 enable = ["all"]
 disable = [

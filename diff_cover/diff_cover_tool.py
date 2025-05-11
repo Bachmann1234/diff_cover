@@ -282,30 +282,42 @@ def generate_coverage_report(
 
 def handle_old_format(description, argv):
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("--html-report", type=str)
-    parser.add_argument("--json-report", type=str)
-    parser.add_argument("--markdown-report", type=str)
+    arg_html = parser.add_argument("--html-report", type=str)
+    arg_json = parser.add_argument("--json-report", type=str)
+    arg_markdown = parser.add_argument("--markdown-report", type=str)
     parser.add_argument("--format", type=str)
 
     known_args, unknown_args = parser.parse_known_args(argv)
-    format_ = (known_args.format or "").split(",")
+    format_ = format_type(known_args.format)
     if known_args.html_report:
+        if "html" in format_:
+            raise argparse.ArgumentError(
+                arg_html, "Cannot use along with --format html."
+            )
         warnings.warn(
             "The --html-report option is deprecated. Use --format html:path instead."
         )
-        format_.append(f"html:{known_args.html_report}")  # noqa: E231
+        format_["html"] = known_args.html_report
     if known_args.json_report:
+        if "json" in format_:
+            raise argparse.ArgumentError(
+                arg_json, "Cannot use along with --format json."
+            )
         warnings.warn(
             "The --json-report option is deprecated. Use --format json:path instead."
         )
-        format_.append(f"json:{known_args.json_report}")  # noqa: E231
+        format_["json"] = known_args.json_report
     if known_args.markdown_report:
+        if "markdown" in format_:
+            raise argparse.ArgumentError(
+                arg_markdown, "Cannot use along with --format markdown."
+            )
         warnings.warn(
             "The --markdown-report option is deprecated. Use --format markdown:path instead."
         )
-        format_.append(f"markdown:{known_args.markdown_report}")  # noqa: E231
+        format_["markdown"] = known_args.markdown_report
     if format_:
-        unknown_args += ["--format", ",".join(format_)]
+        unknown_args += ["--format", ",".join(f"{k}:{v}" for k, v in format_.items())]
     return unknown_args
 
 
