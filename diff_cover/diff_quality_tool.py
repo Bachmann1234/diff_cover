@@ -30,6 +30,7 @@ from diff_cover.diff_cover_tool import (
     MARKDOWN_REPORT_DEFAULT_PATH,
     QUIET_HELP,
     format_type,
+    handle_old_format,
 )
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
@@ -282,7 +283,9 @@ def main(argv=None, directory=None):
     """
 
     argv = argv or sys.argv
-    arg_dict = parse_quality_args(argv[1:])
+    arg_dict = parse_quality_args(
+        handle_old_format(diff_cover.QUALITY_DESCRIPTION, argv[1:])
+    )
 
     quiet = arg_dict["quiet"]
     level = logging.ERROR if quiet else logging.WARNING

@@ -3,6 +3,7 @@ import io
 import logging
 import os
 import sys
+import warnings
 import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
@@ -281,6 +282,39 @@ def generate_coverage_report(
     return reporter.total_percent_covered()
 
 
+def handle_old_format(description, argv):
+    HTML_REPORT_HELP = "Diff coverage HTML output"
+    JSON_REPORT_HELP = "Diff coverage JSON output"
+    MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
+
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("--html-report", type=str, help=HTML_REPORT_HELP)
+    parser.add_argument("--json-report", type=str, help=JSON_REPORT_HELP)
+    parser.add_argument("--markdown-report", type=str, help=MARKDOWN_REPORT_HELP)
+    parser.add_argument("--format", type=str, help=MARKDOWN_REPORT_HELP)
+
+    known_args, unknown_args = parser.parse_known_args(argv)
+    format = (known_args.format or "").split(",")
+    if known_args.html_report:
+        warnings.warn(
+            f"The --html-report option is deprecated. Use --format html:path instead."
+        )
+        format.append(f"html:{known_args.html_report}")
+    if known_args.json_report:
+        warnings.warn(
+            f"The --json-report option is deprecated. Use --format json:path instead."
+        )
+        format.append(f"json:{known_args.json_report}")
+    if known_args.markdown_report:
+        warnings.warn(
+            f"The --markdown-report option is deprecated. Use --format markdown:path instead."
+        )
+        format.append(f"markdown:{known_args.markdown_report}")
+    if format:
+        unknown_args += ["--format", ",".join(format)]
+    return unknown_args
+
+
 def main(argv=None, directory=None):
     """
     Main entry point for the tool, script installed via pyproject.toml
@@ -290,7 +324,7 @@ def main(argv=None, directory=None):
     0 is successful run
     """
     argv = argv or sys.argv
-    arg_dict = parse_coverage_args(argv[1:])
+    arg_dict = parse_coverage_args(handle_old_format(DESCRIPTION, argv[1:]))
 
     quiet = arg_dict["quiet"]
     level = logging.ERROR if quiet else logging.WARNING
