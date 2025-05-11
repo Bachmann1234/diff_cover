@@ -283,35 +283,31 @@ def generate_coverage_report(
 
 
 def handle_old_format(description, argv):
-    HTML_REPORT_HELP = "Diff coverage HTML output"
-    JSON_REPORT_HELP = "Diff coverage JSON output"
-    MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
-
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("--html-report", type=str, help=HTML_REPORT_HELP)
-    parser.add_argument("--json-report", type=str, help=JSON_REPORT_HELP)
-    parser.add_argument("--markdown-report", type=str, help=MARKDOWN_REPORT_HELP)
-    parser.add_argument("--format", type=str, help=MARKDOWN_REPORT_HELP)
+    parser.add_argument("--html-report", type=str)
+    parser.add_argument("--json-report", type=str)
+    parser.add_argument("--markdown-report", type=str)
+    parser.add_argument("--format", type=str)
 
     known_args, unknown_args = parser.parse_known_args(argv)
-    format = (known_args.format or "").split(",")
+    format_ = (known_args.format or "").split(",")
     if known_args.html_report:
         warnings.warn(
-            f"The --html-report option is deprecated. Use --format html:path instead."
+            "The --html-report option is deprecated. Use --format html:path instead."
         )
-        format.append(f"html:{known_args.html_report}")
+        format_.append(f"html:{known_args.html_report}")  # noqa: E231
     if known_args.json_report:
         warnings.warn(
-            f"The --json-report option is deprecated. Use --format json:path instead."
+            "The --json-report option is deprecated. Use --format json:path instead."
         )
-        format.append(f"json:{known_args.json_report}")
+        format_.append(f"json:{known_args.json_report}")  # noqa: E231
     if known_args.markdown_report:
         warnings.warn(
-            f"The --markdown-report option is deprecated. Use --format markdown:path instead."
+            "The --markdown-report option is deprecated. Use --format markdown:path instead."
         )
-        format.append(f"markdown:{known_args.markdown_report}")
-    if format:
-        unknown_args += ["--format", ",".join(format)]
+        format_.append(f"markdown:{known_args.markdown_report}")  # noqa: E231
+    if format_:
+        unknown_args += ["--format", ",".join(format_)]
     return unknown_args
 
 
