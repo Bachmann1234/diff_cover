@@ -90,6 +90,7 @@ load-plugins = [
 branch = true
 relative_files = true
 parallel = true
+concurrency = ["multiprocessing"]
 source = ["diff_cover"]
 omit = ["./tests/*"]
 
