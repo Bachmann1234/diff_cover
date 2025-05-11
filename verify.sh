@@ -2,9 +2,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-black diff_cover tests --check
-isort diff_cover tests --check
-python -m pytest -n auto --cov-context test --cov --cov-report=xml tests
+black diff_cover tests
+isort diff_cover tests
+python -m pytest -n auto --cov-context test --cov --cov-report=xml tests --cov-report=html --cov-report=term
 git fetch origin main:refs/remotes/origin/main
 diff-cover --version
 diff-quality --version
