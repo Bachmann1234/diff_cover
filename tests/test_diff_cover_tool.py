@@ -1,7 +1,6 @@
 """Test for diff_cover/diff_cover_tool."""
 
 import argparse
-import logging
 
 import pytest
 

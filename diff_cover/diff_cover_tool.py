@@ -317,7 +317,10 @@ def handle_old_format(description, argv):
         )
         format_["markdown"] = known_args.markdown_report
     if format_:
-        unknown_args += ["--format", ",".join(f"{k}:{v}" for k, v in format_.items())]
+        unknown_args += [
+            "--format",
+            ",".join(f"{k}:{v}" for k, v in format_.items()),  # noqa: E231
+        ]
     return unknown_args
 
 
