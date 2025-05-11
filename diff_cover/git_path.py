@@ -24,7 +24,10 @@ class GitPathTool:
         Set the cwd that is used to manipulate paths.
         """
         if not cwd:
-            cwd = os.getcwd()
+            try:
+                cwd = os.getcwdu()
+            except AttributeError:
+                cwd = os.getcwd()
         if isinstance(cwd, bytes):
             cwd = cwd.decode(sys.getdefaultencoding())
         cls._cwd = cwd
