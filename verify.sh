@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 black diff_cover tests --check
 isort diff_cover tests --check
-python -m pytest --cov --cov-report=xml tests
+python -m pytest --cov --cov-report=xml tests -n auto
 git fetch origin main:refs/remotes/origin/main
 diff-cover --version
 diff-quality --version
