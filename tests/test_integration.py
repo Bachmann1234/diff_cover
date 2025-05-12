@@ -44,10 +44,7 @@ class ToolsIntegrationBase:
 
         self._mock_popen = mocker.patch("subprocess.Popen")
         self._mock_sys = mocker.patch(f"{self.tool_module}.sys")
-        try:
-            self._mock_getcwd = mocker.patch(f"{self.tool_module}.os.getcwdu")
-        except AttributeError:
-            self._mock_getcwd = mocker.patch(f"{self.tool_module}.os.getcwd")
+        self._mock_getcwd = mocker.patch(f"{self.tool_module}.os.getcwd")
         self._git_root_path = cwd
         self._mock_getcwd.return_value = self._git_root_path
 
