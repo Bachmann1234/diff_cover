@@ -21,185 +21,6 @@ from diff_cover.violationsreporters.base import QualityDriver
 from tests.helpers import fixture_path
 
 
-class ToolsIntegrationBase:
-    """Base class for diff-cover and diff-quality integration tests."""
-
-    tool_module = None
-
-    @pytest.fixture(autouse=True)
-    def capture_fixtures(self, mocker, tmp_path):
-        self.mocker = mocker
-        self.tmp_path = tmp_path
-
-    @pytest.fixture(autouse=True)
-    def setup(self, mocker):
-        """
-        Patch the output of `git` commands and `os.getcwd`
-        set the cwd to the fixtures dir
-        """
-        # Set the CWD to the fixtures dir
-        old_cwd = os.getcwd()
-        os.chdir(fixture_path(""))
-        cwd = os.getcwd()
-
-        self._mock_popen = mocker.patch("subprocess.Popen")
-        self._mock_sys = mocker.patch(f"{self.tool_module}.sys")
-        self._mock_getcwd = mocker.patch(f"{self.tool_module}.os.getcwd")
-        self._git_root_path = cwd
-        self._mock_getcwd.return_value = self._git_root_path
-
-        yield
-
-        os.chdir(old_cwd)
-
-    def _clear_css(self, content):
-        """
-        The CSS is provided by pygments and changes fairly often.
-        Im ok with simply saying "There was css"
-
-        Perhaps I will eat these words
-        """
-        clean_content = re.sub("<style>.*</style>", "", content, flags=re.DOTALL)
-        assert len(content) > len(clean_content)
-        return clean_content
-
-    def _check_html_report(
-        self,
-        git_diff_path,
-        expected_html_path,
-        tool_args,
-        expected_status=0,
-        css_file=None,
-    ):
-        """
-        Verify that the tool produces the expected HTML report.
-
-        `git_diff_path` is a path to a fixture containing the (patched) output of
-        the call to `git diff`.
-
-        `expected_console_path` is a path to the fixture containing
-        the expected HTML output of the tool.
-
-        `tool_args` is a list of command line arguments to pass
-        to the tool.  You should include the name of the tool
-        as the first argument.
-        """
-
-        # Patch the output of `git diff`
-        with open(git_diff_path, encoding="utf-8") as git_diff_file:
-            self._set_git_diff_output(git_diff_file.read(), "")
-
-        # Create a temporary directory to hold the output HTML report
-        # Add a cleanup to ensure the directory gets deleted
-        temp_dir = self.tmp_path / "dummy"
-        temp_dir.mkdir()
-
-        html_report_path = os.path.join(temp_dir, "diff_coverage.html")
-
-        args = tool_args + ["--html-report", html_report_path]
-
-        if css_file:
-            css_file = os.path.join(temp_dir, css_file)
-            args += ["--external-css-file", css_file]
-
-        # Execute the tool
-        if "diff-cover" in args[0]:
-            code = diff_cover_tool.main(args)
-        else:
-            code = diff_quality_tool.main(args)
-
-        assert code == expected_status
-
-        # Check the HTML report
-        with open(expected_html_path, encoding="utf-8") as expected_file:
-            with open(html_report_path, encoding="utf-8") as html_report:
-                html = html_report.read()
-                expected = expected_file.read()
-                if css_file is None:
-                    html = self._clear_css(html)
-                    expected = self._clear_css(expected)
-                assert expected.strip() == html.strip()
-
-        return temp_dir
-
-    def _check_console_report(
-        self, git_diff_path, expected_console_path, tool_args, expected_status=0
-    ):
-        """
-        Verify that the tool produces the expected console report.
-
-        `git_diff_path` is a path to a fixture containing the (patched) output of
-        the call to `git diff`.
-
-        `expected_console_path` is a path to the fixture containing
-        the expected console output of the tool.
-
-        `tool_args` is a list of command line arguments to pass
-        to the tool.  You should include the name of the tool
-        as the first argument.
-        """
-
-        # Patch the output of `git diff`
-        with open(git_diff_path, encoding="utf-8") as git_diff_file:
-            self._set_git_diff_output(git_diff_file.read(), "")
-
-        # Capture stdout to a string buffer
-        string_buffer = BytesIO()
-        self._capture_stdout(string_buffer)
-
-        # Execute the tool
-        if "diff-cover" in tool_args[0]:
-            code = diff_cover_tool.main(tool_args)
-        else:
-            code = diff_quality_tool.main(tool_args)
-
-        assert code == expected_status
-
-        # Check the console report
-        with open(expected_console_path) as expected_file:
-            report = string_buffer.getvalue()
-            expected = expected_file.read()
-            assert expected.strip() == report.strip().decode("utf-8")
-
-    def _capture_stdout(self, string_buffer):
-        """
-        Redirect output sent to `sys.stdout` to the BytesIO buffer
-        `string_buffer`.
-        """
-        self._mock_sys.stdout.buffer = string_buffer
-
-    def _set_git_diff_output(self, stdout, stderr, returncode=0):
-        """
-        Patch the call to `git diff` to output `stdout`
-        and `stderr`.
-        Patch the `git rev-parse` command to output
-        a phony directory.
-        """
-
-        def patch_diff(command, **kwargs):
-            if command[0:6] == [
-                "git",
-                "-c",
-                "diff.mnemonicprefix=no",
-                "-c",
-                "diff.noprefix=no",
-                "diff",
-            ]:
-                mock = self.mocker.Mock()
-                mock.communicate.return_value = (stdout, stderr)
-                mock.returncode = returncode
-                return mock
-            if command[0:2] == ["git", "rev-parse"]:
-                mock = self.mocker.Mock()
-                mock.communicate.return_value = (self._git_root_path, "")
-                mock.returncode = returncode
-                return mock
-
-            return Popen(command, **kwargs)
-
-        self._mock_popen.side_effect = patch_diff
-
-
 @pytest.fixture
 def cwd(tmp_path, monkeypatch):
     src = Path(__file__).parent / "fixtures"
@@ -720,18 +541,12 @@ class TestDiffQualityIntegration:
                 )
             },
         )
-        patch_git_command.set_stdout("git_diff_violations.txt")
+        patch_git_command.set_stdout("git_diff_add.txt")
         logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
         assert runbin(["--violations=not_installed"]) == 1
         logger.error.assert_called_with(
             "Failure: '%s'", "not_installed is not installed"
         )
-
-        # self._call_quality_expecting_error(
-        #     "not_installed",
-        #     ("Failure: '%s'", "not_installed is not installed"),
-        #     report_arg=None,
-        # )
 
     def test_do_nothing_reporter(self):
         # Pedantic, but really. This reporter
@@ -741,62 +556,10 @@ class TestDiffQualityIntegration:
         reporter = DoNothingDriver("pycodestyle", [], [])
         assert reporter.parse_reports("") == {}
 
-    def test_quiet_mode(self):
-        assert False
-        # self._check_console_report(
-        #     "git_diff_violations.txt"
-        #     "empty.txt",
-        #     ["diff-quality", "--violations=pylint", "-q"],
-        # )
-
-
-class TestDiffQualityIntegration2(ToolsIntegrationBase):
-    "TODO: DELETE!!!"
-    tool_module = "diff_cover.diff_quality_tool"
-
-    def _call_quality_expecting_error(
-        self, tool_name, expected_error, report_arg="pylint_report.txt"
-    ):
-        """
-        Makes calls to diff_quality that should fail to ensure
-        we get back the correct failure.
-        Takes in a string which is a tool to call and
-        an string which is the error you expect to see
-        """
-        with open("git_diff_add.txt", encoding="utf-8") as git_diff_file:
-            self._set_git_diff_output(git_diff_file.read(), "")
-        argv = ["diff-quality", f"--violations={tool_name}"]
-        if report_arg:
-            argv.append(report_arg)
-
-        logger = self.mocker.patch("diff_cover.diff_quality_tool.LOGGER")
-        exit_value = diff_quality_tool.main(argv)
-        logger.error.assert_called_with(*expected_error)
-        assert exit_value == 1
-
-    def test_tool_not_installed(self):
-        # Pretend we support a tool named not_installed
-        self.mocker.patch.dict(
-            diff_quality_tool.QUALITY_DRIVERS,
-            {
-                "not_installed": DoNothingDriver(
-                    "not_installed", ["txt"], ["not_installed"]
-                )
-            },
-        )
-
-        self._call_quality_expecting_error(
-            "not_installed",
-            ("Failure: '%s'", "not_installed is not installed"),
-            report_arg=None,
-        )
-
-    def test_quiet_mode(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "empty.txt",
-            ["diff-quality", "--violations=pylint", "-q"],
-        )
+    def test_quiet_mode(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["--violations=pylint", "-q"]) == 0
+        compare_console("empty.txt", capsys.readouterr().out)
 
 
 class DoNothingDriver(QualityDriver):
