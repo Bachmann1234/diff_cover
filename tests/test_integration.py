@@ -705,6 +705,12 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
         assert runbin(["--violations=pylint", "pylint_dupe.txt"]) == 0
         compare_console("pylint_dupe_violations_report.txt", capsys.readouterr().out)
 
+    def test_tool_not_recognized(self, runbin, patch_git_command, mocker):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
+        logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
+
     # def _call_quality_expecting_error(
     #     self, tool_name, expected_error, report_arg="pylint_report.txt"
     # ):
@@ -724,12 +730,6 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
     #     exit_value = diff_quality_tool.main(argv)
     #     logger.error.assert_called_with(*expected_error)
     #     assert exit_value == 1
-
-    def test_tool_not_recognized(self, runbin, patch_git_command, mocker):
-        patch_git_command.set_stdout("git_diff_violations.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
-        assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
-        logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
 
     def test_tool_not_installed(self, mocker, runbin, patch_git_command):
         # Pretend we support a tool named not_installed
