@@ -705,34 +705,35 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
         assert runbin(["--violations=pylint", "pylint_dupe.txt"]) == 0
         compare_console("pylint_dupe_violations_report.txt", capsys.readouterr().out)
 
-    def _call_quality_expecting_error(
-        self, tool_name, expected_error, report_arg="pylint_report.txt"
-    ):
-        """
-        Makes calls to diff_quality that should fail to ensure
-        we get back the correct failure.
-        Takes in a string which is a tool to call and
-        an string which is the error you expect to see
-        """
-        with open("git_diff_add.txt", encoding="utf-8") as git_diff_file:
-            self._set_git_diff_output(git_diff_file.read(), "")
-        argv = ["diff-quality", f"--violations={tool_name}"]
-        if report_arg:
-            argv.append(report_arg)
+    # def _call_quality_expecting_error(
+    #     self, tool_name, expected_error, report_arg="pylint_report.txt"
+    # ):
+    #     """
+    #     Makes calls to diff_quality that should fail to ensure
+    #     we get back the correct failure.
+    #     Takes in a string which is a tool to call and
+    #     an string which is the error you expect to see
+    #     """
+    #     with open("git_diff_add.txt", encoding="utf-8") as git_diff_file:
+    #         self._set_git_diff_output(git_diff_file.read(), "")
+    #     argv = ["diff-quality", f"--violations={tool_name}"]
+    #     if report_arg:
+    #         argv.append(report_arg)
 
-        logger = self.mocker.patch("diff_cover.diff_quality_tool.LOGGER")
-        exit_value = diff_quality_tool.main(argv)
-        logger.error.assert_called_with(*expected_error)
-        assert exit_value == 1
+    #     logger = self.mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+    #     exit_value = diff_quality_tool.main(argv)
+    #     logger.error.assert_called_with(*expected_error)
+    #     assert exit_value == 1
 
-    def test_tool_not_recognized(self):
-        self._call_quality_expecting_error(
-            "garbage", ("Quality tool not recognized: '%s'", "garbage"), "'garbage'"
-        )
+    def test_tool_not_recognized(self, runbin, patch_git_command, mocker):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
+        logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
 
-    def test_tool_not_installed(self):
+    def test_tool_not_installed(self, mocker, runbin, patch_git_command):
         # Pretend we support a tool named not_installed
-        self.mocker.patch.dict(
+        mocker.patch.dict(
             diff_quality_tool.QUALITY_DRIVERS,
             {
                 "not_installed": DoNothingDriver(
@@ -740,12 +741,16 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
                 )
             },
         )
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        assert runbin(["--violations=not_installed"]) == 1
+        logger.error.assert_called_with("Failure: '%s'", "not_installed is not installed")
 
-        self._call_quality_expecting_error(
-            "not_installed",
-            ("Failure: '%s'", "not_installed is not installed"),
-            report_arg=None,
-        )
+        # self._call_quality_expecting_error(
+        #     "not_installed",
+        #     ("Failure: '%s'", "not_installed is not installed"),
+        #     report_arg=None,
+        # )
 
     def test_do_nothing_reporter(self):
         # Pedantic, but really. This reporter
