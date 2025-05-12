@@ -440,7 +440,9 @@ class TestDiffCoverIntegration:
         generates correct reports.
         """
         patch_git_command.set_stdout("git_diff_subdir.txt")
-        mocker.patch.object(GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", ""))
+        mocker.patch.object(
+            GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", "")
+        )
         assert (
             runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
         )
@@ -452,7 +454,9 @@ class TestDiffCoverIntegration:
         generates correct reports.
         """
         patch_git_command.set_stdout("git_diff_subdir.txt")
-        mocker.patch.object(GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", ""))
+        mocker.patch.object(
+            GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", "")
+        )
         assert runbin(["coverage.xml"]) == 0
         compare_console("subdir_coverage_console_report.txt", capsys.readouterr().out)
 
@@ -491,6 +495,7 @@ class TestDiffCoverIntegration:
             )
             == 0
         )
+        assert Path("dummy/external_style.css").exists()
 
     def test_git_diff_error(self, runbin, patch_git_command):
         # Patch the output of `git diff` to return an error
@@ -530,59 +535,100 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
     High-level integration test.
     """
 
-    def test_git_diff_error_diff_quality(self):
-        # Patch the output of `git diff` to return an error
-        self._set_git_diff_output("", "fatal error", 1)
+    @pytest.fixture
+    def runbin(self, cwd):
+        return lambda x: diff_quality_tool.main(["diff-quality", *x])
 
+    def test_git_diff_error_diff_quality(self, runbin, patch_git_command):
+        # Patch the output of `git diff` to return an error
+        patch_git_command.set_stderr("fatal error")
+        patch_git_command.set_returncode(1)
         # Expect an error
         with pytest.raises(CommandError):
-            diff_quality_tool.main(["diff-quality", "--violations", "pycodestyle"])
+            runbin(["coverage.xml", "--violations", "pycodestyle"])
 
-    def test_added_file_pycodestyle_html(self):
-        self._check_html_report(
-            "git_diff_violations.txt",
-            "pycodestyle_violations_report.html",
-            ["diff-quality", "--violations=pycodestyle"],
+    def test_added_file_pycodestyle_html(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                    "--violations=pycodestyle",
+                ]
+            )
+            == 0
         )
+        compare_html("pycodestyle_violations_report.html", "dummy/diff_coverage.html")
 
-    def test_added_file_pyflakes_html(self):
-        self._check_html_report(
-            "git_diff_violations.txt",
-            "pyflakes_violations_report.html",
-            ["diff-quality", "--violations=pyflakes"],
+    def test_added_file_pyflakes_html(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                ["--violations=pyflakes", "--html-report", "dummy/diff_coverage.html"]
+            )
+            == 0
         )
+        compare_html("pyflakes_violations_report.html", "dummy/diff_coverage.html")
 
-    def test_added_file_pylint_html(self):
-        self._check_html_report(
-            "git_diff_violations.txt",
-            "pylint_violations_report.html",
-            ["diff-quality", "--violations=pylint"],
+    def test_added_file_pylint_html(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(["--violations=pylint", "--html-report", "dummy/diff_coverage.html"])
+            == 0
         )
+        compare_html("pylint_violations_report.html", "dummy/diff_coverage.html")
 
-    def test_fail_under_html(self):
-        self._check_html_report(
-            "git_diff_violations.txt",
-            "pylint_violations_report.html",
-            ["diff-quality", "--violations=pylint", "--fail-under=80"],
-            expected_status=1,
+    def test_fail_under_html(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--violations=pylint",
+                    "--fail-under=80",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                ]
+            )
+            == 1
         )
+        compare_html("pylint_violations_report.html", "dummy/diff_coverage.html")
 
-    def test_fail_under_pass_html(self):
-        self._check_html_report(
-            "git_diff_violations.txt",
-            "pylint_violations_report.html",
-            ["diff-quality", "--violations=pylint", "--fail-under=40"],
-            expected_status=0,
+    def test_fail_under_pass_html(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--violations=pylint",
+                    "--fail-under=40",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                ]
+            )
+            == 0
         )
+        compare_html("pylint_violations_report.html", "dummy/diff_coverage.html")
 
-    def test_html_with_external_css(self):
-        temp_dir = self._check_html_report(
-            "git_diff_violations.txt",
+    def test_html_with_external_css(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--violations=pycodestyle",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                    "--external-css-file",
+                    "dummy/external_style.css",
+                ]
+            )
+            == 0
+        )
+        compare_html(
             "pycodestyle_violations_report_external_css.html",
-            ["diff-quality", "--violations=pycodestyle"],
-            css_file="external_style.css",
+            "dummy/diff_coverage.html",
+            clear_inline_css=False,
         )
-        assert os.path.exists(os.path.join(temp_dir, "external_style.css"))
+        assert Path("dummy/external_style.css").exists()
 
     def test_added_file_pycodestyle_console(self):
         self._check_console_report(
