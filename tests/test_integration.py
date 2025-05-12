@@ -296,7 +296,7 @@ def compare_console(expected_console_path, report):
         assert expected.strip() == report.strip()
 
 
-class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
+class TestDiffCoverIntegration:
     """
     High-level integration test.
     The `git diff` is a mock, but everything else is our code.
@@ -342,7 +342,7 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         assert runbin(["coverage.xml", "--fail-under=5"]) == 0
         compare_console("add_console_report.txt", capsys.readouterr().out)
 
-    def test_deleted_file_html(self, runbin, patch_git_command, capsys):
+    def test_deleted_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_delete.txt")
         assert (
             runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
@@ -354,14 +354,14 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         assert runbin(["coverage.xml"]) == 0
         compare_console("delete_console_report.txt", capsys.readouterr().out)
 
-    def test_changed_file_html(self, runbin, patch_git_command, capsys):
+    def test_changed_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_changed.txt")
         assert (
             runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
         )
         compare_html("changed_html_report.html", "dummy/diff_coverage.html")
 
-    def test_fail_under_html(self, runbin, patch_git_command, capsys):
+    def test_fail_under_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_changed.txt")
         assert (
             runbin(
@@ -376,7 +376,7 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         )
         compare_html("changed_html_report.html", "dummy/diff_coverage.html")
 
-    def test_fail_under_pass_html(self, runbin, patch_git_command, capsys):
+    def test_fail_under_pass_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_changed.txt")
         assert (
             runbin(
@@ -409,7 +409,7 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         assert runbin(["moved_coverage.xml"]) == 0
         compare_console("moved_console_report.txt", capsys.readouterr().out)
 
-    def test_mult_inputs_html(self, runbin, patch_git_command, capsys):
+    def test_mult_inputs_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_mult.txt")
         assert (
             runbin(
@@ -485,7 +485,7 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         assert runbin(["dotnet_coverage.xml"]) == 0
         compare_console("dotnet_coverage_console_report.txt", capsys.readouterr().out)
 
-    def test_unicode_html(self, runbin, patch_git_command, capsys):
+    def test_unicode_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_unicode.txt")
         assert (
             runbin(
@@ -495,7 +495,7 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         )
         compare_html("unicode_html_report.html", "dummy/diff_coverage.html")
 
-    def test_html_with_external_css(self, runbin, patch_git_command, capsys):
+    def test_html_with_external_css(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_external_css.txt")
         assert (
             runbin(
