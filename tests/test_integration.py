@@ -434,45 +434,27 @@ class TestDiffCoverIntegration:
         assert runbin(["lcov.info"]) == 0
         compare_console("changed_console_report.txt", capsys.readouterr().out)
 
-    def test_subdir_coverage_html(self, runbin, monkeypatch, mocker, patch_git_command):
+    def test_subdir_coverage_html(self, runbin, mocker, patch_git_command):
         """
         Assert that when diff-cover is ran from a subdirectory it
         generates correct reports.
         """
         patch_git_command.set_stdout("git_diff_subdir.txt")
-        Path.cwd().joinpath("sub").mkdir(parents=True, exist_ok=True)
-        # monkeypatch.chdir("./sub")
-        # mocker.patch.object(GitPathTool, "_git_root", return_value="./sub")
+        mocker.patch.object(GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", ""))
         assert (
             runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
         )
         compare_html("subdir_coverage_html_report.html", "dummy/diff_coverage.html")
 
-        # old_cwd = self._mock_getcwd.return_value
-        # self._mock_getcwd.return_value = os.path.join(old_cwd, "sub")
-        # self._check_html_report(
-        #     "git_diff_subdir.txt",
-        #     "subdir_coverage_html_report.html",
-        #     ["diff-cover", "coverage.xml"],
-        # )
-        # self._mock_getcwd.return_value = old_cwd
-
-    def test_subdir_coverage_console(self, runbin, patch_git_command, capsys):
+    def test_subdir_coverage_console(self, runbin, mocker, patch_git_command, capsys):
         """
         Assert that when diff-cover is ran from a subdirectory it
         generates correct reports.
         """
         patch_git_command.set_stdout("git_diff_subdir.txt")
+        mocker.patch.object(GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", ""))
         assert runbin(["coverage.xml"]) == 0
         compare_console("subdir_coverage_console_report.txt", capsys.readouterr().out)
-        # old_cwd = self._mock_getcwd.return_value
-        # self._mock_getcwd.return_value = os.path.join(old_cwd, "sub")
-        # self._check_console_report(
-        #     "git_diff_subdir.txt",
-        #     "subdir_coverage_console_report.txt",
-        #     ["diff-cover", "coverage.xml"],
-        # )
-        # self._mock_getcwd.return_value = old_cwd
 
     def test_unicode_console(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_unicode.txt")
