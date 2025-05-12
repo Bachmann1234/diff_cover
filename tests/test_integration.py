@@ -290,14 +290,6 @@ def compare_html(expected_html_path, html_report_path, css_file=None):
             assert expected.strip() == html.strip()
 
 
-class TestDiffCoverIntegrationOriginal(ToolsIntegrationBase):
-    tool_module = "diff_cover.diff_cover_tool"
-    def test_added_file_html(self):
-        import ipdb; ipdb.set_trace()
-        self._check_html_report(
-            "git_diff_add.txt", "add_html_report.html", ["diff-cover", "coverage.xml"]
-        )
-
 class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
     """
     High-level integration test.
@@ -310,16 +302,10 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
 
     def test_added_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_add.txt")
-        import ipdb; ipdb.set_trace()
         assert (
             runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
         )
-
         compare_html("add_html_report.html", "dummy/diff_coverage.html")
-
-        self._check_html_report(
-            "git_diff_add.txt", "add_html_report.html", ["diff-cover", "coverage.xml"]
-        )
 
     def test_added_file_console(self):
         self._check_console_report(
