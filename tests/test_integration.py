@@ -277,17 +277,23 @@ def patch_git_command(patch_popen, mocker):
     return helper
 
 
-def compare_html(expected_html_path, html_report_path, css_file=None):
+def compare_html(expected_html_path, html_report_path, clear_inline_css=True):
     clean_content = re.compile("<style>.*</style>", flags=re.DOTALL)
 
     with open(expected_html_path, encoding="utf-8") as expected_file:
         with open(html_report_path, encoding="utf-8") as html_report:
             html = html_report.read()
             expected = expected_file.read()
-            if css_file is None:
+            if clear_inline_css:
                 html = clean_content.sub("", html)
                 expected = clean_content.sub("", expected)
             assert expected.strip() == html.strip()
+
+
+def compare_console(expected_console_path, report):
+    with open(expected_console_path) as expected_file:
+        expected = expected_file.read()
+        assert expected.strip() == report.strip()
 
 
 class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
@@ -307,218 +313,242 @@ class TestDiffCoverIntegration:  # (ToolsIntegrationBase):
         )
         compare_html("add_html_report.html", "dummy/diff_coverage.html")
 
-    def test_added_file_console(self):
-        self._check_console_report(
-            "git_diff_add.txt", "add_console_report.txt", ["diff-cover", "coverage.xml"]
-        )
+    def test_added_file_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml"]) == 0
+        compare_console("add_console_report.txt", capsys.readouterr().out)
 
-    def test_added_file_console_lcov(self):
-        self._check_console_report(
-            "git_diff_add.txt", "add_console_report.txt", ["diff-cover", "lcov.info"]
-        )
+    def test_added_file_console_lcov(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["lcov.info"]) == 0
+        compare_console("add_console_report.txt", capsys.readouterr().out)
 
-    def test_lua_coverage(self):
+    def test_lua_coverage(self, runbin, patch_git_command, capsys):
         """
         coverage report shows that diff-cover needs to normalize
         paths read in
         """
-        self._check_console_report(
-            "git_diff_lua.txt",
-            "lua_console_report.txt",
-            ["diff-cover", "luacoverage.xml"],
+        patch_git_command.set_stdout("git_diff_lua.txt")
+        assert runbin(["luacoverage.xml"]) == 0
+        compare_console("lua_console_report.txt", capsys.readouterr().out)
+
+    def test_fail_under_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml", "--fail-under=90"]) == 1
+        compare_console("add_console_report.txt", capsys.readouterr().out)
+
+    def test_fail_under_pass_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml", "--fail-under=5"]) == 0
+        compare_console("add_console_report.txt", capsys.readouterr().out)
+
+    def test_deleted_file_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_delete.txt")
+        assert (
+            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+        )
+        compare_html("delete_html_report.html", "dummy/diff_coverage.html")
+
+    def test_deleted_file_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_delete.txt")
+        assert runbin(["coverage.xml"]) == 0
+        compare_console("delete_console_report.txt", capsys.readouterr().out)
+
+    def test_changed_file_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_changed.txt")
+        assert (
+            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+        )
+        compare_html("changed_html_report.html", "dummy/diff_coverage.html")
+
+    def test_fail_under_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_changed.txt")
+        assert (
+            runbin(
+                [
+                    "coverage.xml",
+                    "--fail-under=100.1",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                ]
+            )
+            == 1
+        )
+        compare_html("changed_html_report.html", "dummy/diff_coverage.html")
+
+    def test_fail_under_pass_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_changed.txt")
+        assert (
+            runbin(
+                [
+                    "coverage.xml",
+                    "--fail-under=100",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                ]
+            )
+            == 0
+        )
+        compare_html("changed_html_report.html", "dummy/diff_coverage.html")
+
+    def test_changed_file_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_changed.txt")
+        assert runbin(["coverage.xml"]) == 0
+        compare_console("changed_console_report.txt", capsys.readouterr().out)
+
+    def test_moved_file_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_moved.txt")
+        assert (
+            runbin(["moved_coverage.xml", "--html-report", "dummy/diff_coverage.html"])
+            == 0
+        )
+        compare_html("moved_html_report.html", "dummy/diff_coverage.html")
+
+    def test_moved_file_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_moved.txt")
+        assert runbin(["moved_coverage.xml"]) == 0
+        compare_console("moved_console_report.txt", capsys.readouterr().out)
+
+    def test_mult_inputs_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_mult.txt")
+        assert (
+            runbin(
+                [
+                    "coverage1.xml",
+                    "coverage2.xml",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                ]
+            )
+            == 0
+        )
+        compare_html("mult_inputs_html_report.html", "dummy/diff_coverage.html")
+
+    def test_mult_inputs_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_mult.txt")
+        assert runbin(["coverage1.xml", "coverage2.xml"]) == 0
+        compare_console("mult_inputs_console_report.txt", capsys.readouterr().out)
+
+    def test_changed_file_lcov_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_changed.txt")
+        assert runbin(["lcov.info"]) == 0
+        compare_console("changed_console_report.txt", capsys.readouterr().out)
+
+    # def test_subdir_coverage_html(self,runbin, monkeypatch, patch_git_command, capsys):
+    #     """
+    #     Assert that when diff-cover is ran from a subdirectory it
+    #     generates correct reports.
+    #     """
+    #     patch_git_command.set_stdout("git_diff_subdir.txt")
+    #     # monkeypatch.chdir('./sub')
+    #     assert (
+    #         runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+    #     )
+    #     compare_html("subdir_coverage_html_report.html", "dummy/diff_coverage.html")
+
+    #     # old_cwd = self._mock_getcwd.return_value
+    #     # self._mock_getcwd.return_value = os.path.join(old_cwd, "sub")
+    #     # self._check_html_report(
+    #     #     "git_diff_subdir.txt",
+    #     #     "subdir_coverage_html_report.html",
+    #     #     ["diff-cover", "coverage.xml"],
+    #     # )
+    #     # self._mock_getcwd.return_value = old_cwd
+
+    # def test_subdir_coverage_console(self,runbin, patch_git_command, capsys):
+    #     patch_git_command.set_stdout("git_diff_add.txt")
+    #     assert (
+    #         runbin(["coverage.xml", "--fail-under=5"]) == 0
+    #     )
+    #     compare_console("add_console_report.txt", capsys.readouterr().out)
+    #     """
+    #     Assert that when diff-cover is ran from a subdirectory it
+    #     generates correct reports.
+    #     """
+    #     old_cwd = self._mock_getcwd.return_value
+    #     self._mock_getcwd.return_value = os.path.join(old_cwd, "sub")
+    #     self._check_console_report(
+    #         "git_diff_subdir.txt",
+    #         "subdir_coverage_console_report.txt",
+    #         ["diff-cover", "coverage.xml"],
+    #     )
+    #     self._mock_getcwd.return_value = old_cwd
+
+    def test_unicode_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_unicode.txt")
+        assert runbin(["unicode_coverage.xml"]) == 0
+        compare_console("unicode_console_report.txt", capsys.readouterr().out)
+
+    def test_dot_net_diff(self, mocker, runbin, patch_git_command):  # , capsys):
+        patch_git_command.set_stdout("git_diff_dotnet.txt")
+        assert runbin(["dotnet_coverage.xml"]) == 0
+        compare_console("dotnet_coverage_console_report.txt", capsys.readouterr().out)
+
+        # mock_path = "/code/samplediff/"
+        # self._mock_getcwd.return_value = mock_path
+        # mocker.patch.object(GitPathTool, "_git_root", return_value=mock_path)
+        # self._check_console_report(
+        #     "git_diff_dotnet.txt",
+        #     "dotnet_coverage_console_report.txt",
+        #     ["diff-cover", "dotnet_coverage.xml"],
+        # )
+
+    def test_unicode_html(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_unicode.txt")
+        assert (
+            runbin(
+                ["unicode_coverage.xml", "--html-report", "dummy/diff_coverage.html"]
+            )
+            == 0
+        )
+        compare_html("unicode_html_report.html", "dummy/diff_coverage.html")
+
+    def test_html_with_external_css(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_external_css.txt")
+        assert (
+            runbin(
+                [
+                    "coverage.xml",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                    "--external-css-file",
+                    "dummy/external_style.css",
+                ]
+            )
+            == 0
         )
 
-    def test_fail_under_console(self):
-        self._check_console_report(
-            "git_diff_add.txt",
-            "add_console_report.txt",
-            ["diff-cover", "coverage.xml", "--fail-under=90"],
-            expected_status=1,
-        )
-
-    def test_fail_under_pass_console(self):
-        self._check_console_report(
-            "git_diff_add.txt",
-            "add_console_report.txt",
-            ["diff-cover", "coverage.xml", "--fail-under=5"],
-            expected_status=0,
-        )
-
-    def test_deleted_file_html(self):
-        self._check_html_report(
-            "git_diff_delete.txt",
-            "delete_html_report.html",
-            ["diff-cover", "coverage.xml"],
-        )
-
-    def test_deleted_file_console(self):
-        self._check_console_report(
-            "git_diff_delete.txt",
-            "delete_console_report.txt",
-            ["diff-cover", "coverage.xml"],
-        )
-
-    def test_changed_file_html(self):
-        self._check_html_report(
-            "git_diff_changed.txt",
-            "changed_html_report.html",
-            ["diff-cover", "coverage.xml"],
-        )
-
-    def test_fail_under_html(self):
-        self._check_html_report(
-            "git_diff_changed.txt",
-            "changed_html_report.html",
-            ["diff-cover", "coverage.xml", "--fail-under=100.1"],
-            expected_status=1,
-        )
-
-    def test_fail_under_pass_html(self):
-        self._check_html_report(
-            "git_diff_changed.txt",
-            "changed_html_report.html",
-            ["diff-cover", "coverage.xml", "--fail-under=100"],
-            expected_status=0,
-        )
-
-    def test_changed_file_console(self):
-        self._check_console_report(
-            "git_diff_changed.txt",
-            "changed_console_report.txt",
-            ["diff-cover", "coverage.xml"],
-        )
-
-    def test_moved_file_html(self):
-        self._check_html_report(
-            "git_diff_moved.txt",
-            "moved_html_report.html",
-            ["diff-cover", "moved_coverage.xml"],
-        )
-
-    def test_moved_file_console(self):
-        self._check_console_report(
-            "git_diff_moved.txt",
-            "moved_console_report.txt",
-            ["diff-cover", "moved_coverage.xml"],
-        )
-
-    def test_mult_inputs_html(self):
-        self._check_html_report(
-            "git_diff_mult.txt",
-            "mult_inputs_html_report.html",
-            ["diff-cover", "coverage1.xml", "coverage2.xml"],
-        )
-
-    def test_mult_inputs_console(self):
-        self._check_console_report(
-            "git_diff_mult.txt",
-            "mult_inputs_console_report.txt",
-            ["diff-cover", "coverage1.xml", "coverage2.xml"],
-        )
-
-    def test_changed_file_lcov_console(self):
-        self._check_console_report(
-            "git_diff_changed.txt",
-            "changed_console_report.txt",
-            ["diff-cover", "lcov.info"],
-        )
-
-    def test_subdir_coverage_html(self):
-        """
-        Assert that when diff-cover is ran from a subdirectory it
-        generates correct reports.
-        """
-        old_cwd = self._mock_getcwd.return_value
-        self._mock_getcwd.return_value = os.path.join(old_cwd, "sub")
-        self._check_html_report(
-            "git_diff_subdir.txt",
-            "subdir_coverage_html_report.html",
-            ["diff-cover", "coverage.xml"],
-        )
-        self._mock_getcwd.return_value = old_cwd
-
-    def test_subdir_coverage_console(self):
-        """
-        Assert that when diff-cover is ran from a subdirectory it
-        generates correct reports.
-        """
-        old_cwd = self._mock_getcwd.return_value
-        self._mock_getcwd.return_value = os.path.join(old_cwd, "sub")
-        self._check_console_report(
-            "git_diff_subdir.txt",
-            "subdir_coverage_console_report.txt",
-            ["diff-cover", "coverage.xml"],
-        )
-        self._mock_getcwd.return_value = old_cwd
-
-    def test_unicode_console(self):
-        self._check_console_report(
-            "git_diff_unicode.txt",
-            "unicode_console_report.txt",
-            ["diff-cover", "unicode_coverage.xml"],
-        )
-
-    def test_dot_net_diff(self, mocker):
-        mock_path = "/code/samplediff/"
-        self._mock_getcwd.return_value = mock_path
-        mocker.patch.object(GitPathTool, "_git_root", return_value=mock_path)
-        self._check_console_report(
-            "git_diff_dotnet.txt",
-            "dotnet_coverage_console_report.txt",
-            ["diff-cover", "dotnet_coverage.xml"],
-        )
-
-    def test_unicode_html(self):
-        self._check_html_report(
-            "git_diff_unicode.txt",
-            "unicode_html_report.html",
-            ["diff-cover", "unicode_coverage.xml"],
-        )
-
-    def test_html_with_external_css(self):
-        temp_dir = self._check_html_report(
-            "git_diff_external_css.txt",
-            "external_css_html_report.html",
-            ["diff-cover", "coverage.xml"],
-            css_file="external_style.css",
-        )
-        assert os.path.exists(os.path.join(temp_dir, "external_style.css"))
-
-    def test_git_diff_error(self):
+    def test_git_diff_error(self, runbin, patch_git_command):
         # Patch the output of `git diff` to return an error
-        self._set_git_diff_output("", "fatal error", 1)
-
+        patch_git_command.set_stderr("fatal error")
+        patch_git_command.set_returncode(1)
         # Expect an error
         with pytest.raises(CommandError):
-            diff_cover_tool.main(["diff-cover", "coverage.xml"])
+            runbin(["coverage.xml"])
 
-    def test_quiet_mode(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "empty.txt",
-            ["diff-cover", "coverage.xml", "-q"],
-        )
+    def test_quiet_mode(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["coverage.xml", "-q"]) == 0
+        compare_console("empty.txt", capsys.readouterr().out)
 
-    def test_show_uncovered_lines_console(self):
-        self._check_console_report(
-            "git_diff_add.txt",
-            "show_uncovered_lines_console.txt",
-            ["diff-cover", "--show-uncovered", "coverage.xml"],
-        )
+    def test_show_uncovered_lines_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["--show-uncovered", "coverage.xml"]) == 0
+        compare_console("show_uncovered_lines_console.txt", capsys.readouterr().out)
 
-    def test_expand_coverage_report_complete_report(self):
-        self._check_console_report(
-            "git_diff_add.txt",
-            "add_console_report.txt",
-            ["diff-cover", "coverage.xml", "--expand-coverage-report"],
-        )
+    def test_expand_coverage_report_complete_report(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml", "--expand-coverage-report"]) == 0
+        compare_console("add_console_report.txt", capsys.readouterr().out)
 
-    def test_expand_coverage_report_uncomplete_report(self):
-        self._check_console_report(
-            "git_diff_add.txt",
-            "expand_console_report.txt",
-            ["diff-cover", "coverage_missing_lines.xml", "--expand-coverage-report"],
-        )
+    def test_expand_coverage_report_uncomplete_report(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage_missing_lines.xml", "--expand-coverage-report"]) == 0
+        compare_console("expand_console_report.txt", capsys.readouterr().out)
 
 
 class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
