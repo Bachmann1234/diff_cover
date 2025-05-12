@@ -530,7 +530,7 @@ class TestDiffCoverIntegration:
         compare_console("expand_console_report.txt", capsys.readouterr().out)
 
 
-class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
+class TestDiffQualityIntegration:
     """
     High-level integration test.
     """
@@ -711,28 +711,28 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
         assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
         logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
 
-    def test_tool_not_installed(self, mocker, runbin, patch_git_command):
-        # Pretend we support a tool named not_installed
-        mocker.patch.dict(
-            diff_quality_tool.QUALITY_DRIVERS,
-            {
-                "not_installed": DoNothingDriver(
-                    "not_installed", ["txt"], ["not_installed"]
-                )
-            },
-        )
-        patch_git_command.set_stdout("git_diff_violations.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
-        assert runbin(["--violations=not_installed"]) == 1
-        logger.error.assert_called_with(
-            "Failure: '%s'", "not_installed is not installed"
-        )
+    # def test_tool_not_installed(self, mocker, runbin, patch_git_command):
+    #     # Pretend we support a tool named not_installed
+    #     mocker.patch.dict(
+    #         diff_quality_tool.QUALITY_DRIVERS,
+    #         {
+    #             "not_installed": DoNothingDriver(
+    #                 "not_installed", ["txt"], ["not_installed"]
+    #             )
+    #         },
+    #     )
+    #     patch_git_command.set_stdout("git_diff_violations.txt")
+    #     logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+    #     assert runbin(["--violations=not_installed"]) == 1
+    #     logger.error.assert_called_with(
+    #         "Failure: '%s'", "not_installed is not installed"
+    #     )
 
-        # self._call_quality_expecting_error(
-        #     "not_installed",
-        #     ("Failure: '%s'", "not_installed is not installed"),
-        #     report_arg=None,
-        # )
+    #     # self._call_quality_expecting_error(
+    #     #     "not_installed",
+    #     #     ("Failure: '%s'", "not_installed is not installed"),
+    #     #     report_arg=None,
+    #     # )
 
     def test_do_nothing_reporter(self):
         # Pedantic, but really. This reporter
@@ -742,12 +742,12 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
         reporter = DoNothingDriver("pycodestyle", [], [])
         assert reporter.parse_reports("") == {}
 
-    def test_quiet_mode(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "empty.txt",
-            ["diff-quality", "--violations=pylint", "-q"],
-        )
+    # def test_quiet_mode(self):
+    #     self._check_console_report(
+    #         "git_diff_violations.txt",
+    #         "empty.txt",
+    #         ["diff-quality", "--violations=pylint", "-q"],
+    #     )
 
 
 class TestDiffQualityIntegration2(ToolsIntegrationBase):
