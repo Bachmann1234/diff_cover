@@ -296,6 +296,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         See base class.
         output_file must be a file handler that takes in bytes!
         """
+
         if self.template_path is not None:
             template = TEMPLATE_ENV.get_template(self.template_path)
             report = template.render(self._context())
