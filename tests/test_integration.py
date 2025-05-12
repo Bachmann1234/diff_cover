@@ -630,95 +630,80 @@ class TestDiffQualityIntegration:  # (ToolsIntegrationBase):
         )
         assert Path("dummy/external_style.css").exists()
 
-    def test_added_file_pycodestyle_console(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pycodestyle_violations_report.txt",
-            ["diff-quality", "--violations=pycodestyle"],
-        )
+    def test_added_file_pycodestyle_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["--violations=pycodestyle"]) == 0
+        compare_console("pycodestyle_violations_report.txt", capsys.readouterr().out)
 
-    def test_added_file_pycodestyle_console_exclude_file(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "empty_pycodestyle_violations.txt",
-            [
-                "diff-quality",
-                "--violations=pycodestyle",
-                '--options="--exclude=violations_test_file.py"',
-            ],
+    def test_added_file_pycodestyle_console_exclude_file(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--violations=pycodestyle",
+                    '--options="--exclude=violations_test_file.py"',
+                ]
+            )
+            == 0
         )
+        compare_console("empty_pycodestyle_violations.txt", capsys.readouterr().out)
 
-    def test_fail_under_console(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pyflakes_violations_report.txt",
-            ["diff-quality", "--violations=pyflakes", "--fail-under=90"],
-            expected_status=1,
-        )
+    def test_fail_under_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["--violations=pyflakes", "--fail-under=90"]) == 1
+        compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
 
-    def test_fail_under_pass_console(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pyflakes_violations_report.txt",
-            ["diff-quality", "--violations=pyflakes", "--fail-under=30"],
-            expected_status=0,
-        )
+    def test_fail_under_pass_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["--violations=pyflakes", "--fail-under=30"]) == 0
+        compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
 
-    def test_added_file_pyflakes_console(self):
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pyflakes_violations_report.txt",
-            ["diff-quality", "--violations=pyflakes"],
-        )
+    def test_added_file_pyflakes_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["--violations=pyflakes"]) == 0
+        compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
 
-    def test_added_file_pyflakes_console_two_files(self):
-        self._check_console_report(
-            "git_diff_violations_two_files.txt",
-            "pyflakes_two_files.txt",
-            ["diff-quality", "--violations=pyflakes"],
-        )
+    def test_added_file_pyflakes_console_two_files(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_violations_two_files.txt")
+        assert runbin(["--violations=pyflakes"]) == 0
+        compare_console("pyflakes_two_files.txt", capsys.readouterr().out)
 
-    def test_added_file_pylint_console(self):
-        console_report = "pylint_violations_console_report.txt"
-        self._check_console_report(
-            "git_diff_violations.txt",
-            console_report,
-            ["diff-quality", "--violations=pylint"],
-        )
+    def test_added_file_pylint_console(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert runbin(["--violations=pylint"]) == 0
+        compare_console("pylint_violations_console_report.txt", capsys.readouterr().out)
 
-    def test_pre_generated_pycodestyle_report(self):
+    def test_pre_generated_pycodestyle_report(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
         # Pass in a pre-generated pycodestyle report instead of letting
         # the tool call pycodestyle itself.
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pycodestyle_violations_report.txt",
-            ["diff-quality", "--violations=pycodestyle", "pycodestyle_report.txt"],
-        )
+        assert runbin(["--violations=pycodestyle", "pycodestyle_report.txt"]) == 0
+        compare_console("pycodestyle_violations_report.txt", capsys.readouterr().out)
 
-    def test_pre_generated_pyflakes_report(self):
+    def test_pre_generated_pyflakes_report(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
         # Pass in a pre-generated pyflakes report instead of letting
         # the tool call pyflakes itself.
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pyflakes_violations_report.txt",
-            ["diff-quality", "--violations=pyflakes", "pyflakes_violations_report.txt"],
-        )
+        assert runbin(["--violations=pyflakes", "pyflakes_violations_report.txt"]) == 0
+        compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
 
-    def test_pre_generated_pylint_report(self):
+    def test_pre_generated_pylint_report(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_violations.txt")
         # Pass in a pre-generated pylint report instead of letting
         # the tool call pylint itself.
-        self._check_console_report(
-            "git_diff_violations.txt",
-            "pylint_violations_report.txt",
-            ["diff-quality", "--violations=pylint", "pylint_report.txt"],
-        )
+        assert runbin(["--violations=pylint", "pylint_report.txt"]) == 0
+        compare_console("pylint_violations_report.txt", capsys.readouterr().out)
 
-    def test_pylint_report_with_dup_code_violation(self):
-        self._check_console_report(
-            "git_diff_code_dupe.txt",
-            "pylint_dupe_violations_report.txt",
-            ["diff-quality", "--violations=pylint", "pylint_dupe.txt"],
-        )
+    def test_pylint_report_with_dup_code_violation(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_code_dupe.txt")
+        assert runbin(["--violations=pylint", "pylint_dupe.txt"]) == 0
+        compare_console("pylint_dupe_violations_report.txt", capsys.readouterr().out)
 
     def _call_quality_expecting_error(
         self, tool_name, expected_error, report_arg="pylint_report.txt"
