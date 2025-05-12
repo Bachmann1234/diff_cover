@@ -207,7 +207,6 @@ def cwd(tmp_path, monkeypatch):
     temp_dir.mkdir()
 
     shutil.copytree(src, tmp_path, dirs_exist_ok=True)
-    # tmp_path.symlink_to(src, target_is_directory=True)
     monkeypatch.chdir(tmp_path)
 
     return temp_dir
