@@ -59,7 +59,7 @@ class ToolsIntegrationBase:
 
         Perhaps I will eat these words
         """
-        clean_content = re.sub("r'<style>.*</style>", content, "", flags=re.DOTALL)
+        clean_content = re.sub("<style>.*</style>", "", content, flags=re.DOTALL)
         assert len(content) > len(clean_content)
         return clean_content
 
