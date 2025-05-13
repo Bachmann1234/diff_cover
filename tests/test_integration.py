@@ -1,4 +1,4 @@
-# pylint: disable=attribute-defined-outside-init
+# pylint: disable=use-implicit-booleaness-not-comparison-to-zero,use-implicit-booleaness-not-comparison
 
 """High-level integration tests of diff-cover tool."""
 
@@ -7,8 +7,6 @@ import os.path
 import re
 import shutil
 from collections import defaultdict
-from functools import partial
-from io import BytesIO
 from pathlib import Path
 from subprocess import Popen
 
@@ -18,7 +16,6 @@ from diff_cover import diff_cover_tool, diff_quality_tool
 from diff_cover.command_runner import CommandError
 from diff_cover.git_path import GitPathTool
 from diff_cover.violationsreporters.base import QualityDriver
-from tests.helpers import fixture_path
 
 
 @pytest.fixture
@@ -111,7 +108,7 @@ def compare_html(expected_html_path, html_report_path, clear_inline_css=True):
 
 
 def compare_console(expected_console_path, report):
-    with open(expected_console_path) as expected_file:
+    with open(expected_console_path, encoding="utf-8") as expected_file:
         expected = expected_file.read()
         assert expected.strip() == report.strip()
 
