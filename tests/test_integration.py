@@ -3,6 +3,7 @@
 
 """High-level integration tests of diff-cover tool."""
 
+import json
 import os
 import os.path
 import re
@@ -108,6 +109,22 @@ def compare_html(expected_html_path, html_report_path, clear_inline_css=True):
             assert expected.strip() == html.strip()
 
 
+def compare_markdown(expected_file_path, actual_file_path):
+    with open(expected_file_path, encoding="utf-8") as expected_file:
+        with open(actual_file_path, encoding="utf-8") as actual_file:
+            expected = expected_file.read()
+            actual = actual_file.read()
+            assert expected.strip() == actual.strip()
+
+
+def compare_json(expected_json_path, actual_json_path):
+    with open(expected_json_path, encoding="utf-8") as expected_file:
+        with open(actual_json_path, encoding="utf-8") as actual_file:
+            expected = json.load(expected_file)
+            actual = json.load(actual_file)
+            assert expected == actual
+
+
 def compare_console(expected_console_path, report):
     with open(expected_console_path, encoding="utf-8") as expected_file:
         expected = expected_file.read()
@@ -135,6 +152,27 @@ class TestDiffCoverIntegration:
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["coverage.xml"]) == 0
         compare_console("add_console_report.txt", capsys.readouterr().out)
+
+    def test_all_reports(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert (
+            runbin(
+                [
+                    "coverage.xml",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                    "--json-report",
+                    "dummy/diff_coverage.json",
+                    "--markdown-report",
+                    "dummy/diff_coverage.md",
+                ]
+            )
+            == 0
+        )
+        compare_console("add_console_report.txt", capsys.readouterr().out)
+        compare_html("add_html_report.html", "dummy/diff_coverage.html")
+        compare_json("add_json_report.json", "dummy/diff_coverage.json")
+        compare_markdown("add_markdown_report.md", "dummy/diff_coverage.md")
 
     def test_added_file_console_lcov(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
@@ -378,6 +416,26 @@ class TestDiffQualityIntegration:
             == 0
         )
         compare_html("pycodestyle_violations_report.html", "dummy/diff_coverage.html")
+
+    def test_all_reports(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--violations=pycodestyle",
+                    "--html-report",
+                    "dummy/diff_coverage.html",
+                    "--json-report",
+                    "dummy/diff_coverage.json",
+                    "--markdown-report",
+                    "dummy/diff_coverage.md",
+                ]
+            )
+            == 0
+        )
+        compare_html("pycodestyle_violations_report.html", "dummy/diff_coverage.html")
+        compare_json("pycodestyle_violations_report.json", "dummy/diff_coverage.json")
+        compare_markdown("pycodestyle_violations_report.md", "dummy/diff_coverage.md")
 
     def test_added_file_pyflakes_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_violations.txt")

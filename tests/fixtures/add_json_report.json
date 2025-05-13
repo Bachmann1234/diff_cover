@@ -1,0 +1,49 @@
+{
+    "report_name": "XML",
+    "diff_name": "origin/main...HEAD, staged and unstaged changes",
+    "src_stats": {
+        "test_src.txt": {
+            "percent_covered": 50.0,
+            "violation_lines": [
+                2,
+                4,
+                6,
+                8,
+                10
+            ],
+            "covered_lines": [
+                1,
+                3,
+                5,
+                7,
+                9
+            ],
+            "violations": [
+                [
+                    2,
+                    null
+                ],
+                [
+                    4,
+                    null
+                ],
+                [
+                    6,
+                    null
+                ],
+                [
+                    8,
+                    null
+                ],
+                [
+                    10,
+                    null
+                ]
+            ]
+        }
+    },
+    "total_num_lines": 10,
+    "total_num_violations": 5,
+    "total_percent_covered": 50,
+    "num_changed_lines": 10
+}
