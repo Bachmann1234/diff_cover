@@ -1,4 +1,5 @@
-# pylint: disable=use-implicit-booleaness-not-comparison-to-zero,use-implicit-booleaness-not-comparison
+# pylint: disable=use-implicit-booleaness-not-comparison-to-zero
+# pylint: disable=use-implicit-booleaness-not-comparison
 
 """High-level integration tests of diff-cover tool."""
 
