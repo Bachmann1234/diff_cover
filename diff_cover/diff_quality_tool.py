@@ -224,6 +224,7 @@ def parse_quality_args(argv):
 def generate_quality_report(
     tool,
     compare_branch,
+    diff_tool,
     html_report=None,
     json_report=None,
     markdown_report=None,
@@ -233,8 +234,6 @@ def generate_quality_report(
     include_untracked=False,
     exclude=None,
     include=None,
-    diff_range_notation=None,
-    ignore_whitespace=False,
     quiet=False,
 ):
     """
@@ -245,7 +244,7 @@ def generate_quality_report(
     )
     diff = GitDiffReporter(
         compare_branch,
-        git_diff=GitDiffTool(diff_range_notation, ignore_whitespace),
+        git_diff=diff_tool,
         ignore_staged=ignore_staged,
         ignore_unstaged=ignore_unstaged,
         include_untracked=include_untracked,
@@ -353,6 +352,9 @@ def main(argv=None, directory=None):
             percent_passing = generate_quality_report(
                 reporter,
                 arg_dict["compare_branch"],
+                GitDiffTool(
+                    arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
+                ),
                 html_report=arg_dict["html_report"],
                 json_report=arg_dict["json_report"],
                 markdown_report=arg_dict["markdown_report"],
@@ -362,8 +364,6 @@ def main(argv=None, directory=None):
                 include_untracked=arg_dict["include_untracked"],
                 exclude=arg_dict["exclude"],
                 include=arg_dict["include"],
-                diff_range_notation=arg_dict["diff_range_notation"],
-                ignore_whitespace=arg_dict["ignore_whitespace"],
                 quiet=quiet,
             )
             if percent_passing >= fail_under:
