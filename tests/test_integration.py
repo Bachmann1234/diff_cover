@@ -103,6 +103,9 @@ def compare_html(expected_html_path, html_report_path, clear_inline_css=True):
             html = html_report.read()
             expected = expected_file.read()
             if clear_inline_css:
+                # The CSS is provided by pygments and changes fairly often.
+                # Im ok with simply saying "There was css"
+                # Perhaps I will eat these words
                 html = clean_content.sub("", html)
                 expected = clean_content.sub("", expected)
             assert expected.strip() == html.strip()
