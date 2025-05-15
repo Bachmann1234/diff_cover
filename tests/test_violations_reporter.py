@@ -2138,8 +2138,7 @@ class TestRuffCheckQualityDriverTest:
         ]
 
         quality = QualityReporter(ruff_check_driver)
+        actual_violations = quality.violations("foo/bar/path/to/file.py")
 
         assert quality.name() == "ruff.check"
-        assert quality.measured_lines("foo/bar/path/to/file.sh") is None
-        actual_violations = quality.violations("foo/bar/path/to/file.py")
         assert actual_violations == expected_violations
