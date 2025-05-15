@@ -28,6 +28,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
+    ruff_check_driver,
     shellcheck_driver,
 )
 
@@ -2088,3 +2089,57 @@ class TestCppcheckQualityDriverTest:
         assert len(actual_violations) == len(expected_violations)
         for expected in expected_violations:
             assert expected in actual_violations
+
+
+class TestRuffCheckQualityDriverTest:
+    """Tests for ruff check quality driver."""
+
+    def test_quality(self, process_patcher):
+        """Integration test."""
+        process_patcher(
+            (
+                dedent(
+                    """
+            foo/bar/path/to/file.py:244:26: F541 [*] f-string without any placeholders
+                |
+            242 |     ]
+            243 |     if len(xml_roots) > 0 and len(lcov_roots) > 0:
+            244 |         raise ValueError(f"Mixing LCov and XML reports is not supported yet")
+                |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ F541
+            245 |     elif len(xml_roots) > 0:
+            246 |         coverage = XmlCoverageReporter(xml_roots, src_roots, expand_coverage_report)
+                |
+                = help: Remove extraneous `f` prefix
+
+            foo/bar/path/to/file.py:132:27: F841 [*] Local variable `e` is assigned to but never used
+                |
+            130 |             with open(self.diff_file_path, "r") as file:
+            131 |                 return file.read()
+            132 |         except IOError as e:
+                |                           ^ F841
+            133 |             raise ValueError(
+            134 |                 dedent(
+                |
+                = help: Remove assignment to unused variable `e`
+            """
+                )
+                .strip()
+                .encode("ascii"),
+                "",
+            )
+        )
+
+        expected_violations = [
+            Violation(line=244, message="F541 [*] f-string without any placeholders"),
+            Violation(
+                line=132,
+                message="F841 [*] Local variable `e` is assigned to but never used",
+            ),
+        ]
+
+        quality = QualityReporter(ruff_check_driver)
+
+        assert quality.name() == "ruff.check"
+        assert quality.measured_lines("foo/bar/path/to/file.sh") is None
+        actual_violations = quality.violations("foo/bar/path/to/file.py")
+        assert actual_violations == expected_violations
