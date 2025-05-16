@@ -5,6 +5,7 @@ Classes for querying the information in a test coverage report.
 import os
 from collections import defaultdict
 
+
 try:
     # Needed for Python < 3.3, works up to 3.8
     import xml.etree.ElementTree as etree
@@ -19,6 +20,7 @@ from diff_cover.violationsreporters.base import (
     RegexBasedDriver,
     Violation,
 )
+
 
 # Report checkstyle violations.
 # http://checkstyle.sourceforge.net/apidocs/com/puppycrawl/tools/checkstyle/DefaultLogger.html

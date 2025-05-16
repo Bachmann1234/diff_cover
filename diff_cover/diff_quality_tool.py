@@ -58,6 +58,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     shellcheck_driver,
 )
 
+
 QUALITY_DRIVERS = {
     "cppcheck": CppcheckDriver(),
     "pycodestyle": pycodestyle_driver,
