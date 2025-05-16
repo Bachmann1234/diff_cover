@@ -2,6 +2,7 @@
 Wrapper for `git diff` command.
 """
 
+from functools import lru_cache
 from textwrap import dedent
 
 from diff_cover.command_runner import CommandError, execute
@@ -105,6 +106,7 @@ class GitDiffTool:
             0
         ]
 
+    @lru_cache(maxsize=1)
     def untracked(self):
         """Return the untracked files."""
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
