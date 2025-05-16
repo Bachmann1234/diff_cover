@@ -80,7 +80,7 @@ class GitDiffTool:
                         the `--compare-branch` argument allows you to set a different branch.
                     """
                     )
-                )
+                ) from e
             raise
 
     def diff_unstaged(self):
@@ -136,7 +136,7 @@ class GitDiffFileTool(GitDiffTool):
                     Could not read the diff file. Make sure '{self.diff_file_path}' exists?
                     """
                 )
-            )
+            ) from e
 
     def diff_unstaged(self):
         return ""

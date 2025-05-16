@@ -66,7 +66,7 @@ class TestXmlCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     MANY_VIOLATIONS_EXPANDED_MANY_MEASURED = {
         Violation(3, None),
@@ -387,7 +387,7 @@ class TestCloverXmlCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     @pytest.fixture(autouse=True)
     def patch_git_patch(self, mocker):
@@ -597,7 +597,7 @@ class TestJacocoXmlCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     @pytest.fixture(autouse=True)
     def patch_git_patch(self, mocker):
@@ -809,7 +809,7 @@ class TestLcovCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     @pytest.fixture(autouse=True)
     def patch_git_patch(self, mocker):

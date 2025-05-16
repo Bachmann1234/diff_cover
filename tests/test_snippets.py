@@ -58,7 +58,7 @@ def _assert_line_range(src_path, violation_lines, expected_ranges):
     assert len(snippet_list) == len(expected_ranges)
 
     # Check that the snippets have the desired ranges
-    for snippet, line_range in zip(snippet_list, expected_ranges):
+    for snippet, line_range in zip(snippet_list, expected_ranges, strict=False):
         # Expect that the line range is correct
         assert snippet.line_range() == line_range
 
