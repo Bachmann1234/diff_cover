@@ -26,7 +26,9 @@ JSON_REPORT_HELP = "Diff coverage JSON output"
 MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
-FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value"
+FAIL_UNDER_HELP = (
+    "Returns an error code if coverage or quality score is below this value"
+)
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
@@ -90,7 +92,9 @@ def parse_coverage_args(argv):
         help=MARKDOWN_REPORT_HELP,
     )
 
-    parser.add_argument("--show-uncovered", action="store_true", default=None, help=SHOW_UNCOVERED)
+    parser.add_argument(
+        "--show-uncovered", action="store_true", default=None, help=SHOW_UNCOVERED
+    )
 
     parser.add_argument(
         "--expand-coverage-report",
@@ -135,9 +139,13 @@ def parse_coverage_args(argv):
         help=INCLUDE_UNTRACKED_HELP,
     )
 
-    parser.add_argument("--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP)
+    parser.add_argument(
+        "--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP
+    )
 
-    parser.add_argument("--include", metavar="INCLUDE", type=str, nargs="+", help=INCLUDE_HELP)
+    parser.add_argument(
+        "--include", metavar="INCLUDE", type=str, nargs="+", help=INCLUDE_HELP
+    )
 
     parser.add_argument(
         "--src-roots",
@@ -164,9 +172,13 @@ def parse_coverage_args(argv):
         help=IGNORE_WHITESPACE,
     )
 
-    parser.add_argument("-q", "--quiet", action="store_true", default=None, help=QUIET_HELP)
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", default=None, help=QUIET_HELP
+    )
 
-    parser.add_argument("-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE")
+    parser.add_argument(
+        "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
+    )
 
     parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
 
@@ -286,7 +298,9 @@ def main(argv=None, directory=None):
     diff_tool = None
 
     if not arg_dict["diff_file"]:
-        diff_tool = GitDiffTool(arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"])
+        diff_tool = GitDiffTool(
+            arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
+        )
     else:
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 

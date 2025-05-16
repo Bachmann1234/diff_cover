@@ -32,8 +32,9 @@ def test_diff_file_not_found(mocker, diff_tool):
     with pytest.raises(ValueError) as excinfo:
         _diff_tool.diff_committed()
 
-    assert f"Could not read the diff file. Make sure '{_diff_tool.diff_file_path}' exists?" in str(
-        excinfo.value
+    assert (
+        f"Could not read the diff file. Make sure '{_diff_tool.diff_file_path}' exists?"
+        in str(excinfo.value)
     )
     assert _diff_tool.diff_file_path == "non_existent_diff_file.txt"
 

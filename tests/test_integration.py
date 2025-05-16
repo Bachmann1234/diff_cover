@@ -604,7 +604,11 @@ class TestDiffQualityIntegration(ToolsIntegrationBase):
         # Pretend we support a tool named not_installed
         self.mocker.patch.dict(
             diff_quality_tool.QUALITY_DRIVERS,
-            {"not_installed": DoNothingDriver("not_installed", ["txt"], ["not_installed"])},
+            {
+                "not_installed": DoNothingDriver(
+                    "not_installed", ["txt"], ["not_installed"]
+                )
+            },
         )
 
         self._call_quality_expecting_error(

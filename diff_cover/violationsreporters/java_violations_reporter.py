@@ -72,7 +72,9 @@ class CheckstyleXmlDriver(QualityDriver):
             for file_tree in files:
                 for error in file_tree.findall("error"):
                     line_number = error.get("line")
-                    error_str = "{}: {}".format(error.get("severity"), error.get("message"))
+                    error_str = "{}: {}".format(
+                        error.get("severity"), error.get("message")
+                    )
                     violation = Violation(int(line_number), error_str)
                     filename = GitPathTool.relative_path(file_tree.get("name"))
                     violations_dict[filename].append(violation)

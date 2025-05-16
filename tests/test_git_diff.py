@@ -39,7 +39,9 @@ def set_git_diff_output(process):
 @pytest.fixture
 def check_diff_committed(subprocess, set_git_diff_output):
     def _inner(diff_range_notation, ignore_whitespace):
-        tool_ = GitDiffTool(range_notation=diff_range_notation, ignore_whitespace=ignore_whitespace)
+        tool_ = GitDiffTool(
+            range_notation=diff_range_notation, ignore_whitespace=ignore_whitespace
+        )
 
         set_git_diff_output("test output", "")
         output = tool_.diff_committed()
@@ -96,7 +98,9 @@ def test_diff_unstaged(set_git_diff_output, tool, subprocess):
         "--no-ext-diff",
         "-U0",
     ]
-    subprocess.Popen.assert_called_with(expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.Popen.assert_called_with(
+        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
 
 def test_diff_staged(tool, subprocess, set_git_diff_output):
@@ -119,7 +123,9 @@ def test_diff_staged(tool, subprocess, set_git_diff_output):
         "-U0",
         "--cached",
     ]
-    subprocess.Popen.assert_called_with(expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.Popen.assert_called_with(
+        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
 
 def test_diff_missing_branch_error(set_git_diff_output, tool, subprocess):
@@ -159,7 +165,9 @@ def test_diff_committed_compare_branch(set_git_diff_output, tool, subprocess):
         "-U0",
         "release...HEAD",
     ]
-    subprocess.Popen.assert_called_with(expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.Popen.assert_called_with(
+        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 
 
 def test_errors(set_git_diff_output, tool):

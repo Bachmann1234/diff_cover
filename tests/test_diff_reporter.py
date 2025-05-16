@@ -59,7 +59,9 @@ def test_name_ignore_unstaged(git_diff):
 def test_name_ignore_staged_and_unstaged(git_diff):
     # Override the default branch
     assert (
-        GitDiffReporter(git_diff=git_diff, ignore_staged=True, ignore_unstaged=True).name()
+        GitDiffReporter(
+            git_diff=git_diff, ignore_staged=True, ignore_unstaged=True
+        ).name()
         == "origin/main...HEAD"
     )
 
@@ -118,7 +120,9 @@ def test_git_path_selection(diff, git_diff, include, exclude, expected):
         _set_git_diff_output(
             diff,
             git_diff,
-            git_diff_output({"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}),
+            git_diff_output(
+                {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+            ),
             git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
             git_diff_output(dict(), deleted_files=["README.md"]),
         )
@@ -140,7 +144,9 @@ def test_git_source_paths(diff, git_diff):
     _set_git_diff_output(
         diff,
         git_diff,
-        git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}),
+        git_diff_output(
+            {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
         git_diff_output(dict(), deleted_files=["README.md"]),
     )
@@ -172,7 +178,9 @@ def test_git_source_paths_with_space(diff, git_diff):
 
 def test_duplicate_source_paths(diff, git_diff):
     # Duplicate the output for committed, staged, and unstaged changes
-    diff_output = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    diff_output = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
     _set_git_diff_output(diff, git_diff, diff_output, diff_output, diff_output)
 
     # Get the source paths in the diff
@@ -188,7 +196,9 @@ def test_git_source_paths_with_supported_extensions(diff, git_diff):
     _set_git_diff_output(
         diff,
         git_diff,
-        git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}),
+        git_diff_output(
+            {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
         git_diff_output({"README.md": line_numbers(3, 10)}),
     )
@@ -211,7 +221,9 @@ def test_git_lines_changed(diff, git_diff):
     _set_git_diff_output(
         diff,
         git_diff,
-        git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}),
+        git_diff_output(
+            {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
         git_diff_output(dict(), deleted_files=["README.md"]),
     )
@@ -270,7 +282,9 @@ def test_git_deleted_lines(diff, git_diff):
     _set_git_diff_output(
         diff,
         git_diff,
-        git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}),
+        git_diff_output(
+            {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
         git_diff_output(dict(), deleted_files=["README.md"]),
     )
@@ -309,7 +323,9 @@ def test_git_unicode_filename(diff, git_diff):
 
 def test_git_repeat_lines(diff, git_diff):
     # Same committed, staged, and unstaged lines
-    diff_output = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    diff_output = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
     _set_git_diff_output(diff, git_diff, diff_output, diff_output, diff_output)
 
     # Get the lines changed in the diff
@@ -320,7 +336,9 @@ def test_git_repeat_lines(diff, git_diff):
 
 
 def test_git_overlapping_lines(diff, git_diff):
-    main_diff = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    main_diff = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
 
     # Overlap, extending the end of the hunk (lines 3 to 10)
     overlap_1 = git_diff_output({"subdir/file1.py": line_numbers(5, 14)})
@@ -339,7 +357,9 @@ def test_git_overlapping_lines(diff, git_diff):
 
 
 def test_git_line_within_hunk(diff, git_diff):
-    main_diff = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    main_diff = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
 
     # Surround hunk in main (lines 3 to 10)
     surround = git_diff_output({"subdir/file1.py": line_numbers(2, 11)})
@@ -393,7 +413,9 @@ def test_inter_diff_conflict(diff, git_diff):
 
 
 def test_git_no_such_file(diff, git_diff):
-    diff_output = git_diff_output({"subdir/file1.py": [1], "subdir/file2.py": [2], "file3.py": [3]})
+    diff_output = git_diff_output(
+        {"subdir/file1.py": [1], "subdir/file2.py": [2], "file3.py": [3]}
+    )
 
     # Configure the git diff output
     _set_git_diff_output(diff, git_diff, diff_output, "", "")
@@ -541,7 +563,9 @@ def test_inclusion_list(diff, git_diff):
 def test_ignore_staged_inclusion(git_diff):
     reporter = GitDiffReporter(git_diff=git_diff, ignore_staged=True)
 
-    staged_input = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    staged_input = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
     _set_git_diff_output(reporter, git_diff, "", staged_input, "")
 
     assert reporter._get_included_diff_results() == ["", ""]
@@ -559,9 +583,13 @@ def test_ignore_unstaged_inclusion(git_diff):
 
 
 def test_ignore_staged_and_unstaged_inclusion(git_diff):
-    reporter = GitDiffReporter(git_diff=git_diff, ignore_staged=True, ignore_unstaged=True)
+    reporter = GitDiffReporter(
+        git_diff=git_diff, ignore_staged=True, ignore_unstaged=True
+    )
 
-    staged_input = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    staged_input = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
     unstaged_input = git_diff_output(
         {"subdir/file2.py": line_numbers(3, 10) + line_numbers(34, 47)}
     )
@@ -586,7 +614,9 @@ def test_fnmatch_returns_the_default_with_empty_default(diff):
 
 def test_include_untracked(mocker, git_diff):
     reporter = GitDiffReporter(git_diff=git_diff, include_untracked=True)
-    diff_output = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    diff_output = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
     _set_git_diff_output(
         reporter,
         git_diff,
@@ -632,7 +662,9 @@ def test_include_untracked__not_valid_path__not_include_it(
         supported_extensions=supported_extensions,
         exclude=excluded,
     )
-    diff_output = git_diff_output({"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)})
+    diff_output = git_diff_output(
+        {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+    )
     _set_git_diff_output(
         reporter,
         git_diff,

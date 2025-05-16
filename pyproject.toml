@@ -71,22 +71,6 @@ toml = ["tomli"]
 requires = ["poetry-core>=1.0.7"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 88
-target-version = ['py310']
-include = '\.pyi?$'
-exclude = "tests/fixtures/*"
-
-[tool.isort]
-profile = "black"
-extend_skip = "tests/fixtures/"
-
-[tool.pylint.master]
-max-line-length = 100
-load-plugins = [
-    "pylint_pytest",
-]
-
 [tool.coverage.run]
 branch = true
 relative_files = true
@@ -102,45 +86,6 @@ show_missing = true
 show_contexts = true
 skip_covered = false
 
-[tool.pylint."messages control"]
-enable = ["all"]
-disable = [
-    # allow TODO comments
-    "fixme",
-    # allow disables
-    "locally-disabled",
-    "suppressed-message",
-    # covered by isort
-    "ungrouped-imports",
-    # allow classes and functions w/o docstring
-    "missing-docstring",
-    # hard number checks can be ignored, because they are covered in code reviews
-    "too-many-instance-attributes",
-    "too-many-arguments",
-    "too-many-locals",
-    "too-many-branches",
-    "too-few-public-methods",
-    "too-many-nested-blocks",
-    "too-many-public-methods",
-    # allow methods not to use self
-    "no-self-use",
-    # currently some code seems duplicated for pylint
-    "duplicate-code",
-    # we are a command line tool and don't want to show all internals
-    "raise-missing-from",
-]
-
-[tool.pylint.basic]
-good-names = [
-    "_",
-    "i",
-    "setUp",
-    "tearDown",
-    "e",
-    "ex",
-]
-no-docstring-rgx = "^_"
-
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 xfail_strict = true
@@ -152,27 +97,70 @@ markers = [
 max_line_length = 120
 
 [tool.ruff]
-line-length = 100
-target-version = "py39"
-exclude = [
-    "tests/fixtures/*",
-]
+line-length = 88
+target-version = "py310"
+src = ["diff_cover", "tests"]
+exclude = ["tests/fixtures/*"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-line-ending = "auto"
 skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.ruff.lint]
-select = [
-    # McCabe complexity
-    "C901",
-    # pycodestyle
-    "E",
-    # pyflakes
-    "F",
-    # pycodestyle warnings
-    "W",
+select = ["ALL"]
+ignore = [
+    # allow TODO comments (equivalent to "fixme")
+    "FIX",
+    
+    # allow disables (equivalent to "locally-disabled", "suppressed-message")
+    "RUF100",
+    
+    # covered by isort (equivalent to "ungrouped-imports")
+    "I",
+    
+    # allow classes and functions w/o docstring (equivalent to "missing-docstring")
+    "D1",
+    
+    # hard number checks (equivalent to "too-many-*" rules)
+    "C901",  # complexity
+    "PLR0912",  # too many branches
+    "PLR0913",  # too many arguments
+    "PLR0914",  # too many locals
+    "PLR0915",  # too many statements
+    "PLR0916",  # too many nested blocks
+    "PLR0904",  # too many public methods
+    
+    # duplicate code detection (equivalent to "duplicate-code")
+    "CPY",
+    
+    # we are a command line tool (equivalent to "raise-missing-from")
+    "B904",
+    
+    # Resolve incompatible docstring rules
+    "D203",  # Keep D211 (no-blank-line-before-class)
+    "D213",  # Keep D212 (multi-line-summary-first-line)
+    
+    # Avoid formatter conflicts
+    "COM812",
 ]
-ignore = ["E203"]  # Whitespace before ':'
+
+# The equivalent of pylint's good-names
+allowed-confusables = ["_"]
+
+[tool.ruff.lint.pep8-naming]
+# Allow specific names that might otherwise violate naming conventions
+ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
+
+[tool.ruff.lint.pydocstyle]
+# Equivalent to pylint's no-docstring-rgx
+ignore-decorators = ["^_"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["diff_cover", "tests"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+lines-between-types = 0
+lines-after-imports = 2
+combine-as-imports = true
+split-on-trailing-comma = false

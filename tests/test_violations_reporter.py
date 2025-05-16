@@ -134,7 +134,9 @@ class TestXmlCoverageReporterTest:
         violations = self.MANY_VIOLATIONS
         measured = self.FEW_MEASURED
 
-        xml = self._coverage_xml(file_paths, violations, measured, source_paths=source_paths)
+        xml = self._coverage_xml(
+            file_paths, violations, measured, source_paths=source_paths
+        )
         coverage = XmlCoverageReporter([xml])
 
         assert violations == coverage.violations(f"{fancy_path}/{file_paths[0]}")
@@ -225,7 +227,9 @@ class TestXmlCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert violations1 & violations2 & violations3 == coverage.violations("file1.py")
+        assert violations1 & violations2 & violations3 == coverage.violations(
+            "file1.py"
+        )
 
         assert measured1 | measured2 | measured3 == coverage.measured_lines("file1.py")
 
@@ -233,7 +237,9 @@ class TestXmlCoverageReporterTest:
         # Construct the XML report
         xml_roots = [
             self._coverage_xml(["file.py"], self.MANY_VIOLATIONS, self.FEW_MEASURED),
-            self._coverage_xml(["other_file.py"], self.FEW_VIOLATIONS, self.MANY_MEASURED),
+            self._coverage_xml(
+                ["other_file.py"], self.FEW_VIOLATIONS, self.MANY_MEASURED
+            ),
         ]
 
         # Parse the report
@@ -294,7 +300,9 @@ class TestXmlCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert self.MANY_VIOLATIONS_EXPANDED_MANY_MEASURED == coverage.violations("file1.java")
+        assert self.MANY_VIOLATIONS_EXPANDED_MANY_MEASURED == coverage.violations(
+            "file1.java"
+        )
 
     def test_expand_unreported_lines_without_violations(self):
         # Construct the XML report
@@ -482,14 +490,20 @@ class TestCloverXmlCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert violations1 & violations2 & violations3 == coverage.violations("file1.java")
-        assert measured1 | measured2 | measured3 == coverage.measured_lines("file1.java")
+        assert violations1 & violations2 & violations3 == coverage.violations(
+            "file1.java"
+        )
+        assert measured1 | measured2 | measured3 == coverage.measured_lines(
+            "file1.java"
+        )
 
     def test_different_files_in_inputs(self):
         # Construct the XML report
         xml_roots = [
             self._coverage_xml(["file.java"], self.MANY_VIOLATIONS, self.FEW_MEASURED),
-            self._coverage_xml(["other_file.java"], self.FEW_VIOLATIONS, self.MANY_MEASURED),
+            self._coverage_xml(
+                ["other_file.java"], self.FEW_VIOLATIONS, self.MANY_MEASURED
+            ),
         ]
 
         # Parse the report
@@ -686,15 +700,21 @@ class TestJacocoXmlCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert violations1 & violations2 & violations3 == coverage.violations("file1.java")
+        assert violations1 & violations2 & violations3 == coverage.violations(
+            "file1.java"
+        )
 
-        assert measured1 | measured2 | measured3 == coverage.measured_lines("file1.java")
+        assert measured1 | measured2 | measured3 == coverage.measured_lines(
+            "file1.java"
+        )
 
     def test_different_files_in_inputs(self):
         # Construct the XML report
         xml_roots = [
             self._coverage_xml(["file.java"], self.MANY_VIOLATIONS, self.FEW_MEASURED),
-            self._coverage_xml(["other_file.java"], self.FEW_VIOLATIONS, self.MANY_MEASURED),
+            self._coverage_xml(
+                ["other_file.java"], self.FEW_VIOLATIONS, self.MANY_MEASURED
+            ),
         ]
 
         # Parse the report
@@ -892,15 +912,21 @@ class TestLcovCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert violations1 & violations2 & violations3 == coverage.violations("file1.java")
+        assert violations1 & violations2 & violations3 == coverage.violations(
+            "file1.java"
+        )
 
-        assert measured1 | measured2 | measured3 == coverage.measured_lines("file1.java")
+        assert measured1 | measured2 | measured3 == coverage.measured_lines(
+            "file1.java"
+        )
 
     def test_different_files_in_inputs(self):
         # Construct the LCOV report
         lcov_repots = [
             self._coverage_lcov(["file.java"], self.MANY_VIOLATIONS, self.FEW_MEASURED),
-            self._coverage_lcov(["other_file.java"], self.FEW_VIOLATIONS, self.MANY_MEASURED),
+            self._coverage_lcov(
+                ["other_file.java"], self.FEW_VIOLATIONS, self.MANY_MEASURED
+            ),
         ]
 
         # Parse the report
@@ -956,7 +982,9 @@ class TestLcovCoverageReporterTest:
             for file_path in file_paths:
                 f.write(f"SF:{file_path}\n")
                 for line_num in measured:
-                    f.write(f"DA:{line_num},{0 if line_num in violation_lines else 1}\n")
+                    f.write(
+                        f"DA:{line_num},{0 if line_num in violation_lines else 1}\n"
+                    )
                 f.write("end_of_record\n")
         try:
             return LcovCoverageReporter.parse(f.name)
@@ -1564,7 +1592,9 @@ class TestPylintQualityReporterTest:
         ]
 
         violations = quality.violations("file.py")
-        assert violations == [Violation(2, "W0612: cls_name.func_\u9492: Unused variable '\u2920'")]
+        assert violations == [
+            Violation(2, "W0612: cls_name.func_\u9492: Unused variable '\u2920'")
+        ]
 
     def test_unicode_continuation_char(self, process_patcher):
         process_patcher((b"file.py:2: [W1401] Invalid char '\xc3'", ""), 0)
@@ -1612,7 +1642,9 @@ class TestPylintQualityReporterTest:
 
     def test_quality_error(self, mocker, process_patcher):
         # Patch the output stderr/stdout and returncode of `pylint`
-        process_patcher((b"file1.py:1: [C0111] Missing docstring", b"oops"), status_code=1)
+        process_patcher(
+            (b"file1.py:1: [C0111] Missing docstring", b"oops"), status_code=1
+        )
 
         # Parse the report
         code = mocker.patch(
@@ -1678,7 +1710,9 @@ class TestPylintQualityReporterTest:
         # Expect that we get the right violations
         expected_violations = [
             Violation(1, "C0111: Missing docstring"),
-            Violation(57, "W0511: TODO the name of this method is a little bit confusing"),
+            Violation(
+                57, "W0511: TODO the name of this method is a little bit confusing"
+            ),
             Violation(
                 183,
                 'C0103: Foo.bar.gettag: Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)',
@@ -2048,9 +2082,7 @@ class TestCppcheckQualityDriverTest:
                 "(error) Array 'yolo[4]' accessed at index 4, which is out of bounds.",
             ),
         }
-        report = (
-            "[src/foo.c:123]: (error) Array 'yolo[4]' accessed at index 4, which is out of bounds."
-        )
+        report = "[src/foo.c:123]: (error) Array 'yolo[4]' accessed at index 4, which is out of bounds."
 
         driver = CppcheckDriver()
         actual_violations = driver.parse_reports([report])

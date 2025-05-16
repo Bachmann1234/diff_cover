@@ -114,7 +114,9 @@ def patch_git_patch(mocker):
 
 @pytest.fixture
 def report_mock(mocker):
-    return mocker.patch("diff_cover.diff_quality_tool.generate_quality_report", return_value=100)
+    return mocker.patch(
+        "diff_cover.diff_quality_tool.generate_quality_report", return_value=100
+    )
 
 
 def test_parse_options(report_mock):

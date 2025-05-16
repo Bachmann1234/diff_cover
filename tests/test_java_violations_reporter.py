@@ -258,7 +258,9 @@ class TestCheckstyleXmlQualityReporterTest:
         # Expect that we get the right violations
         expected_violations = [
             Violation(1, "error: Missing docstring"),
-            Violation(57, "warning: TODO the name of this method is a little bit confusing"),
+            Violation(
+                57, "warning: TODO the name of this method is a little bit confusing"
+            ),
             Violation(
                 183,
                 "error: Invalid name '' for type argument (should match [a-z_][a-z0-9_]{2,30}$)",

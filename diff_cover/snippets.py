@@ -134,7 +134,11 @@ class Snippet:
         header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
         if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
             return header + (
-                "```" + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name] + "\n" + text + "\n```\n"
+                "```"
+                + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
+                + "\n"
+                + text
+                + "\n```\n"
             )
 
         # unknown programming language, return a non-decorated fenced code block:
@@ -379,7 +383,9 @@ class Snippet:
                 elif lines_since_last_violation > cls.MAX_GAP_IN_SNIPPET:
                     # Expand to include extra context, but not after last line
                     snippet_end = line_num - lines_since_last_violation
-                    snippet_end = min(num_src_lines, snippet_end + cls.NUM_CONTEXT_LINES)
+                    snippet_end = min(
+                        num_src_lines, snippet_end + cls.NUM_CONTEXT_LINES
+                    )
                     current_range = (current_range[0], snippet_end)
 
                     # Store the snippet and start looking for the next one
@@ -408,4 +414,8 @@ class Snippet:
         than or equal to `start_line`; otherwise, they will
         be excluded from the list.
         """
-        return [line_num - start_line + 1 for line_num in line_num_list if line_num >= start_line]
+        return [
+            line_num - start_line + 1
+            for line_num in line_num_list
+            if line_num >= start_line
+        ]

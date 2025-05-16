@@ -239,7 +239,9 @@ class TestTemplateReportGenerator(BaseReportGeneratorTest):
 
     def _test_input_expected_output(self, input_with_expected_output):
         for test_input, expected_output in input_with_expected_output:
-            assert expected_output == TemplateReportGenerator.combine_adjacent_lines(test_input)
+            assert expected_output == TemplateReportGenerator.combine_adjacent_lines(
+                test_input
+            )
 
     def test_combine_adjacent_lines_no_adjacent(self):
         in_out = [([1, 3], ["1", "3"]), ([1, 5, 7, 10], ["1", "5", "7", "10"])]
@@ -549,7 +551,9 @@ class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTes
         self.use_default_values()
         # Have violations_batch() return the violations.
         self.coverage.violations_batch.side_effect = None
-        self.coverage.violations_batch.return_value = copy.deepcopy(self._violations_dict)
+        self.coverage.violations_batch.return_value = copy.deepcopy(
+            self._violations_dict
+        )
         # Have violations() return an empty list to ensure violations_batch()
         # is used.
         for src in self.SRC_PATHS:
