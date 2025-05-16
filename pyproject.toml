@@ -162,7 +162,6 @@ allowed-confusables = ["_"]
 ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
 
 [tool.ruff.lint.per-file-ignores]
-# Allow assert statements in test files
 "tests/*" = [
     "S101",    # Disables Assert statements
     "PLR2004", # Disables Magic value
