@@ -68,9 +68,7 @@ class GitDiffTool:
             branch=compare_branch, notation=self.range_notation
         )
         try:
-            return execute(
-                self._default_git_args + self._default_diff_args + [diff_range]
-            )[0]
+            return execute(self._default_git_args + self._default_diff_args + [diff_range])[0]
         except CommandError as e:
             if "unknown revision" in str(e):
                 raise ValueError(
@@ -101,9 +99,7 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        return execute(self._default_git_args + self._default_diff_args + ["--cached"])[
-            0
-        ]
+        return execute(self._default_git_args + self._default_diff_args + ["--cached"])[0]
 
     def untracked(self):
         """Return the untracked files."""
@@ -114,9 +110,7 @@ class GitDiffTool:
 
 
 class GitDiffFileTool(GitDiffTool):
-
     def __init__(self, diff_file_path):
-
         self.diff_file_path = diff_file_path
         super().__init__("...", False)
 

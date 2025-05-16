@@ -72,9 +72,7 @@ def _src_lines(start_line, end_line):
     Test lines to write to the source file
     (Line 1, Line 2, ...).
     """
-    return "\n".join(
-        [f"Line {line_num}" for line_num in range(start_line, end_line + 1)]
-    )
+    return "\n".join([f"Line {line_num}" for line_num in range(start_line, end_line + 1)])
 
 
 def _assert_format(
@@ -85,9 +83,7 @@ def _assert_format(
     violation_lines,
     expected_fixture,
 ):
-    snippet = Snippet(
-        src_tokens, src_filename, start_line, last_line, violation_lines, None
-    )
+    snippet = Snippet(src_tokens, src_filename, start_line, last_line, violation_lines, None)
     result = snippet.html()
 
     expected_str = load_fixture(expected_fixture, encoding="utf-8")
@@ -290,9 +286,7 @@ def test_load_utf8_snippets():
 
 @pytest.mark.usefixtures("switch_to_fixture_dir")
 def test_load_declared_arabic():
-    _compare_snippets_output(
-        "html", "snippet_8859.py", [7], "snippet_arabic_output.html"
-    )
+    _compare_snippets_output("html", "snippet_8859.py", [7], "snippet_arabic_output.html")
 
 
 def test_latin_one_undeclared(tmp_path):

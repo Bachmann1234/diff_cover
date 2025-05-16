@@ -34,9 +34,7 @@ def test_project_root_command(process, subprocess):
 
     # Expect that the correct command was executed
     expected = ["git", "rev-parse", "--show-toplevel", "--encoding=utf-8"]
-    subprocess.Popen.assert_called_with(
-        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    subprocess.Popen.assert_called_with(expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def test_relative_path(process):

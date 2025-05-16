@@ -31,11 +31,7 @@ def execute(command, exit_codes=None):
         sys.stderr.write(
             " ".join(
                 [
-                    (
-                        cmd.decode(sys.getfilesystemencoding())
-                        if isinstance(cmd, bytes)
-                        else cmd
-                    )
+                    (cmd.decode(sys.getfilesystemencoding()) if isinstance(cmd, bytes) else cmd)
                     for cmd in command
                 ]
             )
@@ -54,9 +50,7 @@ def run_command_for_code(command):
     Returns command's exit code.
     """
     try:
-        process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         process.communicate()
     except FileNotFoundError:
         return 1

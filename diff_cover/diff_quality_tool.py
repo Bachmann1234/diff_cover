@@ -75,9 +75,7 @@ QUALITY_DRIVERS = {
     "shellcheck": shellcheck_driver,
 }
 
-VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(
-    sorted(QUALITY_DRIVERS)
-)
+VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(sorted(QUALITY_DRIVERS))
 INPUT_REPORTS_HELP = "Which violations reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
 INCLUDE_HELP = "Files to include (glob pattern)"
@@ -145,9 +143,7 @@ def parse_quality_args(argv):
 
     parser.add_argument("--options", type=str, nargs="?", help=OPTIONS_HELP)
 
-    parser.add_argument(
-        "--fail-under", metavar="SCORE", type=float, help=FAIL_UNDER_HELP
-    )
+    parser.add_argument("--fail-under", metavar="SCORE", type=float, help=FAIL_UNDER_HELP)
 
     parser.add_argument(
         "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
@@ -167,13 +163,9 @@ def parse_quality_args(argv):
         help=INCLUDE_UNTRACKED_HELP,
     )
 
-    parser.add_argument(
-        "--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP
-    )
+    parser.add_argument("--exclude", metavar="EXCLUDE", type=str, nargs="+", help=EXCLUDE_HELP)
 
-    parser.add_argument(
-        "--include", metavar="INCLUDE", nargs="+", type=str, help=INCLUDE_HELP
-    )
+    parser.add_argument("--include", metavar="INCLUDE", nargs="+", type=str, help=INCLUDE_HELP)
 
     parser.add_argument(
         "--diff-range-notation",
@@ -194,17 +186,11 @@ def parse_quality_args(argv):
         help=IGNORE_WHITESPACE,
     )
 
-    parser.add_argument(
-        "-q", "--quiet", action="store_true", default=None, help=QUIET_HELP
-    )
+    parser.add_argument("-q", "--quiet", action="store_true", default=None, help=QUIET_HELP)
 
-    parser.add_argument(
-        "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
-    )
+    parser.add_argument("-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE")
 
-    parser.add_argument(
-        "--report-root-path", help=REPORT_ROOT_PATH_HELP, metavar="ROOT_PATH"
-    )
+    parser.add_argument("--report-root-path", help=REPORT_ROOT_PATH_HELP, metavar="ROOT_PATH")
 
     defaults = {
         "ignore_whitespace": False,
@@ -218,9 +204,7 @@ def parse_quality_args(argv):
         "quiet": False,
     }
 
-    return get_config(
-        parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_QUALITY
-    )
+    return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_QUALITY)
 
 
 def generate_quality_report(
@@ -341,22 +325,16 @@ def main(argv=None, directory=None):
                 # If we've been given pre-generated reports,
                 # try to open the files
                 if arg_dict["report_root_path"]:
-                    driver.add_driver_args(
-                        report_root_path=arg_dict["report_root_path"]
-                    )
+                    driver.add_driver_args(report_root_path=arg_dict["report_root_path"])
 
                 reporter = QualityReporter(driver, input_reports, user_options)
             elif reporter_factory_fn:
-                reporter = reporter_factory_fn(
-                    reports=input_reports, options=user_options
-                )
+                reporter = reporter_factory_fn(reports=input_reports, options=user_options)
 
             percent_passing = generate_quality_report(
                 reporter,
                 arg_dict["compare_branch"],
-                GitDiffTool(
-                    arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
-                ),
+                GitDiffTool(arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]),
                 html_report=arg_dict["html_report"],
                 json_report=arg_dict["json_report"],
                 markdown_report=arg_dict["markdown_report"],

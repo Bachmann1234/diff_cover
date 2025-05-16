@@ -97,9 +97,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         if not self._xml_cache[index]:
             self._xml_cache[index] = self._get_xml_classes(xml_document)
 
-        return self._xml_cache[index].get(src_abs_path) or self._xml_cache[index].get(
-            src_rel_path
-        )
+        return self._xml_cache[index].get(src_abs_path) or self._xml_cache[index].get(src_rel_path)
 
     def get_src_path_line_nodes_cobertura(self, index, xml_document, src_path):
         classes = self._get_classes(index, xml_document, src_path)
@@ -140,9 +138,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         for root in self._src_roots:
             if (
                 os.path.normcase(
-                    GitPathTool.relative_path(
-                        os.path.join(root, package_name, file_name)
-                    )
+                    GitPathTool.relative_path(os.path.join(root, package_name, file_name))
                 )
                 == norm_src_path
             ):
@@ -163,9 +159,7 @@ class XmlCoverageReporter(BaseViolationReporter):
             _files = [
                 _file
                 for _file in pkg.findall("sourcefile")
-                if self._measured_source_path_matches(
-                    pkg.get("name"), _file.get("name"), src_path
-                )
+                if self._measured_source_path_matches(pkg.get("name"), _file.get("name"), src_path)
             ]
             files.extend(_files)
 
@@ -195,23 +189,17 @@ class XmlCoverageReporter(BaseViolationReporter):
             for i, xml_document in enumerate(self._xml_roots):
                 if xml_document.findall(".[@clover]"):
                     # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
-                    line_nodes = self.get_src_path_line_nodes_clover(
-                        xml_document, src_path
-                    )
+                    line_nodes = self.get_src_path_line_nodes_clover(xml_document, src_path)
                     _number = "num"
                     _hits = "count"
                 elif xml_document.findall(".[@name]"):
                     # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
-                    line_nodes = self.get_src_path_line_nodes_jacoco(
-                        xml_document, src_path
-                    )
+                    line_nodes = self.get_src_path_line_nodes_jacoco(xml_document, src_path)
                     _number = "nr"
                     _hits = "ci"
                 else:
                     # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
-                    line_nodes = self.get_src_path_line_nodes_cobertura(
-                        i, xml_document, src_path
-                    )
+                    line_nodes = self.get_src_path_line_nodes_cobertura(i, xml_document, src_path)
                     _number = "number"
                     _hits = "hits"
                 if line_nodes is None:
@@ -221,9 +209,7 @@ class XmlCoverageReporter(BaseViolationReporter):
                 if self._expand_coverage_report:
                     reported_line_hits = {}
                     for line in line_nodes:
-                        reported_line_hits[int(line.get(_number))] = int(
-                            line.get(_hits, 0)
-                        )
+                        reported_line_hits[int(line.get(_number))] = int(line.get(_hits, 0))
                     if reported_line_hits:
                         last_hit_number = 0
                         for line_number in range(
@@ -235,9 +221,7 @@ class XmlCoverageReporter(BaseViolationReporter):
                             else:
                                 # This is an unreported line.
                                 # We add it with the previous line hit score
-                                line_nodes.append(
-                                    {_hits: last_hit_number, _number: line_number}
-                                )
+                                line_nodes.append({_hits: last_hit_number, _number: line_number})
 
                 # First case, need to define violations initially
                 if violations is None:
@@ -330,9 +314,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 line_no = int(args[0])
                 num_executions = int(args[1])
                 if source_file is None:
-                    raise ValueError(
-                        f"No source file specified for line coverage: {line}"
-                    )
+                    raise ValueError(f"No source file specified for line coverage: {line}")
                 if line_no not in lcov_report[source_file]:
                     lcov_report[source_file][line_no] = 0
                 lcov_report[source_file][line_no] += num_executions
@@ -399,9 +381,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 if violations is None:
                     violations = {
                         Violation(int(line_no), None)
-                        for line_no, num_executions in lcov_document[
-                            src_search_path
-                        ].items()
+                        for line_no, num_executions in lcov_document[src_search_path].items()
                         if int(num_executions) == 0
                     }
 
@@ -411,9 +391,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 else:
                     violations = violations & {
                         Violation(int(line_no), None)
-                        for line_no, num_executions in lcov_document[
-                            src_search_path
-                        ].items()
+                        for line_no, num_executions in lcov_document[src_search_path].items()
                         if int(num_executions) == 0
                     }
 
@@ -421,9 +399,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 # measured = measured | {int(line.get(_number)) for line in line_nodes}
                 measured = measured | {
                     int(line_no)
-                    for line_no, num_executions in lcov_document[
-                        src_search_path
-                    ].items()
+                    for line_no, num_executions in lcov_document[src_search_path].items()
                 }
 
             # If we don't have any information about the source file,
@@ -615,9 +591,7 @@ class PylintDriver(QualityDriver):
                 2 | 4 | 8 | 16,
             ],
         )
-        self.pylint_expression = re.compile(
-            r"^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$"
-        )
+        self.pylint_expression = re.compile(r"^([^:]+):(\d+): \[(\w+),? ?([^\]]*)] (.*)$")
         self.dupe_code_violation = "R0801"
         self.command_to_check_install = ["pylint", "--version"]
 
@@ -681,9 +655,7 @@ class PylintDriver(QualityDriver):
                         # If we're looking for a particular source file,
                         # ignore any other source files.
                         if function_name:
-                            error_str = "{}: {}: {}".format(
-                                pylint_code, function_name, message
-                            )
+                            error_str = "{}: {}: {}".format(pylint_code, function_name, message)
                         else:
                             error_str = f"{pylint_code}: {message}"
 

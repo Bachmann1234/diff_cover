@@ -19,13 +19,9 @@ class DiffViolations:
     """
 
     def __init__(self, violations, measured_lines, diff_lines):
-        self.lines = {violation.line for violation in violations}.intersection(
-            diff_lines
-        )
+        self.lines = {violation.line for violation in violations}.intersection(diff_lines)
 
-        self.violations = {
-            violation for violation in violations if violation.line in self.lines
-        }
+        self.violations = {violation for violation in violations if violation.line in self.lines}
 
         # By convention, a violation reporter
         # can return `None` to indicate that all lines are "measured"
@@ -121,9 +117,7 @@ class BaseReportGenerator(ABC):
             return []
 
         return sorted(
-            set(diff_violations.measured_lines).difference(
-                set(self.violation_lines(src_path))
-            )
+            set(diff_violations.measured_lines).difference(set(self.violation_lines(src_path)))
         )
 
     def violation_lines(self, src_path):
@@ -148,12 +142,7 @@ class BaseReportGenerator(ABC):
         which we have coverage info.
         """
 
-        return sum(
-            [
-                len(summary.measured_lines)
-                for summary in self._diff_violations().values()
-            ]
-        )
+        return sum([len(summary.measured_lines) for summary in self._diff_violations().values()])
 
     def total_num_violations(self):
         """
@@ -179,8 +168,7 @@ class BaseReportGenerator(ABC):
     def num_changed_lines(self):
         """Returns the number of changed lines."""
         return sum(
-            len(self._diff.lines_changed(src_path))
-            for src_path in self._diff.src_paths_changed()
+            len(self._diff.lines_changed(src_path)) for src_path in self._diff.src_paths_changed()
         )
 
     def _diff_violations(self):

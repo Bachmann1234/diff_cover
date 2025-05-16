@@ -85,9 +85,7 @@ def test_get_config_unrecognized_file(mocker, tool):
         ),
     ],
 )
-def test_get_config(
-    mocker, tmp_path, tool, cli_config, defaults, file_content, expected
-):
+def test_get_config(mocker, tmp_path, tool, cli_config, defaults, file_content, expected):
     if file_content:
         toml_file = tmp_path / "foo.toml"
         toml_file.write_text(file_content)

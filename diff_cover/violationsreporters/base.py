@@ -74,9 +74,7 @@ class BaseViolationReporter(ABC):
 
 
 class QualityDriver(ABC):
-    def __init__(
-        self, name, supported_extensions, command, exit_codes=None, output_stderr=False
-    ):
+    def __init__(self, name, supported_extensions, command, exit_codes=None, output_stderr=False):
         """
         Args:
             name: (str) name of the driver
