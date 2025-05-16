@@ -155,9 +155,7 @@ max_line_length = 120
 line-length = 100
 target-version = "py39"
 exclude = [
-    "tests/fixtures/snippet_8859.py",
-    "tests/fixtures/snippet_unicode.py",
-    "tests/fixtures/snippet_src.py",
+    "tests/fixtures/*",
 ]
 
 [tool.ruff.format]
@@ -178,7 +176,3 @@ select = [
     "W",
 ]
 ignore = ["E203"]  # Whitespace before ':'
-
-[tool.ruff.lint.per-file-ignores]
-"diff_cover/tests/*" = ["E501"]
-"diff_cover/tests/fixtures/*" = ["E", "F", "W"]
