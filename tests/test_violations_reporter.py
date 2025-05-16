@@ -299,9 +299,10 @@ class TestXmlCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert coverage.violations(
-            "file1.java"
-        ) == self.MANY_VIOLATIONS_EXPANDED_MANY_MEASURED
+        assert (
+            coverage.violations("file1.java")
+            == self.MANY_VIOLATIONS_EXPANDED_MANY_MEASURED
+        )
 
     def test_expand_unreported_lines_without_violations(self):
         # Construct the XML report
