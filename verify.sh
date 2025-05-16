@@ -11,4 +11,3 @@ diff-quality --version
 diff-cover coverage.xml --include-untracked
 diff-quality --violations ruff.check --include-untracked
 doc8 README.rst --ignore D001
-

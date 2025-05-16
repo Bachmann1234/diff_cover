@@ -111,8 +111,16 @@ line-ending = "auto"
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    # Disable all annotations
+    "ANN",
     # allow TODO comments (equivalent to "fixme")
     "FIX",
+
+    "D200",  # Disables One-line docstring should fit on one line
+    "D205",  # Disables 1 blank line required between summary line and description
+    "D212",  # Disables Multi-line docstring summary should start at the first line
+    "D400",  # Disables First line should end with a period
+    "D415",  # Disables First line should end with a period, question mark, or exclamation point
     
     # allow disables (equivalent to "locally-disabled", "suppressed-message")
     "RUF100",
@@ -152,6 +160,15 @@ allowed-confusables = ["_"]
 [tool.ruff.lint.pep8-naming]
 # Allow specific names that might otherwise violate naming conventions
 ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow assert statements in test files
+"tests/*" = [
+    "S101",    # Disables Assert statements
+    "PLR2004", # Disables Magic value
+    "PT011",   # Disables Exception is too broad
+    "RUF012",  # Disables Mutable class attributes should be annotated with typing.ClassVar
+]
 
 [tool.ruff.lint.pydocstyle]
 # Equivalent to pylint's no-docstring-rgx
