@@ -21,6 +21,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
 )
 
+
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
 MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"

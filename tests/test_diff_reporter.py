@@ -478,7 +478,7 @@ def test_git_diff_error(
 
         # Expect that both methods that access git diff raise an error
         with pytest.raises(GitDiffError):
-            print("src_paths_changed() " "should fail for {}".format(diff_str))
+            print("src_paths_changed() should fail for {}".format(diff_str))
             diff.src_paths_changed()
 
         with pytest.raises(GitDiffError):

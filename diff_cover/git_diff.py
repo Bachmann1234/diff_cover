@@ -114,9 +114,7 @@ class GitDiffTool:
 
 
 class GitDiffFileTool(GitDiffTool):
-
     def __init__(self, diff_file_path):
-
         self.diff_file_path = diff_file_path
         super().__init__("...", False)
 
