@@ -58,7 +58,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
@@ -103,9 +102,3 @@ jobs:
           name: coverage.tar.gz
           path: coverage.tar.gz
           retention-days: 1
-      - name: Ensure main branch is available
-        run: |
-          git remote -v
-          git fetch --all
-          # Try to create a local reference to origin/main if it doesn't exist
-          git branch --track main origin/main || true
