@@ -1,5 +1,9 @@
 name: PR Job
 on: [push, pull_request, workflow_dispatch]
+
+env:
+  DEFAULT_PYTHON_VERSION: 3.12
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -32,5 +36,70 @@ jobs:
         run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run The lints and tests
-        run: poetry run bash -x verify.sh
+        run: |
+          echo ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}| sed 's|\.\*||g' >> "$GITHUB_ENV"
+          poetry run bash -x verify.sh
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          include-hidden-files: true
+          if-no-files-found: error
+          name: ${{ env.ARTIFACT_NAME }}
+          path: .coverage
+          retention-days: 1
       - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        run: poetry install
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded_artifacts
+      - name: Clean up temporary artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: coverage_*
+      - name: Combine coverage.py
+        run: |
+          poetry run coverage combine $(find downloaded_artifacts/ -type f | xargs)
+          poetry run coverage xml
+          poetry run coverage html
+          poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          cp coverage.xml htmlcov/coverage.xml
+          cp .coverage htmlcov/.coverage
+      - name: Complete coverage
+        run: |
+          poetry run diff-cover coverage.xml --include-untracked
+          poetry run diff-quality --violations flake8 --include-untracked
+          poetry run diff-quality --violations pylint --include-untracked
+      - name: Upload single coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          include-hidden-files: true
+          if-no-files-found: error
+          name: htmlcov
+          path: htmlcov
+          # Retention days for main branch is 90 days, for other branches is 1 day
+          retention-days: ${{ github.ref == 'refs/heads/main' && 90 || 1 }}
