@@ -46,7 +46,7 @@ jobs:
           if-no-files-found: error
           name: ${{ env.ARTIFACT_NAME }}
           path: .coverage
-          retention-days: ${{ github.ref == 'refs/heads/main' && 90 || 1 }}
+          retention-days: 1
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
   coverage:
