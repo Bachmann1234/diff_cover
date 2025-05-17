@@ -163,7 +163,7 @@ class QualityReporter(BaseViolationReporter):
                     for arg in self.options.split():
                         command.append(arg)
                 if os.path.exists(src_path):
-                    command.append(src_path.encode(sys.getfilesystemencoding()))
+                    command.append(src_path)
 
                     output = execute(command, self.driver.exit_codes)
                     if self.driver.output_stderr:
