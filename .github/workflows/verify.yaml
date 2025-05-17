@@ -82,16 +82,15 @@ jobs:
           name: coverage_*
       - name: Combine coverage.py
         run: |
-          pip list
-          coverage combine $(find downloaded_artifacts/ -type f | xargs)
-          coverage xml
-          coverage html
+          poetry run coverage combine $(find downloaded_artifacts/ -type f | xargs)
+          poetry run coverage xml
+          poetry run coverage html
           tar -cvf coverage.tar.gz htmlcov
       - name: Complete coverage
         run: |
-          diff-cover coverage.xml --include-untracked
-          diff-quality --violations flake8 --include-untracked
-          diff-quality --violations pylint --include-untracked
+          poetry run diff-cover coverage.xml --include-untracked
+          poetry run diff-quality --violations flake8 --include-untracked
+          poetry run diff-quality --violations pylint --include-untracked
       - name: Upload single coverage artifact
         uses: actions/upload-artifact@v4
         with:
