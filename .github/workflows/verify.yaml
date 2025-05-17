@@ -82,6 +82,7 @@ jobs:
           name: coverage_*
       - name: Combine coverage.py
         run: |
+          pip list
           coverage combine $(find downloaded_artifacts/ -type f | xargs)
           coverage xml
           coverage html
