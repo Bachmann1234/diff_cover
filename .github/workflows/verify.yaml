@@ -87,9 +87,10 @@ jobs:
           poetry run coverage combine $(find downloaded_artifacts/ -type f | xargs)
           poetry run coverage xml
           poetry run coverage html
+          poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
           cp coverage.xml htmlcov/coverage.xml
           cp .coverage htmlcov/.coverage
-          tar -cvf coverage.tar.gz htmlcov
+          # tar -cvf coverage.tar.gz htmlcov
       - name: Complete coverage
         run: |
           poetry run diff-cover coverage.xml --include-untracked
@@ -100,6 +101,6 @@ jobs:
         with:
           include-hidden-files: true
           if-no-files-found: error
-          name: coverage.tar.gz
-          path: coverage.tar.gz
+          name: htmlcov
+          path: htmlcov
           retention-days: 1
