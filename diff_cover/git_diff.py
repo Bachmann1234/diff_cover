@@ -2,6 +2,7 @@
 Wrapper for `git diff` command.
 """
 
+from functools import lru_cache
 from textwrap import dedent
 
 from diff_cover.command_runner import CommandError, execute
@@ -41,7 +42,6 @@ class GitDiffTool:
          :param bool ignore_whitespace:
             Perform a diff but ignore any and all whitespace.
         """
-        self._untracked_cache = None
         self.range_notation = range_notation
         self._default_git_args = [
             "git",
@@ -106,11 +106,9 @@ class GitDiffTool:
             0
         ]
 
+    @lru_cache(maxsize=1)
     def untracked(self):
         """Return the untracked files."""
-        if self._untracked_cache is not None:
-            return self._untracked_cache
-
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
         if not output:
             return []
