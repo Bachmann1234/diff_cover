@@ -183,21 +183,7 @@ def parse_coverage_args(argv):
 
     parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
 
-    defaults = {
-        # "show_uncovered": False,
-        # "compare_branch": ,
-        # "fail_under": 0,
-        # "ignore_staged": False,
-        # "ignore_unstaged": False,
-        # "ignore_untracked": False,
-        # "src_roots": ["src/main/java", "src/test/java"],
-        # "ignore_whitespace": False,
-        # "diff_range_notation": "...",
-        # "quiet": False,
-        # "expand_coverage_report": False,
-    }
-
-    return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
+    return get_config(parser=parser, argv=argv, tool=Tool.DIFF_COVER)
 
 
 def generate_coverage_report(

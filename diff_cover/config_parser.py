@@ -70,21 +70,16 @@ def _parse_config_file(file_name, tool):
     raise ParserError(f"No config parser could handle {file_name}")
 
 
-def get_config(parser, argv, defaults, tool):
+def get_config(parser, argv, tool):
     cli_config = vars(parser.parse_args(argv))
     if cli_config["config_file"]:
         file_config = _parse_config_file(cli_config["config_file"], tool)
     else:
         file_config = {}
 
-    config = defaults
+    config = {}
     for config_dict in [file_config, cli_config]:
         for key, value in config_dict.items():
-            if value is None:
-                # if the value is None, it's a default one; only override if not present
-                config.setdefault(key, value)
-            else:
-                # else just override the existing value
-                config[key] = value
+            config[key] = value
 
     return config

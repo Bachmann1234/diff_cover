@@ -136,6 +136,7 @@ def parse_quality_args(argv):
         "--compare-branch",
         metavar="BRANCH",
         type=str,
+        default="origin/main",
         help=COMPARE_BRANCH_HELP,
     )
 
@@ -144,24 +145,24 @@ def parse_quality_args(argv):
     parser.add_argument("--options", type=str, nargs="?", help=OPTIONS_HELP)
 
     parser.add_argument(
-        "--fail-under", metavar="SCORE", type=float, help=FAIL_UNDER_HELP
+        "--fail-under", metavar="SCORE", type=float, default=0, help=FAIL_UNDER_HELP
     )
 
     parser.add_argument(
-        "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
+        "--ignore-staged", action="store_true", default=False, help=IGNORE_STAGED_HELP
     )
 
     parser.add_argument(
         "--ignore-unstaged",
         action="store_true",
-        default=None,
+        default=False,
         help=IGNORE_UNSTAGED_HELP,
     )
 
     parser.add_argument(
         "--include-untracked",
         action="store_true",
-        default=None,
+        default=False,
         help=INCLUDE_UNTRACKED_HELP,
     )
 
@@ -177,6 +178,7 @@ def parse_quality_args(argv):
         "--diff-range-notation",
         metavar="RANGE_NOTATION",
         type=str,
+        default="...",
         help=DIFF_RANGE_NOTATION_HELP,
     )
 
@@ -188,12 +190,12 @@ def parse_quality_args(argv):
     parser.add_argument(
         "--ignore-whitespace",
         action="store_true",
-        default=None,
+        default=False,
         help=IGNORE_WHITESPACE,
     )
 
     parser.add_argument(
-        "-q", "--quiet", action="store_true", default=None, help=QUIET_HELP
+        "-q", "--quiet", action="store_true", default=False, help=QUIET_HELP
     )
 
     parser.add_argument(
@@ -204,21 +206,7 @@ def parse_quality_args(argv):
         "--report-root-path", help=REPORT_ROOT_PATH_HELP, metavar="ROOT_PATH"
     )
 
-    defaults = {
-        "ignore_whitespace": False,
-        "compare_branch": "origin/main",
-        "diff_range_notation": "...",
-        "input_reports": [],
-        "fail_under": 0,
-        "ignore_staged": False,
-        "ignore_unstaged": False,
-        "ignore_untracked": False,
-        "quiet": False,
-    }
-
-    return get_config(
-        parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_QUALITY
-    )
+    return get_config(parser=parser, argv=argv, tool=Tool.DIFF_QUALITY)
 
 
 def generate_quality_report(

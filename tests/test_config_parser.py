@@ -1,4 +1,5 @@
 import pytest
+import argparse
 
 from diff_cover import config_parser
 from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config
@@ -56,45 +57,41 @@ def test_get_config_unrecognized_file(mocker, tool):
     parser = mocker.Mock()
     parser.parse_args().__dict__ = {"config_file": "foo.bar"}
     with pytest.raises(ParserError):
-        get_config(parser, argv=[], defaults={}, tool=tool)
+        get_config(parser, argv=[], tool=tool)
 
 
 @pytest.mark.parametrize(
-    "tool,cli_config,defaults,file_content,expected",
+    "tool,argv,file_content,expected",
     [
         (
             Tool.DIFF_COVER,
-            {"a": 2, "b": None, "c": None},
-            {"a": 4, "b": 3},
+            ["-a", 2],
             None,
-            {"a": 2, "b": 3, "c": None},
+            {"a": 2, "b": None, "c": None},
         ),
         (
             Tool.DIFF_QUALITY,
-            {"a": 2, "b": None, "c": None},
-            {"a": 4, "b": 3},
+            ["-a", 3],
             None,
-            {"a": 2, "b": 3, "c": None},
+            {"a": 3, "b": None, "c": None},
         ),
         (
             Tool.DIFF_COVER,
-            {"a": 2, "b": None, "c": None, "d": None},
-            {"a": 4, "b": 3},
-            "[tool.diff_cover]\na=1\nd=6",
-            {"a": 2, "b": 3, "c": None, "d": 6},
+            ["-a", 2, "c", 1],
+            "[tool.diff_cover]\na=1\nb=6",
+            {"a": 2, "b": 6, "c": 1},
         ),
     ],
 )
-def test_get_config(
-    mocker, tmp_path, tool, cli_config, defaults, file_content, expected
-):
+def test_get_config(tmp_path, tool, argv, file_content, expected):
     if file_content:
         toml_file = tmp_path / "foo.toml"
         toml_file.write_text(file_content)
-        cli_config["config_file"] = expected["config_file"] = str(toml_file)
-    else:
-        cli_config["config_file"] = expected["config_file"] = None
+        argv.expand(["--config-file", str(toml_file)])
 
-    parser = mocker.Mock()
-    parser.parse_args().__dict__ = cli_config
-    assert get_config(parser, argv=[], defaults=defaults, tool=tool) == expected
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", type=int, default=None)
+    parser.add_argument("-b", type=int, default=None)
+    parser.add_argument("-c", type=int, default=None)
+    parser.add_argument("--config-file", type=str, default=None)
+    assert get_config(parser, argv=argv, tool=tool) == expected
