@@ -25,18 +25,20 @@ from diff_cover.violationsreporters.violations_reporter import (
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
 MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
-COMPARE_BRANCH_HELP = "Branch to compare (default: %(default)s)"
+COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
-FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value (default: %(default)s)"
+FAIL_UNDER_HELP = (
+    "Returns an error code if coverage or quality score is below this value"
+)
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
 INCLUDE_HELP = "Files to include (glob pattern)"
-SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports) (default: %(default)s)"
+SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 COVERAGE_FILE_HELP = "coverage report (XML or lcov.info)"
 DIFF_RANGE_NOTATION_HELP = (
-    "Git diff range notation to use when comparing branches (default: '%(default)s')"
+    "Git diff range notation to use when comparing branches, defaults to '...'"
 )
 QUIET_HELP = "Only print errors and failures"
 SHOW_UNCOVERED = "Show uncovered lines on the console"
@@ -92,13 +94,13 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
-        "--show-uncovered", action="store_true", default=False, help=SHOW_UNCOVERED
+        "--show-uncovered", action="store_true", default=None, help=SHOW_UNCOVERED
     )
 
     parser.add_argument(
         "--expand-coverage-report",
         action="store_true",
-        default=False,
+        default=None,
         help=EXPAND_COVERAGE_REPORT,
     )
 
@@ -112,30 +114,29 @@ def parse_coverage_args(argv):
     parser.add_argument(
         "--compare-branch",
         metavar="BRANCH",
-        default="origin/main",
         type=str,
         help=COMPARE_BRANCH_HELP,
     )
 
     parser.add_argument(
-        "--fail-under", metavar="SCORE", type=float, default=0, help=FAIL_UNDER_HELP
+        "--fail-under", metavar="SCORE", type=float, default=None, help=FAIL_UNDER_HELP
     )
 
     parser.add_argument(
-        "--ignore-staged", action="store_true", default=False, help=IGNORE_STAGED_HELP
+        "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
     )
 
     parser.add_argument(
         "--ignore-unstaged",
         action="store_true",
-        default=False,
+        default=None,
         help=IGNORE_UNSTAGED_HELP,
     )
 
     parser.add_argument(
         "--include-untracked",
         action="store_true",
-        default=False,
+        default=None,
         help=INCLUDE_UNTRACKED_HELP,
     )
 
@@ -152,7 +153,6 @@ def parse_coverage_args(argv):
         metavar="DIRECTORY",
         type=str,
         nargs="+",
-        default=["src/main/java", "src/test/java"],
         help=SRC_ROOTS_HELP,
     )
 
@@ -161,7 +161,6 @@ def parse_coverage_args(argv):
         metavar="RANGE_NOTATION",
         type=str,
         choices=["...", ".."],
-        default="...",
         help=DIFF_RANGE_NOTATION_HELP,
     )
 
@@ -170,12 +169,12 @@ def parse_coverage_args(argv):
     parser.add_argument(
         "--ignore-whitespace",
         action="store_true",
-        default=False,
+        default=None,
         help=IGNORE_WHITESPACE,
     )
 
     parser.add_argument(
-        "-q", "--quiet", action="store_true", default=False, help=QUIET_HELP
+        "-q", "--quiet", action="store_true", default=None, help=QUIET_HELP
     )
 
     parser.add_argument(
@@ -185,17 +184,17 @@ def parse_coverage_args(argv):
     parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
 
     defaults = {
-        # "show_uncovered": False,
-        # "compare_branch": ,
-        # "fail_under": 0,
-        # "ignore_staged": False,
-        # "ignore_unstaged": False,
-        # "ignore_untracked": False,
-        # "src_roots": ["src/main/java", "src/test/java"],
-        # "ignore_whitespace": False,
-        # "diff_range_notation": "...",
-        # "quiet": False,
-        # "expand_coverage_report": False,
+        "show_uncovered": False,
+        "compare_branch": "origin/main",
+        "fail_under": 0,
+        "ignore_staged": False,
+        "ignore_unstaged": False,
+        "ignore_untracked": False,
+        "src_roots": ["src/main/java", "src/test/java"],
+        "ignore_whitespace": False,
+        "diff_range_notation": "...",
+        "quiet": False,
+        "expand_coverage_report": False,
     }
 
     return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
