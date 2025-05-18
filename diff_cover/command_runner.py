@@ -28,18 +28,7 @@ def execute(command, exit_codes=None):
     try:
         stdout, stderr = process.communicate()
     except OSError:
-        sys.stderr.write(
-            " ".join(
-                [
-                    (
-                        cmd.decode(sys.getfilesystemencoding())
-                        if isinstance(cmd, bytes)
-                        else cmd
-                    )
-                    for cmd in command
-                ]
-            )
-        )
+        sys.stderr.write(" ".join(_ensure_unicode(cmd) for cmd in command))
         raise
 
     stderr = _ensure_unicode(stderr)
