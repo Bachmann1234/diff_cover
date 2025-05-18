@@ -57,8 +57,10 @@ def _ensure_unicode(text):
     Ensures the text passed in becomes unicode
     Args:
         text (str|unicode)
+
     Returns:
         unicode
+
     """
     if isinstance(text, bytes):
         return text.decode(sys.getfilesystemencoding(), "replace")

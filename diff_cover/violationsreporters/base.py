@@ -61,7 +61,7 @@ class BaseViolationReporter(ABC):
         """
         # An existing quality plugin "sqlfluff" depends on this
         # being not abstract and returning None
-        return None
+        return
 
     def name(self):
         """
@@ -87,6 +87,7 @@ class QualityDriver(ABC):
                 to create a report
             exit_codes: (list[int]) list of exit codes that do not indicate a command error
             output_stderr: (bool) use stderr instead of stdout from the invoked command
+
         """
         self.name = name
         self.supported_extensions = supported_extensions
@@ -102,6 +103,7 @@ class QualityDriver(ABC):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
 
     @abstractmethod
@@ -126,6 +128,7 @@ class QualityReporter(BaseViolationReporter):
             driver (QualityDriver) object that works with the underlying quality tool
             reports (list[file]) pre-generated reports. If not provided the tool will be run instead
             options (str) options to be passed into the command
+
         """
         super().__init__(driver.name)
         self.reports = self._load_reports(reports) if reports else None
@@ -138,6 +141,7 @@ class QualityReporter(BaseViolationReporter):
         """
         Args:
             report_files: list[file] reports to read in
+
         """
         contents = []
         for file_handle in report_files:
@@ -179,7 +183,7 @@ class QualityReporter(BaseViolationReporter):
         """
         Quality Reports Consider all lines measured
         """
-        return None
+        return
 
     def name(self):
         """
@@ -204,13 +208,14 @@ class RegexBasedDriver(QualityDriver):
         exit_codes=None,
     ):
         """
-        args:
+        Args:
             expression: regex used to parse report, will be fed lines singly
                         unless flags contain re.MULTILINE
             flags: such as re.MULTILINE
         See super for other args
             command_to_check_install: (list[str]) command to run
             to see if the tool is installed
+
         """
         super().__init__(name, supported_extensions, command, exit_codes)
         self.expression = re.compile(expression, flags)
@@ -224,6 +229,7 @@ class RegexBasedDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:

@@ -117,7 +117,6 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         If file is not present in `xml_document`, return None
         """
-
         files = [
             file_tree
             for file_tree in xml_document.findall(".//file")
@@ -156,7 +155,6 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         If file is not present in `xml_document`, return None
         """
-
         files = []
         packages = list(xml_document.findall(".//package"))
         for pkg in packages:
@@ -271,7 +269,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         """
         See base class comments.
         """
-
         self._cache_file(src_path)
 
         # Yield all lines not covered
@@ -322,7 +319,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 # SF:<absolute path to the source file>
                 source_file = util.to_unix_path(GitPathTool.relative_path(content))
                 continue
-            elif directive == "DA":
+            if directive == "DA":
                 # DA:<line number>,<execution count>[,<checksum>]
                 args = content.split(",")
                 if len(args) < 2 or len(args) > 3:
@@ -437,7 +434,6 @@ class LcovCoverageReporter(BaseViolationReporter):
         """
         See base class comments.
         """
-
         self._cache_file(src_path)
 
         # Yield all lines not covered
@@ -580,9 +576,10 @@ pydocstyle_driver = RegexBasedDriver(
 class PylintDriver(QualityDriver):
     def __init__(self):
         """
-        args:
+        Args:
             expression: regex used to parse report
         See super for other args
+
         """
         super().__init__(
             "pylint",
@@ -649,6 +646,7 @@ class PylintDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:
@@ -681,9 +679,7 @@ class PylintDriver(QualityDriver):
                         # If we're looking for a particular source file,
                         # ignore any other source files.
                         if function_name:
-                            error_str = "{}: {}: {}".format(
-                                pylint_code, function_name, message
-                            )
+                            error_str = f"{pylint_code}: {function_name}: {message}"
                         else:
                             error_str = f"{pylint_code}: {message}"
 
@@ -707,9 +703,10 @@ class CppcheckDriver(QualityDriver):
 
     def __init__(self):
         """
-        args:
+        Args:
             expression: regex used to parse report
         See super for other args
+
         """
         super().__init__(
             "cppcheck",
@@ -731,6 +728,7 @@ class CppcheckDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:

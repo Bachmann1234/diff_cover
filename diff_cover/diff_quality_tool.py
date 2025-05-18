@@ -293,7 +293,6 @@ def main(argv=None, directory=None):
     1 is an error
     0 is successful run
     """
-
     argv = argv or sys.argv
     arg_dict = parse_quality_args(argv[1:])
 

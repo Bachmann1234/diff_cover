@@ -146,7 +146,7 @@ class TestDiffCoverIntegration:
 
     def test_lua_coverage(self, runbin, patch_git_command, capsys):
         """
-        coverage report shows that diff-cover needs to normalize
+        Coverage report shows that diff-cover needs to normalize
         paths read in
         """
         patch_git_command.set_stdout("git_diff_lua.txt")

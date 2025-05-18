@@ -64,7 +64,6 @@ def git_diff_output(diff_dict, deleted_files=None):
 
     Returns a byte string.
     """
-
     output = []
 
     # Entries for deleted files
@@ -86,7 +85,6 @@ def _deleted_file_entries(deleted_files):
 
     Returns a list of lines in the diff output.
     """
-
     output = []
 
     if deleted_files is not None:
@@ -116,7 +114,6 @@ def _source_file_entry(src_file, modified_lines):
 
     Returns a list of lines in the diff output.
     """
-
     output = []
 
     # Line for the file names
@@ -158,7 +155,7 @@ def _hunk_entry(start, end, modified_lines):
     # for before/after the change, but since we're only interested
     # in after the change, we use the same numbers for both.
     length = end - start
-    output.append("@@ -{0},{1} +{0},{1} @@".format(start, length))
+    output.append(f"@@ -{start},{length} +{start},{length} @@")
 
     # Output line modifications
     for line_number in range(start, end + 1):
@@ -183,7 +180,6 @@ def _hunks(modified_lines):
     Given a list of line numbers, return a list of hunks represented
     as `(start, end)` tuples.
     """
-
     # Identify contiguous lines as hunks
     hunks = []
     last_line = None

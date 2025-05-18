@@ -116,7 +116,6 @@ class Snippet:
         Return a Markdown representation of the snippet using Markdown fenced code blocks.
         See https://github.github.com/gfm/#fenced-code-blocks.
         """
-
         line_number_length = len(str(self._last_line))
 
         text = ""
@@ -188,7 +187,6 @@ class Snippet:
 
         See `load_snippets()` for details.
         """
-
         # load once...
         snippet_list = cls.load_snippets(src_path, violation_lines)
 
@@ -266,7 +264,6 @@ class Snippet:
         Uses `src_filename` to guess the type of file
         so it can highlight syntax correctly.
         """
-
         # Parse the source into tokens
         try:
             lexer = guess_lexer_for_filename(src_filename, src_contents)
@@ -302,7 +299,6 @@ class Snippet:
         The algorithm is slightly complicated because a single token
         can contain multiple line breaks.
         """
-
         # Create a map from ranges (start/end tuples) to tokens
         token_map = {rng: [] for rng in range_list}
 
