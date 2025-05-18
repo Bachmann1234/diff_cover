@@ -96,6 +96,14 @@ omit = ["./tests/*"]
 
 [tool.coverage.report]
 show_missing = true
+exclude_also = [
+    "if typing.TYPE_CHECKING:",
+    "if TYPE_CHECKING:",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "pass",
+]
 
 [tool.coverage.html]
 show_contexts = true
