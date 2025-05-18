@@ -66,7 +66,7 @@ class TestXmlCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     MANY_VIOLATIONS_EXPANDED_MANY_MEASURED = {
         Violation(3, None),
@@ -244,8 +244,8 @@ class TestXmlCoverageReporterTest:
         # Parse the report
         coverage = XmlCoverageReporter(xml_roots)
 
-        assert self.MANY_VIOLATIONS == coverage.violations("file.py")
-        assert self.FEW_VIOLATIONS == coverage.violations("other_file.py")
+        assert coverage.violations("file.py") == self.MANY_VIOLATIONS
+        assert coverage.violations("other_file.py") == self.FEW_VIOLATIONS
 
     def test_empty_violations(self):
         """
@@ -299,8 +299,9 @@ class TestXmlCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        assert self.MANY_VIOLATIONS_EXPANDED_MANY_MEASURED == coverage.violations(
-            "file1.java"
+        assert (
+            coverage.violations("file1.java")
+            == self.MANY_VIOLATIONS_EXPANDED_MANY_MEASURED
         )
 
     def test_expand_unreported_lines_without_violations(self):
@@ -387,7 +388,7 @@ class TestCloverXmlCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     @pytest.fixture(autouse=True)
     def patch_git_patch(self, mocker):
@@ -508,8 +509,8 @@ class TestCloverXmlCoverageReporterTest:
         # Parse the report
         coverage = XmlCoverageReporter(xml_roots)
 
-        assert self.MANY_VIOLATIONS == coverage.violations("file.java")
-        assert self.FEW_VIOLATIONS == coverage.violations("other_file.java")
+        assert coverage.violations("file.java") == self.MANY_VIOLATIONS
+        assert coverage.violations("other_file.java") == self.FEW_VIOLATIONS
 
     def test_empty_violations(self):
         """
@@ -597,7 +598,7 @@ class TestJacocoXmlCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     @pytest.fixture(autouse=True)
     def patch_git_patch(self, mocker):
@@ -719,8 +720,8 @@ class TestJacocoXmlCoverageReporterTest:
         # Parse the report
         coverage = XmlCoverageReporter(xml_roots)
 
-        assert self.MANY_VIOLATIONS == coverage.violations("file.java")
-        assert self.FEW_VIOLATIONS == coverage.violations("other_file.java")
+        assert coverage.violations("file.java") == self.MANY_VIOLATIONS
+        assert coverage.violations("other_file.java") == self.FEW_VIOLATIONS
 
     def test_empty_violations(self):
         """
@@ -809,7 +810,7 @@ class TestLcovCoverageReporterTest:
     MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17}
 
     ONE_VIOLATION = {Violation(11, None)}
-    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 26, 27}
+    VERY_MANY_MEASURED = {2, 3, 5, 7, 11, 13, 17, 23, 24, 25, 26, 27}
 
     @pytest.fixture(autouse=True)
     def patch_git_patch(self, mocker):
@@ -931,8 +932,8 @@ class TestLcovCoverageReporterTest:
         # Parse the report
         coverage = LcovCoverageReporter(lcov_repots)
 
-        assert self.MANY_VIOLATIONS == coverage.violations("file.java")
-        assert self.FEW_VIOLATIONS == coverage.violations("other_file.java")
+        assert coverage.violations("file.java") == self.MANY_VIOLATIONS
+        assert coverage.violations("other_file.java") == self.FEW_VIOLATIONS
 
     def test_empty_violations(self):
         """
@@ -1033,7 +1034,7 @@ class TestPycodestyleQualityReporterTest:
 
         # Parse the report
         quality = QualityReporter(pycodestyle_driver)
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_no_quality_issues_emptystring(self, process_patcher):
         # Patch the output of `pycodestyle`
@@ -1041,7 +1042,7 @@ class TestPycodestyleQualityReporterTest:
 
         # Parse the report
         quality = QualityReporter(pycodestyle_driver)
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_quality_error(self, mocker, process_patcher):
         # Patch the output of `pycodestyle`
@@ -1166,14 +1167,14 @@ class TestPyflakesQualityReporterTest:
         process_patcher((b"\n", b""))
         # Parse the report
         quality = QualityReporter(pyflakes_driver)
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_no_quality_issues_emptystring(self, process_patcher):
         # Patch the output of `pyflakes`
         process_patcher((b"", b""))
         # Parse the report
         quality = QualityReporter(pyflakes_driver)
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_quality_error(self, mocker, process_patcher):
         # Patch the output of `pyflakes`
@@ -1319,7 +1320,7 @@ class TestFlake8QualityReporterTest:
         process_patcher((b"\n", b""), 0)
 
         quality = QualityReporter(flake8_driver)
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_no_quality_issues_emptystring(self, process_patcher):
         # Patch the output of `flake8`
@@ -1327,7 +1328,7 @@ class TestFlake8QualityReporterTest:
 
         # Parse the report
         quality = QualityReporter(flake8_driver)
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_quality_error(self, mocker, process_patcher):
         # Patch the output of `flake8`
@@ -1661,7 +1662,7 @@ class TestPylintQualityReporterTest:
 
         # Parse the report
         quality = QualityReporter(PylintDriver())
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_no_quality_issues_emptystring(self, process_patcher):
         # Patch the output of `pylint`
@@ -1669,7 +1670,7 @@ class TestPylintQualityReporterTest:
 
         # Parse the report
         quality = QualityReporter(PylintDriver())
-        assert [] == quality.violations("file1.py")
+        assert quality.violations("file1.py") == []
 
     def test_quality_pregenerated_report(self):
         # When the user provides us with a pre-generated pylint report
@@ -1816,7 +1817,7 @@ class JsQualityBaseReporterMixin:
 
         # Parse the report
         quality = QualityReporter(self._get_out())
-        assert [] == quality.violations("test-file.js")
+        assert quality.violations("test-file.js") == []
 
     def test_no_quality_issues_emptystring(self):
         # Patch the output of the linter cmd
@@ -1825,7 +1826,7 @@ class JsQualityBaseReporterMixin:
 
         # Parse the report
         quality = QualityReporter(self._get_out())
-        assert [] == quality.violations("file1.js")
+        assert quality.violations("file1.js") == []
 
     def test_quality_error(self, mocker, process_patcher):
         process_patcher((b"", "whoops Ƕئ".encode()), status_code=1)

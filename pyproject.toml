@@ -46,7 +46,6 @@ Jinja2 = ">=2.7.1"
 pluggy = ">=0.13.1,<2"
 chardet = ">=3.0.0"
 tomli = {version = ">=1.2.1", optional = true}
-setuptools = { version = ">=17.0.0", python = "<3.8" }
 
 [tool.poetry.group.dev.dependencies]
 pytest-cov = "^6.1.1"
