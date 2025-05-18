@@ -61,6 +61,7 @@ pydocstyle = "^6.1.1"
 black = "^25.1.0"
 isort = "^6.0.1"
 doc8 = "1.1.2"
+ruff = "^0.11.10"
 
 [tool.poetry.extras]
 toml = ["tomli"]
