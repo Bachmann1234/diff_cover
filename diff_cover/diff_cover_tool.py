@@ -6,7 +6,7 @@ import sys
 import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
-from diff_cover.config_parser import Tool, get_config
+from diff_cover.config_parser import Tool, get_config, get_parser
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffFileTool, GitDiffTool
 from diff_cover.git_path import GitPathTool
@@ -43,7 +43,6 @@ EXPAND_COVERAGE_REPORT = (
     "Append missing lines in coverage reports based on the hits of the previous line."
 )
 INCLUDE_UNTRACKED_HELP = "Include untracked files"
-CONFIG_FILE_HELP = "The configuration file to use"
 DIFF_FILE_HELP = "The diff file to use"
 
 LOGGER = logging.getLogger(__name__)
@@ -65,7 +64,7 @@ def parse_coverage_args(argv):
 
     The path strings may or may not exist.
     """
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser = get_parser(description=DESCRIPTION)
 
     parser.add_argument("coverage_file", type=str, help=COVERAGE_FILE_HELP, nargs="+")
 
@@ -175,10 +174,6 @@ def parse_coverage_args(argv):
 
     parser.add_argument(
         "-q", "--quiet", action="store_true", default=False, help=QUIET_HELP
-    )
-
-    parser.add_argument(
-        "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
     )
 
     parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)

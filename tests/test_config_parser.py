@@ -2,7 +2,7 @@ import pytest
 import argparse
 
 from diff_cover import config_parser
-from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config
+from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config, get_parser
 
 tools = pytest.mark.parametrize("tool", list(Tool))
 
@@ -65,21 +65,21 @@ def test_get_config_unrecognized_file(mocker, tool):
     [
         (
             Tool.DIFF_COVER,
-            ["-a", 2],
+            ["-aa", "2"],
             None,
-            {"a": 2, "b": None, "c": None},
+            {"aa": 2, "bb": None, "cc": None},
         ),
         (
             Tool.DIFF_QUALITY,
-            ["-a", 3],
+            ["-aa", "3"],
             None,
-            {"a": 3, "b": None, "c": None},
+            {"aa": 3, "bb": None, "cc": None},
         ),
         (
             Tool.DIFF_COVER,
-            ["-a", 2, "c", 1],
-            "[tool.diff_cover]\na=1\nb=6",
-            {"a": 2, "b": 6, "c": 1},
+            ["-aa", "2", "-cc", "1"],
+            "[tool.diff_cover]\naa=1\nbb=6",
+            {"aa": 2, "bb": 6, "cc": 1},
         ),
     ],
 )
@@ -87,11 +87,13 @@ def test_get_config(tmp_path, tool, argv, file_content, expected):
     if file_content:
         toml_file = tmp_path / "foo.toml"
         toml_file.write_text(file_content)
-        argv.expand(["--config-file", str(toml_file)])
+        argv.extend(["--config-file", str(toml_file)])
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", type=int, default=None)
-    parser.add_argument("-b", type=int, default=None)
-    parser.add_argument("-c", type=int, default=None)
-    parser.add_argument("--config-file", type=str, default=None)
-    assert get_config(parser, argv=argv, tool=tool) == expected
+    parser = get_parser(description="test")
+    parser.add_argument("-aa", type=int, default=0)
+    parser.add_argument("-bb", type=int, default=0)
+    parser.add_argument("-cc", type=int, default=0)
+    import ipdb; ipdb.set_trace()
+    actual = get_config(parser, argv=argv, tool=tool)
+    actual.pop("config_file")
+    assert actual == expected

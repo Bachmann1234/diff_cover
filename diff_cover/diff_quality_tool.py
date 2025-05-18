@@ -12,10 +12,9 @@ import pluggy
 
 import diff_cover
 from diff_cover import hookspecs
-from diff_cover.config_parser import Tool, get_config
+from diff_cover.config_parser import Tool, get_config, get_parser
 from diff_cover.diff_cover_tool import (
     COMPARE_BRANCH_HELP,
-    CONFIG_FILE_HELP,
     CSS_FILE_HELP,
     DIFF_RANGE_NOTATION_HELP,
     EXCLUDE_HELP,
@@ -98,7 +97,7 @@ def parse_quality_args(argv):
 
     where `HTML_REPORT` and `CSS_FILE` are paths.
     """
-    parser = argparse.ArgumentParser(description=diff_cover.QUALITY_DESCRIPTION)
+    parser = get_parser(diff_cover.QUALITY_DESCRIPTION) 
 
     parser.add_argument(
         "--violations", metavar="TOOL", type=str, help=VIOLATION_CMD_HELP, required=True
@@ -196,10 +195,6 @@ def parse_quality_args(argv):
 
     parser.add_argument(
         "-q", "--quiet", action="store_true", default=False, help=QUIET_HELP
-    )
-
-    parser.add_argument(
-        "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
     )
 
     parser.add_argument(
