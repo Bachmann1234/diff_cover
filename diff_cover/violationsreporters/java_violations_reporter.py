@@ -3,14 +3,8 @@ Classes for querying the information in a test coverage report.
 """
 
 import os
+import xml.etree.ElementTree as etree
 from collections import defaultdict
-
-try:
-    # Needed for Python < 3.3, works up to 3.8
-    import xml.etree.ElementTree as etree
-except ImportError:
-    # Python 3.9 onwards
-    import xml.etree.ElementTree as etree
 
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
