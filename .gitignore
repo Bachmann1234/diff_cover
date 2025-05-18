@@ -24,12 +24,13 @@ develop-eggs
 lib
 lib64
 __pycache__
+.pytest_cache
 
 # Installer logs
 pip-log.txt
 
 # Unit test / coverage reports
-.coverage
+.coverage*
 .tox
 /coverage.xml
 /report.html

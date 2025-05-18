@@ -46,12 +46,12 @@ Jinja2 = ">=2.7.1"
 pluggy = ">=0.13.1,<2"
 chardet = ">=3.0.0"
 tomli = {version = ">=1.2.1", optional = true}
-setuptools = { version = ">=17.0.0", python = "<3.8" }
 
-[tool.poetry.dev-dependencies]
-pytest-cov = "^6.0.0"
+[tool.poetry.group.dev.dependencies]
+pytest-cov = "^6.1.1"
 pytest-datadir = "^1.5.0"
 pytest-mock = "^3.14.0"
+pytest-xdist = "^3.6.1"
 pycodestyle = ">=2.9.1"
 flake8 = "^5.0.4"
 pyflakes = "^2.5.0"
@@ -84,6 +84,21 @@ max-line-length = 100
 load-plugins = [
     "pylint_pytest",
 ]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+parallel = true
+concurrency = ["multiprocessing"]
+source = ["diff_cover"]
+omit = ["./tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+show_contexts = true
+skip_covered = false
 
 [tool.pylint."messages control"]
 enable = ["all"]
