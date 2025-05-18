@@ -308,52 +308,53 @@ class LcovCoverageReporter(BaseViolationReporter):
         File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
         """
         lcov_report = defaultdict(dict)
-        lcov = open(lcov_file)
-        while True:
-            line = lcov.readline()
-            if not line:
-                break
-            directive, _, content = line.strip().partition(":")
-            # we're only interested in file name and line coverage
-            if directive == "SF":
-                # SF:<absolute path to the source file>
-                source_file = util.to_unix_path(GitPathTool.relative_path(content))
-                continue
-            if directive == "DA":
-                # DA:<line number>,<execution count>[,<checksum>]
-                args = content.split(",")
-                if len(args) < 2 or len(args) > 3:
-                    raise ValueError(f"Unknown syntax in lcov report: {line}")
-                line_no = int(args[0])
-                num_executions = int(args[1])
-                if source_file is None:
-                    raise ValueError(
-                        f"No source file specified for line coverage: {line}"
-                    )
-                if line_no not in lcov_report[source_file]:
-                    lcov_report[source_file][line_no] = 0
-                lcov_report[source_file][line_no] += num_executions
-            elif directive in [
-                "TN",
-                "FNF",
-                "FNH",
-                "FN",
-                "FNDA",
-                "LH",
-                "LF",
-                "BRF",
-                "BRH",
-                "BRDA",
-                "VER",
-            ]:
-                # these are valid lines, but not we don't need them
-                continue
-            elif directive == "end_of_record":
-                source_file = None
-            else:
-                raise ValueError(f"Unknown syntax in lcov report: {line}")
+        skippable_directives = [
+            "TN",
+            "FNF",
+            "FNH",
+            "FN",
+            "FNDA",
+            "LH",
+            "LF",
+            "BRF",
+            "BRH",
+            "BRDA",
+            "VER",
+        ]
+        with open(lcov_file) as lcov:
+            while True:
+                line = lcov.readline()
+                if not line:
+                    break
+                directive, _, content = line.strip().partition(":")
+                if directive in skippable_directives:
+                    # these are valid lines, but not we don't need them
+                    continue
+                # we're only interested in file name and line coverage
+                if directive == "SF":
+                    # SF:<absolute path to the source file>
+                    source_file = util.to_unix_path(GitPathTool.relative_path(content))
+                    continue
+                if directive == "DA":
+                    # DA:<line number>,<execution count>[,<checksum>]
+                    args = content.split(",")
+                    if len(args) < 2 or len(args) > 3:
+                        msg = f"Unknown syntax in lcov report: {line}"
+                        raise ValueError(msg)
+                    line_no = int(args[0])
+                    num_executions = int(args[1])
+                    if source_file is None:
+                        msg = f"No source file specified for line coverage: {line}"
+                        raise ValueError(msg)
+                    if line_no not in lcov_report[source_file]:
+                        lcov_report[source_file][line_no] = 0
+                    lcov_report[source_file][line_no] += num_executions
+                elif directive == "end_of_record":
+                    source_file = None
+                else:
+                    msg = f"Unknown syntax in lcov report: {line}"
+                    raise ValueError(msg)
 
-        lcov.close()
         return lcov_report
 
     def _cache_file(self, src_path):
@@ -415,7 +416,6 @@ class LcovCoverageReporter(BaseViolationReporter):
                     }
 
                 # Measured is the union of itself and the new measured
-                # measured = measured | {int(line.get(_number)) for line in line_nodes}
                 measured = measured | {
                     int(line_no)
                     for line_no, num_executions in lcov_document[
@@ -636,7 +636,7 @@ class PylintDriver(QualityDriver):
                 current_line += 1
                 match = self.multi_line_violation_regex.match(lines[current_line])
                 src_path, l_number = match.groups()
-                src_paths.append(("%s.py" % src_path, l_number))
+                src_paths.append((f"{src_path}.py", l_number))
         return src_paths
 
     def parse_reports(self, reports):

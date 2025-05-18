@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 IFS=$'\n\t'
+COMPARE_BRANCH=${COMPARE_BRANCH:-origin/main}
 
 ruff format --check
 ruff check --select I
