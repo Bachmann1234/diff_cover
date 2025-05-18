@@ -125,6 +125,7 @@ class TestDiffCoverIntegration:
 
     @pytest.fixture
     def runbin(self, cwd):
+        del cwd
         return lambda x: diff_cover_tool.main(["diff-cover", *x])
 
     def test_added_file_html(self, runbin, patch_git_command):
@@ -217,7 +218,7 @@ class TestDiffCoverIntegration:
         assert runbin(["coverage.xml"]) == 0
         compare_console("changed_console_report.txt", capsys.readouterr().out)
 
-    def test_moved_file_html(self, runbin, patch_git_command, capsys):
+    def test_moved_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_moved.txt")
         assert (
             runbin(["moved_coverage.xml", "--html-report", "dummy/diff_coverage.html"])
@@ -358,6 +359,7 @@ class TestDiffQualityIntegration:
 
     @pytest.fixture
     def runbin(self, cwd):
+        del cwd
         return lambda x: diff_quality_tool.main(["diff-quality", *x])
 
     def test_git_diff_error_diff_quality(self, runbin, patch_git_command):
