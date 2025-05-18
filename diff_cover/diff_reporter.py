@@ -484,9 +484,9 @@ class GitDiffReporter(BaseDiffReporter):
                 try:
                     return int(groups[0])
 
-                except ValueError:
+                except ValueError as e:
                     msg = f"Could not parse '{groups[0]}' as a line number"
-                    raise GitDiffError(msg)
+                    raise GitDiffError(msg) from e
 
             else:
                 msg = f"Could not find start of hunk in line '{line}'"
