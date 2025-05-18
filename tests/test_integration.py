@@ -98,34 +98,37 @@ def patch_git_command(patch_popen, mocker):
 
 def compare_html(expected_html_path, html_report_path, clear_inline_css=True):
     clean_content = re.compile("<style>.*</style>", flags=re.DOTALL)
+    expected_file = open(expected_html_path, encoding="utf-8")
+    html_report = open(html_report_path, encoding="utf-8")
 
-    with open(expected_html_path, encoding="utf-8") as expected_file:
-        with open(html_report_path, encoding="utf-8") as html_report:
-            html = html_report.read()
-            expected = expected_file.read()
-            if clear_inline_css:
-                # The CSS is provided by pygments and changes fairly often.
-                # Im ok with simply saying "There was css"
-                # Perhaps I will eat these words
-                html = clean_content.sub("", html)
-                expected = clean_content.sub("", expected)
-            assert expected.strip() == html.strip()
+    with expected_file, html_report:
+        html = html_report.read()
+        expected = expected_file.read()
+        if clear_inline_css:
+            # The CSS is provided by pygments and changes fairly often.
+            # Im ok with simply saying "There was css"
+            # Perhaps I will eat these words
+            html = clean_content.sub("", html)
+            expected = clean_content.sub("", expected)
+        assert expected.strip() == html.strip()
 
 
 def compare_markdown(expected_file_path, actual_file_path):
-    with open(expected_file_path, encoding="utf-8") as expected_file:
-        with open(actual_file_path, encoding="utf-8") as actual_file:
-            expected = expected_file.read()
-            actual = actual_file.read()
-            assert expected.strip() == actual.strip()
+    expected_file = open(expected_file_path, encoding="utf-8")
+    actual_file = open(actual_file_path, encoding="utf-8")
+    with expected_file, actual_file:
+        expected = expected_file.read()
+        actual = actual_file.read()
+        assert expected.strip() == actual.strip()
 
 
 def compare_json(expected_json_path, actual_json_path):
-    with open(expected_json_path, encoding="utf-8") as expected_file:
-        with open(actual_json_path, encoding="utf-8") as actual_file:
-            expected = json.load(expected_file)
-            actual = json.load(actual_file)
-            assert expected == actual
+    expected_file = open(expected_json_path, encoding="utf-8")
+    actual_file = open(actual_json_path, encoding="utf-8")
+    with expected_file, actual_file:
+        expected = json.load(expected_file)
+        actual = json.load(actual_file)
+        assert expected == actual
 
 
 def compare_console(expected_console_path, report):
