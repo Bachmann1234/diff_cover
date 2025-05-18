@@ -2,6 +2,7 @@
 Wrapper for `git diff` command.
 """
 
+from functools import lru_cache
 from textwrap import dedent
 
 from diff_cover.command_runner import CommandError, execute
@@ -80,7 +81,7 @@ class GitDiffTool:
                         the `--compare-branch` argument allows you to set a different branch.
                     """
                     )
-                )
+                ) from e
             raise
 
     def diff_unstaged(self):
@@ -105,6 +106,7 @@ class GitDiffTool:
             0
         ]
 
+    @lru_cache(maxsize=1)
     def untracked(self):
         """Return the untracked files."""
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
@@ -127,14 +129,12 @@ class GitDiffFileTool(GitDiffTool):
         try:
             with open(self.diff_file_path, "r") as file:
                 return file.read()
-        except IOError as e:
-            raise ValueError(
-                dedent(
-                    f"""
-                    Could not read the diff file. Make sure '{self.diff_file_path}' exists?
-                    """
-                )
+        except OSError as e:
+            error_message = (
+                "Could not read the diff file. "
+                f"Make sure '{self.diff_file_path}' exists?"
             )
+            raise ValueError(error_message) from e
 
     def diff_unstaged(self):
         return ""

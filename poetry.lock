@@ -741,12 +741,11 @@ version = "80.1.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev"]
+groups = ["dev"]
 files = [
     {file = "setuptools-80.1.0-py3-none-any.whl", hash = "sha256:ea0e7655c05b74819f82e76e11a85b31779fee7c4969e82f72bab0664e8317e4"},
     {file = "setuptools-80.1.0.tar.gz", hash = "sha256:2e308396e1d83de287ada2c2fd6e64286008fe6aca5008e0b6a8cb0e2c86eedd"},
 ]
-markers = {main = "<empty>"}
 
 [package.extras]
 check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\"", "ruff (>=0.8.0) ; sys_platform != \"cygwin\""]
@@ -858,4 +857,4 @@ toml = ["tomli"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9.17"
-content-hash = "0c2d55a34ab373120f336773707f1d99ca290909a4803f44902b74a8e2512e5a"
+content-hash = "554ae24558961b1eb486fb56d9b3d3525824d5e08ec6934eb7a6483fdf6bb82d"

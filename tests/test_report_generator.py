@@ -256,10 +256,10 @@ class TestTemplateReportGenerator(BaseReportGeneratorTest):
         self._test_input_expected_output(in_out)
 
     def test_empty_list(self):
-        assert [] == TemplateReportGenerator.combine_adjacent_lines([])
+        assert TemplateReportGenerator.combine_adjacent_lines([]) == []
 
     def test_one_number(self):
-        assert ["1"] == TemplateReportGenerator.combine_adjacent_lines([1])
+        assert TemplateReportGenerator.combine_adjacent_lines([1]) == ["1"]
 
 
 class TestJsonReportGenerator(BaseReportGeneratorTest):
