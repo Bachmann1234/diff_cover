@@ -97,7 +97,7 @@ max_line_length = 120
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py39"
 src = ["diff_cover", "tests"]
 exclude = ["tests/fixtures/*"]
 
