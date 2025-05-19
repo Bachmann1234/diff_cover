@@ -197,7 +197,7 @@ def test_untracked(tool, set_git_diff_output, output, expected):
     assert tool.untracked() == expected
 
 
-def test_untracked_with_exclude_standard(tool, set_git_diff_output):
+def test_git_diff_tool_untracked_cache(tool, set_git_diff_output):
     set_git_diff_output("file.txt\nfile2.txt\n", "")
     output = tool.untracked()
     assert output == ["file.txt", "file2.txt"]
