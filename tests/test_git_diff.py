@@ -195,3 +195,13 @@ def test_errors(set_git_diff_output, tool):
 def test_untracked(tool, set_git_diff_output, output, expected):
     set_git_diff_output(output, b"")
     assert tool.untracked() == expected
+
+
+def test_untracked_with_exclude_standard(tool, set_git_diff_output):
+    set_git_diff_output("file.txt\nfile2.txt\n", "")
+    output = tool.untracked()
+    assert output == ["file.txt", "file2.txt"]
+
+    set_git_diff_output("file2.txt\n", "")
+    output = tool.untracked()
+    assert output == ["file.txt", "file2.txt"]
