@@ -118,7 +118,8 @@ class QualityDriver(ABC):
 
         A driver can override the method. By default an exception is raised.
         """
-        raise ValueError(f"Unsupported argument(s) {kwargs.keys()}")
+        msg = f"Unsupported argument(s) {kwargs.keys()}"
+        raise ValueError(msg)
 
 
 class QualityReporter(BaseViolationReporter):
@@ -162,7 +163,8 @@ class QualityReporter(BaseViolationReporter):
                 if self.driver_tool_installed is None:
                     self.driver_tool_installed = self.driver.installed()
                 if not self.driver_tool_installed:
-                    raise OSError(f"{self.driver.name} is not installed")
+                    msg = f"{self.driver.name} is not installed"
+                    raise OSError(msg)
                 command = copy.deepcopy(self.driver.command)
                 if self.options:
                     for arg in self.options.split():
@@ -170,12 +172,9 @@ class QualityReporter(BaseViolationReporter):
                 if os.path.exists(src_path):
                     command.append(src_path.encode(sys.getfilesystemencoding()))
 
-                    output = execute(command, self.driver.exit_codes)
-                    if self.driver.output_stderr:
-                        output = output[1]
-                    else:
-                        output = output[0]
-                    self.violations_dict.update(self.driver.parse_reports([output]))
+                stdout, stderr = execute(command, self.driver.exit_codes)
+                output = stderr if self.driver.output_stderr else stdout
+                self.violations_dict.update(self.driver.parse_reports([output]))
 
         return self.violations_dict[src_path]
 
@@ -183,7 +182,7 @@ class QualityReporter(BaseViolationReporter):
         """
         Quality Reports Consider all lines measured
         """
-        return
+        del src_path
 
     def name(self):
         """

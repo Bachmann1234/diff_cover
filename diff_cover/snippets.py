@@ -78,7 +78,8 @@ class Snippet:
         Raises a `ValueError` if `start_line` is less than 1
         """
         if start_line < 1:
-            raise ValueError("Start line must be >= 1")
+            msg = "Start line must be >= 1"
+            raise ValueError(msg)
 
         self._src_tokens = src_tokens
         self._src_filename = src_filename

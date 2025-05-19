@@ -305,10 +305,11 @@ class LcovCoverageReporter(BaseViolationReporter):
     def parse(lcov_file):
         """
         Parse a single LCov coverage report
-        File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
+        File format: https://linux.die.net/man/1/geninfo
         """
         lcov_report = defaultdict(dict)
-        skippable_directives = [
+        source_file = None
+        skippable = {
             "TN",
             "FNF",
             "FNH",
@@ -320,35 +321,27 @@ class LcovCoverageReporter(BaseViolationReporter):
             "BRH",
             "BRDA",
             "VER",
-        ]
+        }
+
         with open(lcov_file) as lcov:
-            while True:
-                line = lcov.readline()
-                if not line:
-                    break
-                directive, _, content = line.strip().partition(":")
-                if directive in skippable_directives:
-                    # these are valid lines, but not we don't need them
+            for line in (line for line in (line.strip() for line in lcov) if line):
+                directive, _, content = line.partition(":")
+
+                if directive in skippable:
                     continue
-                # we're only interested in file name and line coverage
+
                 if directive == "SF":
-                    # SF:<absolute path to the source file>
                     source_file = util.to_unix_path(GitPathTool.relative_path(content))
-                    continue
-                if directive == "DA":
-                    # DA:<line number>,<execution count>[,<checksum>]
-                    args = content.split(",")
-                    if len(args) < 2 or len(args) > 3:
-                        msg = f"Unknown syntax in lcov report: {line}"
-                        raise ValueError(msg)
-                    line_no = int(args[0])
-                    num_executions = int(args[1])
+                elif directive == "DA":
+                    line_no, hits, *_ = content.split(",")
                     if source_file is None:
                         msg = f"No source file specified for line coverage: {line}"
                         raise ValueError(msg)
-                    if line_no not in lcov_report[source_file]:
-                        lcov_report[source_file][line_no] = 0
-                    lcov_report[source_file][line_no] += num_executions
+                    line_no = int(line_no)
+                    hits = int(hits)
+                    lcov_report[source_file][line_no] = (
+                        lcov_report[source_file].get(line_no, 0) + hits
+                    )
                 elif directive == "end_of_record":
                     source_file = None
                 else:
@@ -657,34 +650,33 @@ class PylintDriver(QualityDriver):
 
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
-                if match is not None:
-                    (
-                        pylint_src_path,
-                        line_number,
-                        pylint_code,
-                        function_name,
-                        message,
-                    ) = match.groups()
-                    if pylint_code == self.dupe_code_violation:
-                        files_involved = self._process_dupe_code_violation(
-                            output_lines, output_line_number, message
-                        )
+                if match is None:
+                    continue
+
+                (
+                    pylint_src_path,
+                    line_number,
+                    pylint_code,
+                    function_name,
+                    message,
+                ) = match.groups()
+                files_involved = [(pylint_src_path, line_number)]
+                if pylint_code == self.dupe_code_violation:
+                    files_involved = self._process_dupe_code_violation(
+                        output_lines, output_line_number, message
+                    )
+
+                for pylint_src_path, line_number in files_involved:
+                    # If we're looking for a particular source file,
+                    # ignore any other source files.
+                    if function_name:
+                        error_str = f"{pylint_code}: {function_name}: {message}"
                     else:
-                        files_involved = [(pylint_src_path, line_number)]
+                        error_str = f"{pylint_code}: {message}"
 
-                    for violation in files_involved:
-                        pylint_src_path, line_number = violation
-                        # pylint might uses windows paths
-                        pylint_src_path = util.to_unix_path(pylint_src_path)
-                        # If we're looking for a particular source file,
-                        # ignore any other source files.
-                        if function_name:
-                            error_str = f"{pylint_code}: {function_name}: {message}"
-                        else:
-                            error_str = f"{pylint_code}: {message}"
-
-                        violation = Violation(int(line_number), error_str)
-                        violations_dict[pylint_src_path].append(violation)
+                    clean_path = util.to_unix_path(pylint_src_path)
+                    violation = Violation(int(line_number), error_str)
+                    violations_dict[clean_path].append(violation)
 
         return violations_dict
 

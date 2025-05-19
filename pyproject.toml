@@ -128,6 +128,7 @@ ignore = [
     "D400",  # Disables First line should end with a period
     "D401",  # Disables First line of docstring should be in imperative mood
     "D415",  # Disables First line should end with a period, question mark, or exclamation point
+    "D417",  # Disables Missing argument descriptions in the docstring
     
     # allow disables (equivalent to "locally-disabled", "suppressed-message")
     "RUF100",
