@@ -166,7 +166,9 @@ class TestDiffCoverIntegration:
                 [
                     "coverage.xml",
                     "--format",
-                    "html:dummy/diff_coverage.html,json:dummy/diff_coverage.json,markdown:dummy/diff_coverage.md",
+                    "html:dummy/diff_coverage.html,"
+                    "json:dummy/diff_coverage.json,"
+                    "markdown:dummy/diff_coverage.md",
                 ]
             )
             == 0
