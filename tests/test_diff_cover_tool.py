@@ -56,9 +56,9 @@ def test_parse_with_multiple_old_reports(recwarn):
         "json": "report.json",
     }
     assert [str(w.message) for w in recwarn] == [
-        "The --html-report option is deprecated. Use --format html:path instead.",
-        "The --json-report option is deprecated. Use --format json:path instead.",
-        "The --markdown-report option is deprecated. Use --format markdown:path instead.",
+        "The --html-report option is deprecated. Use --format html:report.html instead.",
+        "The --json-report option is deprecated. Use --format json:report.json instead.",
+        "The --markdown-report option is deprecated. Use --format markdown:report.md instead.",
     ]
 
 
