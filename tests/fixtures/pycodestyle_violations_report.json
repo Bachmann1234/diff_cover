@@ -1,0 +1,40 @@
+{
+    "report_name": "pycodestyle",
+    "diff_name": "origin/main...HEAD, staged and unstaged changes",
+    "src_stats": {
+        "violations_test_file.py": {
+            "percent_covered": 66.66666666666667,
+            "violation_lines": [
+                2,
+                6,
+                11
+            ],
+            "covered_lines": [
+                1,
+                7,
+                8,
+                9,
+                10,
+                12
+            ],
+            "violations": [
+                [
+                    2,
+                    "E225 missing whitespace around operator"
+                ],
+                [
+                    6,
+                    "E302 expected 2 blank lines, found 0"
+                ],
+                [
+                    11,
+                    "E225 missing whitespace around operator"
+                ]
+            ]
+        }
+    },
+    "total_num_lines": 9,
+    "total_num_violations": 3,
+    "total_percent_covered": 66,
+    "num_changed_lines": 9
+}
