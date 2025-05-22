@@ -69,7 +69,6 @@ def test_parse_invalid_arg():
 
     for argv in invalid_argv:
         with pytest.raises(SystemExit):
-            print(f"args = {argv}")
             parse_quality_args(argv)
 
 

@@ -134,7 +134,6 @@ class BaseReportGenerator(ABC):
         If we have no coverage information for
         `src_path`, returns an empty list.
         """
-
         diff_violations = self._diff_violations().get(src_path)
 
         if diff_violations is None:
@@ -147,7 +146,6 @@ class BaseReportGenerator(ABC):
         Return the total number of lines in the diff for
         which we have coverage info.
         """
-
         return sum(
             [
                 len(summary.measured_lines)
@@ -160,7 +158,6 @@ class BaseReportGenerator(ABC):
         Returns the total number of lines in the diff
         that are in violation.
         """
-
         return sum(len(summary.lines) for summary in self._diff_violations().values())
 
     def total_percent_covered(self):
@@ -233,7 +230,6 @@ class BaseReportGenerator(ABC):
         """
         Return a dict of statistics for the source file at `src_path`.
         """
-
         covered_lines = self.covered_lines(src_path)
 
         # Find violation lines
@@ -296,7 +292,6 @@ class TemplateReportGenerator(BaseReportGenerator):
         See base class.
         output_file must be a file handler that takes in bytes!
         """
-
         if self.template_path is not None:
             template = TEMPLATE_ENV.get_template(self.template_path)
             report = template.render(self._context())
@@ -340,7 +335,6 @@ class TemplateReportGenerator(BaseReportGenerator):
             'total_percent_covered': TOTAL_PERCENT_COVERED
         }
         """
-
         # Include snippet style info if we're displaying
         # source code snippets
         if self.include_snippets:

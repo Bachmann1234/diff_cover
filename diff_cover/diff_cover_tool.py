@@ -21,6 +21,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
 )
 
+
 HTML_REPORT_HELP = "Diff coverage HTML output"
 JSON_REPORT_HELP = "Diff coverage JSON output"
 MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
@@ -240,9 +241,10 @@ def generate_coverage_report(
         for coverage_file in coverage_files
         if not coverage_file.endswith(".xml")
     ]
-    if len(xml_roots) > 0 and len(lcov_roots) > 0:
-        raise ValueError(f"Mixing LCov and XML reports is not supported yet")
-    elif len(xml_roots) > 0:
+    if xml_roots and lcov_roots:
+        msg = "Mixing LCov and XML reports is not supported yet"
+        raise ValueError(msg)
+    if xml_roots:
         coverage = XmlCoverageReporter(xml_roots, src_roots, expand_coverage_report)
     else:
         coverage = LcovCoverageReporter(lcov_roots, src_roots)
