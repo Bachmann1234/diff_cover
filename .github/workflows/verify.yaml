@@ -6,9 +6,10 @@ env:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
