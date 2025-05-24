@@ -8,12 +8,12 @@ from diff_cover.diff_quality_tool import main, parse_quality_args
 
 
 def test_parse_with_html_report():
-    argv = ["--violations", "pycodestyle", "--html-report", "diff_cover.html"]
+    argv = ["--violations", "pycodestyle", "--format", "html:diff_cover.html"]
 
     arg_dict = parse_quality_args(argv)
 
     assert arg_dict.get("violations") == "pycodestyle"
-    assert arg_dict.get("html_report") == "diff_cover.html"
+    assert arg_dict.get("format") == {"html": "diff_cover.html"}
     assert arg_dict.get("input_reports") == []
     assert not arg_dict.get("ignore_unstaged")
     assert arg_dict.get("diff_range_notation") == "..."
