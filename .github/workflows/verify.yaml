@@ -9,8 +9,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest] #ubuntu-latest
+        os: [windows-latest] #, ubuntu-latest]
         python-version: [ "3.9"] #, "3.10", "3.11", "3.12", "3.13" ]
+
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
@@ -36,14 +37,18 @@ jobs:
       - name: Install dependencies
         run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      - name: Run The lints and tests
+      - name: Run The lints and tests (Unix)
+        if: runner.os != 'Windows'
         run: |
-          echo ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}| sed 's|\.\*||g' >> "$GITHUB_ENV"
-          if [ "${{ runner.os }}" == "Windows" ]; then
-            poetry run pwsh -File verify.ps1
-          else
-            poetry run bash -x verify.sh
-          fi
+          echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\.\*||g' >> "$GITHUB_ENV"
+          poetry run bash -x verify.sh
+      - name: Run The lints and tests (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $artifactNameLine = "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" -replace '\.\*',''
+          $artifactNameLine | Add-Content $env:GITHUB_ENV
+          poetry run ./verify.ps1
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
