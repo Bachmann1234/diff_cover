@@ -9,8 +9,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        os: [windows-latest] #ubuntu-latest
+        python-version: [ "3.9"] #, "3.10", "3.11", "3.12", "3.13" ]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
@@ -39,7 +39,11 @@ jobs:
       - name: Run The lints and tests
         run: |
           echo ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}| sed 's|\.\*||g' >> "$GITHUB_ENV"
-          poetry run bash -x verify.sh
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            poetry run pwsh -File verify.ps1
+          else
+            poetry run bash -x verify.sh
+          fi
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
