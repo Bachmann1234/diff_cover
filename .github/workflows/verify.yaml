@@ -39,18 +39,10 @@ jobs:
         shell: bash
         run: poetry install
       - name: Run The lints and tests (Unix)
-        if: runner.os != 'Windows'
+        shell: bash
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           poetry run bash -x verify.sh
-      - name: Run The lints and tests (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          . .\.venv\Scripts\Activate.ps1
-          $artifactNameLine = "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" -replace '\\.\\*',''
-          $artifactNameLine | Add-Content $env:GITHUB_ENV
-          poetry run ./verify.ps1
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
