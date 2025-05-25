@@ -1,3 +1,7 @@
+05/25/2025 v9.3.1
+
+* Loosens the python requirement in diff cover so people using it as a dependency are not restricted to one specific python version
+
 05/24/2025 v9.3.0
 
 * Resolves deprecation warning around regexes. [PR 452](https://github.com/Bachmann1234/diff_cover/pull/452) thanks @emmanuel-ferdman!
