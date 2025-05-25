@@ -40,7 +40,7 @@ diff-cover = 'diff_cover.diff_cover_tool:main'
 diff-quality = 'diff_cover.diff_quality_tool:main'
 
 [tool.poetry.dependencies]
-python = "^3.9.17"
+python = ">=3.9"
 Pygments = "^2.19.1"
 Jinja2 = ">=2.7.1"
 pluggy = ">=0.13.1,<2"
