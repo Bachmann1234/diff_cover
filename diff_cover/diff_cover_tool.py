@@ -56,14 +56,11 @@ LOGGER = logging.getLogger(__name__)
 def format_type(value):
     """
     Accepts:
-        --format html
-        --format json
-        --format json,html
-        --format html,json:path/to/file.json
+        --format html:path/to/file.html,json:path/to/file.json
 
         return: dict of strings to paths
     """
-    return dict((item.split(":") for item in value.split(",")) if value else {})
+    return dict((item.split(":", 1) for item in value.split(",")) if value else {})
 
 
 def parse_coverage_args(argv):
