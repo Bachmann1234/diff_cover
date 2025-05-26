@@ -16,6 +16,18 @@ def test_parse_with_html_report():
     assert not arg_dict.get("ignore_unstaged")
 
 
+def test_report_path_with_colon():
+    argv = [
+        "reports/coverage.xml",
+        "--format",
+        "json:/this:path:should:work/without:breaking.json",
+    ]
+    arg_dict = parse_coverage_args(argv)
+    assert arg_dict.get("format") == {
+        "json": "/this:path:should:work/without:breaking.json"
+    }
+
+
 def test_parse_with_no_report():
     argv = ["reports/coverage.xml"]
     arg_dict = parse_coverage_args(argv)
