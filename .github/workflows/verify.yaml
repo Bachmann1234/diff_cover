@@ -74,11 +74,8 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies (Unix)
-        if: runner.os != 'Windows' && steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows' && steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         shell: bash
         run: poetry install
       - name: Download artifacts
