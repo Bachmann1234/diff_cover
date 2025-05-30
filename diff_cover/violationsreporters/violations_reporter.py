@@ -310,6 +310,8 @@ class LcovCoverageReporter(BaseViolationReporter):
         Parse a single LCov coverage report
         File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
         """
+        branch_coverage = defaultdict(lambda: defaultdict(lambda: {"total": 0, "hit": 0}))
+        function_lines = defaultdict(dict)  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
         lcov = open(lcov_file)
         while True:
@@ -336,22 +338,62 @@ class LcovCoverageReporter(BaseViolationReporter):
                 if line_no not in lcov_report[source_file]:
                     lcov_report[source_file][line_no] = 0
                 lcov_report[source_file][line_no] += num_executions
+            elif directive == "BRDA":
+                args = content.split(",")
+                if len(args) != 4:
+                    continue
+                line_no = int(args[0])
+                taken = args[3]
+                if taken != "-" and source_file:
+                    branch_coverage[source_file][line_no]["total"] += 1
+                    if int(taken) > 0:
+                        branch_coverage[source_file][line_no]["hit"] += 1
+                        if line_no not in lcov_report[source_file]:
+                            lcov_report[source_file][line_no] = 0
+                        lcov_report[source_file][line_no] += int(taken)
+            elif directive == "FN":
+                args = content.split(",")
+                if len(args) != 2:
+                    continue
+                line_no = int(args[0])
+                func_name = args[1]
+                function_lines[source_file][func_name] = (line_no, 0)
+            elif directive == "FNDA":
+                args = content.split(",")
+                if len(args) != 2:
+                    continue
+                hit_count = int(args[0])
+                func_name = args[1]
+                if func_name in function_lines[source_file]:
+                    line_no, _ = function_lines[source_file][func_name]
+                    function_lines[source_file][func_name] = (line_no, hit_count)
             elif directive in [
                 "TN",
                 "FNF",
                 "FNH",
-                "FN",
-                "FNDA",
                 "LH",
                 "LF",
                 "BRF",
                 "BRH",
-                "BRDA",
                 "VER",
             ]:
                 # these are valid lines, but not we don't need them
                 continue
             elif directive == "end_of_record":
+                # Apply branch coverage filtering
+                for line_no, info in branch_coverage[source_file].items():
+                    # Only keep lines that all branches are hit
+                    # TODO: add an option to keep lines with partial branch coverage
+                    if info["total"] > 0 and info["hit"] < info["total"]:
+                        if line_no in lcov_report[source_file]:
+                            lcov_report[source_file][line_no] = 0
+
+                # Apply fun ction hit filtering
+                for func_name, (line_no, hit) in function_lines[source_file].items():
+                    lcov_report[source_file][line_no] = hit
+
+                branch_coverage[source_file].clear()
+                function_lines[source_file].clear()
                 source_file = None
             else:
                 raise ValueError(f"Unknown syntax in lcov report: {line}")
