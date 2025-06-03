@@ -323,7 +323,7 @@ class LcovCoverageReporter(BaseViolationReporter):
             "VER",
         }
 
-        with open(lcov_file) as lcov:
+        with open(lcov_file, encoding="utf-8") as lcov:
             for line in (line for line in (line.strip() for line in lcov) if line):
                 directive, _, content = line.partition(":")
 
