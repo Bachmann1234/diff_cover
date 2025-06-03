@@ -22,6 +22,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
 )
 
+
 FORMAT_HELP = "Format to use"
 HTML_REPORT_DEFAULT_PATH = "diff-cover.html"
 JSON_REPORT_DEFAULT_PATH = "diff-cover.json"
