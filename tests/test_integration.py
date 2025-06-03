@@ -151,7 +151,7 @@ class TestDiffCoverIntegration:
     def test_added_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_add.txt")
         assert (
-            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+            runbin(["coverage.xml", "--format", "html:dummy/diff_coverage.html"]) == 0
         )
         compare_html("add_html_report.html", "dummy/diff_coverage.html")
 
@@ -166,12 +166,10 @@ class TestDiffCoverIntegration:
             runbin(
                 [
                     "coverage.xml",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
-                    "--json-report",
-                    "dummy/diff_coverage.json",
-                    "--markdown-report",
-                    "dummy/diff_coverage.md",
+                    "--format",
+                    "html:dummy/diff_coverage.html,"
+                    "json:dummy/diff_coverage.json,"
+                    "markdown:dummy/diff_coverage.md",
                 ]
             )
             == 0
@@ -208,7 +206,7 @@ class TestDiffCoverIntegration:
     def test_deleted_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_delete.txt")
         assert (
-            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+            runbin(["coverage.xml", "--format", "html:dummy/diff_coverage.html"]) == 0
         )
         compare_html("delete_html_report.html", "dummy/diff_coverage.html")
 
@@ -220,7 +218,7 @@ class TestDiffCoverIntegration:
     def test_changed_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_changed.txt")
         assert (
-            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+            runbin(["coverage.xml", "--format", "html:dummy/diff_coverage.html"]) == 0
         )
         compare_html("changed_html_report.html", "dummy/diff_coverage.html")
 
@@ -231,8 +229,8 @@ class TestDiffCoverIntegration:
                 [
                     "coverage.xml",
                     "--fail-under=100.1",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                 ]
             )
             == 1
@@ -246,8 +244,8 @@ class TestDiffCoverIntegration:
                 [
                     "coverage.xml",
                     "--fail-under=100",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                 ]
             )
             == 0
@@ -262,7 +260,7 @@ class TestDiffCoverIntegration:
     def test_moved_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_moved.txt")
         assert (
-            runbin(["moved_coverage.xml", "--html-report", "dummy/diff_coverage.html"])
+            runbin(["moved_coverage.xml", "--format", "html:dummy/diff_coverage.html"])
             == 0
         )
         compare_html("moved_html_report.html", "dummy/diff_coverage.html")
@@ -279,8 +277,8 @@ class TestDiffCoverIntegration:
                 [
                     "coverage1.xml",
                     "coverage2.xml",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                 ]
             )
             == 0
@@ -307,7 +305,7 @@ class TestDiffCoverIntegration:
             GitPathTool, "relative_path", wraps=lambda x: x.replace("sub/", "")
         )
         assert (
-            runbin(["coverage.xml", "--html-report", "dummy/diff_coverage.html"]) == 0
+            runbin(["coverage.xml", "--format", "html:dummy/diff_coverage.html"]) == 0
         )
         compare_html("subdir_coverage_html_report.html", "dummy/diff_coverage.html")
 
@@ -338,7 +336,7 @@ class TestDiffCoverIntegration:
         patch_git_command.set_stdout("git_diff_unicode.txt")
         assert (
             runbin(
-                ["unicode_coverage.xml", "--html-report", "dummy/diff_coverage.html"]
+                ["unicode_coverage.xml", "--format", "html:dummy/diff_coverage.html"]
             )
             == 0
         )
@@ -350,8 +348,8 @@ class TestDiffCoverIntegration:
             runbin(
                 [
                     "coverage.xml",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                     "--external-css-file",
                     "dummy/external_style.css",
                 ]
@@ -416,8 +414,8 @@ class TestDiffQualityIntegration:
         assert (
             runbin(
                 [
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                     "--violations=pycodestyle",
                 ]
             )
@@ -431,12 +429,10 @@ class TestDiffQualityIntegration:
             runbin(
                 [
                     "--violations=pycodestyle",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
-                    "--json-report",
-                    "dummy/diff_coverage.json",
-                    "--markdown-report",
-                    "dummy/diff_coverage.md",
+                    "--format",
+                    "html:dummy/diff_coverage.html,"
+                    "json:dummy/diff_coverage.json,"
+                    "markdown:dummy/diff_coverage.md",
                 ]
             )
             == 0
@@ -449,7 +445,7 @@ class TestDiffQualityIntegration:
         patch_git_command.set_stdout("git_diff_violations.txt")
         assert (
             runbin(
-                ["--violations=pyflakes", "--html-report", "dummy/diff_coverage.html"]
+                ["--violations=pyflakes", "--format", "html:dummy/diff_coverage.html"]
             )
             == 0
         )
@@ -458,7 +454,7 @@ class TestDiffQualityIntegration:
     def test_added_file_pylint_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_violations.txt")
         assert (
-            runbin(["--violations=pylint", "--html-report", "dummy/diff_coverage.html"])
+            runbin(["--violations=pylint", "--format", "html:dummy/diff_coverage.html"])
             == 0
         )
         compare_html("pylint_violations_report.html", "dummy/diff_coverage.html")
@@ -470,8 +466,8 @@ class TestDiffQualityIntegration:
                 [
                     "--violations=pylint",
                     "--fail-under=80",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                 ]
             )
             == 1
@@ -485,8 +481,8 @@ class TestDiffQualityIntegration:
                 [
                     "--violations=pylint",
                     "--fail-under=40",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                 ]
             )
             == 0
@@ -499,8 +495,8 @@ class TestDiffQualityIntegration:
             runbin(
                 [
                     "--violations=pycodestyle",
-                    "--html-report",
-                    "dummy/diff_coverage.html",
+                    "--format",
+                    "html:dummy/diff_coverage.html",
                     "--external-css-file",
                     "dummy/external_style.css",
                 ]

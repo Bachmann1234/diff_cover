@@ -101,9 +101,10 @@ You can also generate an HTML, JSON or Markdown version of the report:
 
 .. code:: bash
 
-    diff-cover coverage.xml --html-report report.html
-    diff-cover coverage.xml --json-report report.json
-    diff-cover coverage.xml --markdown-report report.md
+    diff-cover coverage.xml --format html:report.html
+    diff-cover coverage.xml --format json:report.json
+    diff-cover coverage.xml --format markdown:report.md
+    diff-cover coverage.xml --format html:report.html,markdown:report.md
 
 Multiple XML Coverage Reports
 -------------------------------
@@ -140,9 +141,10 @@ Like ``diff-cover``, HTML, JSON or Markdown reports can be generated with
 
 .. code:: bash
 
-    diff-quality --violations=<tool> --html-report report.html
-    diff-quality --violations=<tool> --json-report report.json
-    diff-quality --violations=<tool> --markdown-report report.md
+    diff-quality --violations=<tool> --format html:report.html
+    diff-quality --violations=<tool> --format json:report.json
+    diff-quality --violations=<tool> --format markdown:report.md
+    diff-quality --violations=<tool> --format html:report.html,markdown:report.md
 
 If you have already generated a report using ``pycodestyle``, ``pyflakes``, ``flake8``,
 ``pylint``, ``checkstyle``, ``checkstylexml``, or ``findbugs`` you can pass the report
