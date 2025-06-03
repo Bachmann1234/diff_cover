@@ -110,7 +110,9 @@ class GitDiffTool:
             return self._untracked_cache
 
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
-        self._untracked_cache =[to_unescaped_filename(line) for line in output.splitlines() if line]
+        self._untracked_cache = [
+            to_unescaped_filename(line) for line in output.splitlines() if line
+        ]
         return self._untracked_cache
 
 
