@@ -41,27 +41,27 @@ diff-quality = 'diff_cover.diff_quality_tool:main'
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-Pygments = "^2.19.1"
-Jinja2 = ">=2.7.1"
-pluggy = ">=0.13.1,<2"
-chardet = ">=3.0.0"
+Pygments = "*"
+Jinja2 = "*"
+pluggy = "*"
+chardet = "*"
 tomli = {version = ">=1.2.1", optional = true}
 
 [tool.poetry.group.dev.dependencies]
-pytest-cov = "^6.1.1"
-pytest-datadir = "^1.5.0"
-pytest-mock = "^3.14.0"
-pytest-xdist = "^3.6.1"
-pycodestyle = ">=2.9.1"
-flake8 = "^5.0.4"
-pyflakes = "^2.5.0"
-pylint = "^3.3.4"
-pylint-pytest = "^1.1.8"
-pydocstyle = "^6.1.1"
-black = "^25.1.0"
-isort = "^6.0.1"
-doc8 = "1.1.2"
-ruff = "^0.11.10"
+pytest-cov = "*"
+pytest-datadir = "*"
+pytest-mock = "*"
+pytest-xdist = "*"
+pycodestyle = "*"
+flake8 = "*"
+pyflakes = "*"
+pylint = "*"
+pylint-pytest = "*"
+pydocstyle = "*"
+black = "*"
+isort = "*"
+doc8 = "*"
+ruff = "*"
 
 [tool.poetry.extras]
 toml = ["tomli"]
