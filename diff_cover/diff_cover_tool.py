@@ -236,9 +236,7 @@ def generate_coverage_report(
         for coverage_file in coverage_files
         if not coverage_file.endswith(".xml")
     ]
-    if len(xml_roots) > 0 and len(lcov_roots) > 0:
-        raise ValueError(f"Mixing LCov and XML reports is not supported yet")
-    elif len(xml_roots) > 0:
+    if xml_roots:
         coverage = XmlCoverageReporter(xml_roots, src_roots, expand_coverage_report)
     else:
         coverage = LcovCoverageReporter(lcov_roots, src_roots)
