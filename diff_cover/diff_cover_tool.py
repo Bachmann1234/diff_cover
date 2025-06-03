@@ -22,10 +22,10 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
 )
 
-
-HTML_REPORT_HELP = "Diff coverage HTML output"
-JSON_REPORT_HELP = "Diff coverage JSON output"
-MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
+FORMAT_HELP = "Format to use"
+HTML_REPORT_DEFAULT_PATH = "diff-cover.html"
+JSON_REPORT_DEFAULT_PATH = "diff-cover.json"
+MARKDOWN_REPORT_DEFAULT_PATH = "diff-cover.md"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
