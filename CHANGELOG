@@ -1,3 +1,7 @@
+06/01/2025 v9.3.2
+
+* Fix --format with paths containing colons. [PR 484](https://github.com/Bachmann1234/diff_cover/pull/484) thanks @tkukushkin
+
 05/25/2025 v9.3.1
 
 * Loosens the python requirement in diff cover so people using it as a dependency are not restricted to one specific python version
