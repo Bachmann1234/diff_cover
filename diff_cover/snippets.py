@@ -78,7 +78,8 @@ class Snippet:
         Raises a `ValueError` if `start_line` is less than 1
         """
         if start_line < 1:
-            raise ValueError("Start line must be >= 1")
+            msg = "Start line must be >= 1"
+            raise ValueError(msg)
 
         self._src_tokens = src_tokens
         self._src_filename = src_filename
@@ -116,7 +117,6 @@ class Snippet:
         Return a Markdown representation of the snippet using Markdown fenced code blocks.
         See https://github.github.com/gfm/#fenced-code-blocks.
         """
-
         line_number_length = len(str(self._last_line))
 
         text = ""
@@ -188,7 +188,6 @@ class Snippet:
 
         See `load_snippets()` for details.
         """
-
         # load once...
         snippet_list = cls.load_snippets(src_path, violation_lines)
 
@@ -266,7 +265,6 @@ class Snippet:
         Uses `src_filename` to guess the type of file
         so it can highlight syntax correctly.
         """
-
         # Parse the source into tokens
         try:
             lexer = guess_lexer_for_filename(src_filename, src_contents)
@@ -302,7 +300,6 @@ class Snippet:
         The algorithm is slightly complicated because a single token
         can contain multiple line breaks.
         """
-
         # Create a map from ranges (start/end tuples) to tokens
         token_map = {rng: [] for rng in range_list}
 

@@ -162,7 +162,6 @@ class GitDiffReporter(BaseDiffReporter):
         """
         See base class docstring.
         """
-
         # Get the diff dictionary
         diff_dict = self._git_diff()
         # include untracked files
@@ -183,7 +182,6 @@ class GitDiffReporter(BaseDiffReporter):
         """
         Return the number of lines in a file.
         """
-
         try:
             with open(path, encoding="utf-8") as file_handle:
                 return len(file_handle.readlines())
@@ -194,7 +192,6 @@ class GitDiffReporter(BaseDiffReporter):
         """
         See base class docstring.
         """
-
         # Get the diff dictionary (cached)
         diff_dict = self._git_diff()
 
@@ -227,7 +224,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a GitDiffError if `git diff` has an error.
         """
-
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
             result_dict = {}
@@ -268,7 +264,6 @@ class GitDiffReporter(BaseDiffReporter):
         - If the path is excluded
         - If the path has an extension that is not supported
         """
-
         if self._is_path_excluded(src_path):
             return False
 
@@ -297,7 +292,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         If the output could not be parsed, raises a GitDiffError.
         """
-
         # Create a dict to hold results
         diff_dict = {}
 
@@ -320,7 +314,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a `GitDiffError` if `diff_str` is in an invalid format.
         """
-
         # Create a dict to map source files to lines in the diff output
         source_dict = {}
 
@@ -349,22 +342,20 @@ class GitDiffReporter(BaseDiffReporter):
 
             # Every other line is stored in the dictionary for this source file
             # once we find a hunk section
-            else:
-                # Only add lines if we're in a hunk section
-                # (ignore index and files changed lines)
-                if found_hunk or line.startswith("@@"):
-                    # Remember that we found a hunk
-                    found_hunk = True
+            # Only add lines if we're in a hunk section
+            # (ignore index and files changed lines)
+            elif found_hunk or line.startswith("@@"):
+                # Remember that we found a hunk
+                found_hunk = True
 
-                    if src_path is not None:
-                        source_dict[src_path].append(line)
+                if src_path is not None:
+                    source_dict[src_path].append(line)
 
-                    else:
-                        # We tolerate other information before we have
-                        # a source file defined, unless it's a hunk line
-                        if line.startswith("@@"):
-                            msg = f"Hunk has no source file: '{line}'"
-                            raise GitDiffError(msg)
+                # We tolerate other information before we have
+                # a source file defined, unless it's a hunk line
+                elif line.startswith("@@"):
+                    msg = f"Hunk has no source file: '{line}'"
+                    raise GitDiffError(msg)
 
         return source_dict
 
@@ -378,7 +369,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a `GitDiffError` if the diff lines are in an invalid format.
         """
-
         added_lines = []
         deleted_lines = []
 
@@ -502,7 +492,6 @@ class GitDiffReporter(BaseDiffReporter):
         Given a list of line numbers, return a list in which each line
         number is included once and the lines are ordered sequentially.
         """
-
         if len(line_numbers) == 0:
             return []
 
