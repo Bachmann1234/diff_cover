@@ -181,7 +181,7 @@ class TestDiffCoverIntegration:
     def test_added_file_console_lcov(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["lcov.info"]) == 0
-        compare_console("add_console_report.txt", capsys.readouterr().out)
+        compare_console("add_console_report_lcov.txt", capsys.readouterr().out)
 
     def test_lua_coverage(self, runbin, patch_git_command, capsys):
         """

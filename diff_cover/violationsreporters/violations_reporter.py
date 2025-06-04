@@ -388,7 +388,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                         if line_no in lcov_report[source_file]:
                             lcov_report[source_file][line_no] = 0
 
-                # Apply fun ction hit filtering
+                # Apply function hit filtering
                 for func_name, (line_no, hit) in function_lines[source_file].items():
                     lcov_report[source_file][line_no] = hit
 
