@@ -304,7 +304,7 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
     def test_hundred_percent(self):
         # Have the dependencies return an empty report
         self.set_src_paths_changed(["file.py"])
-        self.set_lines_changed("file.py", list(range(0, 100)))
+        self.set_lines_changed("file.py", list(range(100)))
         self.set_violations("file.py", [])
         self.set_measured("file.py", [2])
 
@@ -377,7 +377,7 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
     def test_hundred_percent(self):
         # Have the dependencies return an empty report
         self.set_src_paths_changed(["file.py"])
-        self.set_lines_changed("file.py", list(range(0, 100)))
+        self.set_lines_changed("file.py", list(range(100)))
         self.set_violations("file.py", [])
         self.set_measured("file.py", [2])
 
@@ -484,7 +484,7 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
     def test_hundred_percent(self):
         # Have the dependencies return an empty report
         self.set_src_paths_changed(["file.py"])
-        self.set_lines_changed("file.py", list(range(0, 100)))
+        self.set_lines_changed("file.py", list(range(100)))
         self.set_violations("file.py", [])
         self.set_measured("file.py", [2])
 
