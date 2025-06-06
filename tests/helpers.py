@@ -157,7 +157,7 @@ def _hunk_entry(start, end, modified_lines):
     # for before/after the change, but since we're only interested
     # in after the change, we use the same numbers for both.
     length = end - start
-    output.append("@@ -{0},{1} +{0},{1} @@".format(start, length))
+    output.append(f"@@ -{start},{length} +{start},{length} @@")
 
     # Output line modifications
     for line_number in range(start, end + 1):
