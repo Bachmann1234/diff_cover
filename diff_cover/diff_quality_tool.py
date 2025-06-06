@@ -19,14 +19,17 @@ from diff_cover.diff_cover_tool import (
     DIFF_RANGE_NOTATION_HELP,
     EXCLUDE_HELP,
     FAIL_UNDER_HELP,
-    HTML_REPORT_HELP,
+    FORMAT_HELP,
+    HTML_REPORT_DEFAULT_PATH,
     IGNORE_STAGED_HELP,
     IGNORE_UNSTAGED_HELP,
     IGNORE_WHITESPACE,
     INCLUDE_UNTRACKED_HELP,
-    JSON_REPORT_HELP,
-    MARKDOWN_REPORT_HELP,
+    JSON_REPORT_DEFAULT_PATH,
+    MARKDOWN_REPORT_DEFAULT_PATH,
     QUIET_HELP,
+    format_type,
+    handle_old_format,
 )
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
@@ -106,24 +109,10 @@ def parse_quality_args(argv):
     )
 
     parser.add_argument(
-        "--html-report",
-        metavar="FILENAME",
-        type=str,
-        help=HTML_REPORT_HELP,
-    )
-
-    parser.add_argument(
-        "--json-report",
-        metavar="FILENAME",
-        type=str,
-        help=JSON_REPORT_HELP,
-    )
-
-    parser.add_argument(
-        "--markdown-report",
-        metavar="FILENAME",
-        type=str,
-        help=MARKDOWN_REPORT_HELP,
+        "--format",
+        type=format_type,
+        default="",
+        help=FORMAT_HELP,
     )
 
     parser.add_argument(
@@ -210,9 +199,7 @@ def generate_quality_report(
     tool,
     compare_branch,
     diff_tool,
-    html_report=None,
-    json_report=None,
-    markdown_report=None,
+    report_formats=None,
     css_file=None,
     ignore_staged=False,
     ignore_unstaged=False,
@@ -238,7 +225,8 @@ def generate_quality_report(
         include=include,
     )
 
-    if html_report is not None:
+    if "html" in report_formats:
+        html_report = report_formats["html"] or HTML_REPORT_DEFAULT_PATH
         css_url = css_file
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
@@ -249,12 +237,14 @@ def generate_quality_report(
             with open(css_file, "wb") as output_file:
                 reporter.generate_css(output_file)
 
-    if json_report is not None:
+    if "json" in report_formats:
+        json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
         reporter = JsonReportGenerator(tool, diff)
         with open(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if markdown_report is not None:
+    if "markdown" in report_formats:
+        markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
         reporter = MarkdownQualityReportGenerator(tool, diff)
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
@@ -277,7 +267,9 @@ def main(argv=None, directory=None):
     """
 
     argv = argv or sys.argv
-    arg_dict = parse_quality_args(argv[1:])
+    arg_dict = parse_quality_args(
+        handle_old_format(diff_cover.QUALITY_DESCRIPTION, argv[1:])
+    )
 
     quiet = arg_dict["quiet"]
     level = logging.ERROR if quiet else logging.WARNING
@@ -340,9 +332,7 @@ def main(argv=None, directory=None):
                 GitDiffTool(
                     arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
                 ),
-                html_report=arg_dict["html_report"],
-                json_report=arg_dict["json_report"],
-                markdown_report=arg_dict["markdown_report"],
+                report_formats=arg_dict["format"],
                 css_file=arg_dict["external_css_file"],
                 ignore_staged=arg_dict["ignore_staged"],
                 ignore_unstaged=arg_dict["ignore_unstaged"],

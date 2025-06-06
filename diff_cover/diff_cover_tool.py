@@ -3,6 +3,7 @@ import io
 import logging
 import os
 import sys
+import warnings
 import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
@@ -48,6 +49,16 @@ DIFF_FILE_HELP = "The diff file to use"
 LOGGER = logging.getLogger(__name__)
 
 
+def format_type(value):
+    """
+    Accepts:
+        --format html:path/to/file.html,json:path/to/file.json
+
+        return: dict of strings to paths
+    """
+    return dict((item.split(":", 1) for item in value.split(",")) if value else {})
+
+
 def parse_coverage_args(argv):
     """
     Parse command line arguments, returning a dict of
@@ -66,27 +77,13 @@ def parse_coverage_args(argv):
     """
     parser = get_parser(description=DESCRIPTION)
 
-    parser.add_argument("coverage_file", type=str, help=COVERAGE_FILE_HELP, nargs="+")
+    parser.add_argument("coverage_files", type=str, help=COVERAGE_FILE_HELP, nargs="+")
 
     parser.add_argument(
-        "--html-report",
-        metavar="FILENAME",
-        type=str,
-        help=HTML_REPORT_HELP,
-    )
-
-    parser.add_argument(
-        "--json-report",
-        metavar="FILENAME",
-        type=str,
-        help=JSON_REPORT_HELP,
-    )
-
-    parser.add_argument(
-        "--markdown-report",
-        metavar="FILENAME",
-        type=str,
-        help=MARKDOWN_REPORT_HELP,
+        "--format",
+        type=format_type,
+        default="",
+        help=FORMAT_HELP,
     )
 
     parser.add_argument(
@@ -185,9 +182,7 @@ def generate_coverage_report(
     coverage_files,
     compare_branch,
     diff_tool,
-    html_report=None,
-    json_report=None,
-    markdown_report=None,
+    report_formats=None,
     css_file=None,
     ignore_staged=False,
     ignore_unstaged=False,
@@ -222,15 +217,16 @@ def generate_coverage_report(
         for coverage_file in coverage_files
         if not coverage_file.endswith(".xml")
     ]
-    if len(xml_roots) > 0 and len(lcov_roots) > 0:
-        raise ValueError(f"Mixing LCov and XML reports is not supported yet")
-    elif len(xml_roots) > 0:
+    if xml_roots and lcov_roots:
+        raise ValueError("Mixing LCov and XML reports is not supported yet")
+    if xml_roots:
         coverage = XmlCoverageReporter(xml_roots, src_roots, expand_coverage_report)
     else:
         coverage = LcovCoverageReporter(lcov_roots, src_roots)
 
     # Build a report generator
-    if html_report is not None:
+    if "html" in report_formats:
+        html_report = report_formats["html"] or HTML_REPORT_DEFAULT_PATH
         css_url = css_file
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
@@ -241,12 +237,14 @@ def generate_coverage_report(
             with open(css_file, "wb") as output_file:
                 reporter.generate_css(output_file)
 
-    if json_report is not None:
+    if "json" in report_formats:
+        json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
         reporter = JsonReportGenerator(coverage, diff)
         with open(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if markdown_report is not None:
+    if "markdown" in report_formats:
+        markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
         reporter = MarkdownReportGenerator(coverage, diff)
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
@@ -260,6 +258,53 @@ def generate_coverage_report(
     return reporter.total_percent_covered()
 
 
+def handle_old_format(description, argv):
+    parser = argparse.ArgumentParser(description=description)
+    arg_html = parser.add_argument("--html-report", type=str)
+    arg_json = parser.add_argument("--json-report", type=str)
+    arg_markdown = parser.add_argument("--markdown-report", type=str)
+    parser.add_argument("--format", type=str)
+
+    known_args, unknown_args = parser.parse_known_args(argv)
+    format_ = format_type(known_args.format)
+    if known_args.html_report:
+        if "html" in format_:
+            raise argparse.ArgumentError(
+                arg_html, "Cannot use along with --format html."
+            )
+        warnings.warn(
+            "The --html-report option is deprecated. "
+            f"Use --format html:{known_args.html_report} instead."
+        )
+        format_["html"] = known_args.html_report
+    if known_args.json_report:
+        if "json" in format_:
+            raise argparse.ArgumentError(
+                arg_json, "Cannot use along with --format json."
+            )
+        warnings.warn(
+            "The --json-report option is deprecated. "
+            f"Use --format json:{known_args.json_report} instead."
+        )
+        format_["json"] = known_args.json_report
+    if known_args.markdown_report:
+        if "markdown" in format_:
+            raise argparse.ArgumentError(
+                arg_markdown, "Cannot use along with --format markdown."
+            )
+        warnings.warn(
+            "The --markdown-report option is deprecated. "
+            f"Use --format markdown:{known_args.markdown_report} instead."
+        )
+        format_["markdown"] = known_args.markdown_report
+    if format_:
+        unknown_args += [
+            "--format",
+            ",".join(f"{k}:{v}" for k, v in format_.items()),  # noqa: E231
+        ]
+    return unknown_args
+
+
 def main(argv=None, directory=None):
     """
     Main entry point for the tool, script installed via pyproject.toml
@@ -269,7 +314,7 @@ def main(argv=None, directory=None):
     0 is successful run
     """
     argv = argv or sys.argv
-    arg_dict = parse_coverage_args(argv[1:])
+    arg_dict = parse_coverage_args(handle_old_format(DESCRIPTION, argv[1:]))
 
     quiet = arg_dict["quiet"]
     level = logging.ERROR if quiet else logging.WARNING
@@ -287,12 +332,10 @@ def main(argv=None, directory=None):
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 
     percent_covered = generate_coverage_report(
-        arg_dict["coverage_file"],
+        arg_dict["coverage_files"],
         arg_dict["compare_branch"],
         diff_tool,
-        html_report=arg_dict["html_report"],
-        json_report=arg_dict["json_report"],
-        markdown_report=arg_dict["markdown_report"],
+        report_formats=arg_dict["format"],
         css_file=arg_dict["external_css_file"],
         ignore_staged=arg_dict["ignore_staged"],
         ignore_unstaged=arg_dict["ignore_unstaged"],
