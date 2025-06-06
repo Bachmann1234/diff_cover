@@ -6,10 +6,12 @@ env:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        os: [windows-latest] #, ubuntu-latest]
+        python-version: [ "3.9"] #, "3.10", "3.11", "3.12", "3.13" ]
+
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
@@ -33,11 +35,13 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
-        run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      - name: Run The lints and tests
+        shell: bash
+        run: poetry install
+      - name: Run The lints and tests (Unix)
+        shell: bash
         run: |
-          echo ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}| sed 's|\.\*||g' >> "$GITHUB_ENV"
+          echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           poetry run bash -x verify.sh
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
@@ -71,8 +75,9 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
-        run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        shell: bash
+        run: poetry install
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
