@@ -1,8 +1,15 @@
-import pytest
 import argparse
 
+import pytest
+
 from diff_cover import config_parser
-from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config, get_parser
+from diff_cover.config_parser import (
+    ParserError,
+    TOMLParser,
+    Tool,
+    get_config,
+    get_parser,
+)
 
 tools = pytest.mark.parametrize("tool", list(Tool))
 
@@ -93,7 +100,6 @@ def test_get_config(tmp_path, tool, argv, file_content, expected):
     parser.add_argument("-aa", type=int, default=0)
     parser.add_argument("-bb", type=int, default=0)
     parser.add_argument("-cc", type=int, default=0)
-    import ipdb; ipdb.set_trace()
     actual = get_config(parser, argv=argv, tool=tool)
     actual.pop("config_file")
     assert actual == expected

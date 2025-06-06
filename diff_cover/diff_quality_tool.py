@@ -102,7 +102,7 @@ def parse_quality_args(argv):
 
     where `HTML_REPORT` and `CSS_FILE` are paths.
     """
-    parser = get_parser(diff_cover.QUALITY_DESCRIPTION) 
+    parser = get_parser(diff_cover.QUALITY_DESCRIPTION)
 
     parser.add_argument(
         "--violations", metavar="TOOL", type=str, help=VIOLATION_CMD_HELP, required=True
