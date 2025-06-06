@@ -1,7 +1,8 @@
 import pytest
+import argparse
 
 from diff_cover import config_parser
-from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config
+from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config, get_parser
 
 tools = pytest.mark.parametrize("tool", list(Tool))
 
@@ -56,45 +57,43 @@ def test_get_config_unrecognized_file(mocker, tool):
     parser = mocker.Mock()
     parser.parse_args().__dict__ = {"config_file": "foo.bar"}
     with pytest.raises(ParserError):
-        get_config(parser, argv=[], defaults={}, tool=tool)
+        get_config(parser, argv=[], tool=tool)
 
 
 @pytest.mark.parametrize(
-    "tool,cli_config,defaults,file_content,expected",
+    "tool,argv,file_content,expected",
     [
         (
             Tool.DIFF_COVER,
-            {"a": 2, "b": None, "c": None},
-            {"a": 4, "b": 3},
+            ["-aa", "2"],
             None,
-            {"a": 2, "b": 3, "c": None},
+            {"aa": 2, "bb": None, "cc": None},
         ),
         (
             Tool.DIFF_QUALITY,
-            {"a": 2, "b": None, "c": None},
-            {"a": 4, "b": 3},
+            ["-aa", "3"],
             None,
-            {"a": 2, "b": 3, "c": None},
+            {"aa": 3, "bb": None, "cc": None},
         ),
         (
             Tool.DIFF_COVER,
-            {"a": 2, "b": None, "c": None, "d": None},
-            {"a": 4, "b": 3},
-            "[tool.diff_cover]\na=1\nd=6",
-            {"a": 2, "b": 3, "c": None, "d": 6},
+            ["-aa", "2", "-cc", "1"],
+            "[tool.diff_cover]\naa=1\nbb=6",
+            {"aa": 2, "bb": 6, "cc": 1},
         ),
     ],
 )
-def test_get_config(
-    mocker, tmp_path, tool, cli_config, defaults, file_content, expected
-):
+def test_get_config(tmp_path, tool, argv, file_content, expected):
     if file_content:
         toml_file = tmp_path / "foo.toml"
         toml_file.write_text(file_content)
-        cli_config["config_file"] = expected["config_file"] = str(toml_file)
-    else:
-        cli_config["config_file"] = expected["config_file"] = None
+        argv.extend(["--config-file", str(toml_file)])
 
-    parser = mocker.Mock()
-    parser.parse_args().__dict__ = cli_config
-    assert get_config(parser, argv=[], defaults=defaults, tool=tool) == expected
+    parser = get_parser(description="test")
+    parser.add_argument("-aa", type=int, default=0)
+    parser.add_argument("-bb", type=int, default=0)
+    parser.add_argument("-cc", type=int, default=0)
+    import ipdb; ipdb.set_trace()
+    actual = get_config(parser, argv=argv, tool=tool)
+    actual.pop("config_file")
+    assert actual == expected
