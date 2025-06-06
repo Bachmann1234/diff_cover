@@ -375,6 +375,13 @@ class TestDiffCoverIntegration:
         assert runbin(["--show-uncovered", "coverage.xml"]) == 0
         compare_console("show_uncovered_lines_console.txt", capsys.readouterr().out)
 
+    def test_multiple_lcov_xml_reports(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        with pytest.raises(
+            ValueError, match="Mixing LCov and XML reports is not supported yet"
+        ):
+            runbin(["--show-uncovered", "coverage.xml", "lcov.info"])
+
     def test_expand_coverage_report_complete_report(
         self, runbin, patch_git_command, capsys
     ):
