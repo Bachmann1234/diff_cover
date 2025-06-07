@@ -81,7 +81,7 @@ def parse_coverage_args(argv):
     """
     parser = argparse.ArgumentParser(description=DESCRIPTION)
 
-    parser.add_argument("coverage_file", type=str, help=COVERAGE_FILE_HELP, nargs="+")
+    parser.add_argument("coverage_files", type=str, help=COVERAGE_FILE_HELP, nargs="+")
 
     parser.add_argument(
         "--format",
@@ -236,9 +236,9 @@ def generate_coverage_report(
         for coverage_file in coverage_files
         if not coverage_file.endswith(".xml")
     ]
-    if len(xml_roots) > 0 and len(lcov_roots) > 0:
-        raise ValueError(f"Mixing LCov and XML reports is not supported yet")
-    elif len(xml_roots) > 0:
+    if xml_roots and lcov_roots:
+        raise ValueError("Mixing LCov and XML reports is not supported yet")
+    if xml_roots:
         coverage = XmlCoverageReporter(xml_roots, src_roots, expand_coverage_report)
     else:
         coverage = LcovCoverageReporter(lcov_roots, src_roots)
@@ -351,7 +351,7 @@ def main(argv=None, directory=None):
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 
     percent_covered = generate_coverage_report(
-        arg_dict["coverage_file"],
+        arg_dict["coverage_files"],
         arg_dict["compare_branch"],
         diff_tool,
         report_formats=arg_dict["format"],

@@ -1673,7 +1673,7 @@ class TestPylintQualityReporterTest:
         ]
 
     def test_unicode_continuation_char(self, process_patcher):
-        process_patcher((b"file.py:2: [W1401]" b" Invalid char '\xc3'", ""), 0)
+        process_patcher((b"file.py:2: [W1401] Invalid char '\xc3'", ""), 0)
         # Since we are replacing characters we can't interpet, this should
         # return a valid string with the char replaced with '?'
         quality = QualityReporter(PylintDriver())

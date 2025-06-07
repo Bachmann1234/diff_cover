@@ -11,9 +11,9 @@ def test_parse_with_html_report():
     argv = ["reports/coverage.xml", "--format", "html:diff_cover.html"]
     arg_dict = parse_coverage_args(argv)
 
-    assert arg_dict.get("coverage_file") == ["reports/coverage.xml"]
-    assert arg_dict.get("format") == {"html": "diff_cover.html"}
-    assert not arg_dict.get("ignore_unstaged")
+    assert arg_dict["coverage_files"] == ["reports/coverage.xml"]
+    assert arg_dict["format"] == {"html": "diff_cover.html"}
+    assert not arg_dict["ignore_unstaged"]
 
 
 def test_report_path_with_colon():
@@ -32,9 +32,9 @@ def test_parse_with_no_report():
     argv = ["reports/coverage.xml"]
     arg_dict = parse_coverage_args(argv)
 
-    assert arg_dict.get("coverage_file") == ["reports/coverage.xml"]
-    assert arg_dict.get("format") == {}
-    assert not arg_dict.get("ignore_unstaged")
+    assert arg_dict["coverage_files"] == ["reports/coverage.xml"]
+    assert arg_dict["format"] == {}
+    assert not arg_dict["ignore_unstaged"]
 
 
 def test_parse_with_multiple_reports():
@@ -45,9 +45,9 @@ def test_parse_with_multiple_reports():
     ]
     arg_dict = parse_coverage_args(argv)
 
-    assert arg_dict.get("coverage_file") == ["reports/coverage.xml"]
-    assert arg_dict.get("format") == {"html": "report.html", "markdown": "report.md"}
-    assert not arg_dict.get("ignore_unstaged")
+    assert arg_dict["coverage_files"] == ["reports/coverage.xml"]
+    assert arg_dict["format"] == {"html": "report.html", "markdown": "report.md"}
+    assert not arg_dict["ignore_unstaged"]
 
 
 def test_parse_with_multiple_old_reports(recwarn):

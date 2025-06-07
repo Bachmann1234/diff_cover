@@ -99,9 +99,10 @@ show_missing = true
 exclude_also = [
     "if typing.TYPE_CHECKING:",
     "if TYPE_CHECKING:",
+    "if __name__ == \"__main__\":",
     "raise NotImplementedError",
     "raise AssertionError",
-    "pass",
+    "^\\s*pass\\s*$",
 ]
 
 [tool.coverage.html]
