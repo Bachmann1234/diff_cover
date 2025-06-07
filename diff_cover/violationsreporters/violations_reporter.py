@@ -308,7 +308,8 @@ class LcovCoverageReporter(BaseViolationReporter):
     def parse(lcov_file):
         """
         Parse a single LCov coverage report
-        File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
+        File format: https://linux.die.net/man/1/geninfo
+        More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
         """
         branch_coverage = defaultdict(lambda: defaultdict(lambda: {"total": 0, "hit": 0}))
         function_lines = defaultdict(dict)  # { source_file: { func_name: (line_no, hit_count) } }
