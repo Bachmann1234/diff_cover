@@ -1004,24 +1004,19 @@ class TestLcovCoverageReporterTest:
             function_data=function_data,
         )
 
-        # line 10: covered (no branch/function)
-        assert lcov_report["file1.cpp"][10] == 1
-        # line 20: all branches hit, should be covered
-        assert lcov_report["file1.cpp"][20] == 3
-        # line 25: covered (no branch/function)
-        assert lcov_report["file1.cpp"][25] == 1
-        # line 30: not all branches hit, should NOT be covered
-        assert lcov_report["file1.cpp"][30] == 0
-        # line 35: covered (no branch/function)
-        assert lcov_report["file1.cpp"][35] == 1
-        # line 40: function hit, should be covered
-        assert lcov_report["file1.cpp"][40] == 3
-        # line 45: covered (no branch/function)
-        assert lcov_report["file1.cpp"][45] == 1
-        # line 50: function not hit, should NOT be covered
-        assert lcov_report["file1.cpp"][50] == 0
-        # line 45: covered (no branch/function)
-        assert lcov_report["file1.cpp"][55] == 1
+        assert lcov_report == {
+            "file1.cpp": {
+                10: 1,  # covered (no branch/function)
+                20: 3,  # all branches hit, should be covered
+                25: 1,  # covered (no branch/function)
+                30: 0,  # not all branches hit, should NOT be covered
+                35: 1,  # covered (no branch/function)
+                40: 3,  # function hit, should be covered
+                45: 1,  # covered (no branch/function)
+                50: 0,  # function not hit, should NOT be covered
+                55: 1,  # covered (no branch/function)
+            }
+        }
 
     def _coverage_lcov(
         self,
@@ -1041,7 +1036,7 @@ class TestLcovCoverageReporterTest:
         branch_data = branch_data or {}
         function_data = function_data or {}
 
-        with tempfile.NamedTemporaryFile("w", delete=False) as f:
+        with tempfile.NamedTemporaryFile("w", delete=True) as f:
             for path in file_paths:
                 f.write(f"SF:{path}\n")
                 # Write function data
@@ -1064,7 +1059,6 @@ class TestLcovCoverageReporterTest:
             f.seek(0)
             # Parse and return the LCOV report
             lcov_report = LcovCoverageReporter.parse(f.name)
-        os.unlink(f.name)
         return lcov_report
 
 
