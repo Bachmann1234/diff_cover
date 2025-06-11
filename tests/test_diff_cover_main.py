@@ -12,7 +12,7 @@ def test_parse_coverage_file():
 
     arg_dict = parse_coverage_args(argv)
 
-    assert arg_dict["coverage_file"] == ["build/tests/coverage.xml"]
+    assert arg_dict["coverage_files"] == ["build/tests/coverage.xml"]
     assert arg_dict["compare_branch"] == "origin/other"
     assert arg_dict["diff_range_notation"] == "..."
 
@@ -22,7 +22,7 @@ def test_parse_range_notation(capsys):
 
     arg_dict = parse_coverage_args(argv)
 
-    assert arg_dict["coverage_file"] == ["build/tests/coverage.xml"]
+    assert arg_dict["coverage_files"] == ["build/tests/coverage.xml"]
     assert arg_dict["diff_range_notation"] == ".."
 
     with pytest.raises(SystemExit) as e:
