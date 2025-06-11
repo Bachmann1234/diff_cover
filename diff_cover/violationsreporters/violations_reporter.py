@@ -312,9 +312,11 @@ class LcovCoverageReporter(BaseViolationReporter):
         More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
         """
         branch_coverage = defaultdict(
-            lambda: defaultdict(lambda: {"total": 0, "hit": 0}))
+            lambda: defaultdict(lambda: {"total": 0, "hit": 0})
+        )
         function_lines = defaultdict(
-            dict)  # { source_file: { func_name: (line_no, hit_count) } }
+            dict
+        )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
         lcov = open(lcov_file)
         while True:
@@ -344,9 +346,7 @@ class LcovCoverageReporter(BaseViolationReporter):
             elif directive == "BRDA":
                 args = content.split(",")
                 if len(args) != 4:
-                    raise ValueError(
-                        f"Unknown syntax in lcov report: {line}"
-                    )
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
                 if source_file is None:
                     raise ValueError(
                         f"No source file specified for line coverage: {line}"
@@ -362,9 +362,7 @@ class LcovCoverageReporter(BaseViolationReporter):
             elif directive == "FN":
                 args = content.split(",")
                 if len(args) != 2:
-                    raise ValueError(
-                        f"Unknown syntax in lcov report: {line}"
-                    )
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
                 if source_file is None:
                     raise ValueError(
                         f"No source file specified for line coverage: {line}"
@@ -375,9 +373,7 @@ class LcovCoverageReporter(BaseViolationReporter):
             elif directive == "FNDA":
                 args = content.split(",")
                 if len(args) != 2:
-                    raise ValueError(
-                        f"Unknown syntax in lcov report: {line}"
-                    )
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
                 if source_file is None:
                     raise ValueError(
                         f"No source file specified for line coverage: {line}"
