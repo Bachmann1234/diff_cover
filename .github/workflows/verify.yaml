@@ -63,7 +63,6 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
-          cache: 'poetry'
       - name: Install poetry
         uses: snok/install-poetry@v1
         with:
