@@ -22,21 +22,24 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
 )
 
-HTML_REPORT_HELP = "Diff coverage HTML output"
-JSON_REPORT_HELP = "Diff coverage JSON output"
-MARKDOWN_REPORT_HELP = "Diff coverage Markdown output"
-COMPARE_BRANCH_HELP = "Branch to compare (default: %(default)s)"
+FORMAT_HELP = "Format to use"
+HTML_REPORT_DEFAULT_PATH = "diff-cover.html"
+JSON_REPORT_DEFAULT_PATH = "diff-cover.json"
+MARKDOWN_REPORT_DEFAULT_PATH = "diff-cover.md"
+COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
-FAIL_UNDER_HELP = "Returns an error code if coverage or quality score is below this value (default: %(default)s)"
+FAIL_UNDER_HELP = (
+    "Returns an error code if coverage or quality score is below this value"
+)
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
 EXCLUDE_HELP = "Exclude files, more patterns supported"
 INCLUDE_HELP = "Files to include (glob pattern)"
-SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports) (default: %(default)s)"
+SRC_ROOTS_HELP = "List of source directories (only for jacoco coverage reports)"
 COVERAGE_FILE_HELP = "coverage report (XML or lcov.info)"
 DIFF_RANGE_NOTATION_HELP = (
-    "Git diff range notation to use when comparing branches (default: '%(default)s')"
+    "Git diff range notation to use when comparing branches, defaults to '...'"
 )
 QUIET_HELP = "Only print errors and failures"
 SHOW_UNCOVERED = "Show uncovered lines on the console"
@@ -44,6 +47,7 @@ EXPAND_COVERAGE_REPORT = (
     "Append missing lines in coverage reports based on the hits of the previous line."
 )
 INCLUDE_UNTRACKED_HELP = "Include untracked files"
+CONFIG_FILE_HELP = "The configuration file to use"
 DIFF_FILE_HELP = "The diff file to use"
 
 LOGGER = logging.getLogger(__name__)
