@@ -416,6 +416,7 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
 
         self.assert_report(expected)
 
+
 class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):
     REPORT_GENERATOR_CLASS = GitHubAnnotationsReportGenerator
 

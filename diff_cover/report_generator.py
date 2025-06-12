@@ -419,6 +419,7 @@ class StringReportGenerator(TemplateReportGenerator):
         super().__init__(violations_reporter, diff_reporter)
         self.include_snippets = show_uncovered
 
+
 class GitHubAnnotationsReportGenerator(TemplateReportGenerator):
     """
     Generate a diff coverage report for GitHub annotations.
