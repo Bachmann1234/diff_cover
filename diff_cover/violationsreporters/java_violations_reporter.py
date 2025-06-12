@@ -14,6 +14,7 @@ from diff_cover.violationsreporters.base import (
     Violation,
 )
 
+
 # Report checkstyle violations.
 # http://checkstyle.sourceforge.net/apidocs/com/puppycrawl/tools/checkstyle/DefaultLogger.html
 # https://github.com/checkstyle/checkstyle/blob/master/src/main/java/com/puppycrawl/tools/checkstyle/AuditEventDefaultFormatter.java
@@ -58,6 +59,7 @@ class CheckstyleXmlDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:
@@ -96,6 +98,7 @@ class FindbugsXmlDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:
@@ -120,9 +123,11 @@ class FindbugsXmlDriver(QualityDriver):
     def installed(self):
         """
         Method checks if the provided tool is installed.
+
         Returns:
             boolean False: As findbugs analyses bytecode,
             it would be hard to run it from outside the build framework.
+
         """
         return False
 
@@ -141,6 +146,7 @@ class PmdXmlDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:
@@ -160,8 +166,10 @@ class PmdXmlDriver(QualityDriver):
     def installed(self):
         """
         Method checks if the provided tool is installed.
+
         Returns:
             boolean False: As findbugs analyses bytecode,
             it would be hard to run it from outside the build framework.
+
         """
         return False

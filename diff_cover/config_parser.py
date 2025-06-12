@@ -1,6 +1,7 @@
 import abc
 import enum
 
+
 try:
     import tomli as toml
 

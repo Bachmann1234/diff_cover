@@ -5,6 +5,7 @@ Test helper functions.
 import os.path
 import random
 
+
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
 LINE_STRINGS = ["test", "+ has a plus sign", "- has a minus sign"]
@@ -63,7 +64,6 @@ def git_diff_output(diff_dict, deleted_files=None):
 
     Returns a byte string.
     """
-
     output = []
 
     # Entries for deleted files
@@ -85,7 +85,6 @@ def _deleted_file_entries(deleted_files):
 
     Returns a list of lines in the diff output.
     """
-
     output = []
 
     if deleted_files is not None:
@@ -115,7 +114,6 @@ def _source_file_entry(src_file, modified_lines):
 
     Returns a list of lines in the diff output.
     """
-
     output = []
 
     # Line for the file names
@@ -182,7 +180,6 @@ def _hunks(modified_lines):
     Given a list of line numbers, return a list of hunks represented
     as `(start, end)` tuples.
     """
-
     # Identify contiguous lines as hunks
     hunks = []
     last_line = None

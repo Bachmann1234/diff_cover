@@ -65,9 +65,7 @@ class GitDiffTool:
         Raises a `GitDiffError` if `git diff` outputs anything
         to stderr.
         """
-        diff_range = "{branch}{notation}HEAD".format(
-            branch=compare_branch, notation=self.range_notation
-        )
+        diff_range = f"{compare_branch}{self.range_notation}HEAD"
         try:
             return execute(
                 self._default_git_args + self._default_diff_args + [diff_range]
@@ -112,18 +110,14 @@ class GitDiffTool:
             return self._untracked_cache
 
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
-        self._untracked_cache = []
-        if output:
-            self._untracked_cache = [
-                to_unescaped_filename(line) for line in output.splitlines() if line
-            ]
+        self._untracked_cache = [
+            to_unescaped_filename(line) for line in output.splitlines() if line
+        ]
         return self._untracked_cache
 
 
 class GitDiffFileTool(GitDiffTool):
-
     def __init__(self, diff_file_path):
-
         self.diff_file_path = diff_file_path
         super().__init__("...", False)
 
@@ -134,7 +128,7 @@ class GitDiffFileTool(GitDiffTool):
         Raises a `GitDiffError` if the file cannot be read.
         """
         try:
-            with open(self.diff_file_path, "r") as file:
+            with open(self.diff_file_path, encoding="utf-8") as file:
                 return file.read()
         except OSError as e:
             error_message = (
