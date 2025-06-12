@@ -150,27 +150,27 @@ class QualityReporter(BaseViolationReporter):
         """
         if not any(src_path.endswith(ext) for ext in self.driver.supported_extensions):
             return []
+
         if src_path not in self.violations_dict:
             if self.reports:
                 self.violations_dict = self.driver.parse_reports(self.reports)
-            else:
-                if self.driver_tool_installed is None:
-                    self.driver_tool_installed = self.driver.installed()
-                if not self.driver_tool_installed:
-                    raise OSError(f"{self.driver.name} is not installed")
-                command = copy.deepcopy(self.driver.command)
-                if self.options:
-                    for arg in self.options.split():
-                        command.append(arg)
-                if os.path.exists(src_path):
-                    command.append(src_path.encode(sys.getfilesystemencoding()))
+                return self.violations_dict[src_path]
 
-                    output = execute(command, self.driver.exit_codes)
-                    if self.driver.output_stderr:
-                        output = output[1]
-                    else:
-                        output = output[0]
-                    self.violations_dict.update(self.driver.parse_reports([output]))
+            if self.driver_tool_installed is None:
+                self.driver_tool_installed = self.driver.installed()
+            if not self.driver_tool_installed:
+                msg = f"{self.driver.name} is not installed"
+                raise OSError(msg)
+            command = copy.deepcopy(self.driver.command)
+            if self.options:
+                for arg in self.options.split():
+                    command.append(arg)
+            if os.path.exists(src_path):
+                command.append(src_path.encode(sys.getfilesystemencoding()))
+
+            stdout, stderr = execute(command, self.driver.exit_codes)
+            output = stderr if self.driver.output_stderr else stdout
+            self.violations_dict.update(self.driver.parse_reports([output]))
 
         return self.violations_dict[src_path]
 

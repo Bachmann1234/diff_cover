@@ -83,6 +83,7 @@ jobs:
           name: coverage_*
       - name: Combine coverage.py
         run: |
+          poetry run pip list
           poetry run coverage combine $(find downloaded_artifacts/ -type f | xargs)
           poetry run coverage xml
           poetry run coverage html
