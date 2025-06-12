@@ -669,10 +669,9 @@ class PylintDriver(QualityDriver):
                 for pylint_src_path, line_number in files_involved:
                     # If we're looking for a particular source file,
                     # ignore any other source files.
+                    error_str = f"{pylint_code}: {message}"
                     if function_name:
                         error_str = f"{pylint_code}: {function_name}: {message}"
-                    else:
-                        error_str = f"{pylint_code}: {message}"
 
                     clean_path = util.to_unix_path(pylint_src_path)
                     violation = Violation(int(line_number), error_str)
