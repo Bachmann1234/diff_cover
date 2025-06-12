@@ -1,10 +1,31 @@
+06/01/2025 v9.3.2
+
+* Fix --format with paths containing colons. [PR 484](https://github.com/Bachmann1234/diff_cover/pull/484) thanks @tkukushkin
+
+05/25/2025 v9.3.1
+
+* Loosens the python requirement in diff cover so people using it as a dependency are not restricted to one specific python version
+
+05/24/2025 v9.3.0
+
+* Resolves deprecation warning around regexes. [PR 452](https://github.com/Bachmann1234/diff_cover/pull/452) thanks @emmanuel-ferdman!
+
+* Improvements to coverage, test, performance, test quality. Huge improvemetns to how this projects tests.  [PR 454](https://github.com/Bachmann1234/diff_cover/pull/454) [PR 456](https://github.com/Bachmann1234/diff_cover/pull/456)
+[PR 459](https://github.com/Bachmann1234/diff_cover/pull/459) [PR 465](https://github.com/Bachmann1234/diff_cover/pull/465) [PR 468](https://github.com/Bachmann1234/diff_cover/pull/468)
+[PR 466](https://github.com/Bachmann1234/diff_cover/pull/466/files) [PR 476](http://github.com/Bachmann1234/diff_cover/pull/476) [PR 458](https://github.com/Bachmann1234/diff_cover/pull/458) [PR 462](https://github.com/Bachmann1234/diff_cover/pull/462) Thanks @kingbuzzman!
+
+* Removes/updates some deprecated code [PR 469](https://github.com/Bachmann1234/diff_cover/pull/469) [PR 455](https://github.com/Bachmann1234/diff_cover/pull/455) [PR 480](https://github.com/Bachmann1234/diff_cover/pull/480/files) Thanks @kingbuzzman!
+
+* Adds Ruff Support! [PR 463](https://github.com/Bachmann1234/diff_cover/pull/463) Closes [Issue 362](https://github.com/Bachmann1234/diff_cover/issues/362)
+
+
 03/08/2025 v9.2.4
 
 * Improves handling of escaped characters in untracked files. [PR 440](https://github.com/Bachmann1234/diff_cover/pull/440) Thanks @buermarc!
 
 02/18/2025 v9.2.3
 
-* Bumps some dev dependencies and updates tests to support pygments 2.18.0 
+* Bumps some dev dependencies and updates tests to support pygments 2.18.0
 
 01/30/2025 v9.2.2
 
@@ -36,7 +57,7 @@
 
 01/20/2024 v8.0.3
 
-* Fixes paths not being properly normalized when accessing the diff violations. Potentially fixing issues with users using diff quality in windows. [#388](https://github.com/Bachmann1234/diff_cover/pull/388) Thanks @mrcool4 for the PR! 
+* Fixes paths not being properly normalized when accessing the diff violations. Potentially fixing issues with users using diff quality in windows. [#388](https://github.com/Bachmann1234/diff_cover/pull/388) Thanks @mrcool4 for the PR!
 
 12/16/2023 v8.0.2
 
@@ -49,7 +70,7 @@
 10/14/2023 v8.0.0
 
 * Declares python 3.12 support (no code changes required)
-* Drops python 3.7 support 
+* Drops python 3.7 support
 * Various dependabot dependency updates
 
 07/14/2023 v7.7.0
@@ -136,13 +157,13 @@ report.
 PR by me however, this was first identified and worked on by @AdamWill in
 [PR-280](https://github.com/Bachmann1234/diff_cover/pull/280). I absentmindly
 stomped over that PR when I saw [Issue
-281](https://github.com/Bachmann1234/diff_cover/issues/281) come in. 
+281](https://github.com/Bachmann1234/diff_cover/issues/281) come in.
 
 
 4/15/2022 v6.5.0
 
 * Fixes issues when pylint identifies a multi line issue. Issue
-[#276](https://github.com/Bachmann1234/diff_cover/issues/276) Thanks @kozlovsky 
+[#276](https://github.com/Bachmann1234/diff_cover/issues/276) Thanks @kozlovsky
 
 3/24/2022 v6.4.5
 
@@ -155,7 +176,7 @@ https://github.com/Bachmann1234/diff_cover/pull/264)
 12/5/2021 v6.4.4
 
 * Fixes issue where fail over was not being properly set by default. Thanks
-@kasium https://github.com/Bachmann1234/diff_cover/pull/262 
+@kasium https://github.com/Bachmann1234/diff_cover/pull/262
 
 12/2/2021 v6.4.3
 
@@ -176,14 +197,14 @@ time. Thanks @dvzrv !
 
 9/16/2021 v6.4.0
 
-* Allows passing a root path in for ESLint with --report_root_path 
+* Allows passing a root path in for ESLint with --report_root_path
 * Bump pluggy to 1.0
 Thanks @kasium for both of these!
 
 8/29/2021 v6.3.5
 
 * Including the tests dir pollutes the namespace so for now they are removed
-again 
+again
 
 8/24/2021 v6.3.4
 
@@ -197,7 +218,7 @@ again
 8/19/2021 v6.3.2
 
 * Fix issue where untracked files that start with space would trigger a crash. (Thanks
-@kasium) Issue #242 
+@kasium) Issue #242
 
 8/15/2021 v6.3.1
 
@@ -225,14 +246,14 @@ in pypi. Thanks @kasium!
 
 7/09/2021 v6.1.1
 
-* Undoes a change making a implemented method abstract. Turned out existing plugins depended on this. 
+* Undoes a change making a implemented method abstract. Turned out existing plugins depended on this.
 
 7/08/2021 v6.1.0
 
 * New flag `--include-untracked` to give people the option to run against files that are not being tracked by git currently Thanks @kasium
 * Improved handling when the user provides a report file that does not exist (the app will fail instead of just saying there were no results) Thanks @kasium
 * More progress to moving tests to pytest style tests Thanks @kasium
-* More static analysis clean up. Thanks @kasium again! 
+* More static analysis clean up. Thanks @kasium again!
 
 Another all @kasium release!
 
@@ -263,14 +284,14 @@ All of these are due to @kasium Thanks for all you have done to this point!
 
 6/18/2021 v5.2.0
 
-* Adds 'quiet mode' which will only print errors and failures. Flag -q thanks @kasium https://github.com/Bachmann1234/diff_cover/issues/160 
+* Adds 'quiet mode' which will only print errors and failures. Flag -q thanks @kasium https://github.com/Bachmann1234/diff_cover/issues/160
 * Several internal improvement to tools and configs. Thanks @kasium !
 
 5/29/2021 v5.1.2
 
 * Fixes a bug where clover reports were not counting conditionals (Thanks for ZSmallX providing a detailed report that made fixing this easy) (https://github.com/Bachmann1234/diff_cover/issues/190)
 * Switch to github actions for CI as I ran out of free credits for travis and this job does not pay
-* Drop 'official' support for pypy3. I don't really have any reason to think pypy wont work for this project and I wanted to simplify my ci builds. 
+* Drop 'official' support for pypy3. I don't really have any reason to think pypy wont work for this project and I wanted to simplify my ci builds.
 
 5/11/2021 v5.1.1
 
@@ -297,7 +318,7 @@ All of these are due to @kasium Thanks for all you have done to this point!
 
 3/01/2021 v4.2.2
 
-* We still support python 3.5 (though we should probably drop it soon). A transitive dep dropped support for 3.5. 
+* We still support python 3.5 (though we should probably drop it soon). A transitive dep dropped support for 3.5.
   this version pins inflect
 * Pins pygments cuse updates keep breaking my overly fragile html tests"
 
@@ -329,7 +350,7 @@ All of these are due to @kasium Thanks for all you have done to this point!
 
 6/4/2020 v3.0.1
 
-* Updates a test around the json report that was flaking. This gets a release as some people run the tests from the packaged code 
+* Updates a test around the json report that was flaking. This gets a release as some people run the tests from the packaged code
 
 6/2/2020 v3.0.0
 
@@ -354,7 +375,7 @@ All of these are due to @kasium Thanks for all you have done to this point!
 * Just a point release to get back into the habit of signing them
 
 12/11/2019 v2.5.0
- 
+
  * Diff quality now has a plugin system! From now own this project will avoid adding new tools and instead direct those to become plugins instead. Perhaps we can look into moving existing tools into separate plugins over time however, currently im leaving it alone. Thank you @barrywhart (https://github.com/Bachmann1234/diff_cover/pull/128)
 
 11/20/2019 v2.4.1
@@ -368,7 +389,7 @@ All of these are due to @kasium Thanks for all you have done to this point!
 
 6/30/2019 v2.3.0
 
- * Add PMD xml driver Thanks @bit-ranger (https://github.com/Bachmann1234/diff_cover/pull/117) 
+ * Add PMD xml driver Thanks @bit-ranger (https://github.com/Bachmann1234/diff_cover/pull/117)
 
 6/13/2019 v2.2.0
 
@@ -404,14 +425,14 @@ All of these are due to @kasium Thanks for all you have done to this point!
 12/17/2018 v1.0.6
 
  * Fix bug where no source information would cause a crash https://github.com/Bachmann1234/diff-cover/issues/88 thanks @hjqgloria for the report
-    
+
 10/26/2018 v1.0.5
 
  * Add support for jacoco xml
  * support multiple xml formats (any combination of cobertura, clover, jacoco) at the same time
 
 7/10/2018 v1.0.4
- 
+
  * Fix issue where whitespace was not trimmed pulling source file from cobertura causing a missed match
 
 6/24/2018 v1.0.3
@@ -458,7 +479,7 @@ All of these are due to @kasium Thanks for all you have done to this point!
 
 3/29/2016 v0.9.7
 
-  * Move logging config to main method rather than __main__. Thanks @pkaleta (PR 45)   
+  * Move logging config to main method rather than __main__. Thanks @pkaleta (PR 45)
 
 2/21/2016 v0.9.6
 
@@ -474,11 +495,11 @@ All of these are due to @kasium Thanks for all you have done to this point!
 
 2/9/2016 v0.9.3
 
-  * Make it so you can run help without being in a git repository thanks @dashea! 
+  * Make it so you can run help without being in a git repository thanks @dashea!
 
 2/8/2016 v0.9.2
 
-  * CSS template was not being installed properly 
+  * CSS template was not being installed properly
 
 2/8/2016 v0.9.1
 

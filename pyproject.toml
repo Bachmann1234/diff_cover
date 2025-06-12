@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diff_cover"
-version = "9.2.4"
+version = "9.3.2"
 description = "Run coverage and linting reports on diffs"
 authors = ["See Contributors"]
 homepage = "https://github.com/Bachmann1234/diff-cover"
@@ -40,7 +40,7 @@ diff-cover = 'diff_cover.diff_cover_tool:main'
 diff-quality = 'diff_cover.diff_quality_tool:main'
 
 [tool.poetry.dependencies]
-python = "^3.9.17"
+python = ">=3.9"
 Pygments = "^2.19.1"
 Jinja2 = ">=2.7.1"
 pluggy = ">=0.13.1,<2"
@@ -53,8 +53,8 @@ pytest-datadir = "^1.5.0"
 pytest-mock = "^3.14.0"
 pytest-xdist = "^3.6.1"
 pycodestyle = ">=2.9.1"
-flake8 = "^5.0.4"
-pyflakes = "^2.5.0"
+flake8 = "^7.2.0"
+pyflakes = "^3.3.2 "
 pylint = "^3.3.4"
 pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
@@ -80,6 +80,14 @@ omit = ["./tests/*"]
 
 [tool.coverage.report]
 show_missing = true
+exclude_also = [
+    "if typing.TYPE_CHECKING:",
+    "if TYPE_CHECKING:",
+    "if __name__ == \"__main__\":",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "^\\s*pass\\s*$",
+]
 
 [tool.coverage.html]
 show_contexts = true
