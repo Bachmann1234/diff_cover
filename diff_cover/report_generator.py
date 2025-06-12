@@ -419,6 +419,14 @@ class StringReportGenerator(TemplateReportGenerator):
         super().__init__(violations_reporter, diff_reporter)
         self.include_snippets = show_uncovered
 
+class GitHubAnnotationsReportGenerator(TemplateReportGenerator):
+    """
+    Generate a diff coverage report for GitHub annotations.
+    https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-a-warning-message
+    """
+
+    template_path = "github_coverage_warning_annotations.txt"
+
 
 class HtmlReportGenerator(TemplateReportGenerator):
     """
