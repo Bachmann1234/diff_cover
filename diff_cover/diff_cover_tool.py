@@ -27,6 +27,7 @@ FORMAT_HELP = "Format to use"
 HTML_REPORT_DEFAULT_PATH = "diff-cover.html"
 JSON_REPORT_DEFAULT_PATH = "diff-cover.json"
 MARKDOWN_REPORT_DEFAULT_PATH = "diff-cover.md"
+GITHUB_ANNOTATIONS_DEFAULT_TYPE = "warning"
 COMPARE_BRANCH_HELP = "Branch to compare"
 CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
@@ -270,6 +271,10 @@ def generate_coverage_report(
             reporter.generate_report(output_file)
 
     if "github-annotations" in report_formats:
+        # Github annotations are always written to stdout, but we can use different types
+        # TODO - pass this type to the report generator
+        github_annotations_type = report_formats["github-annotations"] or GITHUB_ANNOTATIONS_DEFAULT_TYPE
+        reporter = GitHubAnnotationsReportGenerator(coverage, diff)
         reporter.generate_report(sys.stdout.buffer)
 
     # Generate the report for stdout
