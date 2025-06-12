@@ -36,7 +36,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root
+        run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Run The lints and tests
         run: |
@@ -78,7 +78,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root
+        run: poetry install
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       - name: Download artifacts
         uses: actions/download-artifact@v4
