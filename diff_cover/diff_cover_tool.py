@@ -269,8 +269,7 @@ def generate_coverage_report(
         with open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if "github" in report_formats:
-        reporter = GitHubAnnotationsReportGenerator(coverage, diff)
+    if "github-annotations" in report_formats:
         reporter.generate_report(sys.stdout.buffer)
 
     # Generate the report for stdout
