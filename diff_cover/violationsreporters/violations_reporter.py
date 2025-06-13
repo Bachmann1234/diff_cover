@@ -308,8 +308,15 @@ class LcovCoverageReporter(BaseViolationReporter):
     def parse(lcov_file):
         """
         Parse a single LCov coverage report
-        File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
+        File format: https://linux.die.net/man/1/geninfo
+        More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
         """
+        branch_coverage = defaultdict(
+            lambda: defaultdict(lambda: {"total": 0, "hit": 0})
+        )
+        function_lines = defaultdict(
+            dict
+        )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
         lcov = open(lcov_file)
         while True:
@@ -336,22 +343,76 @@ class LcovCoverageReporter(BaseViolationReporter):
                 if line_no not in lcov_report[source_file]:
                     lcov_report[source_file][line_no] = 0
                 lcov_report[source_file][line_no] += num_executions
+            elif directive == "BRDA":
+                args = content.split(",")
+                if len(args) != 4:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                line_no = int(args[0])
+                taken = int(args[3])
+                branch_coverage[source_file][line_no]["total"] += 1
+                if line_no not in lcov_report[source_file]:
+                    lcov_report[source_file][line_no] = 0
+                if taken > 0:
+                    branch_coverage[source_file][line_no]["hit"] += 1
+                    lcov_report[source_file][line_no] += taken
+            elif directive == "FN":
+                args = content.split(",")
+                if len(args) != 2:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                line_no = int(args[0])
+                func_name = args[1]
+                function_lines[source_file][func_name] = (line_no, 0)
+            elif directive == "FNDA":
+                args = content.split(",")
+                if len(args) != 2:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                hit_count = int(args[0])
+                func_name = args[1]
+                if func_name in function_lines[source_file]:
+                    line_no, _ = function_lines[source_file][func_name]
+                    function_lines[source_file][func_name] = (line_no, hit_count)
             elif directive in [
                 "TN",
                 "FNF",
                 "FNH",
-                "FN",
-                "FNDA",
                 "LH",
                 "LF",
                 "BRF",
                 "BRH",
-                "BRDA",
                 "VER",
             ]:
                 # these are valid lines, but not we don't need them
                 continue
             elif directive == "end_of_record":
+                # Apply branch coverage filtering
+                for line_no, info in branch_coverage[source_file].items():
+                    if line_no not in lcov_report[source_file]:
+                        raise ValueError(
+                            f"Line {line_no} not found in lcov report for {source_file}"
+                        )
+                    # Only keep lines that all branches are hit
+                    # TODO: add an option to keep lines with partial branch coverage
+                    if info["total"] > 0 and info["hit"] < info["total"]:
+                        lcov_report[source_file][line_no] = 0
+
+                # Apply function hit filtering
+                for func_name, (line_no, hit) in function_lines[source_file].items():
+                    lcov_report[source_file][line_no] = hit
+
+                branch_coverage[source_file].clear()
+                function_lines[source_file].clear()
                 source_file = None
             else:
                 raise ValueError(f"Unknown syntax in lcov report: {line}")
