@@ -428,6 +428,15 @@ class GitHubAnnotationsReportGenerator(TemplateReportGenerator):
 
     template_path = "github_coverage_warning_annotations.txt"
 
+    def __init__(self, violations_reporter, diff_reporter, github_annotations_type):
+        super().__init__(violations_reporter, diff_reporter)
+        self.github_annotations_type = github_annotations_type
+
+    def _context(self):
+        context = super().report_dict()
+        context.update({"github_annotations_type": self.github_annotations_type})
+        return context
+
 
 class HtmlReportGenerator(TemplateReportGenerator):
     """

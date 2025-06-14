@@ -18,6 +18,7 @@ from diff_cover.report_generator import (
     MarkdownReportGenerator,
     StringReportGenerator,
 )
+from diff_cover.util import open_file
 from diff_cover.violationsreporters.violations_reporter import (
     LcovCoverageReporter,
     XmlCoverageReporter,
@@ -252,7 +253,7 @@ def generate_coverage_report(
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
         reporter = HtmlReportGenerator(coverage, diff, css_url=css_url)
-        with open(html_report, "wb") as output_file:
+        with open_file(html_report, "wb") as output_file:
             reporter.generate_report(output_file)
         if css_file is not None:
             with open(css_file, "wb") as output_file:
@@ -261,23 +262,23 @@ def generate_coverage_report(
     if "json" in report_formats:
         json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
         reporter = JsonReportGenerator(coverage, diff)
-        with open(json_report, "wb") as output_file:
+        with open_file(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     if "markdown" in report_formats:
         markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
         reporter = MarkdownReportGenerator(coverage, diff)
-        with open(markdown_report, "wb") as output_file:
+        with open_file(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if "github-annotations" in report_formats:
+    if "github" in report_formats:
         # Github annotations are always written to stdout, but we can use different types
-        # TODO - pass this type to the report generator
-        github_annotations_type = (
-            report_formats["github-annotations"] or GITHUB_ANNOTATIONS_DEFAULT_TYPE
+        github_report = report_formats["github"]
+        reporter = GitHubAnnotationsReportGenerator(
+            coverage, diff, GITHUB_ANNOTATIONS_DEFAULT_TYPE
         )
-        reporter = GitHubAnnotationsReportGenerator(coverage, diff)
-        reporter.generate_report(sys.stdout.buffer)
+        with open_file(github_report, "wb") as output_file:
+            reporter.generate_report(output_file)
 
     # Generate the report for stdout
     reporter = StringReportGenerator(coverage, diff, show_uncovered)

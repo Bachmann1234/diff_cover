@@ -1,5 +1,7 @@
 import sys
 
+import pytest
+
 from diff_cover import util
 
 
@@ -21,3 +23,25 @@ def test_to_unescaped_filename():
     assert util.to_unescaped_filename('"\\""') == '"'
     assert util.to_unescaped_filename("some_file.py") == "some_file.py"
     assert util.to_unescaped_filename("#$%") == "#$%"
+
+
+@pytest.mark.usefixtures("capsys")
+def test_open_file(tmp_path):
+    """Test the open_file function."""
+    with util.open_file("-", "w") as f:
+        assert f == sys.stdout
+    with util.open_file("/dev/stdout", "bw") as f:
+        assert f == sys.stdout.buffer
+    with util.open_file("/dev/stderr", "w") as f:
+        assert f == sys.stderr
+    with util.open_file("/dev/stderr", "bw") as f:
+        assert f == sys.stderr.buffer
+
+    with util.open_file(tmp_path / "some_file.txt", "w") as f:
+        f.write("test")
+    with util.open_file(tmp_path / "some_file.txt", "r") as f:
+        assert f.read() == "test"
+    with util.open_file(tmp_path / "some_file.txt", "wb") as f:
+        f.write(b"test")
+    with util.open_file(tmp_path / "some_file.txt", "rb") as f:
+        assert f.read() == b"test"

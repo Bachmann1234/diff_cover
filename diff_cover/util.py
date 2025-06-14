@@ -1,5 +1,31 @@
+import contextlib
 import os.path
 import posixpath
+import sys
+
+
+@contextlib.contextmanager
+def open_file(path, mode):
+    """
+    Behaves like open(), but with some special cases for stdout and stderr.
+
+    :param path: string of the path to open
+    :param mode: string of the mode to open the file in
+    :return: a context manager that yields the file object
+    """
+    if path in ("/dev/stdout", "-"):
+        output_file = sys.stdout
+    elif path == "/dev/stderr":
+        output_file = sys.stderr
+    else:
+        with open(path, mode) as f:
+            yield f
+        return
+
+    if "b" in mode:
+        output_file = output_file.buffer
+
+    yield output_file
 
 
 def to_unix_path(path):
