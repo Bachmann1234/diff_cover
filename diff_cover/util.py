@@ -5,12 +5,13 @@ import sys
 
 
 @contextlib.contextmanager
-def open_file(path, mode):
+def open_file(path, mode, encoding="utf-8"):
     """
     Behaves like open(), but with some special cases for stdout and stderr.
 
     :param path: string of the path to open
     :param mode: string of the mode to open the file in
+    :param encoding: encoding to use when opening the file (text mode only)
     :return: a context manager that yields the file object
     """
     if path in ("/dev/stdout", "-"):
@@ -18,7 +19,10 @@ def open_file(path, mode):
     elif path == "/dev/stderr":
         output_file = sys.stderr
     else:
-        with open(path, mode) as f:
+        if "b" in mode:
+            encoding = None
+
+        with open(path, mode, encoding=encoding) as f:
             yield f
         return
 
