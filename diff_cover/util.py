@@ -14,22 +14,22 @@ def open_file(path, mode, encoding="utf-8"):
     :param encoding: encoding to use when opening the file (text mode only)
     :return: a context manager that yields the file object
     """
+    output_file = None
     if path in ("/dev/stdout", "-"):
         output_file = sys.stdout
     elif path == "/dev/stderr":
         output_file = sys.stderr
+
+    if output_file:
+        if "b" in mode:
+            output_file = output_file.buffer
+        yield output_file
     else:
         if "b" in mode:
             encoding = None
 
         with open(path, mode, encoding=encoding) as f:
             yield f
-        return
-
-    if "b" in mode:
-        output_file = output_file.buffer
-
-    yield output_file
 
 
 def to_unix_path(path):
