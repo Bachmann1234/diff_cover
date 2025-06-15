@@ -397,7 +397,7 @@ class TestDiffCoverIntegration:
         assert runbin(["coverage_missing_lines.xml", "--expand-coverage-report"]) == 0
         compare_console("expand_console_report.txt", capsys.readouterr().out)
 
-    def test_github(self, runbin, patch_git_command, capsys):
+    def test_github_silent(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["coverage.xml", "--format", "github:notice", "-q"]) == 0
         expected = textwrap.dedent(
@@ -407,6 +407,38 @@ class TestDiffCoverIntegration:
         ::notice file=test_src.txt,line=6,title=Missing Coverage::Line 6 missing coverage
         ::notice file=test_src.txt,line=8,title=Missing Coverage::Line 8 missing coverage
         ::notice file=test_src.txt,line=10,title=Missing Coverage::Line 10 missing coverage
+        """
+        )
+        assert capsys.readouterr().out == expected
+
+    @pytest.mark.usefixtures("patch_git_command")
+    def test_github_fully_covered(self, runbin, capsys):
+        assert runbin(["coverage2.xml", "--format", "github:notice"]) == 0
+        expected = textwrap.dedent(
+            """\
+        -------------
+        Diff Coverage
+        Diff: origin/main...HEAD, staged and unstaged changes
+        -------------
+        No lines with coverage information in this diff.
+        -------------
+
+        """
+        )
+        assert capsys.readouterr().out == expected
+
+    def test_github_empty_diff(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("")
+        assert runbin(["coverage.xml", "--format", "github:notice"]) == 0
+        expected = textwrap.dedent(
+            """\
+        -------------
+        Diff Coverage
+        Diff: origin/main...HEAD, staged and unstaged changes
+        -------------
+        No lines with coverage information in this diff.
+        -------------
+
         """
         )
         assert capsys.readouterr().out == expected
