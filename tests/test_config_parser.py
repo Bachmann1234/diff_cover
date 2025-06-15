@@ -3,13 +3,7 @@ import argparse
 import pytest
 
 from diff_cover import config_parser
-from diff_cover.config_parser import (
-    # ParserError,
-    # TOMLParser,
-    Tool,
-    # get_config,
-    get_parser,
-)
+from diff_cover.config_parser import Tool
 
 tools = pytest.mark.parametrize("tool", list(Tool))
 

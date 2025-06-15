@@ -33,7 +33,6 @@ def get_parser(description):
 
 
 def get_config(parser, argv, tool):
-    import ipdb; ipdb.set_trace()
     cli_config = vars(parser.parse_args(argv))
     # if cli_config["config_file"]:
     #     file_config = _parse_config_file(cli_config["config_file"], tool)
