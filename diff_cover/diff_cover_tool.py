@@ -7,7 +7,7 @@ import warnings
 import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
-from diff_cover.config_parser import Tool, get_config
+from diff_cover.config_parser import Tool, get_config, get_parser
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffFileTool, GitDiffTool
 from diff_cover.git_path import GitPathTool
@@ -79,7 +79,7 @@ def parse_coverage_args(argv):
 
     The path strings may or may not exist.
     """
-    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser = get_parser(description=DESCRIPTION)
 
     parser.add_argument("coverage_files", type=str, help=COVERAGE_FILE_HELP, nargs="+")
 
@@ -91,13 +91,13 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument(
-        "--show-uncovered", action="store_true", default=None, help=SHOW_UNCOVERED
+        "--show-uncovered", action="store_true", default=False, help=SHOW_UNCOVERED
     )
 
     parser.add_argument(
         "--expand-coverage-report",
         action="store_true",
-        default=None,
+        default=False,
         help=EXPAND_COVERAGE_REPORT,
     )
 
@@ -111,29 +111,30 @@ def parse_coverage_args(argv):
     parser.add_argument(
         "--compare-branch",
         metavar="BRANCH",
+        default="origin/main",
         type=str,
         help=COMPARE_BRANCH_HELP,
     )
 
     parser.add_argument(
-        "--fail-under", metavar="SCORE", type=float, default=None, help=FAIL_UNDER_HELP
+        "--fail-under", metavar="SCORE", type=float, default=0, help=FAIL_UNDER_HELP
     )
 
     parser.add_argument(
-        "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
+        "--ignore-staged", action="store_true", default=False, help=IGNORE_STAGED_HELP
     )
 
     parser.add_argument(
         "--ignore-unstaged",
         action="store_true",
-        default=None,
+        default=False,
         help=IGNORE_UNSTAGED_HELP,
     )
 
     parser.add_argument(
         "--include-untracked",
         action="store_true",
-        default=None,
+        default=False,
         help=INCLUDE_UNTRACKED_HELP,
     )
 
@@ -150,6 +151,7 @@ def parse_coverage_args(argv):
         metavar="DIRECTORY",
         type=str,
         nargs="+",
+        default=["src/main/java", "src/test/java"],
         help=SRC_ROOTS_HELP,
     )
 
@@ -158,6 +160,7 @@ def parse_coverage_args(argv):
         metavar="RANGE_NOTATION",
         type=str,
         choices=["...", ".."],
+        default="...",
         help=DIFF_RANGE_NOTATION_HELP,
     )
 
@@ -166,35 +169,17 @@ def parse_coverage_args(argv):
     parser.add_argument(
         "--ignore-whitespace",
         action="store_true",
-        default=None,
+        default=False,
         help=IGNORE_WHITESPACE,
     )
 
     parser.add_argument(
-        "-q", "--quiet", action="store_true", default=None, help=QUIET_HELP
-    )
-
-    parser.add_argument(
-        "-c", "--config-file", help=CONFIG_FILE_HELP, metavar="CONFIG_FILE"
+        "-q", "--quiet", action="store_true", default=False, help=QUIET_HELP
     )
 
     parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
 
-    defaults = {
-        "show_uncovered": False,
-        "compare_branch": "origin/main",
-        "fail_under": 0,
-        "ignore_staged": False,
-        "ignore_unstaged": False,
-        "ignore_untracked": False,
-        "src_roots": ["src/main/java", "src/test/java"],
-        "ignore_whitespace": False,
-        "diff_range_notation": "...",
-        "quiet": False,
-        "expand_coverage_report": False,
-    }
-
-    return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
+    return get_config(parser=parser, argv=argv, tool=Tool.DIFF_COVER)
 
 
 def generate_coverage_report(
