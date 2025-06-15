@@ -17,6 +17,7 @@ from diff_cover.report_generator import (
     MarkdownReportGenerator,
     StringReportGenerator,
 )
+from diff_cover.util import open_file
 from diff_cover.violationsreporters.violations_reporter import (
     LcovCoverageReporter,
     XmlCoverageReporter,
@@ -252,7 +253,7 @@ def generate_coverage_report(
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
         reporter = HtmlReportGenerator(coverage, diff, css_url=css_url)
-        with open(html_report, "wb") as output_file:
+        with open_file(html_report, "wb") as output_file:
             reporter.generate_report(output_file)
         if css_file is not None:
             with open(css_file, "wb") as output_file:
@@ -261,7 +262,7 @@ def generate_coverage_report(
     if "json" in report_formats:
         json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
         reporter = JsonReportGenerator(coverage, diff)
-        with open(json_report, "wb") as output_file:
+        with open_file(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     if "markdown" in report_formats:
