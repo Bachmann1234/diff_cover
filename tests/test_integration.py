@@ -2,12 +2,12 @@
 # pylint: disable=use-implicit-booleaness-not-comparison
 
 """High-level integration tests of diff-cover tool."""
-
 import json
 import os
 import os.path
 import re
 import shutil
+import textwrap
 from collections import defaultdict
 from pathlib import Path
 from subprocess import Popen
@@ -396,6 +396,20 @@ class TestDiffCoverIntegration:
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["coverage_missing_lines.xml", "--expand-coverage-report"]) == 0
         compare_console("expand_console_report.txt", capsys.readouterr().out)
+
+    def test_github(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml", "--format", "github:notice", "-q"]) == 0
+        expected = textwrap.dedent(
+            """\
+        ::notice file=test_src.txt,line=2,title=Missing Coverage::Line 2 missing coverage
+        ::notice file=test_src.txt,line=4,title=Missing Coverage::Line 4 missing coverage
+        ::notice file=test_src.txt,line=6,title=Missing Coverage::Line 6 missing coverage
+        ::notice file=test_src.txt,line=8,title=Missing Coverage::Line 8 missing coverage
+        ::notice file=test_src.txt,line=10,title=Missing Coverage::Line 10 missing coverage
+        """
+        )
+        assert capsys.readouterr().out == expected
 
 
 class TestDiffQualityIntegration:
