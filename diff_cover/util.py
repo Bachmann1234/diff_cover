@@ -27,7 +27,7 @@ def open_file(path, mode, encoding="utf-8"):
     else:
         if "b" in mode:
             encoding = None
-    
+
         with open(path, mode, encoding=encoding) as f:
             yield f
 
