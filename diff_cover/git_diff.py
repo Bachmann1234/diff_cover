@@ -132,7 +132,7 @@ class GitDiffFileTool(GitDiffTool):
         Raises a `GitDiffError` if the file cannot be read.
         """
         try:
-            with open(self.diff_file_path, encoding="utf-8") as file:
+            with open(self.diff_file_path, "r") as file:
                 return file.read()
         except OSError as e:
             error_message = (
