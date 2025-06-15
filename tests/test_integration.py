@@ -145,7 +145,7 @@ class TestDiffCoverIntegration:
 
     @pytest.fixture
     def runbin(self, cwd):
-        del cwd  # fixtures cannot use pytest.mark.usefixtures
+        del cwd
         return lambda x: diff_cover_tool.main(["diff-cover", *x])
 
     def test_added_file_html(self, runbin, patch_git_command):
@@ -186,7 +186,7 @@ class TestDiffCoverIntegration:
 
     def test_lua_coverage(self, runbin, patch_git_command, capsys):
         """
-        coverage report shows that diff-cover needs to normalize
+        Coverage report shows that diff-cover needs to normalize
         paths read in
         """
         patch_git_command.set_stdout("git_diff_lua.txt")
@@ -405,7 +405,7 @@ class TestDiffQualityIntegration:
 
     @pytest.fixture
     def runbin(self, cwd):
-        del cwd  # fixtures cannot use pytest.mark.usefixtures
+        del cwd
         return lambda x: diff_quality_tool.main(["diff-quality", *x])
 
     def test_git_diff_error_diff_quality(self, runbin, patch_git_command):
