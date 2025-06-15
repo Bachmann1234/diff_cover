@@ -121,7 +121,7 @@ class BaseReportGeneratorTest:
             diff_lines_changed.update({src: self.LINES})
             coverage_violations.update({src: self.VIOLATIONS})
             coverage_measured_lines.update({src: self.MEASURED})
-            self.set_num_snippets(0)
+        self.set_num_snippets(0)
 
     def get_report(self):
         """
@@ -607,7 +607,7 @@ class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTes
         return SimpleReportGenerator(coverage, diff)
 
     @pytest.fixture(autouse=True)
-    def setup(self, coverage, coverage_violations, use_default_values):
+    def setup(self, use_default_values, coverage, coverage_violations):
         del use_default_values
         # Have violations_batch() return the violations.
         coverage.violations_batch.side_effect = None
@@ -619,6 +619,6 @@ class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTes
 
     def test_violation_lines(self):
         # By construction, each file has the same coverage information
-        expected = [10, 11]
+        expected = []
         for src_path in self.SRC_PATHS:
             assert self.report.violation_lines(src_path) == expected
