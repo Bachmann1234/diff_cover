@@ -349,22 +349,20 @@ class GitDiffReporter(BaseDiffReporter):
 
             # Every other line is stored in the dictionary for this source file
             # once we find a hunk section
-            else:
-                # Only add lines if we're in a hunk section
-                # (ignore index and files changed lines)
-                if found_hunk or line.startswith("@@"):
-                    # Remember that we found a hunk
-                    found_hunk = True
+            # Only add lines if we're in a hunk section
+            # (ignore index and files changed lines)
+            elif found_hunk or line.startswith("@@"):
+                # Remember that we found a hunk
+                found_hunk = True
 
-                    if src_path is not None:
-                        source_dict[src_path].append(line)
+                if src_path is not None:
+                    source_dict[src_path].append(line)
 
-                    else:
-                        # We tolerate other information before we have
-                        # a source file defined, unless it's a hunk line
-                        if line.startswith("@@"):
-                            msg = f"Hunk has no source file: '{line}'"
-                            raise GitDiffError(msg)
+                # We tolerate other information before we have
+                # a source file defined, unless it's a hunk line
+                elif line.startswith("@@"):
+                    msg = f"Hunk has no source file: '{line}'"
+                    raise GitDiffError(msg)
 
         return source_dict
 
