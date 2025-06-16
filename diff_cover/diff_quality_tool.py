@@ -62,6 +62,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     shellcheck_driver,
 )
 
+
 QUALITY_DRIVERS = {
     "cppcheck": CppcheckDriver(),
     "pycodestyle": pycodestyle_driver,
@@ -283,7 +284,6 @@ def main(argv=None, directory=None):
     1 is an error
     0 is successful run
     """
-
     argv = argv or sys.argv
     arg_dict = parse_quality_args(
         handle_old_format(diff_cover.QUALITY_DESCRIPTION, argv[1:])

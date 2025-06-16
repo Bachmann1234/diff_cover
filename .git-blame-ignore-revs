@@ -1,2 +1,7 @@
 # Migrate code style to Black
 e1db83a447700237a96be7a9db4413fe5024d328
+# Migrate code style to Ruff
+# ########################################################################
+# TODO: IMPORTANT replace this with the real commit once it's merged
+# ########################################################################
+d1cbd0bbfd80e19f7ab6231251389fadfd4b9b22

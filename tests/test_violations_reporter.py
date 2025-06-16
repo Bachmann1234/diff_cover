@@ -976,7 +976,6 @@ class TestLcovCoverageReporterTest:
         """
         Build an LCOV document based on the provided arguments.
         """
-
         violation_lines = {violation.line for violation in violations}
 
         with tempfile.NamedTemporaryFile("w", delete=False) as f:
@@ -1768,9 +1767,9 @@ class JsQualityBaseReporterMixin:
 
     def _get_out(self):
         """
-        get Object Under Test
+        Get Object Under Test
         """
-        return None  # pragma: no cover
+        return  # pragma: no cover
 
     def test_quality(self):
         """
