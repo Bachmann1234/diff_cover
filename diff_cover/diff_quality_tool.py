@@ -41,6 +41,7 @@ from diff_cover.report_generator import (
     MarkdownQualityReportGenerator,
     StringQualityReportGenerator,
 )
+from diff_cover.util import open_file
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.java_violations_reporter import (
     CheckstyleXmlDriver,
@@ -248,7 +249,7 @@ def generate_quality_report(
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
         reporter = HtmlQualityReportGenerator(tool, diff, css_url=css_url)
-        with open(html_report, "wb") as output_file:
+        with open_file(html_report, "wb") as output_file:
             reporter.generate_report(output_file)
         if css_file is not None:
             with open(css_file, "wb") as output_file:
@@ -257,13 +258,13 @@ def generate_quality_report(
     if "json" in report_formats:
         json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
         reporter = JsonReportGenerator(tool, diff)
-        with open(json_report, "wb") as output_file:
+        with open_file(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     if "markdown" in report_formats:
         markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
         reporter = MarkdownQualityReportGenerator(tool, diff)
-        with open(markdown_report, "wb") as output_file:
+        with open_file(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     # Generate the report for stdout
