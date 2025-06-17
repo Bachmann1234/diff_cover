@@ -700,7 +700,7 @@ class PylintDriver(QualityDriver):
                 current_line += 1
                 match = self.multi_line_violation_regex.match(lines[current_line])
                 src_path, l_number = match.groups()
-                src_paths.append(("%s.py" % src_path, l_number))
+                src_paths.append((f"{src_path}.py", l_number))
         return src_paths
 
     def parse_reports(self, reports):
@@ -720,36 +720,32 @@ class PylintDriver(QualityDriver):
 
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
-                if match is not None:
-                    (
-                        pylint_src_path,
-                        line_number,
-                        pylint_code,
-                        function_name,
-                        message,
-                    ) = match.groups()
-                    if pylint_code == self.dupe_code_violation:
-                        files_involved = self._process_dupe_code_violation(
-                            output_lines, output_line_number, message
-                        )
-                    else:
-                        files_involved = [(pylint_src_path, line_number)]
+                if match is None:
+                    continue
 
-                    for violation in files_involved:
-                        pylint_src_path, line_number = violation
-                        # pylint might uses windows paths
-                        pylint_src_path = util.to_unix_path(pylint_src_path)
-                        # If we're looking for a particular source file,
-                        # ignore any other source files.
-                        if function_name:
-                            error_str = "{}: {}: {}".format(
-                                pylint_code, function_name, message
-                            )
-                        else:
-                            error_str = f"{pylint_code}: {message}"
+                (
+                    pylint_src_path,
+                    line_number,
+                    pylint_code,
+                    function_name,
+                    message,
+                ) = match.groups()
+                files_involved = [(pylint_src_path, line_number)]
+                if pylint_code == self.dupe_code_violation:
+                    files_involved = self._process_dupe_code_violation(
+                        output_lines, output_line_number, message
+                    )
 
-                        violation = Violation(int(line_number), error_str)
-                        violations_dict[pylint_src_path].append(violation)
+                for pylint_src_path, line_number in files_involved:
+                    # If we're looking for a particular source file,
+                    # ignore any other source files.
+                    error_str = f"{pylint_code}: {message}"
+                    if function_name:
+                        error_str = f"{pylint_code}: {function_name}: {message}"
+
+                    clean_path = util.to_unix_path(pylint_src_path)
+                    violation = Violation(int(line_number), error_str)
+                    violations_dict[clean_path].append(violation)
 
         return violations_dict
 
