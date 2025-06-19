@@ -1,0 +1,38 @@
+diff --git a/calculator.py b/calculator.py
+new file mode 100644
+index 0000000..abcdef1
+--- /dev/null
++++ b/calculator.py
+@@ -0,0 +1,32 @@
++from typing import List, Callable
++
++class Calculator:
++    def add(self, a: float, b: float) -> float:
++        """Function coverage example"""
++        return a + b
++
++    def divide(self, a: float, b: float) -> float:
++        """Branch coverage example"""
++        if b == 0:
++            raise ValueError("Division by zero")
++        return a / b
++
++    def process_numbers(self, numbers: List[float], processor: Callable[[float], float] = None) -> List[float]:
++        """Lambda function coverage example"""
++        if processor is None:
++            processor = lambda x: x * 2
++        return list(map(processor, numbers))
++
++    def get_grade(self, score: float) -> str:
++        """Line and branch coverage example"""
++        if score < 0 or score > 100:
++            raise ValueError("Invalid score")
++        
++        if score >= 90:
++            return "A"
++        elif score >= 80:
++            return "B"
++        elif score >= 70:
++            return "C"
++        else:
++            return "F" 

@@ -972,25 +972,104 @@ class TestLcovCoverageReporterTest:
         result = coverage.violations("file.java")
         assert result == set()
 
-    def _coverage_lcov(self, file_paths, violations, measured):
+    def test_parse_branch_and_function_coverage(self):
+        file_paths = ["file1.cpp"]
+        # Add violations for lines 15 and 60 to test DA=0 + branch override scenarios
+        violations = {Violation(15, None), Violation(60, None)}
+        measured = {10, 15, 25, 35, 45, 55, 60}
+
+        # Branch data:
+        # line 15: DA=0, but branches executed (should override to use branch executions)
+        # line 20: two branches, both hit (should be covered)
+        # line 30: two branches, one not hit (should NOT be covered)
+        # line 60: DA=0, branches also 0 executions (should remain 0, no override)
+        branch_data = {
+            "file1.cpp": {
+                15: [
+                    (0, 0, 2),
+                    (0, 1, 3),
+                ],  # DA=0 but branches executed (override case)
+                20: [(0, 0, 1), (0, 1, 2)],  # both branches hit
+                30: [(0, 0, 1), (0, 1, 0)],  # one branch not hit
+                60: [(0, 0, 0), (0, 1, 0)],  # DA=0 and branches=0 (no override)
+            }
+        }
+        # Function data:
+        # line 40: function hit (should be covered)
+        # line 50: function not hit (should NOT be covered)
+        function_data = {
+            "file1.cpp": {
+                "func_hit": (40, 3),
+                "func_not_hit": (50, 0),
+            }
+        }
+
+        lcov_report = self._coverage_lcov(
+            file_paths,
+            violations,
+            measured,
+            branch_data=branch_data,
+            function_data=function_data,
+        )
+
+        assert lcov_report == {
+            "file1.cpp": {
+                10: 1,  # covered (no branch/function)
+                15: 5,  # DA=0 but branch executions=2+3=5 (override case, lines 417-418)
+                20: 3,  # all branches hit, should be covered
+                25: 1,  # covered (no branch/function)
+                30: 0,  # not all branches hit, should NOT be covered
+                35: 1,  # covered (no branch/function)
+                40: 3,  # function hit, should be covered
+                45: 1,  # covered (no branch/function)
+                50: 0,  # function not hit, should NOT be covered
+                55: 1,  # covered (no branch/function)
+                60: 0,  # DA=0 and branch executions=0 (no override)
+            }
+        }
+
+    def _coverage_lcov(
+        self,
+        file_paths,
+        violations,
+        measured,
+        branch_data=None,
+        function_data=None,
+    ):
         """
         Build an LCOV document based on the provided arguments.
+        Optionally include branch and function coverage data.
+        - branch_data: dict {file: {line: [(block, branch, taken), ...]}}
+        - function_data: dict {file: {func_name: (line, hit_count)}}
         """
-
         violation_lines = {violation.line for violation in violations}
+        branch_data = branch_data or {}
+        function_data = function_data or {}
 
-        with tempfile.NamedTemporaryFile("w", delete=False) as f:
-            for file_path in file_paths:
-                f.write(f"SF:{file_path}\n")
-                for line_num in measured:
-                    f.write(
-                        f"DA:{line_num},{0 if line_num in violation_lines else 1}\n"
-                    )
+        with tempfile.NamedTemporaryFile("w", delete=True) as f:
+            for path in file_paths:
+                f.write(f"SF:{path}\n")
+                # Write function data
+                for func_name, (line, _) in function_data.get(path, {}).items():
+                    f.write(f"FN:{line},{func_name}\n")
+                for func_name, (_, hit_count) in function_data.get(path, {}).items():
+                    f.write(f"FNDA:{hit_count},{func_name}\n")
+                # Write line data
+                for line in measured:
+                    if line in violation_lines:
+                        f.write(f"DA:{line},0\n")
+                    else:
+                        f.write(f"DA:{line},1\n")
+                # Write branch data
+                for line, branches in branch_data.get(path, {}).items():
+                    for block, branch, taken in branches:
+                        f.write(f"BRDA:{line},{block},{branch},{taken}\n")
                 f.write("end_of_record\n")
-        try:
-            return LcovCoverageReporter.parse(f.name)
-        finally:
-            os.unlink(f.name)
+            f.flush()
+            f.seek(0)
+            # Parse and return the LCOV report
+            lcov_report = LcovCoverageReporter.parse(f.name)
+        return lcov_report
 
 
 class TestPycodestyleQualityReporterTest:

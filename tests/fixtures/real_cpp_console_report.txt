@@ -1,0 +1,10 @@
+-------------
+Diff Coverage
+Diff: origin/main...HEAD, staged and unstaged changes
+-------------
+calculator.cpp (96.4%): Missing lines 12
+-------------
+Total:   28 lines
+Missing: 1 line
+Coverage: 96%
+------------- 

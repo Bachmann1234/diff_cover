@@ -1,0 +1,10 @@
+-------------
+Diff Coverage
+Diff: origin/main...HEAD, staged and unstaged changes
+-------------
+src/calculator.ts (100%)
+-------------
+Total:   20 lines
+Missing: 0 lines
+Coverage: 100%
+------------- 

@@ -1,0 +1,29 @@
+diff --git a/src/calculator.ts b/src/calculator.ts
+new file mode 100644
+index 0000000..def5678
+--- /dev/null
++++ b/src/calculator.ts
+@@ -0,0 +1,36 @@
++export class Calculator {
++  
++  static divide(a: number, b: number): number {
++    if (b === 0) {
++      throw new Error('Division by zero');
++    }
++    return a / b;
++  }
++  
++  static getGrade(score: number): string {
++    if (score >= 90) {
++      return 'A';
++    } else if (score >= 80) {
++      return 'B';
++    } else if (score >= 70) {
++      return 'C';
++    } else if (score >= 60) {
++      return 'D';
++    } else {
++      return 'F';
++    }
++  }
++} 
