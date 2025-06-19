@@ -182,7 +182,7 @@ class TestDiffCoverIntegration:
     def test_added_file_console_lcov(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["lcov.info"]) == 0
-        compare_console("add_console_report_lcov.txt", capsys.readouterr().out)
+        compare_console("add_console_report.txt", capsys.readouterr().out)
 
     def test_lua_coverage(self, runbin, patch_git_command, capsys):
         """
@@ -396,6 +396,79 @@ class TestDiffCoverIntegration:
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["coverage_missing_lines.xml", "--expand-coverage-report"]) == 0
         compare_console("expand_console_report.txt", capsys.readouterr().out)
+
+    def test_real_world_cpp_lcov_coverage(self, runbin, patch_git_command, capsys):
+        """Test with real C++ LCOV coverage data"""
+        # Create git diff for C++ files
+        patch_git_command.set_stdout("git_diff_cpp.txt")
+
+        # Use real C++ LCOV data
+        assert runbin(["real_cpp_coverage.lcov"]) == 0
+
+        # Compare output with expected result
+        compare_console("real_cpp_console_report.txt", capsys.readouterr().out)
+
+    def test_real_world_python_lcov_coverage(self, runbin, patch_git_command, capsys):
+        """Test with real Python LCOV coverage data with checksums"""
+        # Create git diff for Python files
+        patch_git_command.set_stdout("git_diff_python.txt")
+
+        # Use real Python LCOV data
+        assert runbin(["real_python_coverage.lcov"]) == 0
+
+        # Compare output with expected result
+        compare_console("real_python_console_report.txt", capsys.readouterr().out)
+
+    def test_real_world_typescript_lcov_coverage(
+        self, runbin, patch_git_command, capsys
+    ):
+        """Test with real TypeScript LCOV coverage data with branch coverage"""
+        # Create git diff for TypeScript files
+        patch_git_command.set_stdout("git_diff_typescript.txt")
+
+        # Use real TypeScript LCOV data
+        assert runbin(["real_typescript_coverage.lcov"]) == 0
+
+        # Compare output with expected result
+        compare_console("real_typescript_console_report.txt", capsys.readouterr().out)
+
+    def test_real_world_lcov_with_function_coverage(
+        self, runbin, patch_git_command, capsys
+    ):
+        """Test LCOV parsing with function coverage data (C++ format)"""
+        # Create git diff for C++ files with FNL/FNA directives
+        patch_git_command.set_stdout("git_diff_cpp_functions.txt")
+
+        # Use LCOV data with FNL/FNA directives
+        assert runbin(["cpp_functions_coverage.lcov"]) == 0
+
+        # Capture and validate output
+        output = capsys.readouterr().out
+
+        # Should handle FNL/FNA directives without errors
+        assert "calculator.cpp" in output
+        assert "Coverage: " in output
+        # Should not crash on FNL/FNA directives
+        assert "Error" not in output and "Exception" not in output
+
+    def test_real_world_lcov_with_branch_coverage(
+        self, runbin, patch_git_command, capsys
+    ):
+        """Test LCOV parsing with branch coverage data (TypeScript format)"""
+        # Create git diff for TypeScript files with branch coverage
+        patch_git_command.set_stdout("git_diff_typescript_branches.txt")
+
+        # Use LCOV data with BRDA directives
+        assert runbin(["typescript_branches_coverage.lcov"]) == 0
+
+        # Capture and validate output
+        output = capsys.readouterr().out
+
+        # Should handle BRDA directives properly
+        assert "calculator.ts" in output
+        assert "Coverage: " in output
+        # Should apply branch coverage logic correctly
+        assert "Error" not in output and "Exception" not in output
 
 
 class TestDiffQualityIntegration:

@@ -312,7 +312,7 @@ class LcovCoverageReporter(BaseViolationReporter):
         More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
         """
         branch_coverage = defaultdict(
-            lambda: defaultdict(lambda: {"total": 0, "hit": 0})
+            lambda: defaultdict(lambda: {"total": 0, "hit": 0, "executions": 0})
         )
         function_lines = defaultdict(
             dict
@@ -352,13 +352,13 @@ class LcovCoverageReporter(BaseViolationReporter):
                         f"No source file specified for line coverage: {line}"
                     )
                 line_no = int(args[0])
-                taken = int(args[3])
+                taken = (
+                    int(args[3]) if args[3] != "-" else 0
+                )  # Handle '-' for untaken branches
                 branch_coverage[source_file][line_no]["total"] += 1
-                if line_no not in lcov_report[source_file]:
-                    lcov_report[source_file][line_no] = 0
+                branch_coverage[source_file][line_no]["executions"] += taken
                 if taken > 0:
                     branch_coverage[source_file][line_no]["hit"] += 1
-                    lcov_report[source_file][line_no] += taken
             elif directive == "FN":
                 args = content.split(",")
                 if len(args) != 2:
@@ -392,24 +392,44 @@ class LcovCoverageReporter(BaseViolationReporter):
                 "BRF",
                 "BRH",
                 "VER",
+                "FNL",  # Function line coverage (alternative format)
+                "FNA",  # Function name alternative format
             ]:
                 # these are valid lines, but not we don't need them
                 continue
             elif directive == "end_of_record":
                 # Apply branch coverage filtering
                 for line_no, info in branch_coverage[source_file].items():
-                    if line_no not in lcov_report[source_file]:
-                        raise ValueError(
-                            f"Line {line_no} not found in lcov report for {source_file}"
-                        )
-                    # Only keep lines that all branches are hit
-                    # TODO: add an option to keep lines with partial branch coverage
-                    if info["total"] > 0 and info["hit"] < info["total"]:
-                        lcov_report[source_file][line_no] = 0
+                    # Check if this line has DA directive (actual line execution data)
+                    has_da_directive = line_no in lcov_report[source_file]
 
-                # Apply function hit filtering
+                    if not has_da_directive:
+                        # For lines without DA directive, apply branch logic
+                        if info["total"] > 0 and info["hit"] < info["total"]:
+                            # Mark as uncovered if not all branches are hit (strict logic)
+                            lcov_report[source_file][line_no] = 0
+                        else:
+                            # Use branch execution count if all branches hit
+                            lcov_report[source_file][line_no] = info["executions"]
+                    elif not lcov_report[source_file][line_no]:
+                        # If DA directive exists with 0 executions, check if any branch was hit
+                        # This handles cases where DA reports 0 but branches were executed
+                        if info["executions"] > 0:
+                            lcov_report[source_file][line_no] = info["executions"]
+                    # If DA directive exists with >0 executions, don't override with branch logic
+
+                # Function coverage: don't override existing line execution counts
+                # Functions that weren't called should be marked as uncovered only if
+                # the line doesn't already have execution data from DA directive
                 for func_name, (line_no, hit) in function_lines[source_file].items():
-                    lcov_report[source_file][line_no] = hit
+                    if line_no not in lcov_report[source_file]:
+                        # Only set function hit count if no DA data exists for this line
+                        lcov_report[source_file][line_no] = hit
+                    elif not hit and lcov_report[source_file][line_no] > 0:
+                        # If function wasn't hit but line was executed, keep line execution count
+                        # This handles cases where function definition
+                        # and implementation are on different lines
+                        pass
 
                 branch_coverage[source_file].clear()
                 function_lines[source_file].clear()
