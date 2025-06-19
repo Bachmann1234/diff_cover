@@ -974,16 +974,24 @@ class TestLcovCoverageReporterTest:
 
     def test_parse_branch_and_function_coverage(self):
         file_paths = ["file1.cpp"]
-        violations = set()
-        measured = {10, 25, 35, 45, 55}
+        # Add violations for lines 15 and 60 to test DA=0 + branch override scenarios
+        violations = {Violation(15, None), Violation(60, None)}
+        measured = {10, 15, 25, 35, 45, 55, 60}
 
         # Branch data:
+        # line 15: DA=0, but branches executed (should override to use branch executions)
         # line 20: two branches, both hit (should be covered)
         # line 30: two branches, one not hit (should NOT be covered)
+        # line 60: DA=0, branches also 0 executions (should remain 0, no override)
         branch_data = {
             "file1.cpp": {
+                15: [
+                    (0, 0, 2),
+                    (0, 1, 3),
+                ],  # DA=0 but branches executed (override case)
                 20: [(0, 0, 1), (0, 1, 2)],  # both branches hit
                 30: [(0, 0, 1), (0, 1, 0)],  # one branch not hit
+                60: [(0, 0, 0), (0, 1, 0)],  # DA=0 and branches=0 (no override)
             }
         }
         # Function data:
@@ -1007,6 +1015,7 @@ class TestLcovCoverageReporterTest:
         assert lcov_report == {
             "file1.cpp": {
                 10: 1,  # covered (no branch/function)
+                15: 5,  # DA=0 but branch executions=2+3=5 (override case, lines 417-418)
                 20: 3,  # all branches hit, should be covered
                 25: 1,  # covered (no branch/function)
                 30: 0,  # not all branches hit, should NOT be covered
@@ -1015,6 +1024,7 @@ class TestLcovCoverageReporterTest:
                 45: 1,  # covered (no branch/function)
                 50: 0,  # function not hit, should NOT be covered
                 55: 1,  # covered (no branch/function)
+                60: 0,  # DA=0 and branch executions=0 (no override)
             }
         }
 

@@ -384,53 +384,48 @@ class LcovCoverageReporter(BaseViolationReporter):
                     line_no, _ = function_lines[source_file][func_name]
                     function_lines[source_file][func_name] = (line_no, hit_count)
             elif directive in [
-                "TN",
-                "FNF",
-                "FNH",
-                "LH",
-                "LF",
-                "BRF",
-                "BRH",
-                "VER",
+                "TN",  # Test name
+                "FNF",  # Functions found
+                "FNH",  # Functions hit
+                "LH",  # Lines hit
+                "LF",  # Lines found
+                "BRF",  # Branches found
+                "BRH",  # Branches hit
+                "VER",  # Version
                 "FNL",  # Function line coverage (alternative format)
-                "FNA",  # Function name alternative format
+                "FNA",  # Function name (alternative format)
             ]:
-                # these are valid lines, but not we don't need them
+                # Valid directives that we don't need to process
                 continue
             elif directive == "end_of_record":
-                # Apply branch coverage filtering
+                # Process collected coverage data for current source file
+
+                # 1. Apply branch coverage logic
                 for line_no, info in branch_coverage[source_file].items():
-                    # Check if this line has DA directive (actual line execution data)
                     has_da_directive = line_no in lcov_report[source_file]
 
                     if not has_da_directive:
-                        # For lines without DA directive, apply branch logic
+                        # No line execution data, use branch coverage
                         if info["total"] > 0 and info["hit"] < info["total"]:
-                            # Mark as uncovered if not all branches are hit (strict logic)
-                            lcov_report[source_file][line_no] = 0
+                            lcov_report[source_file][
+                                line_no
+                            ] = 0  # Partial branch coverage
                         else:
-                            # Use branch execution count if all branches hit
                             lcov_report[source_file][line_no] = info["executions"]
                     elif not lcov_report[source_file][line_no]:
-                        # If DA directive exists with 0 executions, check if any branch was hit
-                        # This handles cases where DA reports 0 but branches were executed
+                        # Line shows 0 executions, but check if branches were hit
                         if info["executions"] > 0:
                             lcov_report[source_file][line_no] = info["executions"]
-                    # If DA directive exists with >0 executions, don't override with branch logic
+                    # Note: Don't override existing positive execution counts
 
-                # Function coverage: don't override existing line execution counts
-                # Functions that weren't called should be marked as uncovered only if
-                # the line doesn't already have execution data from DA directive
+                # 2. Apply function coverage logic
                 for func_name, (line_no, hit) in function_lines[source_file].items():
                     if line_no not in lcov_report[source_file]:
-                        # Only set function hit count if no DA data exists for this line
+                        # No existing line data, use function hit count
                         lcov_report[source_file][line_no] = hit
-                    elif not hit and lcov_report[source_file][line_no] > 0:
-                        # If function wasn't hit but line was executed, keep line execution count
-                        # This handles cases where function definition
-                        # and implementation are on different lines
-                        pass
+                    # Note: Don't override existing line execution data
 
+                # 3. Clean up temporary data for current file
                 branch_coverage[source_file].clear()
                 function_lines[source_file].clear()
                 source_file = None
