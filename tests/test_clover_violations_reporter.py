@@ -13,7 +13,7 @@ def test_get_src_path_clover(datadir, monkeypatch):
     monkeypatch.setattr(GitPathTool, "_cwd", "/")
     monkeypatch.setattr(GitPathTool, "_root", "/")
 
-    clover_report = ET.parse(str(datadir / "test.xml"))
+    clover_report = ET.parse(datadir / "test.xml")
     result = XmlCoverageReporter.get_src_path_line_nodes_clover(
         clover_report, "isLucky.js"
     )
