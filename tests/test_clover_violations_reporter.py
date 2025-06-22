@@ -9,9 +9,10 @@ from diff_cover.violationsreporters.violations_reporter import XmlCoverageReport
 
 
 # https://github.com/Bachmann1234/diff_cover/issues/190
-def test_get_src_path_clover(datadir):
-    GitPathTool._cwd = "/"
-    GitPathTool._root = "/"
+def test_get_src_path_clover(datadir, monkeypatch):
+    monkeypatch.setattr(GitPathTool, "_cwd", "/")
+    monkeypatch.setattr(GitPathTool, "_root", "/")
+
     clover_report = ET.parse(str(datadir / "test.xml"))
     result = XmlCoverageReporter.get_src_path_line_nodes_clover(
         clover_report, "isLucky.js"

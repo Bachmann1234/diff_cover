@@ -357,15 +357,14 @@ def main(argv=None, directory=None):
         )
         if percent_passing >= fail_under:
             return 0
-
-        logger.error("Failure. Quality is below %i.", fail_under)
-        return 1
-
     except ImportError:
         logger.exception("Quality tool not installed: '%s'", tool)
         return 1
     except OSError as exc:
         logger.exception("Failure: '%s'", str(exc))
+        return 1
+    else:
+        logger.error("Failure. Quality is below %i.", fail_under)
         return 1
     # Close any reports we opened
     finally:
