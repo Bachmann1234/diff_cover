@@ -235,10 +235,12 @@ class XmlCoverageReporter(BaseViolationReporter):
                             else:
                                 # This is an unreported line.
                                 # We add it with the previous line hit score
-                                line_nodes.append({
-                                    _hits: last_hit_number,
-                                    _number: line_number,
-                                })
+                                line_nodes.append(
+                                    {
+                                        _hits: last_hit_number,
+                                        _number: line_number,
+                                    }
+                                )
 
                 # First case, need to define violations initially
                 if violations is None:

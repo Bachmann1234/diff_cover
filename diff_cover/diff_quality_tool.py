@@ -58,8 +58,8 @@ from diff_cover.violationsreporters.violations_reporter import (
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
-    ruff_format_driver,
     ruff_check_driver,
+    ruff_format_driver,
     shellcheck_driver,
 )
 
