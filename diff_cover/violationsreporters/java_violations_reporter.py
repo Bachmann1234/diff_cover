@@ -14,7 +14,6 @@ from diff_cover.violationsreporters.base import (
     Violation,
 )
 
-
 # Report checkstyle violations.
 # http://checkstyle.sourceforge.net/apidocs/com/puppycrawl/tools/checkstyle/DefaultLogger.html
 # https://github.com/checkstyle/checkstyle/blob/master/src/main/java/com/puppycrawl/tools/checkstyle/AuditEventDefaultFormatter.java

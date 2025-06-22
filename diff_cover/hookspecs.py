@@ -1,6 +1,5 @@
 import pluggy
 
-
 hookspec = pluggy.HookspecMarker("diff_cover")
 
 

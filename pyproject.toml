@@ -183,9 +183,9 @@ ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
 ignore-decorators = ["^_"]
 
 [tool.ruff.lint.isort]
+case-sensitive = false
+combine-as-imports = true
 known-first-party = ["diff_cover", "tests"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
-lines-between-types = 0
-lines-after-imports = 2
-combine-as-imports = true
+lines-after-imports = -1
 split-on-trailing-comma = false

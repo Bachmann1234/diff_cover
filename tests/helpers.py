@@ -5,7 +5,6 @@ Test helper functions.
 import os.path
 import random
 
-
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
 LINE_STRINGS = ["test", "+ has a plus sign", "- has a minus sign"]

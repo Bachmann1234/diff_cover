@@ -11,7 +11,6 @@ from diff_cover.git_path import GitPathTool
 from diff_cover.snippets import Snippet
 from tests.helpers import fixture_path, load_fixture
 
-
 SRC_TOKENS = [
     (Token.Comment, "# Test source"),
     (Token.Text, "\n"),

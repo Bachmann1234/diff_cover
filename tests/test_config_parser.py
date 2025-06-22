@@ -3,7 +3,6 @@ import pytest
 from diff_cover import config_parser
 from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config
 
-
 tools = pytest.mark.parametrize("tool", list(Tool))
 
 
