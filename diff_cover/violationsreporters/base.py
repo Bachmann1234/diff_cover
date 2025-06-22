@@ -131,7 +131,7 @@ class QualityReporter(BaseViolationReporter):
 
         """
         super().__init__(driver.name)
-        self.reports = self._load_reports(reports) if reports else None
+        self.reports = self._load_reports(reports or [])
         self.violations_dict = defaultdict(list)
         self.driver = driver
         self.options = options
