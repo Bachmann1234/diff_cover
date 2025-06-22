@@ -412,7 +412,8 @@ class LcovCoverageReporter(BaseViolationReporter):
                             ] = 0  # Partial branch coverage
                         else:
                             lcov_report[source_file][line_no] = info["executions"]
-                    elif not lcov_report[source_file][line_no]:
+                        continue
+                    if not lcov_report[source_file][line_no]:
                         # Line shows 0 executions, but check if branches were hit
                         if info["executions"] > 0:
                             lcov_report[source_file][line_no] = info["executions"]

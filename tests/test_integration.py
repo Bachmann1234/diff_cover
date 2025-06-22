@@ -442,14 +442,8 @@ class TestDiffCoverIntegration:
         # Use LCOV data with FNL/FNA directives
         assert runbin(["cpp_functions_coverage.lcov"]) == 0
 
-        # Capture and validate output
-        output = capsys.readouterr().out
-
-        # Should handle FNL/FNA directives without errors
-        assert "calculator.cpp" in output
-        assert "Coverage: " in output
-        # Should not crash on FNL/FNA directives
-        assert "Error" not in output and "Exception" not in output
+        # Compare output with expected result
+        compare_console("cpp_functions_console_report.txt", capsys.readouterr().out)
 
     def test_real_world_lcov_with_branch_coverage(
         self, runbin, patch_git_command, capsys
@@ -461,14 +455,10 @@ class TestDiffCoverIntegration:
         # Use LCOV data with BRDA directives
         assert runbin(["typescript_branches_coverage.lcov"]) == 0
 
-        # Capture and validate output
-        output = capsys.readouterr().out
-
-        # Should handle BRDA directives properly
-        assert "calculator.ts" in output
-        assert "Coverage: " in output
-        # Should apply branch coverage logic correctly
-        assert "Error" not in output and "Exception" not in output
+        # Compare output with expected result
+        compare_console(
+            "typescript_branches_console_report.txt", capsys.readouterr().out
+        )
 
 
 class TestDiffQualityIntegration:
