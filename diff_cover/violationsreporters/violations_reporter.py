@@ -235,9 +235,10 @@ class XmlCoverageReporter(BaseViolationReporter):
                             else:
                                 # This is an unreported line.
                                 # We add it with the previous line hit score
-                                line_nodes.append(
-                                    {_hits: last_hit_number, _number: line_number}
-                                )
+                                line_nodes.append({
+                                    _hits: last_hit_number,
+                                    _number: line_number,
+                                })
 
                 # First case, need to define violations initially
                 if violations is None:
@@ -484,6 +485,29 @@ ruff_check_driver = RegexBasedDriver(
     # path/to/file.py:328:27 F541 [*] f-string without any placeholders
     # path/to/file.py:418:26 F841 [*] Local variable `e` is assigned to but never used
     expression=r"^([^:]+):(\d+):\d*:? (.*)$",
+    command_to_check_install=["ruff", "--version"],
+    # ruff exit code is 1 if there are violations
+    # https://docs.astral.sh/ruff/linter/#exit-codes
+    exit_codes=[0, 1],
+)
+
+
+class RuffFormatDriver(RegexBasedDriver):
+    def _get_violation(self, match):
+        src = match.groups()[0]
+        # Transform src to a relative path, if it isn't already
+        src = os.path.relpath(src)
+        return src, Violation(Violation.ALL_LINES, "Needs reformat")
+
+
+ruff_format_driver = RuffFormatDriver(
+    name="ruff.format",
+    supported_extensions=["py"],
+    command=["ruff", "format", "--check"],
+    # Match lines of the form:
+    # Would reformat: path/to/file.py
+    # Would reformat: path/to/file2.py
+    expression=r"^Would reformat: ([^:]+)$",
     command_to_check_install=["ruff", "--version"],
     # ruff exit code is 1 if there are violations
     # https://docs.astral.sh/ruff/linter/#exit-codes

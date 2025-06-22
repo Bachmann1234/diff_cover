@@ -58,6 +58,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
+    ruff_format_driver,
     ruff_check_driver,
     shellcheck_driver,
 )
@@ -68,6 +69,7 @@ QUALITY_DRIVERS = {
     "pyflakes": pyflakes_driver,
     "pylint": PylintDriver(),
     "ruff.check": ruff_check_driver,
+    "ruff.format": ruff_format_driver,
     "flake8": flake8_driver,
     "jshint": jshint_driver,
     "eslint": EslintDriver(),

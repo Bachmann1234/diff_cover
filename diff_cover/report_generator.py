@@ -11,6 +11,7 @@ from gettext import gettext, ngettext
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from diff_cover.snippets import Snippet
+from diff_cover.violationsreporters.base import Violation
 
 
 class DiffViolations:
@@ -19,9 +20,10 @@ class DiffViolations:
     """
 
     def __init__(self, violations, measured_lines, diff_lines):
-        self.lines = {violation.line for violation in violations}.intersection(
-            diff_lines
-        )
+        _lines = {violation.line for violation in violations}
+        self.lines = _lines.intersection(diff_lines)
+        if Violation.ALL_LINES in _lines:
+            self.lines.add(Violation.ALL_LINES)
 
         self.violations = {
             violation for violation in violations if violation.line in self.lines
@@ -98,6 +100,9 @@ class BaseReportGenerator(ABC):
 
         if diff_violations is None:
             return None
+
+        if Violation.ALL_LINES in diff_violations.lines:
+            return 0
 
         # Protect against a divide by zero
         num_measured = len(diff_violations.measured_lines)
