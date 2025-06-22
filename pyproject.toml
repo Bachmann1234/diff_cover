@@ -174,6 +174,7 @@ ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "S101",    # Disables Assert statements
+    "S311",    # Disables random checks
     "PLR2004", # Disables Magic value
     "PT011",   # Disables Exception is too broad
     "RUF012",  # Disables Mutable class attributes should be annotated with typing.ClassVar

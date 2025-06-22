@@ -88,7 +88,6 @@ OPTIONS_HELP = "Options to be passed to the violations tool"
 INCLUDE_HELP = "Files to include (glob pattern)"
 REPORT_ROOT_PATH_HELP = "The root path used to generate a report"
 
-
 logger = logging.getLogger(__name__)
 
 

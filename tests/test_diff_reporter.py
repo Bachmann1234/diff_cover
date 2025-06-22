@@ -6,7 +6,6 @@ import os
 import tempfile
 from pathlib import Path
 from textwrap import dedent
-from unittest.mock import patch
 
 import pytest
 
@@ -97,7 +96,7 @@ def test_name_include_untracked(git_diff):
         ),
     ],
 )
-def test_git_path_selection(diff, git_diff, include, exclude, expected):
+def test_git_path_selection(diff, git_diff, include, exclude, expected, monkeypatch):
     old_cwd = os.getcwd()
     with tempfile.TemporaryDirectory() as tmp_dir:
         # change the working directory into the temp directory so that globs are working
@@ -128,8 +127,8 @@ def test_git_path_selection(diff, git_diff, include, exclude, expected):
         )
 
         # Get the source paths in the diff
-        with patch.object(os.path, "abspath", lambda path: f"{tmp_dir}/{path}"):
-            source_paths = diff.src_paths_changed()
+        monkeypatch.setattr(os.path, "abspath", lambda path: f"{tmp_dir}/{path}")
+        source_paths = diff.src_paths_changed()
 
         # Validate the source paths
         # They should be in alphabetical order
@@ -630,7 +629,7 @@ def test_include_untracked(mocker, git_diff):
             nonlocal raise_count
             raise_count += 1
 
-            raise UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte")
+            raise UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte")  # noqa: EM101
         return base_open_mock(*args, **kwargs)
 
     mocker.patch("diff_cover.diff_reporter.open", open_side_effect)

@@ -33,7 +33,7 @@ def open_file(path, mode, encoding="utf-8"):
 
 
 def to_unix_path(path):
-    """
+    r"""
     Tries to ensure tha the path is a normalized unix path.
     This seems to be the solution cobertura used....
     https://github.com/cobertura/cobertura/blob/642a46eb17e14f51272c6962e64e56e0960918af/cobertura/src/main/java/net/sourceforge/cobertura/instrument/ClassPattern.java#L84

@@ -36,11 +36,11 @@ class Snippet:
 
     # See https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
     # for typical values of accepted programming language hints in Markdown code fenced blocks
-    LEXER_TO_MARKDOWN_CODE_HINT = {
-        "Python": "python",
-        "C++": "cpp",
+    LEXER_TO_MARKDOWN_CODE_HINT = (
+        ("Python", "python"),
+        ("C++", "cpp"),
         # TODO: expand this list...
-    }
+    )
 
     def __init__(
         self,
@@ -130,7 +130,7 @@ class Snippet:
         body = "\n".join(formatted_lines)
 
         # Prefer a syntax-highlighted fenced block when we know the language.
-        code_hint = self.LEXER_TO_MARKDOWN_CODE_HINT.get(self._lexer_name)
+        code_hint = dict(self.LEXER_TO_MARKDOWN_CODE_HINT).get(self._lexer_name)
 
         if code_hint:
             header = f"Lines {self._start_line}-{self._last_line}\n\n"
@@ -214,7 +214,7 @@ class Snippet:
             # We failed to decode the file.
             # if this is happening a lot I should just bite the bullet
             # and write a parameter to let people list their file encodings
-            print(
+            print(  # noqa: T201
                 "Warning: I was not able to decode your src file. "
                 "I can continue but code snippets in the final report may look wrong"
             )

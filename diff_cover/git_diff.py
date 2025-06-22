@@ -119,7 +119,7 @@ class GitDiffTool:
 class GitDiffFileTool(GitDiffTool):
     def __init__(self, diff_file_path):
         self.diff_file_path = diff_file_path
-        super().__init__("...", False)
+        super().__init__(range_notation="...", ignore_whitespace=False)
 
     def diff_committed(self, compare_branch="origin/main"):
         """
