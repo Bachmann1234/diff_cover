@@ -80,8 +80,8 @@ QUALITY_DRIVERS = {
     "shellcheck": shellcheck_driver,
 }
 
-VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(
-    sorted(QUALITY_DRIVERS)
+VIOLATION_CMD_HELP = "Which code quality tool to use ({})".format(
+    "/".join(sorted(QUALITY_DRIVERS))
 )
 INPUT_REPORTS_HELP = "Which violations reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"

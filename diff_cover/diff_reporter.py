@@ -436,11 +436,11 @@ class GitDiffReporter(BaseDiffReporter):
         # Parse for the source file path
         groups = regex.findall(line)
 
-        if len(groups) == 1:
-            return groups[0]
+        if len(groups) != 1:
+            msg = f"Could not parse source path in line '{line}'"
+            raise GitDiffError(msg)
 
-        msg = f"Could not parse source path in line '{line}'"
-        raise GitDiffError(msg)
+        return groups[0]
 
     def _parse_hunk_line(self, line):
         """
@@ -465,24 +465,21 @@ class GitDiffReporter(BaseDiffReporter):
         # the line starts with '@@'.  The second component should
         # be the hunk information, and any additional components
         # are excerpts from the code.
-        if len(components) >= 2:
-            hunk_info = components[1]
-            groups = self.HUNK_LINE_RE.findall(hunk_info)
-
-            if len(groups) == 1:
-                try:
-                    return int(groups[0])
-
-                except ValueError as e:
-                    msg = f"Could not parse '{groups[0]}' as a line number"
-                    raise GitDiffError(msg) from e
-
-            else:
-                msg = f"Could not find start of hunk in line '{line}'"
-                raise GitDiffError(msg)
-
-        else:
+        if len(components) <= 1:
             msg = f"Could not parse hunk in line '{line}'"
+            raise GitDiffError(msg)
+
+        hunk_info = components[1]
+        groups = self.HUNK_LINE_RE.findall(hunk_info)
+
+        if len(groups) == 1:
+            try:
+                return int(groups[0])
+            except ValueError as e:
+                msg = f"Could not parse '{groups[0]}' as a line number"
+                raise GitDiffError(msg) from e
+        else:
+            msg = f"Could not find start of hunk in line '{line}'"
             raise GitDiffError(msg)
 
     @staticmethod

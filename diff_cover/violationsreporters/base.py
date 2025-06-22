@@ -131,23 +131,11 @@ class QualityReporter(BaseViolationReporter):
 
         """
         super().__init__(driver.name)
-        self.reports = self._load_reports(reports or [])
+        self.reports = [fh.read().decode("utf-8", "replace") for fh in reports or []]
         self.violations_dict = defaultdict(list)
         self.driver = driver
         self.options = options
         self.driver_tool_installed = None
-
-    def _load_reports(self, report_files):
-        """
-        Args:
-            report_files: list[file] reports to read in
-
-        """
-        contents = []
-        for file_handle in report_files:
-            # Convert to unicode, replacing unreadable chars
-            contents.append(file_handle.read().decode("utf-8", "replace"))
-        return contents
 
     def violations(self, src_path):
         """
