@@ -337,10 +337,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         """
         # Include snippet style info if we're displaying
         # source code snippets
-        if self.include_snippets:
-            snippet_style = Snippet.style_defs()
-        else:
-            snippet_style = None
+        snippet_style = Snippet.style_defs() if self.include_snippets else None
 
         context = super().report_dict()
         context.update({"css_url": self.css_url, "snippet_style": snippet_style})

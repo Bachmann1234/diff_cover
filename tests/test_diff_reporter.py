@@ -239,7 +239,7 @@ def test_ignore_lines_outside_src(diff, git_diff):
     # Add some lines at the start of the diff, before any
     # source files are specified
     diff_output = git_diff_output({"subdir/file1.py": line_numbers(3, 10)})
-    main_diff = "\n".join(["- deleted line", "+ added line", diff_output])
+    main_diff = f"- deleted line\n+ added line\n{diff_output}"
 
     # Configure the git diff output
     _set_git_diff_output(diff, git_diff, main_diff, "", "")
@@ -645,7 +645,7 @@ def test_include_untracked(mocker, git_diff):
 
 
 @pytest.mark.parametrize(
-    "excluded, supported_extensions, path",
+    ("excluded", "supported_extensions", "path"),
     [
         (["file.bin"], ["py"], "file.bin"),
         ([], ["py"], "file.bin"),

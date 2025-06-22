@@ -46,7 +46,8 @@ class TOMLParser(ConfigParser):
             return None
 
         if not _HAS_TOML:
-            raise ParserError("No Toml lib installed")
+            msg = "No Toml lib installed"
+            raise ParserError(msg)
 
         with open(self._file_name, "rb") as file_handle:
             config = toml.load(file_handle)
