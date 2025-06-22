@@ -20,7 +20,7 @@ class TestTOMLParser:
             parser.parse()
 
     @pytest.mark.parametrize(
-        "tool,content",
+        ("tool", "content"),
         [
             (Tool.DIFF_COVER, ""),
             (Tool.DIFF_COVER, "[tool.diff_quality]"),
@@ -37,7 +37,7 @@ class TestTOMLParser:
             parser.parse()
 
     @pytest.mark.parametrize(
-        "tool,content,expected",
+        ("tool", "content", "expected"),
         [
             (Tool.DIFF_COVER, "[tool.diff_cover]\nquiet=true", {"quiet": True}),
             (Tool.DIFF_QUALITY, "[tool.diff_quality]\nquiet=true", {"quiet": True}),
@@ -60,7 +60,7 @@ def test_get_config_unrecognized_file(mocker, tool):
 
 
 @pytest.mark.parametrize(
-    "tool,cli_config,defaults,file_content,expected",
+    ("tool", "cli_config", "defaults", "file_content", "expected"),
     [
         (
             Tool.DIFF_COVER,

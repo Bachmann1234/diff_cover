@@ -53,7 +53,8 @@ class TOMLParser(ConfigParser):
 
         config = config.get("tool", {}).get(self._section, {})
         if not config:
-            raise ParserError(f"No 'tool.{self._section}' configuration available")
+            message = f"No 'tool.{self._section}' configuration available"
+            raise ParserError(message)
         return config
 
 
@@ -67,7 +68,8 @@ def _parse_config_file(file_name, tool):
         if config:
             return config
 
-    raise ParserError(f"No config parser could handle {file_name}")
+    message = f"No config parser could handle {file_name}"
+    raise ParserError(message)
 
 
 def get_config(parser, argv, defaults, tool):

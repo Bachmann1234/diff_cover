@@ -91,7 +91,7 @@ def test_parse_with_multiple_old_reports(recwarn):
         ),
     ],
 )
-def test_parse_mixing_new_with_old_reports(recwarn, old_report, expected_error):
+def test_parse_mixing_new_with_old_reports(old_report, expected_error):
     argv = [
         "reports/coverage.xml",
         *old_report,

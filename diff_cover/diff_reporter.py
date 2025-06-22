@@ -271,10 +271,9 @@ class GitDiffReporter(BaseDiffReporter):
         _, extension = os.path.splitext(src_path)
         extension = extension[1:].lower()
 
-        if self._supported_extensions and extension not in self._supported_extensions:
-            return False
-
-        return True
+        return not (
+            self._supported_extensions and extension not in self._supported_extensions
+        )
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^\n"]*)"?')
@@ -328,7 +327,7 @@ class GitDiffReporter(BaseDiffReporter):
             # If the line starts with "diff --git"
             # or "diff --cc" (in the case of a merge conflict)
             # then it is the start of a new source file
-            if line.startswith("diff --git") or line.startswith("diff --cc"):
+            if line.startswith(("diff --git", "diff --cc")):
                 # Retrieve the name of the source file
                 src_path = self._parse_source_line(line)
 

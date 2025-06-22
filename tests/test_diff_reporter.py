@@ -75,7 +75,7 @@ def test_name_include_untracked(git_diff):
 
 
 @pytest.mark.parametrize(
-    "include,exclude,expected",
+    ("include", "exclude", "expected"),
     [
         # no include/exclude --> use all paths
         ([], [], ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]),
@@ -124,7 +124,7 @@ def test_git_path_selection(diff, git_diff, include, exclude, expected):
                 {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
             ),
             git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-            git_diff_output(dict(), deleted_files=["README.md"]),
+            git_diff_output({}, deleted_files=["README.md"]),
         )
 
         # Get the source paths in the diff
@@ -148,7 +148,7 @@ def test_git_source_paths(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the source paths in the diff
@@ -225,7 +225,7 @@ def test_git_lines_changed(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -286,7 +286,7 @@ def test_git_deleted_lines(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff

@@ -295,7 +295,8 @@ def handle_old_format(description, argv):
             )
         warnings.warn(
             "The --html-report option is deprecated. "
-            f"Use --format html:{known_args.html_report} instead."
+            f"Use --format html:{known_args.html_report} instead.",
+            stacklevel=1,
         )
         format_["html"] = known_args.html_report
     if known_args.json_report:
@@ -305,7 +306,8 @@ def handle_old_format(description, argv):
             )
         warnings.warn(
             "The --json-report option is deprecated. "
-            f"Use --format json:{known_args.json_report} instead."
+            f"Use --format json:{known_args.json_report} instead.",
+            stacklevel=1,
         )
         format_["json"] = known_args.json_report
     if known_args.markdown_report:
@@ -315,7 +317,8 @@ def handle_old_format(description, argv):
             )
         warnings.warn(
             "The --markdown-report option is deprecated. "
-            f"Use --format markdown:{known_args.markdown_report} instead."
+            f"Use --format markdown:{known_args.markdown_report} instead.",
+            stacklevel=1,
         )
         format_["markdown"] = known_args.markdown_report
     if format_:

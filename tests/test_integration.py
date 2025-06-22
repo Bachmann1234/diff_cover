@@ -69,6 +69,8 @@ def patch_git_command(patch_popen, mocker):
         def set_returncode(self, value):
             self.returncode = value
 
+    helper = Wrapper()
+
     def patch_diff(command, **kwargs):
         if command[0:6] == [
             "git",
@@ -91,7 +93,6 @@ def patch_git_command(patch_popen, mocker):
         return Popen(command, **kwargs)
 
     patch_popen.side_effect = patch_diff
-    helper = Wrapper()
 
     return helper
 
@@ -633,6 +634,7 @@ class DoNothingDriver(QualityDriver):
     """Dummy class that implements necessary abstract functions."""
 
     def parse_reports(self, reports):
+        del reports
         return defaultdict(list)
 
     def installed(self):
