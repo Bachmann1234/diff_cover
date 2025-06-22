@@ -360,8 +360,8 @@ def main(argv=None, directory=None):
     except ImportError:
         logger.exception("Quality tool not installed: '%s'", tool)
         return 1
-    except OSError as exc:
-        logger.exception("Failure: '%s'", str(exc))
+    except OSError:
+        logger.exception("Failure")
         return 1
     else:
         logger.error("Failure. Quality is below %i.", fail_under)

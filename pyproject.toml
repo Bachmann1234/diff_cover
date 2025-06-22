@@ -160,6 +160,8 @@ ignore = [
     
     # Avoid formatter conflicts
     "COM812",
+
+    "PYI024",  # Disables complains about unused type hints
 ]
 
 # The equivalent of pylint's good-names
@@ -177,6 +179,7 @@ ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
     "RUF012",  # Disables Mutable class attributes should be annotated with typing.ClassVar
     "S314",    # Disables xml security checks
     "SLF001",  # Disables complains about accessing private members/methods
+    "RUF001",  # Disables complains about greek letters
 ]
 
 [tool.ruff.lint.pydocstyle]

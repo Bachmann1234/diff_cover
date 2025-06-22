@@ -4,6 +4,7 @@
 """High-level integration tests of diff-cover tool."""
 
 import json
+import logging
 import os
 import os.path
 import re
@@ -599,7 +600,7 @@ class TestDiffQualityIntegration:
         assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
         logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
 
-    def test_tool_not_installed(self, mocker, runbin, patch_git_command):
+    def test_tool_not_installed(self, mocker, runbin, patch_git_command, caplog):
         # Pretend we support a tool named not_installed
         mocker.patch.dict(
             diff_quality_tool.QUALITY_DRIVERS,
@@ -610,11 +611,11 @@ class TestDiffQualityIntegration:
             },
         )
         patch_git_command.set_stdout("git_diff_add.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.logger")
         assert runbin(["--violations=not_installed"]) == 1
-        logger.exception.assert_called_with(
-            "Failure: '%s'", "not_installed is not installed"
-        )
+        assert caplog.record_tuples == [
+            ("diff_cover.diff_quality_tool", logging.ERROR, "Failure")
+        ]
+        assert "not_installed is not installed" in caplog.text
 
     def test_do_nothing_reporter(self):
         # Pedantic, but really. This reporter

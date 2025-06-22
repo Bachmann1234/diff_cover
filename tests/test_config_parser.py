@@ -14,7 +14,7 @@ class TestTOMLParser:
 
     @tools
     def test_parse_but_no_tomli_installed(self, tool, mocker):
-        mocker.patch.object(config_parser, "_HAS_TOML", False)
+        mocker.patch.object(config_parser, "_HAS_TOML", new=False)
         parser = TOMLParser("myfile.toml", tool)
         with pytest.raises(ParserError):
             parser.parse()

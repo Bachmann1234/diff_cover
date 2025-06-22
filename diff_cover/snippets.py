@@ -121,7 +121,9 @@ class Snippet:
 
         # Build each formatted line of the snippet, highlighting violations with '!'.
         formatted_lines: list[str] = []
-        for line_no, source_line in enumerate(self.text().splitlines(), start=self._start_line):
+        for line_no, source_line in enumerate(
+            self.text().splitlines(), start=self._start_line
+        ):
             marker = "!" if line_no in self._violation_lines else " "
             formatted_lines.append(f"{marker} {line_no:>{line_no_width}} {source_line}")
 
