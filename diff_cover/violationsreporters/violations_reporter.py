@@ -306,7 +306,14 @@ class LcovCoverageReporter(BaseViolationReporter):
         """
         Parse a single LCov coverage report
         File format: https://linux.die.net/man/1/geninfo
+        More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
         """
+        branch_coverage = defaultdict(
+            lambda: defaultdict(lambda: {"total": 0, "hit": 0, "executions": 0})
+        )
+        function_lines = defaultdict(
+            dict
+        )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
         source_file = None
         skippable = {
@@ -342,11 +349,98 @@ class LcovCoverageReporter(BaseViolationReporter):
                     lcov_report[source_file][line_no] = (
                         lcov_report[source_file].get(line_no, 0) + hits
                     )
-                elif directive == "end_of_record":
-                    source_file = None
-                else:
-                    msg = f"Unknown syntax in lcov report: {line}"
-                    raise ValueError(msg)
+                if line_no not in lcov_report[source_file]:
+                    lcov_report[source_file][line_no] = 0
+                lcov_report[source_file][line_no] += num_executions
+            elif directive == "BRDA":
+                args = content.split(",")
+                if len(args) != 4:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                line_no = int(args[0])
+                taken = (
+                    int(args[3]) if args[3] != "-" else 0
+                )  # Handle '-' for untaken branches
+                branch_coverage[source_file][line_no]["total"] += 1
+                branch_coverage[source_file][line_no]["executions"] += taken
+                if taken > 0:
+                    branch_coverage[source_file][line_no]["hit"] += 1
+            elif directive == "FN":
+                args = content.split(",")
+                if len(args) != 2:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                line_no = int(args[0])
+                func_name = args[1]
+                function_lines[source_file][func_name] = (line_no, 0)
+            elif directive == "FNDA":
+                args = content.split(",")
+                if len(args) != 2:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                hit_count = int(args[0])
+                func_name = args[1]
+                if func_name in function_lines[source_file]:
+                    line_no, _ = function_lines[source_file][func_name]
+                    function_lines[source_file][func_name] = (line_no, hit_count)
+            elif directive in [
+                "TN",  # Test name
+                "FNF",  # Functions found
+                "FNH",  # Functions hit
+                "LH",  # Lines hit
+                "LF",  # Lines found
+                "BRF",  # Branches found
+                "BRH",  # Branches hit
+                "VER",  # Version
+                "FNL",  # Function line coverage (alternative format)
+                "FNA",  # Function name (alternative format)
+            ]:
+                # Valid directives that we don't need to process
+                continue
+            elif directive == "end_of_record":
+                # Process collected coverage data for current source file
+
+                # 1. Apply branch coverage logic
+                for line_no, info in branch_coverage[source_file].items():
+                    has_da_directive = line_no in lcov_report[source_file]
+
+                    if not has_da_directive:
+                        # No line execution data, use branch coverage
+                        if info["total"] > 0 and info["hit"] < info["total"]:
+                            lcov_report[source_file][
+                                line_no
+                            ] = 0  # Partial branch coverage
+                        else:
+                            lcov_report[source_file][line_no] = info["executions"]
+                        continue
+                    if not lcov_report[source_file][line_no]:
+                        # Line shows 0 executions, but check if branches were hit
+                        if info["executions"] > 0:
+                            lcov_report[source_file][line_no] = info["executions"]
+                    # Note: Don't override existing positive execution counts
+
+                # 2. Apply function coverage logic
+                for func_name, (line_no, hit) in function_lines[source_file].items():
+                    if line_no not in lcov_report[source_file]:
+                        # No existing line data, use function hit count
+                        lcov_report[source_file][line_no] = hit
+                    # Note: Don't override existing line execution data
+
+                # 3. Clean up temporary data for current file
+                branch_coverage[source_file].clear()
+                function_lines[source_file].clear()
+                source_file = None
+            else:
+                raise ValueError(f"Unknown syntax in lcov report: {line}")
 
         return lcov_report
 
