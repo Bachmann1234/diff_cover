@@ -4,9 +4,9 @@ Quality Report: pylint
 Diff: origin/main...HEAD, staged and unstaged changes
 -------------
 violations_test_file.py (77.8%):
-violations_test_file.py:1: C0114: (missing-module-docstring), : Missing module docstring
-violations_test_file.py:1: C0116: (missing-function-docstring), func_1: Missing function or method docstring
-violations_test_file.py:11: W0612: (unused-variable), func_2: Unused variable 'unused'
+violations_test_file.py:1: C0111: Missing docstring
+violations_test_file.py:1: C0111: func_1: Missing docstring
+violations_test_file.py:2: C0322: func_1: Operator not preceded by a space
 -------------
 Total:   9 lines
 Violations: 2 lines

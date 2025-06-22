@@ -329,8 +329,9 @@ def main(argv=None, directory=None):
     try:
         for path in arg_dict["input_reports"]:
             if not pathlib.Path(path).exists():
-                logger.exception("Could not load report '%s'", path)
+                logger.error("Could not load report '%s'", path)
                 return 1
+            input_reports.append(open(path, "rb"))
         if driver is not None:
             # If we've been given pre-generated reports,
             # try to open the files
