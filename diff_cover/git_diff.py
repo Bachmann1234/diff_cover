@@ -127,6 +127,7 @@ class GitDiffFileTool(GitDiffTool):
 
         Raises a `GitDiffError` if the file cannot be read.
         """
+        del compare_branch
         try:
             with open(self.diff_file_path, encoding="utf-8") as file:
                 return file.read()

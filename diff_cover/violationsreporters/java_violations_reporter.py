@@ -3,7 +3,7 @@ Classes for querying the information in a test coverage report.
 """
 
 import os
-import xml.etree.ElementTree as etree
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 from diff_cover.command_runner import run_command_for_code
@@ -63,7 +63,7 @@ class CheckstyleXmlDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            xml_document = etree.fromstring("".join(report))
+            xml_document = ET.fromstring("".join(report))
             files = xml_document.findall(".//file")
             for file_tree in files:
                 for error in file_tree.findall("error"):
@@ -102,7 +102,7 @@ class FindbugsXmlDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            xml_document = etree.fromstring("".join(report))
+            xml_document = ET.fromstring("".join(report))
             bugs = xml_document.findall(".//BugInstance")
             for bug in bugs:
                 category = bug.get("category")
@@ -150,7 +150,7 @@ class PmdXmlDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            xml_document = etree.fromstring("".join(report))
+            xml_document = ET.fromstring("".join(report))
             node_files = xml_document.findall(".//file")
             for node_file in node_files:
                 for error in node_file.findall("violation"):

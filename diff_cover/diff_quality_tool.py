@@ -6,6 +6,7 @@ import argparse
 import io
 import logging
 import os
+import pathlib
 import sys
 
 import pluggy
@@ -89,7 +90,7 @@ INCLUDE_HELP = "Files to include (glob pattern)"
 REPORT_ROOT_PATH_HELP = "The root path used to generate a report"
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def parse_quality_args(argv):
@@ -321,64 +322,55 @@ def main(argv=None, directory=None):
                 reporter_factory_fn = hookimpl.function
                 break
 
-    if reporter or driver or reporter_factory_fn:
-        input_reports = []
-        try:
-            for path in arg_dict["input_reports"]:
-                try:
-                    input_reports.append(open(path, "rb"))
-                except OSError:
-                    LOGGER.error("Could not load report '%s'", path)
-                    return 1
-            if driver is not None:
-                # If we've been given pre-generated reports,
-                # try to open the files
-                if arg_dict["report_root_path"]:
-                    driver.add_driver_args(
-                        report_root_path=arg_dict["report_root_path"]
-                    )
-
-                reporter = QualityReporter(driver, input_reports, user_options)
-            elif reporter_factory_fn:
-                reporter = reporter_factory_fn(
-                    reports=input_reports, options=user_options
-                )
-
-            percent_passing = generate_quality_report(
-                reporter,
-                arg_dict["compare_branch"],
-                GitDiffTool(
-                    arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]
-                ),
-                report_formats=arg_dict["format"],
-                css_file=arg_dict["external_css_file"],
-                ignore_staged=arg_dict["ignore_staged"],
-                ignore_unstaged=arg_dict["ignore_unstaged"],
-                include_untracked=arg_dict["include_untracked"],
-                exclude=arg_dict["exclude"],
-                include=arg_dict["include"],
-                quiet=quiet,
-            )
-            if percent_passing >= fail_under:
-                return 0
-
-            LOGGER.error("Failure. Quality is below %i.", fail_under)
-            return 1
-
-        except ImportError:
-            LOGGER.error("Quality tool not installed: '%s'", tool)
-            return 1
-        except OSError as exc:
-            LOGGER.error("Failure: '%s'", str(exc))
-            return 1
-        # Close any reports we opened
-        finally:
-            for file_handle in input_reports:
-                file_handle.close()
-
-    else:
-        LOGGER.error("Quality tool not recognized: '%s'", tool)
+    if not (reporter or driver or reporter_factory_fn):
+        logger.error("Quality tool not recognized: '%s'", tool)
         return 1
+
+    input_reports = []
+    try:
+        for path in arg_dict["input_reports"]:
+            if not pathlib.Path(path).exists():
+                logger.exception("Could not load report '%s'", path)
+                return 1
+        if driver is not None:
+            # If we've been given pre-generated reports,
+            # try to open the files
+            if arg_dict["report_root_path"]:
+                driver.add_driver_args(report_root_path=arg_dict["report_root_path"])
+
+            reporter = QualityReporter(driver, input_reports, user_options)
+        elif reporter_factory_fn:
+            reporter = reporter_factory_fn(reports=input_reports, options=user_options)
+
+        percent_passing = generate_quality_report(
+            reporter,
+            arg_dict["compare_branch"],
+            GitDiffTool(arg_dict["diff_range_notation"], arg_dict["ignore_whitespace"]),
+            report_formats=arg_dict["format"],
+            css_file=arg_dict["external_css_file"],
+            ignore_staged=arg_dict["ignore_staged"],
+            ignore_unstaged=arg_dict["ignore_unstaged"],
+            include_untracked=arg_dict["include_untracked"],
+            exclude=arg_dict["exclude"],
+            include=arg_dict["include"],
+            quiet=quiet,
+        )
+        if percent_passing >= fail_under:
+            return 0
+
+        logger.error("Failure. Quality is below %i.", fail_under)
+        return 1
+
+    except ImportError:
+        logger.exception("Quality tool not installed: '%s'", tool)
+        return 1
+    except OSError as exc:
+        logger.exception("Failure: '%s'", str(exc))
+        return 1
+    # Close any reports we opened
+    finally:
+        for file_handle in input_reports:
+            file_handle.close()
 
 
 if __name__ == "__main__":

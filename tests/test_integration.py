@@ -376,7 +376,7 @@ class TestDiffCoverIntegration:
         assert runbin(["--show-uncovered", "coverage.xml"]) == 0
         compare_console("show_uncovered_lines_console.txt", capsys.readouterr().out)
 
-    def test_multiple_lcov_xml_reports(self, runbin, patch_git_command, capsys):
+    def test_multiple_lcov_xml_reports(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_add.txt")
         with pytest.raises(
             ValueError, match="Mixing LCov and XML reports is not supported yet"
@@ -594,7 +594,7 @@ class TestDiffQualityIntegration:
 
     def test_tool_not_recognized(self, runbin, patch_git_command, mocker):
         patch_git_command.set_stdout("git_diff_violations.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        logger = mocker.patch("diff_cover.diff_quality_tool.logger")
         assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
         logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
 
@@ -609,9 +609,9 @@ class TestDiffQualityIntegration:
             },
         )
         patch_git_command.set_stdout("git_diff_add.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        logger = mocker.patch("diff_cover.diff_quality_tool.logger")
         assert runbin(["--violations=not_installed"]) == 1
-        logger.error.assert_called_with(
+        logger.exception.assert_called_with(
             "Failure: '%s'", "not_installed is not installed"
         )
 

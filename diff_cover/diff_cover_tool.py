@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import warnings
-import xml.etree.ElementTree as etree
+import xml.etree.ElementTree as ET
 
 from diff_cover import DESCRIPTION, VERSION
 from diff_cover.config_parser import Tool, get_config
@@ -52,7 +52,7 @@ INCLUDE_UNTRACKED_HELP = "Include untracked files"
 CONFIG_FILE_HELP = "The configuration file to use"
 DIFF_FILE_HELP = "The diff file to use"
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def format_type(value):
@@ -229,7 +229,7 @@ def generate_coverage_report(
     )
 
     xml_roots = [
-        etree.parse(coverage_file)
+        ET.parse(coverage_file)
         for coverage_file in coverage_files
         if coverage_file.endswith(".xml")
     ]
@@ -372,7 +372,7 @@ def main(argv=None, directory=None):
 
     if percent_covered >= fail_under:
         return 0
-    LOGGER.error("Failure. Coverage is below %i%%.", fail_under)
+    logger.error("Failure. Coverage is below %i%%.", fail_under)
     return 1
 
 
