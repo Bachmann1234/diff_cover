@@ -368,7 +368,10 @@ class LcovCoverageReporter(BaseViolationReporter):
                         f"No source file specified for line coverage: {line}"
                     )
                 line_no = int(args[0])
-                func_name = args[1]
+                if len(args) == 3:
+                    func_name = args[2]
+                else:
+                    func_name = args[1]
                 function_lines[source_file][func_name] = (line_no, 0)
             elif directive == "FNDA":
                 args = content.split(",")
