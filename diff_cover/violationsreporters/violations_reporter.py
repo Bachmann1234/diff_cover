@@ -308,8 +308,7 @@ class LcovCoverageReporter(BaseViolationReporter):
     def parse(lcov_file):
         """
         Parse a single LCov coverage report
-        File format: https://linux.die.net/man/1/geninfo
-        More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
+        File format: https://github.com/linux-test-project/lcov/blob/master/man/geninfo.1
         """
         branch_coverage = defaultdict(
             lambda: defaultdict(lambda: {"total": 0, "hit": 0, "executions": 0})
@@ -361,14 +360,18 @@ class LcovCoverageReporter(BaseViolationReporter):
                     branch_coverage[source_file][line_no]["hit"] += 1
             elif directive == "FN":
                 args = content.split(",")
-                if len(args) != 2:
+                # FN:<line number of function start>,[<line number of function end>,]<function name>
+                if len(args) != 2 and len(args) != 3:
                     raise ValueError(f"Unknown syntax in lcov report: {line}")
                 if source_file is None:
                     raise ValueError(
                         f"No source file specified for line coverage: {line}"
                     )
                 line_no = int(args[0])
-                func_name = args[1]
+                if len(args) == 3:
+                    func_name = args[2]
+                else:
+                    func_name = args[1]
                 function_lines[source_file][func_name] = (line_no, 0)
             elif directive == "FNDA":
                 args = content.split(",")
