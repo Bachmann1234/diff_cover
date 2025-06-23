@@ -8,8 +8,12 @@ from collections import defaultdict, namedtuple
 from diff_cover.command_runner import execute, run_command_for_code
 
 
-class Violation(namedtuple("Violation", "line, message")):
+class Violation:
     ALL_LINES = -1
+
+    def __init__(self, line, message):
+        self.line = line
+        self.message = message
 
 
 class QualityReporterError(Exception):

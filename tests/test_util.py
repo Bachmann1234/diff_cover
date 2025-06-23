@@ -74,3 +74,20 @@ def test_open_file_encoding_binary(tmp_path):
     with util.open_file(tmp_path / "some_file.txt", "br", encoding="utf-16") as f:
         assert not hasattr(f, "encoding")
         assert f.read() == b"cafe naive resume"
+
+
+@pytest.mark.parametrize(
+    (
+        "nums",
+        "expected",
+    ),
+    (
+        ([], []),
+        ([1, 2, 3], ["1-3"]),
+        ([1, 2, 3, 5, 6, 7], ["1-3", "5-7"]),
+        ([1, 3, 6, 8], ["1", "3", "6", "8"]),
+        (range(1, 101), ["1-100"]),
+    ),
+)
+def test_merge_ranges(nums, expected):
+    assert util.merge_ranges(nums) == expected

@@ -84,3 +84,27 @@ def to_unescaped_filename(filename: str) -> str:
             i += 1
 
     return "".join(result)
+
+
+def merge_ranges(nums):
+    if not nums:
+        return []
+    nums = sorted(nums)
+    ranges = []
+    start = prev = nums[0]
+
+    for n in nums[1:]:
+        if n == prev + 1:
+            prev = n
+            continue
+        if start == prev:
+            ranges.append(f"{start}")
+        else:
+            ranges.append(f"{start}-{prev}")
+        start = prev = n
+    # Add the last range
+    if start == prev:
+        ranges.append(f"{start}")
+    else:
+        ranges.append(f"{start}-{prev}")
+    return ranges
