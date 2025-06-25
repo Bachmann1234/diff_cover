@@ -70,22 +70,6 @@ toml = ["tomli"]
 requires = ["poetry-core>=1.0.7"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 88
-target-version = ['py310']
-include = '\.pyi?$'
-exclude = "tests/fixtures/*"
-
-[tool.isort]
-profile = "black"
-extend_skip = "tests/fixtures/"
-
-[tool.pylint.master]
-max-line-length = 100
-load-plugins = [
-    "pylint_pytest",
-]
-
 [tool.coverage.run]
 branch = true
 relative_files = true
@@ -109,45 +93,6 @@ exclude_also = [
 show_contexts = true
 skip_covered = false
 
-[tool.pylint."messages control"]
-enable = ["all"]
-disable = [
-    # allow TODO comments
-    "fixme",
-    # allow disables
-    "locally-disabled",
-    "suppressed-message",
-    # covered by isort
-    "ungrouped-imports",
-    # allow classes and functions w/o docstring
-    "missing-docstring",
-    # hard number checks can be ignored, because they are covered in code reviews
-    "too-many-instance-attributes",
-    "too-many-arguments",
-    "too-many-locals",
-    "too-many-branches",
-    "too-few-public-methods",
-    "too-many-nested-blocks",
-    "too-many-public-methods",
-    # allow methods not to use self
-    "no-self-use",
-    # currently some code seems duplicated for pylint
-    "duplicate-code",
-    # we are a command line tool and don't want to show all internals
-    "raise-missing-from",
-]
-
-[tool.pylint.basic]
-good-names = [
-    "_",
-    "i",
-    "setUp",
-    "tearDown",
-    "e",
-    "ex",
-]
-no-docstring-rgx = "^_"
-
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 xfail_strict = true
@@ -157,3 +102,95 @@ markers = [
 
 [tool.doc8]
 max_line_length = 120
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+src = ["diff_cover", "tests"]
+exclude = ["tests/fixtures/*"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # Disable all annotations
+    "ANN",
+    # allow TODO comments (equivalent to "fixme")
+    "FIX",
+    "TD",
+
+    "D200",  # Disables One-line docstring should fit on one line
+    "D203",
+    "D205",  # Disables 1 blank line required between summary line and description
+    "D212",  # Disables Multi-line docstring summary should start at the first line
+    "D213",
+    "D400",  # Disables First line should end with a period
+    "D401",  # Disables First line of docstring should be in imperative mood
+    "D415",  # Disables First line should end with a period, question mark, or exclamation point
+    "D417",  # Disables Missing argument descriptions in the docstring
+    
+    # allow disables (equivalent to "locally-disabled", "suppressed-message")
+    "RUF100",
+    
+    # allow classes and functions w/o docstring (equivalent to "missing-docstring")
+    "D1",
+    
+    # hard number checks (equivalent to "too-many-*" rules)
+    "C901",  # complexity
+    "PLR0912",  # too many branches
+    "PLR0913",  # too many arguments
+    "PLR0914",  # too many locals
+    "PLR0915",  # too many statements
+    "PLR0916",  # too many nested blocks
+    "PLR0904",  # too many public methods
+    
+    # duplicate code detection (equivalent to "duplicate-code")
+    "CPY",
+    
+    # we are a command line tool (equivalent to "raise-missing-from")
+    "B904",
+    
+    "E501",  # Line too long
+    "PTH",
+    
+    # Avoid formatter conflicts
+    "COM812",
+
+    "PYI024",  # Disables complains about unused type hints
+]
+
+# The equivalent of pylint's good-names
+allowed-confusables = ["_"]
+
+[tool.ruff.lint.pep8-naming]
+# Allow specific names that might otherwise violate naming conventions
+ignore-names = ["i", "e", "ex", "setUp", "tearDown"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",    # Disables Assert statements
+    "S311",    # Disables random checks
+    "PLR2004", # Disables Magic value
+    "PT011",   # Disables Exception is too broad
+    "RUF012",  # Disables Mutable class attributes should be annotated with typing.ClassVar
+    "S314",    # Disables xml security checks
+    "SLF001",  # Disables complains about accessing private members/methods
+    "RUF001",  # Disables complains about greek letters
+]
+
+[tool.ruff.lint.pydocstyle]
+# Equivalent to pylint's no-docstring-rgx
+ignore-decorators = ["^_"]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+combine-as-imports = true
+known-first-party = ["diff_cover", "tests"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+lines-after-imports = -1
+split-on-trailing-comma = false

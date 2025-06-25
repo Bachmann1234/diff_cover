@@ -110,20 +110,16 @@ class GitDiffTool:
             return self._untracked_cache
 
         output = execute(["git", "ls-files", "--exclude-standard", "--others"])[0]
-        self._untracked_cache = []
-        if output:
-            self._untracked_cache = [
-                to_unescaped_filename(line) for line in output.splitlines() if line
-            ]
+        self._untracked_cache = [
+            to_unescaped_filename(line) for line in output.splitlines() if line
+        ]
         return self._untracked_cache
 
 
 class GitDiffFileTool(GitDiffTool):
-
     def __init__(self, diff_file_path):
-
         self.diff_file_path = diff_file_path
-        super().__init__("...", False)
+        super().__init__(range_notation="...", ignore_whitespace=False)
 
     def diff_committed(self, compare_branch="origin/main"):
         """
@@ -131,8 +127,9 @@ class GitDiffFileTool(GitDiffTool):
 
         Raises a `GitDiffError` if the file cannot be read.
         """
+        del compare_branch
         try:
-            with open(self.diff_file_path, "r") as file:
+            with open(self.diff_file_path, encoding="utf-8") as file:
                 return file.read()
         except OSError as e:
             error_message = (

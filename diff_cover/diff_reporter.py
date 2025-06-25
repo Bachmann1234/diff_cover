@@ -162,7 +162,6 @@ class GitDiffReporter(BaseDiffReporter):
         """
         See base class docstring.
         """
-
         # Get the diff dictionary
         diff_dict = self._git_diff()
         # include untracked files
@@ -183,7 +182,6 @@ class GitDiffReporter(BaseDiffReporter):
         """
         Return the number of lines in a file.
         """
-
         try:
             with open(path, encoding="utf-8") as file_handle:
                 return len(file_handle.readlines())
@@ -194,7 +192,6 @@ class GitDiffReporter(BaseDiffReporter):
         """
         See base class docstring.
         """
-
         # Get the diff dictionary (cached)
         diff_dict = self._git_diff()
 
@@ -227,7 +224,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a GitDiffError if `git diff` has an error.
         """
-
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
             result_dict = {}
@@ -268,7 +264,6 @@ class GitDiffReporter(BaseDiffReporter):
         - If the path is excluded
         - If the path has an extension that is not supported
         """
-
         if self._is_path_excluded(src_path):
             return False
 
@@ -276,10 +271,9 @@ class GitDiffReporter(BaseDiffReporter):
         _, extension = os.path.splitext(src_path)
         extension = extension[1:].lower()
 
-        if self._supported_extensions and extension not in self._supported_extensions:
-            return False
-
-        return True
+        return not (
+            self._supported_extensions and extension not in self._supported_extensions
+        )
 
     # Regular expressions used to parse the diff output
     SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^\n"]*)"?')
@@ -297,7 +291,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         If the output could not be parsed, raises a GitDiffError.
         """
-
         # Create a dict to hold results
         diff_dict = {}
 
@@ -320,7 +313,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a `GitDiffError` if `diff_str` is in an invalid format.
         """
-
         # Create a dict to map source files to lines in the diff output
         source_dict = {}
 
@@ -335,7 +327,7 @@ class GitDiffReporter(BaseDiffReporter):
             # If the line starts with "diff --git"
             # or "diff --cc" (in the case of a merge conflict)
             # then it is the start of a new source file
-            if line.startswith("diff --git") or line.startswith("diff --cc"):
+            if line.startswith(("diff --git", "diff --cc")):
                 # Retrieve the name of the source file
                 src_path = self._parse_source_line(line)
 
@@ -376,7 +368,6 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a `GitDiffError` if the diff lines are in an invalid format.
         """
-
         added_lines = []
         deleted_lines = []
 
@@ -445,11 +436,11 @@ class GitDiffReporter(BaseDiffReporter):
         # Parse for the source file path
         groups = regex.findall(line)
 
-        if len(groups) == 1:
-            return groups[0]
+        if len(groups) != 1:
+            msg = f"Could not parse source path in line '{line}'"
+            raise GitDiffError(msg)
 
-        msg = f"Could not parse source path in line '{line}'"
-        raise GitDiffError(msg)
+        return groups[0]
 
     def _parse_hunk_line(self, line):
         """
@@ -474,24 +465,21 @@ class GitDiffReporter(BaseDiffReporter):
         # the line starts with '@@'.  The second component should
         # be the hunk information, and any additional components
         # are excerpts from the code.
-        if len(components) >= 2:
-            hunk_info = components[1]
-            groups = self.HUNK_LINE_RE.findall(hunk_info)
-
-            if len(groups) == 1:
-                try:
-                    return int(groups[0])
-
-                except ValueError as e:
-                    msg = f"Could not parse '{groups[0]}' as a line number"
-                    raise GitDiffError(msg) from e
-
-            else:
-                msg = f"Could not find start of hunk in line '{line}'"
-                raise GitDiffError(msg)
-
-        else:
+        if len(components) <= 1:
             msg = f"Could not parse hunk in line '{line}'"
+            raise GitDiffError(msg)
+
+        hunk_info = components[1]
+        groups = self.HUNK_LINE_RE.findall(hunk_info)
+
+        if len(groups) == 1:
+            try:
+                return int(groups[0])
+            except ValueError as e:
+                msg = f"Could not parse '{groups[0]}' as a line number"
+                raise GitDiffError(msg) from e
+        else:
+            msg = f"Could not find start of hunk in line '{line}'"
             raise GitDiffError(msg)
 
     @staticmethod
@@ -500,7 +488,6 @@ class GitDiffReporter(BaseDiffReporter):
         Given a list of line numbers, return a list in which each line
         number is included once and the lines are ordered sequentially.
         """
-
         if len(line_numbers) == 0:
             return []
 

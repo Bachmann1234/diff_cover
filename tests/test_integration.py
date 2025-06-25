@@ -4,6 +4,7 @@
 """High-level integration tests of diff-cover tool."""
 
 import json
+import logging
 import os
 import os.path
 import re
@@ -69,6 +70,8 @@ def patch_git_command(patch_popen, mocker):
         def set_returncode(self, value):
             self.returncode = value
 
+    helper = Wrapper()
+
     def patch_diff(command, **kwargs):
         if command[0:6] == [
             "git",
@@ -91,7 +94,6 @@ def patch_git_command(patch_popen, mocker):
         return Popen(command, **kwargs)
 
     patch_popen.side_effect = patch_diff
-    helper = Wrapper()
 
     return helper
 
@@ -145,7 +147,7 @@ class TestDiffCoverIntegration:
 
     @pytest.fixture
     def runbin(self, cwd):
-        del cwd  # fixtures cannot use pytest.mark.usefixtures
+        del cwd
         return lambda x: diff_cover_tool.main(["diff-cover", *x])
 
     def test_added_file_html(self, runbin, patch_git_command):
@@ -186,7 +188,7 @@ class TestDiffCoverIntegration:
 
     def test_lua_coverage(self, runbin, patch_git_command, capsys):
         """
-        coverage report shows that diff-cover needs to normalize
+        Coverage report shows that diff-cover needs to normalize
         paths read in
         """
         patch_git_command.set_stdout("git_diff_lua.txt")
@@ -376,7 +378,7 @@ class TestDiffCoverIntegration:
         assert runbin(["--show-uncovered", "coverage.xml"]) == 0
         compare_console("show_uncovered_lines_console.txt", capsys.readouterr().out)
 
-    def test_multiple_lcov_xml_reports(self, runbin, patch_git_command, capsys):
+    def test_multiple_lcov_xml_reports(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_add.txt")
         with pytest.raises(
             ValueError, match="Mixing LCov and XML reports is not supported yet"
@@ -468,7 +470,7 @@ class TestDiffQualityIntegration:
 
     @pytest.fixture
     def runbin(self, cwd):
-        del cwd  # fixtures cannot use pytest.mark.usefixtures
+        del cwd
         return lambda x: diff_quality_tool.main(["diff-quality", *x])
 
     def test_git_diff_error_diff_quality(self, runbin, patch_git_command):
@@ -657,11 +659,11 @@ class TestDiffQualityIntegration:
 
     def test_tool_not_recognized(self, runbin, patch_git_command, mocker):
         patch_git_command.set_stdout("git_diff_violations.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
+        logger = mocker.patch("diff_cover.diff_quality_tool.logger")
         assert runbin(["--violations=garbage", "pylint_report.txt"]) == 1
         logger.error.assert_called_with("Quality tool not recognized: '%s'", "garbage")
 
-    def test_tool_not_installed(self, mocker, runbin, patch_git_command):
+    def test_tool_not_installed(self, mocker, runbin, patch_git_command, caplog):
         # Pretend we support a tool named not_installed
         mocker.patch.dict(
             diff_quality_tool.QUALITY_DRIVERS,
@@ -672,11 +674,11 @@ class TestDiffQualityIntegration:
             },
         )
         patch_git_command.set_stdout("git_diff_add.txt")
-        logger = mocker.patch("diff_cover.diff_quality_tool.LOGGER")
         assert runbin(["--violations=not_installed"]) == 1
-        logger.error.assert_called_with(
-            "Failure: '%s'", "not_installed is not installed"
-        )
+        assert caplog.record_tuples == [
+            ("diff_cover.diff_quality_tool", logging.ERROR, "Failure")
+        ]
+        assert "not_installed is not installed" in caplog.text
 
     def test_do_nothing_reporter(self):
         # Pedantic, but really. This reporter
@@ -696,6 +698,7 @@ class DoNothingDriver(QualityDriver):
     """Dummy class that implements necessary abstract functions."""
 
     def parse_reports(self, reports):
+        del reports
         return defaultdict(list)
 
     def installed(self):

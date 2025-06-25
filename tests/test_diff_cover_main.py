@@ -25,8 +25,8 @@ def test_parse_range_notation(capsys):
     assert arg_dict["coverage_files"] == ["build/tests/coverage.xml"]
     assert arg_dict["diff_range_notation"] == ".."
 
+    argv = ["build/tests/coverage.xml", "--diff-range-notation=FOO"]
     with pytest.raises(SystemExit) as e:
-        argv = ["build/tests/coverage.xml", "--diff-range-notation=FOO"]
         parse_coverage_args(argv)
 
     assert e.value.code == 2

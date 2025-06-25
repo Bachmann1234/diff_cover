@@ -6,7 +6,6 @@ import os
 import tempfile
 from pathlib import Path
 from textwrap import dedent
-from unittest.mock import patch
 
 import pytest
 
@@ -75,7 +74,7 @@ def test_name_include_untracked(git_diff):
 
 
 @pytest.mark.parametrize(
-    "include,exclude,expected",
+    ("include", "exclude", "expected"),
     [
         # no include/exclude --> use all paths
         ([], [], ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]),
@@ -97,7 +96,7 @@ def test_name_include_untracked(git_diff):
         ),
     ],
 )
-def test_git_path_selection(diff, git_diff, include, exclude, expected):
+def test_git_path_selection(diff, git_diff, include, exclude, expected, monkeypatch):
     old_cwd = os.getcwd()
     with tempfile.TemporaryDirectory() as tmp_dir:
         # change the working directory into the temp directory so that globs are working
@@ -124,12 +123,12 @@ def test_git_path_selection(diff, git_diff, include, exclude, expected):
                 {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
             ),
             git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-            git_diff_output(dict(), deleted_files=["README.md"]),
+            git_diff_output({}, deleted_files=["README.md"]),
         )
 
         # Get the source paths in the diff
-        with patch.object(os.path, "abspath", lambda path: f"{tmp_dir}/{path}"):
-            source_paths = diff.src_paths_changed()
+        monkeypatch.setattr(os.path, "abspath", lambda path: f"{tmp_dir}/{path}")
+        source_paths = diff.src_paths_changed()
 
         # Validate the source paths
         # They should be in alphabetical order
@@ -148,7 +147,7 @@ def test_git_source_paths(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the source paths in the diff
@@ -225,7 +224,7 @@ def test_git_lines_changed(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -239,7 +238,7 @@ def test_ignore_lines_outside_src(diff, git_diff):
     # Add some lines at the start of the diff, before any
     # source files are specified
     diff_output = git_diff_output({"subdir/file1.py": line_numbers(3, 10)})
-    main_diff = "\n".join(["- deleted line", "+ added line", diff_output])
+    main_diff = f"- deleted line\n+ added line\n{diff_output}"
 
     # Configure the git diff output
     _set_git_diff_output(diff, git_diff, main_diff, "", "")
@@ -286,7 +285,7 @@ def test_git_deleted_lines(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -630,7 +629,7 @@ def test_include_untracked(mocker, git_diff):
             nonlocal raise_count
             raise_count += 1
 
-            raise UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte")
+            raise UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte")  # noqa: EM101
         return base_open_mock(*args, **kwargs)
 
     mocker.patch("diff_cover.diff_reporter.open", open_side_effect)
@@ -645,7 +644,7 @@ def test_include_untracked(mocker, git_diff):
 
 
 @pytest.mark.parametrize(
-    "excluded, supported_extensions, path",
+    ("excluded", "supported_extensions", "path"),
     [
         (["file.bin"], ["py"], "file.bin"),
         ([], ["py"], "file.bin"),

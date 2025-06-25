@@ -36,11 +36,11 @@ class Snippet:
 
     # See https://github.com/github/linguist/blob/master/lib/linguist/languages.yml
     # for typical values of accepted programming language hints in Markdown code fenced blocks
-    LEXER_TO_MARKDOWN_CODE_HINT = {
-        "Python": "python",
-        "C++": "cpp",
+    LEXER_TO_MARKDOWN_CODE_HINT = (
+        ("Python", "python"),
+        ("C++", "cpp"),
         # TODO: expand this list...
-    }
+    )
 
     def __init__(
         self,
@@ -78,7 +78,8 @@ class Snippet:
         Raises a `ValueError` if `start_line` is less than 1
         """
         if start_line < 1:
-            raise ValueError("Start line must be >= 1")
+            msg = "Start line must be >= 1"
+            raise ValueError(msg)
 
         self._src_tokens = src_tokens
         self._src_filename = src_filename
@@ -116,33 +117,27 @@ class Snippet:
         Return a Markdown representation of the snippet using Markdown fenced code blocks.
         See https://github.github.com/gfm/#fenced-code-blocks.
         """
+        line_no_width = len(str(self._last_line))
 
-        line_number_length = len(str(self._last_line))
+        # Build each formatted line of the snippet, highlighting violations with '!'.
+        formatted_lines: list[str] = []
+        for line_no, source_line in enumerate(
+            self.text().splitlines(), start=self._start_line
+        ):
+            marker = "!" if line_no in self._violation_lines else " "
+            formatted_lines.append(f"{marker} {line_no:>{line_no_width}} {source_line}")
 
-        text = ""
-        for i, line in enumerate(self.text().splitlines(), start=self._start_line):
-            if i > self._start_line:
-                text += "\n"
+        body = "\n".join(formatted_lines)
 
-            notice = " "
-            if i in self._violation_lines:
-                notice = "!"
+        # Prefer a syntax-highlighted fenced block when we know the language.
+        code_hint = dict(self.LEXER_TO_MARKDOWN_CODE_HINT).get(self._lexer_name)
 
-            format_string = "{} {:>" + str(line_number_length) + "} {}"
-            text += format_string.format(notice, i, line)
+        if code_hint:
+            header = f"Lines {self._start_line}-{self._last_line}\n\n"
+            return f"{header}```{code_hint}\n{body}\n```\n"
 
-        header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
-        if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
-            return header + (
-                "```"
-                + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
-                + "\n"
-                + text
-                + "\n```\n"
-            )
-
-        # unknown programming language, return a non-decorated fenced code block:
-        return "```\n" + text + "\n```\n"
+        # Fallback: plain fenced code block with no language hint.
+        return f"```\n{body}\n```\n"
 
     def terminal(self):
         """
@@ -188,7 +183,6 @@ class Snippet:
 
         See `load_snippets()` for details.
         """
-
         # load once...
         snippet_list = cls.load_snippets(src_path, violation_lines)
 
@@ -220,7 +214,7 @@ class Snippet:
             # We failed to decode the file.
             # if this is happening a lot I should just bite the bullet
             # and write a parameter to let people list their file encodings
-            print(
+            print(  # noqa: T201
                 "Warning: I was not able to decode your src file. "
                 "I can continue but code snippets in the final report may look wrong"
             )
@@ -266,7 +260,6 @@ class Snippet:
         Uses `src_filename` to guess the type of file
         so it can highlight syntax correctly.
         """
-
         # Parse the source into tokens
         try:
             lexer = guess_lexer_for_filename(src_filename, src_contents)
@@ -302,7 +295,6 @@ class Snippet:
         The algorithm is slightly complicated because a single token
         can contain multiple line breaks.
         """
-
         # Create a map from ranges (start/end tuples) to tokens
         token_map = {rng: [] for rng in range_list}
 

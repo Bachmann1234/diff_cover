@@ -25,6 +25,7 @@ lib
 lib64
 __pycache__
 .pytest_cache
+.ruff_cache
 
 # Installer logs
 pip-log.txt
@@ -34,6 +35,7 @@ pip-log.txt
 .tox
 /coverage.xml
 /report.html
+htmlcov/
 
 # Translations
 *.mo

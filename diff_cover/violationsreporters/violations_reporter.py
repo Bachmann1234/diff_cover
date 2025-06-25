@@ -117,7 +117,6 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         If file is not present in `xml_document`, return None
         """
-
         files = [
             file_tree
             for file_tree in xml_document.findall(".//file")
@@ -156,7 +155,6 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         If file is not present in `xml_document`, return None
         """
-
         files = []
         packages = list(xml_document.findall(".//package"))
         for pkg in packages:
@@ -271,7 +269,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         """
         See base class comments.
         """
-
         self._cache_file(src_path)
 
         # Yield all lines not covered
@@ -317,27 +314,39 @@ class LcovCoverageReporter(BaseViolationReporter):
             dict
         )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
-        lcov = open(lcov_file)
-        while True:
-            line = lcov.readline()
-            if not line:
-                break
-            directive, _, content = line.strip().partition(":")
-            # we're only interested in file name and line coverage
-            if directive == "SF":
-                # SF:<absolute path to the source file>
-                source_file = util.to_unix_path(GitPathTool.relative_path(content))
-                continue
-            elif directive == "DA":
-                # DA:<line number>,<execution count>[,<checksum>]
-                args = content.split(",")
-                if len(args) < 2 or len(args) > 3:
-                    raise ValueError(f"Unknown syntax in lcov report: {line}")
-                line_no = int(args[0])
-                num_executions = int(args[1])
-                if source_file is None:
-                    raise ValueError(
-                        f"No source file specified for line coverage: {line}"
+        source_file = None
+        skippable = {
+            "TN",
+            "FNF",
+            "FNH",
+            "FN",
+            "FNDA",
+            "LH",
+            "LF",
+            "BRF",
+            "BRH",
+            "BRDA",
+            "VER",
+        }
+
+        with open(lcov_file, encoding="utf-8") as lcov:
+            for line in (line for line in (line.strip() for line in lcov) if line):
+                directive, _, content = line.partition(":")
+
+                if directive in skippable:
+                    continue
+
+                if directive == "SF":
+                    source_file = util.to_unix_path(GitPathTool.relative_path(content))
+                elif directive == "DA":
+                    line_no, hits, *_ = content.split(",")
+                    if source_file is None:
+                        msg = f"No source file specified for line coverage: {line}"
+                        raise ValueError(msg)
+                    line_no = int(line_no)
+                    hits = int(hits)
+                    lcov_report[source_file][line_no] = (
+                        lcov_report[source_file].get(line_no, 0) + hits
                     )
                 if line_no not in lcov_report[source_file]:
                     lcov_report[source_file][line_no] = 0
@@ -436,7 +445,6 @@ class LcovCoverageReporter(BaseViolationReporter):
             else:
                 raise ValueError(f"Unknown syntax in lcov report: {line}")
 
-        lcov.close()
         return lcov_report
 
     def _cache_file(self, src_path):
@@ -498,7 +506,6 @@ class LcovCoverageReporter(BaseViolationReporter):
                     }
 
                 # Measured is the union of itself and the new measured
-                # measured = measured | {int(line.get(_number)) for line in line_nodes}
                 measured = measured | {
                     int(line_no)
                     for line_no, num_executions in lcov_document[
@@ -517,7 +524,6 @@ class LcovCoverageReporter(BaseViolationReporter):
         """
         See base class comments.
         """
-
         self._cache_file(src_path)
 
         # Yield all lines not covered
@@ -660,9 +666,10 @@ pydocstyle_driver = RegexBasedDriver(
 class PylintDriver(QualityDriver):
     def __init__(self):
         """
-        args:
+        Args:
             expression: regex used to parse report
         See super for other args
+
         """
         super().__init__(
             "pylint",
@@ -729,6 +736,7 @@ class PylintDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:
@@ -783,9 +791,10 @@ class CppcheckDriver(QualityDriver):
 
     def __init__(self):
         """
-        args:
+        Args:
             expression: regex used to parse report
         See super for other args
+
         """
         super().__init__(
             "cppcheck",
@@ -807,6 +816,7 @@ class CppcheckDriver(QualityDriver):
         Return:
             A dict[Str:Violation]
             Violation is a simple named tuple Defined above
+
         """
         violations_dict = defaultdict(list)
         for report in reports:

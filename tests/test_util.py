@@ -60,9 +60,10 @@ def test_open_file_encoding(tmp_path):
         assert f.encoding == "utf-16"
         assert f.read() == "café naïve résumé"
 
-    with pytest.raises(UnicodeDecodeError):
-        with util.open_file(tmp_path / "some_file.txt", "r", encoding="utf-8") as f:
-            f.read()
+    raise_error = pytest.raises(UnicodeDecodeError)
+    open_file = util.open_file(tmp_path / "some_file.txt", "r", encoding="utf-8")
+    with raise_error, open_file as f:
+        f.read()
 
 
 def test_open_file_encoding_binary(tmp_path):

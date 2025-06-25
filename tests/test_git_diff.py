@@ -128,7 +128,7 @@ def test_diff_staged(tool, subprocess, set_git_diff_output):
     )
 
 
-def test_diff_missing_branch_error(set_git_diff_output, tool, subprocess):
+def test_diff_missing_branch_error(set_git_diff_output, tool):
     # Override the default compare branch
     set_git_diff_output("test output", "fatal error", 1)
     with pytest.raises(CommandError):
@@ -184,7 +184,7 @@ def test_errors(set_git_diff_output, tool):
 
 
 @pytest.mark.parametrize(
-    "output,expected",
+    ("output", "expected"),
     [
         ("", []),
         ("\n", []),

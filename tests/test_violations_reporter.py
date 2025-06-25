@@ -6,7 +6,7 @@
 import os
 import subprocess
 import tempfile
-import xml.etree.ElementTree as etree
+import xml.etree.ElementTree as ET
 from io import BytesIO, StringIO
 from subprocess import Popen
 from textwrap import dedent
@@ -147,7 +147,7 @@ class TestXmlCoverageReporterTest:
         In the wild empty sources can happen. See https://github.com/Bachmann1234/diff-cover/issues/88
         Best I can tell its mostly irrelevant but I mostly don't want it crashing
         """
-        xml = etree.fromstring(
+        xml = ET.fromstring(
             """
         <coverage line-rate="0.178" branch-rate="0.348" version="1.9" timestamp="1545037553" lines-covered="675" lines-valid="3787" branches-covered="260" branches-valid="747">
         <sources>
@@ -345,29 +345,29 @@ class TestXmlCoverageReporterTest:
         This leaves out some attributes of the Cobertura format,
         but includes all the elements.
         """
-        root = etree.Element("coverage")
+        root = ET.Element("coverage")
         if source_paths:
-            sources = etree.SubElement(root, "sources")
+            sources = ET.SubElement(root, "sources")
             for path in source_paths:
-                source = etree.SubElement(sources, "source")
+                source = ET.SubElement(sources, "source")
                 source.text = path
 
-        packages = etree.SubElement(root, "packages")
-        classes = etree.SubElement(packages, "classes")
+        packages = ET.SubElement(root, "packages")
+        classes = ET.SubElement(packages, "classes")
 
         violation_lines = {violation.line for violation in violations}
 
         for path in file_paths:
-            src_node = etree.SubElement(classes, "class")
+            src_node = ET.SubElement(classes, "class")
             src_node.set("filename", path)
 
-            etree.SubElement(src_node, "methods")
-            lines_node = etree.SubElement(src_node, "lines")
+            ET.SubElement(src_node, "methods")
+            lines_node = ET.SubElement(src_node, "lines")
 
             # Create a node for each line in measured
             for line_num in measured:
                 is_covered = line_num not in violation_lines
-                line = etree.SubElement(lines_node, "line")
+                line = ET.SubElement(lines_node, "line")
 
                 hits = 1 if is_covered else 0
                 line.set("hits", str(hits))
@@ -563,21 +563,21 @@ class TestCloverXmlCoverageReporterTest:
         This leaves out some attributes of the Cobertura format,
         but includes all the elements.
         """
-        root = etree.Element("coverage")
+        root = ET.Element("coverage")
         root.set("clover", "4.2.0")
-        project = etree.SubElement(root, "project")
-        package = etree.SubElement(project, "package")
+        project = ET.SubElement(root, "project")
+        package = ET.SubElement(project, "package")
 
         violation_lines = {violation.line for violation in violations}
 
         for path in file_paths:
-            src_node = etree.SubElement(package, "file")
+            src_node = ET.SubElement(package, "file")
             src_node.set("path", path)
 
             # Create a node for each line in measured
             for line_num in measured:
                 is_covered = line_num not in violation_lines
-                line = etree.SubElement(src_node, "line")
+                line = ET.SubElement(src_node, "line")
 
                 hits = 1 if is_covered else 0
                 line.set("count", str(hits))
@@ -774,23 +774,23 @@ class TestJacocoXmlCoverageReporterTest:
         This leaves out some attributes of the Cobertura format,
         but includes all the elements.
         """
-        root = etree.Element("report")
+        root = ET.Element("report")
         root.set("name", "diff-cover")
-        sessioninfo = etree.SubElement(root, "sessioninfo")
+        sessioninfo = ET.SubElement(root, "sessioninfo")
         sessioninfo.set("id", "C13WQ1WFHTEE-83e2bc9b")
 
         violation_lines = {violation.line for violation in violations}
 
         for path in file_paths:
-            package = etree.SubElement(root, "package")
+            package = ET.SubElement(root, "package")
             package.set("name", os.path.dirname(path))
-            src_node = etree.SubElement(package, "sourcefile")
+            src_node = ET.SubElement(package, "sourcefile")
             src_node.set("name", os.path.basename(path))
 
             # Create a node for each line in measured
             for line_num in measured:
                 is_covered = line_num not in violation_lines
-                line = etree.SubElement(src_node, "line")
+                line = ET.SubElement(src_node, "line")
 
                 hits = 1 if is_covered else 0
                 line.set("ci", str(hits))
@@ -1863,9 +1863,9 @@ class JsQualityBaseReporterMixin:
 
     def _get_out(self):
         """
-        get Object Under Test
+        Get Object Under Test
         """
-        return None  # pragma: no cover
+        return  # pragma: no cover
 
     def test_quality(self):
         """

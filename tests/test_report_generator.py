@@ -1,6 +1,5 @@
 # pylint: disable=attribute-defined-outside-init,not-callable
 
-import copy
 import json
 from io import BytesIO
 from textwrap import dedent
@@ -214,7 +213,6 @@ class TestSimpleReportGenerator(BaseReportGeneratorTest):
 
 
 class TestTemplateReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -246,7 +244,6 @@ class TestTemplateReportGenerator(BaseReportGeneratorTest):
 
 
 class TestJsonReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -336,7 +333,6 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
 
 
 class TestStringReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -408,7 +404,6 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
 
 
 class TestHtmlReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -449,7 +444,6 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
 
 
 class TestMarkdownReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -541,7 +535,6 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
 
 
 class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
