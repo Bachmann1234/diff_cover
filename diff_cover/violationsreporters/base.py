@@ -4,16 +4,40 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
+from functools import lru_cache
 
 from diff_cover.command_runner import execute, run_command_for_code
 
 
-class Violation:
+class Violation(namedtuple("_", "line, message")):
     ALL_LINES = -1
 
-    def __init__(self, line, message):
-        self.line = line
-        self.message = message
+
+class SourceFile:
+    __slots__ = ("path", "violations")
+
+    def __init__(self, path):
+        self.path = path
+        self.violations = []
+
+    def add_violation(self, violation):
+        self.violations.add(violation)
+
+    @property
+    @lru_cache(maxsize=1)
+    def content(self):
+        with open(self.path, "r", encoding="utf-8") as f:
+            return f.read()
+
+    @property
+    @lru_cache(maxsize=1)
+    def size(self):
+        return len(self.content)
+
+    @property
+    @lru_cache(maxsize=1)
+    def lines(self):
+        return set(self.content.splitlines())
 
 
 class QualityReporterError(Exception):

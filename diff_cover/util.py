@@ -89,7 +89,7 @@ def to_unescaped_filename(filename: str) -> str:
 def merge_ranges(nums):
     """
     Merge a list of numbers into a list of ranges.
-    Given a list of numbers, merge consecutive numbers 
+    Given a list of numbers, merge consecutive numbers
     into ranges of strings e.g. [1, 2, 3] -> ["1-3"]
     """
     if not nums:
