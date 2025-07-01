@@ -4,10 +4,40 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
+from functools import lru_cache
 
 from diff_cover.command_runner import execute, run_command_for_code
 
-Violation = namedtuple("Violation", "line, message")
+
+class Violation(namedtuple("_", "line, message")):
+    ALL_LINES = -1
+
+
+class SourceFile:
+    __slots__ = ("path", "violations")
+
+    def __init__(self, path):
+        self.path = path
+        self.violations = []
+
+    def add_violation(self, violation):
+        self.violations.add(violation)
+
+    @property
+    @lru_cache(maxsize=1)
+    def content(self):
+        with open(self.path, "r", encoding="utf-8") as f:
+            return f.read()
+
+    @property
+    @lru_cache(maxsize=1)
+    def size(self):
+        return len(self.content)
+
+    @property
+    @lru_cache(maxsize=1)
+    def lines(self):
+        return set(self.content.splitlines())
 
 
 class QualityReporterError(Exception):
@@ -227,17 +257,21 @@ class RegexBasedDriver(QualityDriver):
         violations_dict = defaultdict(list)
         for report in reports:
             if self.expression.flags & re.MULTILINE:
-                matches = (match for match in re.finditer(self.expression, report))
+                matches = re.finditer(self.expression, report)
             else:
                 matches = (self.expression.match(line) for line in report.split("\n"))
             for match in matches:
-                if match is not None:
-                    src, line_number, message = match.groups()
-                    # Transform src to a relative path, if it isn't already
-                    src = os.path.relpath(src)
-                    violation = Violation(int(line_number), message)
-                    violations_dict[src].append(violation)
+                if match is None:
+                    continue
+                src, violation = self._get_violation(match)
+                violations_dict[src].append(violation)
         return violations_dict
+
+    def _get_violation(self, match):
+        src, line_number, message = match.groups()
+        # Transform src to a relative path, if it isn't already
+        src = os.path.relpath(src)
+        return src, Violation(int(line_number), message)
 
     def installed(self):
         """
