@@ -17,6 +17,7 @@ from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.violationsreporters import base
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
+    ClangFormatDriver,
     CppcheckDriver,
     EslintDriver,
     LcovCoverageReporter,
@@ -2237,4 +2238,24 @@ class TestRuffCheckQualityDriverTest:
         actual_violations = quality.violations("foo/bar/path/to/file.py")
 
         assert quality.name() == "ruff.check"
+        assert actual_violations == expected_violations
+
+
+class TestClangFormatcheckQualityDriverTest:
+    """Tests for clang-format quality driver."""
+
+    def test_parse_report(self):
+        """Basic report test parse"""
+        expected_violations = {
+            "src/foo.c": [
+                Violation(
+                    12,
+                    "warning: code should be clang-formatted [-Wclang-format-violations]\n        int  bar;\n           ^",
+                ),
+            ]
+        }
+        report = "src/foo.c:12:1: warning: code should be clang-formatted [-Wclang-format-violations]\n        int  bar;\n           ^"
+
+        driver = ClangFormatDriver()
+        actual_violations = driver.parse_reports([report])
         assert actual_violations == expected_violations
