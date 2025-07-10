@@ -50,6 +50,7 @@ from diff_cover.violationsreporters.java_violations_reporter import (
     checkstyle_driver,
 )
 from diff_cover.violationsreporters.violations_reporter import (
+    ClangFormatDriver,
     CppcheckDriver,
     EslintDriver,
     PylintDriver,
@@ -63,6 +64,7 @@ from diff_cover.violationsreporters.violations_reporter import (
 )
 
 QUALITY_DRIVERS = {
+    "clang": ClangFormatDriver(),
     "cppcheck": CppcheckDriver(),
     "pycodestyle": pycodestyle_driver,
     "pyflakes": pyflakes_driver,

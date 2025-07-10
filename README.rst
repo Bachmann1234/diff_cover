@@ -129,7 +129,7 @@ You can use diff-cover to see quality reports on the diff as well by running
     diff-quality --violations=<tool>
 
 Where ``tool`` is the quality checker to use. Currently ``pycodestyle``, ``pyflakes``,
-``flake8``, ``pylint``, ``checkstyle``, ``checkstylexml``, ``ruff check`` are supported, but more
+``flake8``, ``pylint``, ``checkstyle``, ``checkstylexml``, ``ruff check``, ``clang`` are supported, but more
 checkers can (and should!) be supported. See the section "Adding `diff-quality``
 Support for a New Quality Checker".
 
