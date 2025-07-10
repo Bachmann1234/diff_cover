@@ -1,3 +1,7 @@
+07/09/2025 v9.5.0
+
+* Adds clang-format quality check (Thanks @mg-cloud) [PR 511](https://github.com/Bachmann1234/diff_cover/pull/511)
+
 06/23/2025 v9.4.1
 
 * Update to LCOV to support pytest-cov. Pytest-cov uses an obsolute lcov format that needed additional handling. [PR 505](https://github.com/Bachmann1234/diff_cover/pull/505) Thanks @129tyc
