@@ -2,11 +2,9 @@
 
 """Test for diff_cover.diff_reporter"""
 
-import os
-import tempfile
+from os.path import normcase, normpath
 from pathlib import Path
 from textwrap import dedent
-from unittest.mock import patch
 
 import pytest
 
@@ -101,6 +99,9 @@ def test_git_path_selection(
     monkeypatch, tmp_path, diff, git_diff, include, exclude, expected
 ):
     monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "os.path.abspath", lambda path: normpath(normcase(tmp_path / path))
+    )
     diff = GitDiffReporter(git_diff=git_diff, exclude=exclude, include=include)
 
     main_dir = Path(tmp_path)
@@ -126,8 +127,7 @@ def test_git_path_selection(
     )
 
     # Get the source paths in the diff
-    with patch.object(os.path, "abspath", lambda path: f"{tmp_path}/{path}"):
-        source_paths = diff.src_paths_changed()
+    source_paths = diff.src_paths_changed()
 
     # Validate the source paths
     # They should be in alphabetical order
