@@ -1,0 +1,45 @@
+diff --git a/src/calculator.ts b/src/calculator.ts
+new file mode 100644
+index 0000000..fedcba0
+--- /dev/null
++++ b/src/calculator.ts
+@@ -0,0 +1,40 @@
++export class Calculator {
++  // Function coverage
++  add(a: number, b: number): number {
++    return a + b;
++  }
++
++  // Branch coverage
++  divide(a: number, b: number): number {
++    if (b === 0) {
++      throw new Error("Division by zero");
++    }
++    return a / b;
++  }
++
++  // Anonymous function coverage
++  processNumbers(
++    numbers: number[],
++    processor: (n: number) => number = (n) => n * 2
++  ): number[] {
++    return numbers.map(processor);
++  }
++
++  // Line and branch coverage
++  getGrade(score: number): string {
++    if (score < 0 || score > 100) {
++      throw new Error("Invalid score");
++    }
++
++    if (score >= 90) {
++      return "A";
++    } else if (score >= 80) {
++      return "B";
++    } else if (score >= 70) {
++      return "C";
++    } else {
++      return "F";
++    }
++  }
++} 
