@@ -17,6 +17,7 @@ from diff_cover.command_runner import CommandError, run_command_for_code
 from diff_cover.violationsreporters import base
 from diff_cover.violationsreporters.base import QualityReporter
 from diff_cover.violationsreporters.violations_reporter import (
+    ClangFormatDriver,
     CppcheckDriver,
     EslintDriver,
     LcovCoverageReporter,
@@ -999,8 +1000,8 @@ class TestLcovCoverageReporterTest:
         # line 50: function not hit (should NOT be covered)
         function_data = {
             "file1.cpp": {
-                "func_hit": (40, 3),
-                "func_not_hit": (50, 0),
+                "func_hit": (40, 40, 3),
+                "func_not_hit": (50, 50, 0),
             }
         }
 
@@ -1010,6 +1011,15 @@ class TestLcovCoverageReporterTest:
             measured,
             branch_data=branch_data,
             function_data=function_data,
+        )
+
+        lcov_report_obsolete_format = self._coverage_lcov(
+            file_paths,
+            violations,
+            measured,
+            branch_data=branch_data,
+            function_data=function_data,
+            use_obsolete_format=True,
         )
 
         assert lcov_report == {
@@ -1027,6 +1037,7 @@ class TestLcovCoverageReporterTest:
                 60: 0,  # DA=0 and branch executions=0 (no override)
             }
         }
+        assert lcov_report_obsolete_format == lcov_report
 
     def _coverage_lcov(
         self,
@@ -1035,12 +1046,13 @@ class TestLcovCoverageReporterTest:
         measured,
         branch_data=None,
         function_data=None,
+        use_obsolete_format=False,
     ):
         """
         Build an LCOV document based on the provided arguments.
         Optionally include branch and function coverage data.
         - branch_data: dict {file: {line: [(block, branch, taken), ...]}}
-        - function_data: dict {file: {func_name: (line, hit_count)}}
+        - function_data: dict {file: {func_name: (line, end_line, hit_count)}}
         """
         violation_lines = {violation.line for violation in violations}
         branch_data = branch_data or {}
@@ -1050,9 +1062,14 @@ class TestLcovCoverageReporterTest:
             for path in file_paths:
                 f.write(f"SF:{path}\n")
                 # Write function data
-                for func_name, (line, _) in function_data.get(path, {}).items():
-                    f.write(f"FN:{line},{func_name}\n")
-                for func_name, (_, hit_count) in function_data.get(path, {}).items():
+                for func_name, (line, end_line, _) in function_data.get(
+                    path, {}
+                ).items():
+                    if use_obsolete_format:
+                        f.write(f"FN:{line},{end_line},{func_name}\n")
+                    else:
+                        f.write(f"FN:{line},{func_name}\n")
+                for func_name, (_, _, hit_count) in function_data.get(path, {}).items():
                     f.write(f"FNDA:{hit_count},{func_name}\n")
                 # Write line data
                 for line in measured:
@@ -2221,4 +2238,24 @@ class TestRuffCheckQualityDriverTest:
         actual_violations = quality.violations("foo/bar/path/to/file.py")
 
         assert quality.name() == "ruff.check"
+        assert actual_violations == expected_violations
+
+
+class TestClangFormatcheckQualityDriverTest:
+    """Tests for clang-format quality driver."""
+
+    def test_parse_report(self):
+        """Basic report test parse"""
+        expected_violations = {
+            "src/foo.c": [
+                Violation(
+                    12,
+                    "warning: code should be clang-formatted [-Wclang-format-violations]\n        int  bar;\n           ^",
+                ),
+            ]
+        }
+        report = "src/foo.c:12:1: warning: code should be clang-formatted [-Wclang-format-violations]\n        int  bar;\n           ^"
+
+        driver = ClangFormatDriver()
+        actual_violations = driver.parse_reports([report])
         assert actual_violations == expected_violations

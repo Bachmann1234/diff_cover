@@ -308,8 +308,7 @@ class LcovCoverageReporter(BaseViolationReporter):
     def parse(lcov_file):
         """
         Parse a single LCov coverage report
-        File format: https://linux.die.net/man/1/geninfo
-        More info: https://github.com/linux-test-project/lcov/issues/113#issuecomment-762335134
+        File format: https://github.com/linux-test-project/lcov/blob/master/man/geninfo.1
         """
         branch_coverage = defaultdict(
             lambda: defaultdict(lambda: {"total": 0, "hit": 0, "executions": 0})
@@ -361,14 +360,18 @@ class LcovCoverageReporter(BaseViolationReporter):
                     branch_coverage[source_file][line_no]["hit"] += 1
             elif directive == "FN":
                 args = content.split(",")
-                if len(args) != 2:
+                # FN:<line number of function start>,[<line number of function end>,]<function name>
+                if len(args) != 2 and len(args) != 3:
                     raise ValueError(f"Unknown syntax in lcov report: {line}")
                 if source_file is None:
                     raise ValueError(
                         f"No source file specified for line coverage: {line}"
                     )
                 line_no = int(args[0])
-                func_name = args[1]
+                if len(args) == 3:
+                    func_name = args[2]
+                else:
+                    func_name = args[1]
                 function_lines[source_file][func_name] = (line_no, 0)
             elif directive == "FNDA":
                 args = content.split(",")
@@ -820,6 +823,70 @@ class CppcheckDriver(QualityDriver):
                     violation = Violation(int(line_number), message)
                     violations_dict[cppcheck_src_path].append(violation)
 
+        return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        return run_command_for_code(self.command_to_check_install) == 0
+
+
+class ClangFormatDriver(QualityDriver):
+    """
+    Driver for clang-format
+    """
+
+    def __init__(self):
+        """
+        args:
+            expression: regex used to parse report
+        See super for other args
+        """
+        super().__init__(
+            "clang",
+            ["c", "cpp", "h", "hpp"],
+            ["clang-format", "--dry-run"],  # Use dry-run option to not modify files
+            output_stderr=True,
+        )
+
+        # Errors look like:
+        # src/foo.c:8:1: warning: code should be clang-formatted [-Wclang-format-violations]
+        # int foo;
+        #   ^
+        # Match for everything, including ":" in the file name (first capturing
+        # group), in case there are pathological path names with ":"
+        self.clang_expression = re.compile(
+            r"^(.*?):(\d+):\d+: ([^[]* \[[^]]*\])\n(.+)\n(.+)$",
+            re.MULTILINE,
+        )
+        self.command_to_check_install = ["clang-format", "--version"]
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        violations_dict = defaultdict(list)
+        for report in reports:
+
+            matches = list(re.finditer(self.clang_expression, report))
+            for match in matches:
+                if match is not None:
+                    (
+                        clang_src_path,
+                        line_number,
+                        message,
+                        code_extract,
+                        cursor_error,
+                    ) = match.groups()
+                    full_message = f"{message}\n{code_extract}\n{cursor_error}"
+                    violation = Violation(int(line_number), full_message)
+                    violations_dict[clang_src_path].append(violation)
         return violations_dict
 
     def installed(self):
