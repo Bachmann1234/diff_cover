@@ -98,8 +98,7 @@ def patch_git_command(patch_popen, mocker):
 
 def clean_html(html, clear_inline_css):
     if clear_inline_css:
-        clean_content = re.compile("<style>.*</style>", flags=re.DOTALL)
-        html = clean_content.sub("", html)
+        html = re.sub("<style>.*</style>", "", html, flags=re.DOTALL)
     return html.strip()
 
 
