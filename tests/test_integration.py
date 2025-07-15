@@ -399,7 +399,9 @@ class TestDiffCoverIntegration:
 
     def test_github_silent(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
-        assert runbin(["coverage.xml", "--format", "github:notice", "-q"]) == 0
+        assert (
+            runbin(["coverage.xml", "--format", "github-annotations:notice", "-q"]) == 0
+        )
         expected = textwrap.dedent(
             """\
         ::notice file=test_src.txt,line=2,title=Missing Coverage::Line 2 missing coverage
@@ -413,7 +415,7 @@ class TestDiffCoverIntegration:
 
     @pytest.mark.usefixtures("patch_git_command")
     def test_github_fully_covered(self, runbin, capsys):
-        assert runbin(["coverage2.xml", "--format", "github:notice"]) == 0
+        assert runbin(["coverage2.xml", "--format", "github-annotations:notice"]) == 0
         expected = textwrap.dedent(
             """\
         -------------
@@ -429,7 +431,7 @@ class TestDiffCoverIntegration:
 
     def test_github_empty_diff(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("")
-        assert runbin(["coverage.xml", "--format", "github:notice"]) == 0
+        assert runbin(["coverage.xml", "--format", "github-annotations:notice"]) == 0
         expected = textwrap.dedent(
             """\
         -------------

@@ -271,10 +271,12 @@ def generate_coverage_report(
         with open_file(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
-    if "github" in report_formats:
+    if "github-annotations" in report_formats:
         # Github annotations are always written to stdout, but we can use different types
         reporter = GitHubAnnotationsReportGenerator(
-            coverage, diff, report_formats["github"] or GITHUB_ANNOTATIONS_DEFAULT_TYPE
+            coverage,
+            diff,
+            report_formats["github-annotations"] or GITHUB_ANNOTATIONS_DEFAULT_TYPE,
         )
         reporter.generate_report(sys.stdout.buffer)
 
