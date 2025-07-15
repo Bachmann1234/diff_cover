@@ -9,6 +9,7 @@ import re
 from abc import ABC, abstractmethod
 
 from diff_cover.git_diff import GitDiffError
+from diff_cover.util import to_unix_path
 
 
 class BaseDiffReporter(ABC):
@@ -237,12 +238,13 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path, (added_lines, deleted_lines) in diff_dict.items():
+                    src_path = os.path.normpath(src_path)
                     if not self._validate_path_to_diff(src_path):
                         continue
 
                     # Remove any lines from the dict that have been deleted
                     # Include any lines that have been added
-                    result_dict[src_path] = [
+                    result_dict[to_unix_path(src_path)] = [
                         line
                         for line in result_dict.get(src_path, [])
                         if line not in deleted_lines

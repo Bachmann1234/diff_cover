@@ -97,46 +97,41 @@ def test_name_include_untracked(git_diff):
         ),
     ],
 )
-def test_git_path_selection(diff, git_diff, include, exclude, expected):
-    old_cwd = os.getcwd()
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        # change the working directory into the temp directory so that globs are working
-        os.chdir(tmp_dir)
+def test_git_path_selection(
+    monkeypatch, tmp_path, diff, git_diff, include, exclude, expected
+):
+    monkeypatch.chdir(tmp_path)
+    diff = GitDiffReporter(git_diff=git_diff, exclude=exclude, include=include)
 
-        diff = GitDiffReporter(git_diff=git_diff, exclude=exclude, include=include)
+    main_dir = Path(tmp_path)
+    (main_dir / "file3.py").touch()
 
-        main_dir = Path(tmp_dir)
-        (main_dir / "file3.py").touch()
+    subdir1 = main_dir / "subdir1"
+    subdir1.mkdir()
+    (subdir1 / "file1.py").touch()
 
-        subdir1 = main_dir / "subdir1"
-        subdir1.mkdir()
-        (subdir1 / "file1.py").touch()
+    subdir2 = main_dir / "subdir2"
+    subdir2.mkdir()
+    (subdir2 / "file2.py").touch()
 
-        subdir2 = main_dir / "subdir2"
-        subdir2.mkdir()
-        (subdir2 / "file2.py").touch()
+    # Configure the git diff output
+    _set_git_diff_output(
+        diff,
+        git_diff,
+        git_diff_output(
+            {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        ),
+        git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
+        git_diff_output(dict(), deleted_files=["README.md"]),
+    )
 
-        # Configure the git diff output
-        _set_git_diff_output(
-            diff,
-            git_diff,
-            git_diff_output(
-                {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
-            ),
-            git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-            git_diff_output(dict(), deleted_files=["README.md"]),
-        )
+    # Get the source paths in the diff
+    with patch.object(os.path, "abspath", lambda path: f"{tmp_path}/{path}"):
+        source_paths = diff.src_paths_changed()
 
-        # Get the source paths in the diff
-        with patch.object(os.path, "abspath", lambda path: f"{tmp_dir}/{path}"):
-            source_paths = diff.src_paths_changed()
-
-        # Validate the source paths
-        # They should be in alphabetical order
-        assert source_paths == expected
-
-        # change back to the previous working directory
-        os.chdir(old_cwd)
+    # Validate the source paths
+    # They should be in alphabetical order
+    assert source_paths == expected
 
 
 def test_git_source_paths(diff, git_diff):
