@@ -17,7 +17,7 @@ from diff_cover.report_generator import (
     MarkdownReportGenerator,
     StringReportGenerator,
 )
-from diff_cover.util import open_file
+from diff_cover.util import file_open, open_file
 from diff_cover.violationsreporters.violations_reporter import (
     LcovCoverageReporter,
     XmlCoverageReporter,
@@ -266,7 +266,7 @@ def generate_coverage_report(
     if "markdown" in report_formats:
         markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
         reporter = MarkdownReportGenerator(coverage, diff)
-        with open(markdown_report, "wb") as output_file:
+        with file_open(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     # Generate the report for stdout
