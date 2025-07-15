@@ -1,3 +1,11 @@
+07/09/2025 v9.5.0
+
+* Adds clang-format quality check (Thanks @mg-cloud) [PR 511](https://github.com/Bachmann1234/diff_cover/pull/511)
+
+06/23/2025 v9.4.1
+
+* Update to LCOV to support pytest-cov. Pytest-cov uses an obsolute lcov format that needed additional handling. [PR 505](https://github.com/Bachmann1234/diff_cover/pull/505) Thanks @129tyc
+
 06/22/2025 v9.4.0
 
 * Many improvements to internal structure, dependencies, and tests. (Thanks @kingbuzzman)
@@ -14,8 +22,6 @@
 * You can now use stdout and stderr when using --format [PR 500](https://github.com/Bachmann1234/diff_cover/pull/500) (Thanks @kingbuzzman)
 
 * Significant enhancements to LCOV parsing! [PR 493](https://github.com/Bachmann1234/diff_cover/pull/493) (Thanks @129tyc)
-
-
 
 06/01/2025 v9.3.2
 
