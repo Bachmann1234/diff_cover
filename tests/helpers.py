@@ -14,7 +14,7 @@ def normcases(paths):
     """
     Normalize the paths for all OS's.
     """
-    return [os.path.normcase(path) for path in paths]
+    return [os.path.normpath(os.path.normcase(path)) for path in paths]
 
 
 def fixture_path(rel_path):
