@@ -11,8 +11,12 @@ def test_to_unix_path():
     """
     assert util.to_unix_path("foo/bar") == "foo/bar"
     assert util.to_unix_path("foo\\bar") == "foo/bar"
+    # Ensure the paths are temporally stable
+    assert util.to_unix_path(util.to_unix_path("foo/bar")) == "foo/bar"
+    assert util.to_unix_path(util.to_unix_path("foo\\bar")) == "foo/bar"
     if sys.platform.startswith("win"):
         assert util.to_unix_path("FOO\\bar") == "foo/bar"
+        assert util.to_unix_path(util.to_unix_path("FOO\\bar")) == "foo/bar"
 
 
 def test_to_unescaped_filename():
