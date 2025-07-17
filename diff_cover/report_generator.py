@@ -11,6 +11,7 @@ from gettext import gettext, ngettext
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from diff_cover.snippets import Snippet
+from diff_cover.util import to_unix_path
 
 
 class DiffViolations:
@@ -198,8 +199,8 @@ class BaseReportGenerator(ABC):
             try:
                 violations = self._violations.violations_batch(src_paths_changed)
                 self._diff_violations_dict = {
-                    os.path.normpath(src_path): DiffViolations(
-                        violations.get(os.path.normpath(src_path), []),
+                    to_unix_path(src_path): DiffViolations(
+                        violations.get(to_unix_path(src_path), []),
                         self._violations.measured_lines(src_path),
                         self._diff.lines_changed(src_path),
                     )

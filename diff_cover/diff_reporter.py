@@ -239,7 +239,7 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path, (added_lines, deleted_lines) in diff_dict.items():
-                    src_path = os.path.normpath(src_path)
+                    src_path = to_unix_path(src_path)
                     if not self._validate_path_to_diff(src_path):
                         continue
 
