@@ -194,6 +194,7 @@ class BaseReportGenerator(ABC):
 
         To make this efficient, we cache and reuse the result.
         """
+        import ipdb; ipdb.sset_trace()
         src_paths_changed = self._diff.src_paths_changed()
         if not self._diff_violations_dict:
             try:
