@@ -164,6 +164,7 @@ class GitDiffReporter(BaseDiffReporter):
         See base class docstring.
         """
 
+        import ipdb; ipdb.set_trace()
         # Get the diff dictionary
         diff_dict = self._git_diff()
         # include untracked files
