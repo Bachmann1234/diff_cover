@@ -6,11 +6,11 @@ from os.path import normcase, normpath
 from pathlib import Path
 from textwrap import dedent
 
-from diff_cover.util import to_unix_path
 import pytest
 
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffError, GitDiffTool
+from diff_cover.util import to_unix_path
 from tests.helpers import git_diff_output, line_numbers, normcases
 
 
