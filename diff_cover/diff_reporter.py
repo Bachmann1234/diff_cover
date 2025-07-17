@@ -9,7 +9,7 @@ import re
 from abc import ABC, abstractmethod
 
 from diff_cover.git_diff import GitDiffError
-from diff_cover.util import to_unix_path
+from diff_cover.util import to_unix_path, to_unix_paths
 
 
 class BaseDiffReporter(ABC):
@@ -86,7 +86,7 @@ class BaseDiffReporter(ABC):
         include = self._include
         if include:
             for pattern in include:
-                if path in glob.glob(pattern, recursive=True):
+                if path in to_unix_paths(glob.glob(pattern, recursive=True)):
                     break  # file is included
             else:
                 return True
@@ -229,7 +229,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a GitDiffError if `git diff` has an error.
         """
-        # import ipdb; ipdb.set_trace()
+
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
             result_dict = {}

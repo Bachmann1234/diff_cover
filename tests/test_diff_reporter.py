@@ -2,7 +2,6 @@
 
 """Test for diff_cover.diff_reporter"""
 
-from os.path import normcase, normpath
 from pathlib import Path
 from textwrap import dedent
 
@@ -10,8 +9,8 @@ import pytest
 
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffError, GitDiffTool
-from diff_cover.util import to_unix_path
-from tests.helpers import git_diff_output, line_numbers, normcases
+from diff_cover.util import to_unix_path, to_unix_paths
+from tests.helpers import git_diff_output, line_numbers
 
 
 @pytest.fixture
@@ -80,7 +79,7 @@ def test_name_include_untracked(git_diff):
         (
             [],
             [],
-            normcases(
+            to_unix_paths(
                 ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]
             ),
         ),
@@ -88,17 +87,17 @@ def test_name_include_untracked(git_diff):
         (
             [],
             ["file1.py"],
-            normcases(["file3.py", "README.md", "subdir2/file2.py"]),
+            to_unix_paths(["file3.py", "README.md", "subdir2/file2.py"]),
         ),
         # specified include (folder) without exclude
-        (["subdir1/**"], [], normcases(["subdir1/file1.py"])),
+        (["subdir1/**"], [], to_unix_paths(["subdir1/file1.py"])),
         # specified include (file) without exclude
-        (["subdir1/file1.py"], [], normcases(["subdir1/file1.py"])),
+        (["subdir1/file1.py"], [], to_unix_paths(["subdir1/file1.py"])),
         # specified include and exclude
         (
             ["subdir1/**", "subdir2/**"],
             ["file1.py", "file3.py"],
-            normcases(["subdir2/file2.py"]),
+            to_unix_paths(["subdir2/file2.py"]),
         ),
     ],
 )
@@ -154,7 +153,7 @@ def test_git_source_paths(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Validate the source paths
-    assert source_paths == normcases(
+    assert source_paths == to_unix_paths(
         ["file3.py", "README.md", "subdir/file1.py", "subdir/file2.py"]
     )
 
@@ -168,7 +167,7 @@ def test_git_source_paths_with_space(diff, git_diff):
 
     source_paths = diff.src_paths_changed()
 
-    assert source_paths == normcases([" weird.py"])
+    assert source_paths == to_unix_paths([" weird.py"])
 
 
 def test_duplicate_source_paths(diff, git_diff):
@@ -182,7 +181,7 @@ def test_duplicate_source_paths(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Should see only one copy of source files
-    assert source_paths == normcases(["subdir/file1.py"])
+    assert source_paths == to_unix_paths(["subdir/file1.py"])
 
 
 def test_git_source_paths_with_supported_extensions(diff, git_diff):
@@ -204,7 +203,9 @@ def test_git_source_paths_with_supported_extensions(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Validate the source paths, README.md should be left out
-    assert source_paths == normcases(["file3.py", "subdir/file1.py", "subdir/file2.py"])
+    assert source_paths == to_unix_paths(
+        ["file3.py", "subdir/file1.py", "subdir/file2.py"]
+    )
 
 
 def test_git_lines_changed(diff, git_diff):
