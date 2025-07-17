@@ -12,6 +12,7 @@ from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffFileTool, GitDiffTool
 from diff_cover.git_path import GitPathTool
 from diff_cover.report_generator import (
+    GitHubAnnotationsReportGenerator,
     HtmlReportGenerator,
     JsonReportGenerator,
     MarkdownReportGenerator,
@@ -268,6 +269,15 @@ def generate_coverage_report(
         reporter = MarkdownReportGenerator(coverage, diff)
         with open_file(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
+
+    if "github-annotations" in report_formats:
+        # Github annotations are always written to stdout, but we can use different types
+        reporter = GitHubAnnotationsReportGenerator(
+            coverage,
+            diff,
+            report_formats["github-annotations"],
+        )
+        reporter.generate_report(sys.stdout.buffer)
 
     # Generate the report for stdout
     reporter = StringReportGenerator(coverage, diff, show_uncovered)

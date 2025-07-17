@@ -420,6 +420,27 @@ class StringReportGenerator(TemplateReportGenerator):
         self.include_snippets = show_uncovered
 
 
+class GitHubAnnotationsReportGenerator(TemplateReportGenerator):
+    """
+    Generate a diff coverage report for GitHub annotations.
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-debug-message
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-notice-message
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-error-message
+    """
+
+    template_path = "github_coverage_annotations.txt"
+
+    def __init__(self, violations_reporter, diff_reporter, annotations_type):
+        super().__init__(violations_reporter, diff_reporter)
+        self.annotations_type = annotations_type
+
+    def _context(self):
+        context = super().report_dict()
+        context.update({"annotations_type": self.annotations_type})
+        return context
+
+
 class HtmlReportGenerator(TemplateReportGenerator):
     """
     Generate an HTML formatted diff coverage report.
