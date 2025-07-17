@@ -10,6 +10,13 @@ MAX_LINE_LENGTH = 300
 LINE_STRINGS = ["test", "+ has a plus sign", "- has a minus sign"]
 
 
+def normcases(paths):
+    """
+    Normalize the paths for all OS's.
+    """
+    return [os.path.normcase(path) for path in paths]
+
+
 def fixture_path(rel_path):
     """
     Returns the absolute path to a fixture file

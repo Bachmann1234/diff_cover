@@ -10,7 +10,7 @@ import pytest
 
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffError, GitDiffTool
-from tests.helpers import git_diff_output, line_numbers
+from tests.helpers import git_diff_output, line_numbers, normcases
 
 
 @pytest.fixture
@@ -76,22 +76,28 @@ def test_name_include_untracked(git_diff):
     "include,exclude,expected",
     [
         # no include/exclude --> use all paths
-        ([], [], ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]),
+        (
+            [],
+            [],
+            normcases(
+                ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]
+            ),
+        ),
         # specified exclude without include
         (
             [],
             ["file1.py"],
-            ["file3.py", "README.md", "subdir2/file2.py"],
+            normcases(["file3.py", "README.md", "subdir2/file2.py"]),
         ),
         # specified include (folder) without exclude
-        (["subdir1/**"], [], ["subdir1/file1.py"]),
+        (["subdir1/**"], [], normcases(["subdir1/file1.py"])),
         # specified include (file) without exclude
-        (["subdir1/file1.py"], [], ["subdir1/file1.py"]),
+        (["subdir1/file1.py"], [], normcases(["subdir1/file1.py"])),
         # specified include and exclude
         (
             ["subdir1/**", "subdir2/**"],
             ["file1.py", "file3.py"],
-            ["subdir2/file2.py"],
+            normcases(["subdir2/file2.py"]),
         ),
     ],
 )
