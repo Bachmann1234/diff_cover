@@ -353,7 +353,7 @@ def main(argv=None, directory=None):
     GitPathTool.set_cwd(directory)
     fail_under = arg_dict.get("fail_under")
     diff_tool = None
-    import ipdb; ipdb.set_trace()
+    import ipdb; ipdb.sset_trace()
 
     if not arg_dict["diff_file"]:
         diff_tool = GitDiffTool(
