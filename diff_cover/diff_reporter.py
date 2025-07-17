@@ -228,7 +228,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a GitDiffError if `git diff` has an error.
         """
-
+        import ipdb; ipdb.set_trace()
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
             result_dict = {}
