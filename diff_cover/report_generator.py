@@ -301,7 +301,6 @@ class TemplateReportGenerator(BaseReportGenerator):
 
         if self.template_path is not None:
             template = TEMPLATE_ENV.get_template(self.template_path)
-            import ipdb; ipdb.sset_trace()
             report = template.render(self._context())
 
             if isinstance(report, str):
