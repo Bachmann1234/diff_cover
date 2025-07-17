@@ -308,8 +308,14 @@ class LcovCoverageReporter(BaseViolationReporter):
     def parse(lcov_file):
         """
         Parse a single LCov coverage report
-        File format: https://ltp.sourceforge.net/coverage/lcov/geninfo.1.php
+        File format: https://github.com/linux-test-project/lcov/blob/master/man/geninfo.1
         """
+        branch_coverage = defaultdict(
+            lambda: defaultdict(lambda: {"total": 0, "hit": 0, "executions": 0})
+        )
+        function_lines = defaultdict(
+            dict
+        )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
         lcov = open(lcov_file)
         while True:
@@ -336,22 +342,96 @@ class LcovCoverageReporter(BaseViolationReporter):
                 if line_no not in lcov_report[source_file]:
                     lcov_report[source_file][line_no] = 0
                 lcov_report[source_file][line_no] += num_executions
+            elif directive == "BRDA":
+                args = content.split(",")
+                if len(args) != 4:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                line_no = int(args[0])
+                taken = (
+                    int(args[3]) if args[3] != "-" else 0
+                )  # Handle '-' for untaken branches
+                branch_coverage[source_file][line_no]["total"] += 1
+                branch_coverage[source_file][line_no]["executions"] += taken
+                if taken > 0:
+                    branch_coverage[source_file][line_no]["hit"] += 1
+            elif directive == "FN":
+                args = content.split(",")
+                # FN:<line number of function start>,[<line number of function end>,]<function name>
+                if len(args) != 2 and len(args) != 3:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                line_no = int(args[0])
+                if len(args) == 3:
+                    func_name = args[2]
+                else:
+                    func_name = args[1]
+                function_lines[source_file][func_name] = (line_no, 0)
+            elif directive == "FNDA":
+                args = content.split(",")
+                if len(args) != 2:
+                    raise ValueError(f"Unknown syntax in lcov report: {line}")
+                if source_file is None:
+                    raise ValueError(
+                        f"No source file specified for line coverage: {line}"
+                    )
+                hit_count = int(args[0])
+                func_name = args[1]
+                if func_name in function_lines[source_file]:
+                    line_no, _ = function_lines[source_file][func_name]
+                    function_lines[source_file][func_name] = (line_no, hit_count)
             elif directive in [
-                "TN",
-                "FNF",
-                "FNH",
-                "FN",
-                "FNDA",
-                "LH",
-                "LF",
-                "BRF",
-                "BRH",
-                "BRDA",
-                "VER",
+                "TN",  # Test name
+                "FNF",  # Functions found
+                "FNH",  # Functions hit
+                "LH",  # Lines hit
+                "LF",  # Lines found
+                "BRF",  # Branches found
+                "BRH",  # Branches hit
+                "VER",  # Version
+                "FNL",  # Function line coverage (alternative format)
+                "FNA",  # Function name (alternative format)
             ]:
-                # these are valid lines, but not we don't need them
+                # Valid directives that we don't need to process
                 continue
             elif directive == "end_of_record":
+                # Process collected coverage data for current source file
+
+                # 1. Apply branch coverage logic
+                for line_no, info in branch_coverage[source_file].items():
+                    has_da_directive = line_no in lcov_report[source_file]
+
+                    if not has_da_directive:
+                        # No line execution data, use branch coverage
+                        if info["total"] > 0 and info["hit"] < info["total"]:
+                            lcov_report[source_file][
+                                line_no
+                            ] = 0  # Partial branch coverage
+                        else:
+                            lcov_report[source_file][line_no] = info["executions"]
+                        continue
+                    if not lcov_report[source_file][line_no]:
+                        # Line shows 0 executions, but check if branches were hit
+                        if info["executions"] > 0:
+                            lcov_report[source_file][line_no] = info["executions"]
+                    # Note: Don't override existing positive execution counts
+
+                # 2. Apply function coverage logic
+                for func_name, (line_no, hit) in function_lines[source_file].items():
+                    if line_no not in lcov_report[source_file]:
+                        # No existing line data, use function hit count
+                        lcov_report[source_file][line_no] = hit
+                    # Note: Don't override existing line execution data
+
+                # 3. Clean up temporary data for current file
+                branch_coverage[source_file].clear()
+                function_lines[source_file].clear()
                 source_file = None
             else:
                 raise ValueError(f"Unknown syntax in lcov report: {line}")
@@ -743,6 +823,70 @@ class CppcheckDriver(QualityDriver):
                     violation = Violation(int(line_number), message)
                     violations_dict[cppcheck_src_path].append(violation)
 
+        return violations_dict
+
+    def installed(self):
+        """
+        Method checks if the provided tool is installed.
+        Returns: boolean True if installed
+        """
+        return run_command_for_code(self.command_to_check_install) == 0
+
+
+class ClangFormatDriver(QualityDriver):
+    """
+    Driver for clang-format
+    """
+
+    def __init__(self):
+        """
+        args:
+            expression: regex used to parse report
+        See super for other args
+        """
+        super().__init__(
+            "clang",
+            ["c", "cpp", "h", "hpp"],
+            ["clang-format", "--dry-run"],  # Use dry-run option to not modify files
+            output_stderr=True,
+        )
+
+        # Errors look like:
+        # src/foo.c:8:1: warning: code should be clang-formatted [-Wclang-format-violations]
+        # int foo;
+        #   ^
+        # Match for everything, including ":" in the file name (first capturing
+        # group), in case there are pathological path names with ":"
+        self.clang_expression = re.compile(
+            r"^(.*?):(\d+):\d+: ([^[]* \[[^]]*\])\n(.+)\n(.+)$",
+            re.MULTILINE,
+        )
+        self.command_to_check_install = ["clang-format", "--version"]
+
+    def parse_reports(self, reports):
+        """
+        Args:
+            reports: list[str] - output from the report
+        Return:
+            A dict[Str:Violation]
+            Violation is a simple named tuple Defined above
+        """
+        violations_dict = defaultdict(list)
+        for report in reports:
+
+            matches = list(re.finditer(self.clang_expression, report))
+            for match in matches:
+                if match is not None:
+                    (
+                        clang_src_path,
+                        line_number,
+                        message,
+                        code_extract,
+                        cursor_error,
+                    ) = match.groups()
+                    full_message = f"{message}\n{code_extract}\n{cursor_error}"
+                    violation = Violation(int(line_number), full_message)
+                    violations_dict[clang_src_path].append(violation)
         return violations_dict
 
     def installed(self):

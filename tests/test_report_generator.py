@@ -10,6 +10,7 @@ import pytest
 from diff_cover.diff_reporter import BaseDiffReporter
 from diff_cover.report_generator import (
     BaseReportGenerator,
+    GitHubAnnotationsReportGenerator,
     HtmlReportGenerator,
     JsonReportGenerator,
     MarkdownReportGenerator,
@@ -403,6 +404,64 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
         -------------
         """
         ).strip()
+
+        self.assert_report(expected)
+
+
+class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):
+
+    @pytest.fixture
+    def report(self, coverage, diff):
+        # Create a concrete instance of a report generator
+        return GitHubAnnotationsReportGenerator(coverage, diff, "warning")
+
+    @pytest.mark.usefixtures("use_default_values")
+    def test_generate_report(self):
+        # Verify that we got the expected string
+        expected = dedent(
+            """
+        ::warning file=file1.py,line=10,endLine=11,title=Missing Coverage::Line 10-11 missing coverage
+        ::warning file=subdir/file2.py,line=10,endLine=11,title=Missing Coverage::Line 10-11 missing coverage
+        """
+        ).strip()
+
+        self.assert_report(expected)
+
+    def test_single_line(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        diff.src_paths_changed.return_value = ["file.py"]
+        diff_lines_changed.update({"file.py": list(range(100))})
+        coverage_violations.update({"file.py": [Violation(10, None)]})
+        coverage_measured_lines.update({"file.py": [2]})
+
+        # Verify that we got the expected string
+        expected = dedent(
+            """
+        ::warning file=file.py,line=10,title=Missing Coverage::Line 10 missing coverage
+        """
+        ).strip()
+
+        self.assert_report(expected)
+
+    def test_hundred_percent(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        # Have the dependencies return an empty report
+        diff.src_paths_changed.return_value = ["file.py"]
+        diff_lines_changed.update({"file.py": list(range(100))})
+        coverage_violations.update({"file.py": []})
+        coverage_measured_lines.update({"file.py": [2]})
+
+        expected = ""
+
+        self.assert_report(expected)
+
+    def test_empty_report(self):
+        # Have the dependencies return an empty report
+        # (this is the default)
+
+        expected = ""
 
         self.assert_report(expected)
 
