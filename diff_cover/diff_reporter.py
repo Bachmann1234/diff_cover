@@ -201,7 +201,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Look up the modified lines for the source file
         # If no lines modified, return an empty list
-        return diff_dict.get(src_path, [])
+        return diff_dict.get(to_unix_path(src_path), [])
 
     def _get_included_diff_results(self):
         """
@@ -228,7 +228,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         Raises a GitDiffError if `git diff` has an error.
         """
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
         # If we do not have a cached result, execute `git diff`
         if self._diff_dict is None:
             result_dict = {}
