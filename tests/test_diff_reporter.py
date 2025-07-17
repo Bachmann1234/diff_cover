@@ -6,6 +6,7 @@ from os.path import normcase, normpath
 from pathlib import Path
 from textwrap import dedent
 
+from diff_cover.util import to_unix_path
 import pytest
 
 from diff_cover.diff_reporter import GitDiffReporter
@@ -105,9 +106,6 @@ def test_git_path_selection(
     monkeypatch, tmp_path, diff, git_diff, include, exclude, expected
 ):
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(
-        "os.path.abspath", lambda path: normpath(normcase(tmp_path / path))
-    )
     diff = GitDiffReporter(git_diff=git_diff, exclude=exclude, include=include)
 
     main_dir = Path(tmp_path)
