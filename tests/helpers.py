@@ -5,6 +5,8 @@ Test helper functions.
 import os.path
 import random
 
+from diff_cover.util import to_unix_path
+
 HUNK_BUFFER = 2
 MAX_LINE_LENGTH = 300
 LINE_STRINGS = ["test", "+ has a plus sign", "- has a minus sign"]
@@ -14,7 +16,7 @@ def normcases(paths):
     """
     Normalize the paths for all OS's.
     """
-    return [os.path.normpath(os.path.normcase(path)) for path in paths]
+    return [to_unix_path(path) for path in paths]
 
 
 def fixture_path(rel_path):
