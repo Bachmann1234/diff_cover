@@ -154,12 +154,9 @@ def test_git_source_paths(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Validate the source paths
-    # They should be in alphabetical order
-    assert len(source_paths) == 4
-    assert source_paths[0] == "file3.py"
-    assert source_paths[1] == "README.md"
-    assert source_paths[2] == "subdir/file1.py"
-    assert source_paths[3] == "subdir/file2.py"
+    assert source_paths == normcases(
+        ["file3.py", "README.md", "subdir/file1.py", "subdir/file2.py"]
+    )
 
 
 def test_git_source_paths_with_space(diff, git_diff):
@@ -171,8 +168,7 @@ def test_git_source_paths_with_space(diff, git_diff):
 
     source_paths = diff.src_paths_changed()
 
-    assert len(source_paths) == 1
-    assert source_paths[0] == " weird.py"
+    assert source_paths == normcases([" weird.py"])
 
 
 def test_duplicate_source_paths(diff, git_diff):
@@ -186,8 +182,7 @@ def test_duplicate_source_paths(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Should see only one copy of source files
-    assert len(source_paths) == 1
-    assert source_paths[0] == "subdir/file1.py"
+    assert source_paths == normcases(["subdir/file1.py"])
 
 
 def test_git_source_paths_with_supported_extensions(diff, git_diff):
@@ -209,10 +204,7 @@ def test_git_source_paths_with_supported_extensions(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Validate the source paths, README.md should be left out
-    assert len(source_paths) == 3
-    assert source_paths[0] == "file3.py"
-    assert source_paths[1] == "subdir/file1.py"
-    assert source_paths[2] == "subdir/file2.py"
+    assert source_paths == normcases(["file3.py", "subdir/file1.py", "subdir/file2.py"])
 
 
 def test_git_lines_changed(diff, git_diff):
