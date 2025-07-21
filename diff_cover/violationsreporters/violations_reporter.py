@@ -735,7 +735,7 @@ class PylintDriver(QualityDriver):
             output_lines = report.split("\n")
 
             for output_line_number, line in enumerate(output_lines):
-                match = self.pylint_expression.match(line.strip())
+                match = self.pylint_expression.match(line.rstrip())
 
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)

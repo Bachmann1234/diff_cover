@@ -230,14 +230,14 @@ class RegexBasedDriver(QualityDriver):
                 matches = (match for match in re.finditer(self.expression, report))
             else:
                 matches = (
-                    self.expression.match(line.strip()) for line in report.split("\n")
+                    self.expression.match(line.rstrip()) for line in report.split("\n")
                 )
             for match in matches:
                 if match is not None:
                     src, line_number, message = match.groups()
                     # Transform src to a relative path, if it isn't already
                     src = os.path.relpath(src)
-                    violation = Violation(int(line_number), message.strip())
+                    violation = Violation(int(line_number), message.rstrip())
                     violations_dict[src].append(violation)
         return violations_dict
 
