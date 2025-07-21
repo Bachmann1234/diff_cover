@@ -9,7 +9,7 @@ import pytest
 
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffError, GitDiffTool
-from diff_cover.util import to_unix_path, to_unix_paths
+from diff_cover.util import to_unix_paths
 from tests.helpers import git_diff_output, line_numbers
 
 
@@ -126,7 +126,7 @@ def test_git_path_selection(
             {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the source paths in the diff
