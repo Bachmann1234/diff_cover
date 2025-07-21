@@ -316,7 +316,7 @@ class Snippet:
             # each line within the token is within one
             # of our ranges.
             if "\n" in val:
-                val_lines = val.split("\n").strip()
+                val_lines = val.split("\n")
 
                 # Check if the tokens match each range
                 for (start, end), filtered_tokens in token_map.items():

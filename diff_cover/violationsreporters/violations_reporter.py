@@ -732,10 +732,10 @@ class PylintDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-            output_lines = report.split("\n").strip()
+            output_lines = report.split("\n")
 
             for output_line_number, line in enumerate(output_lines):
-                match = self.pylint_expression.match(line)
+                match = self.pylint_expression.match(line.strip())
 
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
