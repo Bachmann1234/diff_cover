@@ -229,7 +229,7 @@ class RegexBasedDriver(QualityDriver):
             if self.expression.flags & re.MULTILINE:
                 matches = (match for match in re.finditer(self.expression, report))
             else:
-                matches = (self.expression.match(line) for line in report.split("\n"))
+                matches = (self.expression.match(line.strip()) for line in report.split("\n"))
             for match in matches:
                 if match is not None:
                     src, line_number, message = match.groups()

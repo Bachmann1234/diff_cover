@@ -334,6 +334,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Parse the diff string into sections by source file
         for line in diff_str.split("\n"):
+            line = line.strip()
             # If the line starts with "diff --git"
             # or "diff --cc" (in the case of a merge conflict)
             # then it is the start of a new source file
