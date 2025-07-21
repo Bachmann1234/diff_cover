@@ -2,12 +2,12 @@
 # pylint: disable=use-implicit-booleaness-not-comparison
 
 """High-level integration tests of diff-cover tool."""
-
 import json
 import os
 import os.path
 import re
 import shutil
+import textwrap
 from collections import defaultdict
 from pathlib import Path
 from subprocess import Popen
@@ -96,21 +96,23 @@ def patch_git_command(patch_popen, mocker):
     return helper
 
 
+def clean_html(html, clear_inline_css):
+    if clear_inline_css:
+        html = re.sub("<style>.*</style>", "", html, flags=re.DOTALL)
+    return html.strip()
+
+
 def compare_html(expected_html_path, html_report_path, clear_inline_css=True):
-    clean_content = re.compile("<style>.*</style>", flags=re.DOTALL)
     expected_file = open(expected_html_path, encoding="utf-8")
     html_report = open(html_report_path, encoding="utf-8")
 
     with expected_file, html_report:
-        html = html_report.read()
-        expected = expected_file.read()
-        if clear_inline_css:
-            # The CSS is provided by pygments and changes fairly often.
-            # Im ok with simply saying "There was css"
-            # Perhaps I will eat these words
-            html = clean_content.sub("", html)
-            expected = clean_content.sub("", expected)
-        assert expected.strip() == html.strip()
+        # The CSS is provided by pygments and changes fairly often.
+        # Im ok with simply saying "There was css"
+        # Perhaps I will eat these words
+        html = clean_html(html_report.read(), clear_inline_css)
+        expected = clean_html(expected_file.read(), clear_inline_css)
+        assert expected == html
 
 
 def compare_markdown(expected_file_path, actual_file_path):
@@ -178,6 +180,36 @@ class TestDiffCoverIntegration:
         compare_html("add_html_report.html", "dummy/diff_coverage.html")
         compare_json("add_json_report.json", "dummy/diff_coverage.json")
         compare_markdown("add_markdown_report.md", "dummy/diff_coverage.md")
+
+    def test_all_reports_with_stdout(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert (
+            runbin(
+                [
+                    "coverage.xml",
+                    "--format",
+                    "html:-,json:-,markdown:-",
+                ]
+            )
+            == 0
+        )
+        output = capsys.readouterr().out
+        with open("add_console_report.txt", "r", encoding="utf-8") as f:
+            actual = f.read()
+            assert actual in output
+        with open("add_html_report.html", "r", encoding="utf-8") as f:
+            actual = clean_html(f.read(), clear_inline_css=True)
+            # can't compare the output inside <head> since it changes
+            # a lot so we just compare the body
+            actual = actual[actual.find("</head>") :]
+            assert len(actual) > 20
+            assert actual in output
+        with open("add_json_report.json", "r", encoding="utf-8") as f:
+            actual = json.dumps(json.loads(f.read()))
+            assert actual in output
+        with open("add_markdown_report.md", "r", encoding="utf-8") as f:
+            actual = f.read()
+            assert actual in output
 
     def test_added_file_console_lcov(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
@@ -396,6 +428,54 @@ class TestDiffCoverIntegration:
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["coverage_missing_lines.xml", "--expand-coverage-report"]) == 0
         compare_console("expand_console_report.txt", capsys.readouterr().out)
+
+    def test_github_silent(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert (
+            runbin(["coverage.xml", "--format", "github-annotations:notice", "-q"]) == 0
+        )
+        expected = textwrap.dedent(
+            """\
+        ::notice file=test_src.txt,line=2,title=Missing Coverage::Line 2 missing coverage
+        ::notice file=test_src.txt,line=4,title=Missing Coverage::Line 4 missing coverage
+        ::notice file=test_src.txt,line=6,title=Missing Coverage::Line 6 missing coverage
+        ::notice file=test_src.txt,line=8,title=Missing Coverage::Line 8 missing coverage
+        ::notice file=test_src.txt,line=10,title=Missing Coverage::Line 10 missing coverage
+        """
+        )
+        assert capsys.readouterr().out == expected
+
+    @pytest.mark.usefixtures("patch_git_command")
+    def test_github_fully_covered(self, runbin, capsys):
+        assert runbin(["coverage2.xml", "--format", "github-annotations:notice"]) == 0
+        expected = textwrap.dedent(
+            """\
+        -------------
+        Diff Coverage
+        Diff: origin/main...HEAD, staged and unstaged changes
+        -------------
+        No lines with coverage information in this diff.
+        -------------
+
+        """
+        )
+        assert capsys.readouterr().out == expected
+
+    def test_github_empty_diff(self, runbin, patch_git_command, capsys):
+        patch_git_command.set_stdout("")
+        assert runbin(["coverage.xml", "--format", "github-annotations:notice"]) == 0
+        expected = textwrap.dedent(
+            """\
+        -------------
+        Diff Coverage
+        Diff: origin/main...HEAD, staged and unstaged changes
+        -------------
+        No lines with coverage information in this diff.
+        -------------
+
+        """
+        )
+        assert capsys.readouterr().out == expected
 
     def test_real_world_cpp_lcov_coverage(self, runbin, patch_git_command, capsys):
         """Test with real C++ LCOV coverage data"""

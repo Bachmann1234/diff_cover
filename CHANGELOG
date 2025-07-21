@@ -1,3 +1,8 @@
+07/16/2025 v9.6.0
+
+* Fixes issue when sending markdown reports to stdout. Thanks @kingbuzzman! [PR 516](https://github.com/Bachmann1234/diff_cover/pull/516)
+* Support for github annotations! Thanks @timkrins [PR 432](https://github.com/Bachmann1234/diff_cover/pull/432)
+
 07/09/2025 v9.5.0
 
 * Adds clang-format quality check (Thanks @mg-cloud) [PR 511](https://github.com/Bachmann1234/diff_cover/pull/511)
