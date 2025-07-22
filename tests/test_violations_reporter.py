@@ -2054,10 +2054,9 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
         driver.add_driver_args(report_root_path="foo/bar")
         quality = QualityReporter(driver, reports=reports)
 
-        expected_violation = Violation(3, "Found issue")
-        import ipdb; ipdb.sset_trace()
+        expected_violations = [Violation(3, "Found issue")]
         actual_violations = quality.violations("path/to/file.js")
-        assert actual_violations == [expected_violation]
+        assert actual_violations == expected_violations
 
 
 class TestShellCheckQualityReporterTest:
