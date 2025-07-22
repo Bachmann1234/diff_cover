@@ -823,6 +823,10 @@ class TestLcovCoverageReporterTest:
         _git_path_mock.relative_path = lambda path: path
         _git_path_mock.absolute_path = lambda path: path
 
+    @pytest.fixture(autouse=True)
+    def setup(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+
     def test_violations(self):
         # Construct the LCOV report
         file_paths = ["file1.java", "subdir/file2.java"]
@@ -838,7 +842,6 @@ class TestLcovCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
-        import ipdb; ipdb.sset_trace()
         assert violations == coverage.violations("file1.java")
         assert measured == coverage.measured_lines("file1.java")
 
@@ -1059,7 +1062,7 @@ class TestLcovCoverageReporterTest:
         branch_data = branch_data or {}
         function_data = function_data or {}
 
-        with tempfile.NamedTemporaryFile("w", delete=True) as f:
+        with open("temp.lcov", "w") as f:
             for path in file_paths:
                 f.write(f"SF:{path}\n")
                 # Write function data
@@ -1083,10 +1086,9 @@ class TestLcovCoverageReporterTest:
                     for block, branch, taken in branches:
                         f.write(f"BRDA:{line},{block},{branch},{taken}\n")
                 f.write("end_of_record\n")
-            f.flush()
-            f.seek(0)
-            # Parse and return the LCOV report
-            lcov_report = LcovCoverageReporter.parse(f.name)
+
+        # Parse and return the LCOV report
+        lcov_report = LcovCoverageReporter.parse(f.name)
         return lcov_report
 
 
