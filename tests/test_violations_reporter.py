@@ -2055,6 +2055,7 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
         quality = QualityReporter(driver, reports=reports)
 
         expected_violation = Violation(3, "Found issue")
+        import ipdb; ipdb.sset_trace()
         actual_violations = quality.violations("path/to/file.js")
         assert actual_violations == [expected_violation]
 
