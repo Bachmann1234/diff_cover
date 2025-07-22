@@ -838,6 +838,7 @@ class TestLcovCoverageReporterTest:
 
         # By construction, each file has the same set
         # of covered/uncovered lines
+        import ipdb; ipdb.sset_trace()
         assert violations == coverage.violations("file1.java")
         assert measured == coverage.measured_lines("file1.java")
 
