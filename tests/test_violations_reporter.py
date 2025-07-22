@@ -1061,7 +1061,7 @@ class TestLcovCoverageReporterTest:
         branch_data = branch_data or {}
         function_data = function_data or {}
 
-        with open("temp.lcov", "w") as f:
+        with open("temp.lcov", "w", encoding="utf-8") as f:
             for path in file_paths:
                 f.write(f"SF:{path}\n")
                 # Write function data
