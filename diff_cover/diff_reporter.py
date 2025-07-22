@@ -9,6 +9,7 @@ import re
 from abc import ABC, abstractmethod
 
 from diff_cover.git_diff import GitDiffError
+from diff_cover.util import to_unix_path, to_unix_paths
 
 
 class BaseDiffReporter(ABC):
@@ -85,7 +86,7 @@ class BaseDiffReporter(ABC):
         include = self._include
         if include:
             for pattern in include:
-                if path in glob.glob(pattern, recursive=True):
+                if path in to_unix_paths(glob.glob(pattern, recursive=True)):
                     break  # file is included
             else:
                 return True
@@ -200,7 +201,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Look up the modified lines for the source file
         # If no lines modified, return an empty list
-        return diff_dict.get(src_path, [])
+        return diff_dict.get(to_unix_path(src_path), [])
 
     def _get_included_diff_results(self):
         """
@@ -237,12 +238,13 @@ class GitDiffReporter(BaseDiffReporter):
                 diff_dict = self._parse_diff_str(diff_str)
 
                 for src_path, (added_lines, deleted_lines) in diff_dict.items():
+                    src_path = to_unix_path(src_path)
                     if not self._validate_path_to_diff(src_path):
                         continue
 
                     # Remove any lines from the dict that have been deleted
                     # Include any lines that have been added
-                    result_dict[src_path] = [
+                    result_dict[to_unix_path(src_path)] = [
                         line
                         for line in result_dict.get(src_path, [])
                         if line not in deleted_lines
@@ -332,6 +334,7 @@ class GitDiffReporter(BaseDiffReporter):
 
         # Parse the diff string into sections by source file
         for line in diff_str.split("\n"):
+            line = line.rstrip()
             # If the line starts with "diff --git"
             # or "diff --cc" (in the case of a merge conflict)
             # then it is the start of a new source file

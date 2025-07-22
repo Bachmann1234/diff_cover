@@ -6,6 +6,7 @@ import os
 import sys
 
 from diff_cover.command_runner import execute
+from diff_cover.util import to_unix_path
 
 
 class GitPathTool:
@@ -51,7 +52,7 @@ class GitPathTool:
         # and src_path is `other_package/some_file.py`
         # search for `/home/user/work/diff-cover/other_package/some_file.py`
 
-        return os.path.join(cls._root, src_path)
+        return to_unix_path(os.path.join(cls._root, src_path))
 
     @classmethod
     def _git_root(cls):

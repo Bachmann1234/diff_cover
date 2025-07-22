@@ -4,13 +4,13 @@ Classes for generating diff coverage reports.
 
 import contextlib
 import json
-import os
 from abc import ABC, abstractmethod
 from gettext import gettext, ngettext
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from diff_cover.snippets import Snippet
+from diff_cover.util import to_unix_path
 
 
 class DiffViolations:
@@ -193,13 +193,14 @@ class BaseReportGenerator(ABC):
 
         To make this efficient, we cache and reuse the result.
         """
+
         src_paths_changed = self._diff.src_paths_changed()
         if not self._diff_violations_dict:
             try:
                 violations = self._violations.violations_batch(src_paths_changed)
                 self._diff_violations_dict = {
-                    os.path.normpath(src_path): DiffViolations(
-                        violations.get(os.path.normpath(src_path), []),
+                    to_unix_path(src_path): DiffViolations(
+                        violations.get(to_unix_path(src_path), []),
                         self._violations.measured_lines(src_path),
                         self._diff.lines_changed(src_path),
                     )

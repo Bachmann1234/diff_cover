@@ -2,12 +2,12 @@
 Classes for querying the information in a test coverage report.
 """
 
-import os
 import xml.etree.ElementTree as etree
 from collections import defaultdict
 
 from diff_cover.command_runner import run_command_for_code
 from diff_cover.git_path import GitPathTool
+from diff_cover.util import to_unix_path
 from diff_cover.violationsreporters.base import (
     QualityDriver,
     RegexBasedDriver,
@@ -71,7 +71,7 @@ class CheckstyleXmlDriver(QualityDriver):
                     )
                     violation = Violation(int(line_number), error_str)
                     filename = GitPathTool.relative_path(file_tree.get("name"))
-                    violations_dict[filename].append(violation)
+                    violations_dict[to_unix_path(filename)].append(violation)
         return violations_dict
 
     def installed(self):
@@ -113,7 +113,7 @@ class FindbugsXmlDriver(QualityDriver):
                     error_str = f"{category}: {short_message}"
                     violation = Violation(line_number, error_str)
                     filename = GitPathTool.relative_path(line.get("sourcepath"))
-                    violations_dict[filename].append(violation)
+                    violations_dict[to_unix_path(filename)].append(violation)
 
         return violations_dict
 
@@ -152,8 +152,7 @@ class PmdXmlDriver(QualityDriver):
                     error_str = "{}: {}".format(error.get("rule"), error.text.strip())
                     violation = Violation(int(line_number), error_str)
                     filename = GitPathTool.relative_path(node_file.get("name"))
-                    filename = filename.replace(os.sep, "/")
-                    violations_dict[filename].append(violation)
+                    violations_dict[to_unix_path(filename)].append(violation)
 
         return violations_dict
 
