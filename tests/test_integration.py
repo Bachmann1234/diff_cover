@@ -202,7 +202,7 @@ class TestDiffCoverIntegration:
             actual = clean_html(f.read(), clear_inline_css=True)
             # can't compare the output inside <head> since it changes
             # a lot so we just compare the body
-            actual = actual[actual.find("</head>") :]
+            actual = actual[actual.find("</head>"):]
             assert len(actual) > 20
             assert actual in output
         with open("add_json_report.json", "r", encoding="utf-8") as f:

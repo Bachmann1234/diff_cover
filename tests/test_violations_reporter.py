@@ -5,7 +5,6 @@
 
 import os
 import subprocess
-import tempfile
 import xml.etree.ElementTree as etree
 from io import BytesIO, StringIO
 from subprocess import Popen

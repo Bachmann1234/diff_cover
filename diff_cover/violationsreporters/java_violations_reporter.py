@@ -2,7 +2,6 @@
 Classes for querying the information in a test coverage report.
 """
 
-import os
 import xml.etree.ElementTree as etree
 from collections import defaultdict
 
