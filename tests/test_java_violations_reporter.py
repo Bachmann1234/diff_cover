@@ -89,6 +89,7 @@ class TestCheckstyleQualityReporterTest:
         # Expect that we get violations for file1.java only
         # We're not guaranteed that the violations are returned
         # in any particular order.
+        import ipdb; ipdb.sset_trace()
         actual_violations = quality.violations("../new_file.java")
         assert len(actual_violations) == len(expected_violations)
         for expected in expected_violations:
