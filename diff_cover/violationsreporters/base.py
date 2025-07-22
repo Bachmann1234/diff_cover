@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
 
 from diff_cover.command_runner import execute, run_command_for_code
+from diff_cover.util import to_unix_path
 
 Violation = namedtuple("Violation", "line, message")
 
@@ -236,7 +237,7 @@ class RegexBasedDriver(QualityDriver):
                 if match is not None:
                     src, line_number, message = match.groups()
                     # Transform src to a relative path, if it isn't already
-                    src = os.path.relpath(src)
+                    src = to_unix_path(os.path.relpath(src))
                     violation = Violation(int(line_number), message.rstrip())
                     violations_dict[src].append(violation)
         return violations_dict
