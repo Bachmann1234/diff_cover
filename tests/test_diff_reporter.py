@@ -266,7 +266,7 @@ def test_one_line_file(diff, git_diff):
     lines_changed = diff.lines_changed("one_line.txt")
 
     # Expect that no lines are changed
-    assert len(lines_changed) == 0
+    assert not lines_changed
 
 
 def test_git_deleted_lines(diff, git_diff):
@@ -285,7 +285,7 @@ def test_git_deleted_lines(diff, git_diff):
     lines_changed = diff.lines_changed("README.md")
 
     # Validate no lines changed
-    assert len(lines_changed) == 0
+    assert not lines_changed
 
 
 def test_git_unicode_filename(diff, git_diff):
@@ -310,7 +310,7 @@ def test_git_unicode_filename(diff, git_diff):
     lines_changed = diff.lines_changed("unic\303\270\342\210\202e\314\201.txt")
 
     # Expect that three lines changed
-    assert len(lines_changed) == 3
+    assert lines_changed == [1, 2, 3]
 
 
 def test_git_repeat_lines(diff, git_diff):
@@ -413,7 +413,7 @@ def test_git_no_such_file(diff, git_diff):
     _set_git_diff_output(diff, git_diff, diff_output, "", "")
 
     lines_changed = diff.lines_changed("no_such_file.txt")
-    assert len(lines_changed) == 0
+    assert not lines_changed
 
 
 def test_no_diff(diff, git_diff):
@@ -546,8 +546,7 @@ def test_inclusion_list(diff, git_diff):
     )
     _set_git_diff_output(diff, git_diff, "", "", unstaged_input)
 
-    assert len(diff._get_included_diff_results()) == 3
-    assert ["", "", unstaged_input] == diff._get_included_diff_results()
+    assert diff._get_included_diff_results() == ["", "", unstaged_input]
 
 
 def test_ignore_staged_inclusion(git_diff):

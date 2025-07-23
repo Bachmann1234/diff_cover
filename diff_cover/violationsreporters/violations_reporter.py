@@ -634,17 +634,15 @@ class EslintDriver(RegexBasedDriver):
         return violations_dict
 
 
-"""
-    Report pydocstyle violations.
-
-    Warning/error codes:
-        D1**: Missing Docstrings
-        D2**: Whitespace Issues
-        D3**: Quotes Issues
-        D4**: Docstring Content Issues
-
-    http://www.pydocstyle.org/en/latest/error_codes.html
-"""
+# Report pydocstyle violations.
+#
+# Warning/error codes:
+#     D1**: Missing Docstrings
+#     D2**: Whitespace Issues
+#     D3**: Quotes Issues
+#     D4**: Docstring Content Issues
+#
+# http://www.pydocstyle.org/en/latest/error_codes.html
 pydocstyle_driver = RegexBasedDriver(
     name="pydocstyle",
     supported_extensions=["py"],
