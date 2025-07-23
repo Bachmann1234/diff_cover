@@ -3,6 +3,7 @@ Implement the command-line tool interface for diff_quality.
 """
 
 import argparse
+import contextlib
 import io
 import logging
 import os
@@ -321,12 +322,18 @@ def main(argv=None, directory=None):
                 reporter_factory_fn = hookimpl.function
                 break
 
-    if reporter or driver or reporter_factory_fn:
-        input_reports = []
+    # If none of the reporter, driver, or reporter_factory_fn are set
+    if not any((reporter, driver, reporter_factory_fn)):
+        LOGGER.error("Quality tool not recognized: '%s'", tool)
+        return 1
+
+    with contextlib.ExitStack() as stack:
         try:
+            input_reports = []
             for path in arg_dict["input_reports"]:
                 try:
-                    input_reports.append(open(path, "rb"))
+                    file_handle = stack.enter_context(open(path, "rb"))
+                    input_reports.append(file_handle)
                 except OSError:
                     LOGGER.error("Could not load report '%s'", path)
                     return 1
@@ -371,14 +378,6 @@ def main(argv=None, directory=None):
         except OSError as exc:
             LOGGER.error("Failure: '%s'", str(exc))
             return 1
-        # Close any reports we opened
-        finally:
-            for file_handle in input_reports:
-                file_handle.close()
-
-    else:
-        LOGGER.error("Quality tool not recognized: '%s'", tool)
-        return 1
 
 
 if __name__ == "__main__":
