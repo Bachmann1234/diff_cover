@@ -82,11 +82,15 @@ def patch_git_command(patch_popen, mocker):
             mock = mocker.Mock()
             mock.communicate.return_value = (helper.stdout, helper.stderr)
             mock.returncode = helper.returncode
+            mock.__enter__ = mocker.Mock(return_value=mock)
+            mock.__exit__ = mocker.Mock(return_value=None)
             return mock
         if command[0:2] == ["git", "rev-parse"]:
             mock = mocker.Mock()
             mock.communicate.return_value = (os.getcwd(), "")
             mock.returncode = helper.returncode
+            mock.__enter__ = mocker.Mock(return_value=mock)
+            mock.__exit__ = mocker.Mock(return_value=None)
             return mock
 
         return Popen(command, **kwargs)

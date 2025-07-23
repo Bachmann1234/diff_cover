@@ -24,12 +24,12 @@ def execute(command, exit_codes=None):
         exit_codes = [0]
 
     stdout_pipe = subprocess.PIPE
-    process = subprocess.Popen(command, stdout=stdout_pipe, stderr=stdout_pipe)
-    try:
-        stdout, stderr = process.communicate()
-    except OSError:
-        sys.stderr.write(" ".join(_ensure_unicode(cmd) for cmd in command))
-        raise
+    with subprocess.Popen(command, stdout=stdout_pipe, stderr=stdout_pipe) as process:
+        try:
+            stdout, stderr = process.communicate()
+        except OSError:
+            sys.stderr.write(" ".join(_ensure_unicode(cmd) for cmd in command))
+            raise
 
     stderr = _ensure_unicode(stderr)
     if process.returncode not in exit_codes:
@@ -43,10 +43,10 @@ def run_command_for_code(command):
     Returns command's exit code.
     """
     try:
-        process = subprocess.Popen(
+        with subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        process.communicate()
+        ) as process:
+            process.communicate()
     except FileNotFoundError:
         return 1
     return process.returncode
