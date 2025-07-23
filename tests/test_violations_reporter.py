@@ -48,7 +48,10 @@ def process_patcher(mocker):
         mocked_process.returncode = status_code
         mocked_process.communicate.return_value = return_value
         mocked_subprocess = mocker.patch("diff_cover.command_runner.subprocess")
-        mocked_subprocess.Popen.return_value = mocked_process
+        popen_mock = mocked_subprocess.Popen
+        popen_instance = popen_mock.return_value
+        popen_instance.__enter__ = mocker.Mock(return_value=mocked_process)
+        popen_instance.__exit__ = mocker.Mock(return_value=None)
         return mocked_process
 
     return _inner
@@ -1863,6 +1866,8 @@ class JsQualityBaseReporterMixin:
         self._mock_communicate = mocker.patch.object(subprocess, "Popen")
         self.subproc_mock = mocker.MagicMock()
         self.subproc_mock.returncode = 0
+        self.subproc_mock.__enter__ = mocker.Mock(return_value=self.subproc_mock)
+        self.subproc_mock.__exit__ = mocker.Mock(return_value=None)
 
     def _get_out(self):
         """
@@ -2131,6 +2136,8 @@ class TestSimpleCommandTestCase:
     def patcher(self, mocker):
         self._mock_communicate = mocker.patch.object(subprocess, "Popen")
         self.subproc_mock = mocker.MagicMock()
+        self.subproc_mock.__enter__ = mocker.Mock(return_value=self.subproc_mock)
+        self.subproc_mock.__exit__ = mocker.Mock(return_value=None)
 
     def test_run_simple_failure(self):
         # command_simple should fail
@@ -2155,14 +2162,19 @@ class TestSubprocessErrorTestCase:
     def patcher(self, mocker):
         # when you create a new subprocess.Popen() object and call .communicate()
         # on it, raise an OSError
-        popen = mocker.Mock()
-        popen.return_value.communicate.side_effect = OSError
-        mocker.patch("diff_cover.command_runner.subprocess.Popen", popen)
+        popen_instance = mocker.Mock()
+        popen_instance.communicate.side_effect = OSError
+        popen_instance.__enter__ = mocker.Mock(return_value=popen_instance)
+        popen_instance.__exit__ = mocker.Mock(return_value=None)
+        mocker.patch(
+            "diff_cover.command_runner.subprocess.Popen", return_value=popen_instance
+        )
 
     def test_quality_reporter(self, mocker):
         mock_stderr = mocker.patch("sys.stderr", new_callable=StringIO)
-        code = mocker.patch("diff_cover.violationsreporters.base.run_command_for_code")
-        code.return_value = 0
+        mocker.patch(
+            "diff_cover.violationsreporters.base.run_command_for_code", return_value=0
+        )
         reporter = QualityReporter(pycodestyle_driver)
         with pytest.raises(OSError):
             reporter.violations("path/to/file.py")

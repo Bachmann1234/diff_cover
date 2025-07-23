@@ -32,7 +32,10 @@ def process_patcher(mocker):
         mocked_process.returncode = status_code
         mocked_process.communicate.return_value = return_value
         mocked_subprocess = mocker.patch("diff_cover.command_runner.subprocess")
-        mocked_subprocess.Popen.return_value = mocked_process
+        popen_mock = mocked_subprocess.Popen
+        popen_instance = popen_mock.return_value
+        popen_instance.__enter__ = mocker.Mock(return_value=mocked_process)
+        popen_instance.__exit__ = mocker.Mock(return_value=None)
         return mocked_process
 
     return _inner
