@@ -2,16 +2,14 @@
 
 """Test for diff_cover.diff_reporter"""
 
-import os
-import tempfile
 from pathlib import Path
 from textwrap import dedent
-from unittest.mock import patch
 
 import pytest
 
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffError, GitDiffTool
+from diff_cover.util import to_unix_paths
 from tests.helpers import git_diff_output, line_numbers
 
 
@@ -78,65 +76,65 @@ def test_name_include_untracked(git_diff):
     "include,exclude,expected",
     [
         # no include/exclude --> use all paths
-        ([], [], ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]),
+        (
+            [],
+            [],
+            to_unix_paths(
+                ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]
+            ),
+        ),
         # specified exclude without include
         (
             [],
             ["file1.py"],
-            ["file3.py", "README.md", "subdir2/file2.py"],
+            to_unix_paths(["file3.py", "README.md", "subdir2/file2.py"]),
         ),
         # specified include (folder) without exclude
-        (["subdir1/**"], [], ["subdir1/file1.py"]),
+        (["subdir1/**"], [], to_unix_paths(["subdir1/file1.py"])),
         # specified include (file) without exclude
-        (["subdir1/file1.py"], [], ["subdir1/file1.py"]),
+        (["subdir1/file1.py"], [], to_unix_paths(["subdir1/file1.py"])),
         # specified include and exclude
         (
             ["subdir1/**", "subdir2/**"],
             ["file1.py", "file3.py"],
-            ["subdir2/file2.py"],
+            to_unix_paths(["subdir2/file2.py"]),
         ),
     ],
 )
-def test_git_path_selection(diff, git_diff, include, exclude, expected):
-    old_cwd = os.getcwd()
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        # change the working directory into the temp directory so that globs are working
-        os.chdir(tmp_dir)
+def test_git_path_selection(
+    monkeypatch, tmp_path, diff, git_diff, include, exclude, expected
+):
+    monkeypatch.chdir(tmp_path)
+    diff = GitDiffReporter(git_diff=git_diff, exclude=exclude, include=include)
 
-        diff = GitDiffReporter(git_diff=git_diff, exclude=exclude, include=include)
+    main_dir = Path(tmp_path)
+    (main_dir / "file3.py").touch()
 
-        main_dir = Path(tmp_dir)
-        (main_dir / "file3.py").touch()
+    subdir1 = main_dir / "subdir1"
+    subdir1.mkdir()
+    (subdir1 / "file1.py").touch()
 
-        subdir1 = main_dir / "subdir1"
-        subdir1.mkdir()
-        (subdir1 / "file1.py").touch()
+    subdir2 = main_dir / "subdir2"
+    subdir2.mkdir()
+    (subdir2 / "file2.py").touch()
 
-        subdir2 = main_dir / "subdir2"
-        subdir2.mkdir()
-        (subdir2 / "file2.py").touch()
+    # Configure the git diff output
+    _set_git_diff_output(
+        diff,
+        git_diff,
+        git_diff_output(
+            {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
+        ),
+        git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
+        git_diff_output({}, deleted_files=["README.md"]),
+    )
 
-        # Configure the git diff output
-        _set_git_diff_output(
-            diff,
-            git_diff,
-            git_diff_output(
-                {"subdir1/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
-            ),
-            git_diff_output({"subdir2/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-            git_diff_output(dict(), deleted_files=["README.md"]),
-        )
+    # Get the source paths in the diff
+    source_paths = diff.src_paths_changed()
 
-        # Get the source paths in the diff
-        with patch.object(os.path, "abspath", lambda path: f"{tmp_dir}/{path}"):
-            source_paths = diff.src_paths_changed()
-
-        # Validate the source paths
-        # They should be in alphabetical order
-        assert source_paths == expected
-
-        # change back to the previous working directory
-        os.chdir(old_cwd)
+    # Validate the source paths
+    # They should be in alphabetical order
+    assert source_paths == expected
 
 
 def test_git_source_paths(diff, git_diff):
@@ -148,19 +146,16 @@ def test_git_source_paths(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the source paths in the diff
     source_paths = diff.src_paths_changed()
 
     # Validate the source paths
-    # They should be in alphabetical order
-    assert len(source_paths) == 4
-    assert source_paths[0] == "file3.py"
-    assert source_paths[1] == "README.md"
-    assert source_paths[2] == "subdir/file1.py"
-    assert source_paths[3] == "subdir/file2.py"
+    assert source_paths == to_unix_paths(
+        ["file3.py", "README.md", "subdir/file1.py", "subdir/file2.py"]
+    )
 
 
 def test_git_source_paths_with_space(diff, git_diff):
@@ -172,8 +167,7 @@ def test_git_source_paths_with_space(diff, git_diff):
 
     source_paths = diff.src_paths_changed()
 
-    assert len(source_paths) == 1
-    assert source_paths[0] == " weird.py"
+    assert source_paths == to_unix_paths([" weird.py"])
 
 
 def test_duplicate_source_paths(diff, git_diff):
@@ -187,8 +181,7 @@ def test_duplicate_source_paths(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Should see only one copy of source files
-    assert len(source_paths) == 1
-    assert source_paths[0] == "subdir/file1.py"
+    assert source_paths == to_unix_paths(["subdir/file1.py"])
 
 
 def test_git_source_paths_with_supported_extensions(diff, git_diff):
@@ -210,10 +203,9 @@ def test_git_source_paths_with_supported_extensions(diff, git_diff):
     source_paths = diff.src_paths_changed()
 
     # Validate the source paths, README.md should be left out
-    assert len(source_paths) == 3
-    assert source_paths[0] == "file3.py"
-    assert source_paths[1] == "subdir/file1.py"
-    assert source_paths[2] == "subdir/file2.py"
+    assert source_paths == to_unix_paths(
+        ["file3.py", "subdir/file1.py", "subdir/file2.py"]
+    )
 
 
 def test_git_lines_changed(diff, git_diff):
@@ -225,7 +217,7 @@ def test_git_lines_changed(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -286,7 +278,7 @@ def test_git_deleted_lines(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -701,7 +693,7 @@ def test_name_with_default_range(git_diff):
 
 
 def test_name_different_range(mocker):
-    diff = mocker.MagicMock(GitDiffTool)
-    diff.range_notation = ".."
-    reporter = GitDiffReporter(git_diff=diff, ignore_staged=True)
+    diff_tool = mocker.MagicMock(GitDiffTool)
+    diff_tool.range_notation = ".."
+    reporter = GitDiffReporter(git_diff=diff_tool, ignore_staged=True)
     assert reporter.name() == "origin/main..HEAD and unstaged changes"

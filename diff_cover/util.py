@@ -47,6 +47,10 @@ def to_unix_path(path):
     return posixpath.normpath(os.path.normcase(path).replace("\\", "/"))
 
 
+def to_unix_paths(paths):
+    return [to_unix_path(path) for path in paths]
+
+
 def to_unescaped_filename(filename: str) -> str:
     """Try to unescape the given filename.
 

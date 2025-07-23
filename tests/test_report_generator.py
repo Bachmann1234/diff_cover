@@ -1,6 +1,5 @@
-# pylint: disable=attribute-defined-outside-init,not-callable
+# pylint: disable=attribute-defined-outside-init
 
-import copy
 import json
 from io import BytesIO
 from textwrap import dedent

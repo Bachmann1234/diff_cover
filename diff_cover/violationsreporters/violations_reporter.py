@@ -320,7 +320,8 @@ class LcovCoverageReporter(BaseViolationReporter):
             dict
         )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
-        lcov = open(lcov_file)
+        lcov = open(lcov_file, encoding="utf-8")
+        source_file = None
         while True:
             line = lcov.readline()
             if not line:
@@ -331,7 +332,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 # SF:<absolute path to the source file>
                 source_file = util.to_unix_path(GitPathTool.relative_path(content))
                 continue
-            elif directive == "DA":
+            if directive == "DA":
                 # DA:<line number>,<execution count>[,<checksum>]
                 args = content.split(",")
                 if len(args) < 2 or len(args) > 3:
@@ -655,7 +656,7 @@ class EslintDriver(RegexBasedDriver):
             keys = list(violations_dict.keys())
             for key in keys:
                 new_key = os.path.relpath(key, self.report_root_path)
-                violations_dict[new_key] = violations_dict.pop(key)
+                violations_dict[util.to_unix_path(new_key)] = violations_dict.pop(key)
         return violations_dict
 
 
@@ -761,7 +762,7 @@ class PylintDriver(QualityDriver):
             output_lines = report.split("\n")
 
             for output_line_number, line in enumerate(output_lines):
-                match = self.pylint_expression.match(line)
+                match = self.pylint_expression.match(line.rstrip())
 
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
@@ -847,7 +848,9 @@ class CppcheckDriver(QualityDriver):
                     (cppcheck_src_path, line_number, message) = match.groups()
 
                     violation = Violation(int(line_number), message)
-                    violations_dict[cppcheck_src_path].append(violation)
+                    violations_dict[util.to_unix_path(cppcheck_src_path)].append(
+                        violation
+                    )
 
         return violations_dict
 
@@ -912,7 +915,7 @@ class ClangFormatDriver(QualityDriver):
                     ) = match.groups()
                     full_message = f"{message}\n{code_extract}\n{cursor_error}"
                     violation = Violation(int(line_number), full_message)
-                    violations_dict[clang_src_path].append(violation)
+                    violations_dict[util.to_unix_path(clang_src_path)].append(violation)
         return violations_dict
 
     def installed(self):

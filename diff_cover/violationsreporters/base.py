@@ -7,6 +7,7 @@ from collections import defaultdict, namedtuple
 from functools import lru_cache
 
 from diff_cover.command_runner import execute, run_command_for_code
+from diff_cover.util import to_unix_path
 
 
 class Violation(namedtuple("_", "line, message")):
@@ -90,7 +91,7 @@ class BaseViolationReporter(ABC):
         """
         # An existing quality plugin "sqlfluff" depends on this
         # being not abstract and returning None
-        return None
+        del src_path
 
     def name(self):
         """
@@ -259,11 +260,14 @@ class RegexBasedDriver(QualityDriver):
             if self.expression.flags & re.MULTILINE:
                 matches = re.finditer(self.expression, report)
             else:
-                matches = (self.expression.match(line) for line in report.split("\n"))
+                matches = (
+                    self.expression.match(line.rstrip()) for line in report.split("\n")
+                )
             for match in matches:
                 if match is None:
                     continue
                 src, violation = self._get_violation(match)
+                src = to_unix_path(os.path.relpath(src))
                 violations_dict[src].append(violation)
         return violations_dict
 

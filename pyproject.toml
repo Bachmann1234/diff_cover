@@ -53,8 +53,8 @@ pytest-datadir = "^1.5.0"
 pytest-mock = "^3.14.0"
 pytest-xdist = "^3.6.1"
 pycodestyle = ">=2.9.1"
-flake8 = "^7.2.0"
-pyflakes = "^3.3.2 "
+flake8-pyproject = "^1.2.3"
+pyflakes = "^3.3.2"
 pylint = "^3.3.4"
 pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
@@ -72,18 +72,71 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ['py39']
 include = '\.pyi?$'
-exclude = "tests/fixtures/*"
+exclude = "tests/fixtures/*|\\.venv/*"
 
 [tool.isort]
 profile = "black"
-extend_skip = "tests/fixtures/"
+extend_skip = "tests/fixtures/|\\.venv/"
 
 [tool.pylint.master]
 max-line-length = 100
 load-plugins = [
     "pylint_pytest",
+]
+ignore = [
+    ".venv",
+    "tests/fixtures"
+]
+ignore-paths = ["tests/fixtures/.*"]
+
+[tool.pylint."messages control"]
+enable = ["all"]
+disable = [
+    # allow TODO comments
+    "fixme",
+    # allow disables
+    "locally-disabled",
+    "suppressed-message",
+    # covered by isort
+    "ungrouped-imports",
+    # allow classes and functions w/o docstring
+    "missing-docstring",
+    # hard number checks can be ignored, because they are covered in code reviews
+    "too-many-instance-attributes",
+    "too-many-arguments",
+    "too-many-locals",
+    "too-many-branches",
+    "too-few-public-methods",
+    "too-many-nested-blocks",
+    "too-many-public-methods",
+    # currently some code seems duplicated for pylint
+    "duplicate-code",
+    # we are a command line tool and don't want to show all internals
+    "raise-missing-from",
+]
+
+[tool.pylint.basic]
+good-names = [
+    "_",
+    "i",
+    "setUp",
+    "tearDown",
+    "e",
+    "ex",
+]
+no-docstring-rgx = "^_"
+
+[tool.flake8]
+max-line-length = 100
+exclude = [
+    ".venv",
+    "tests/fixtures"
+]
+ignore = [
+    "E501", # line too long
+    "W503", # line break before binary operator
 ]
 
 [tool.coverage.run]
@@ -108,45 +161,6 @@ exclude_also = [
 [tool.coverage.html]
 show_contexts = true
 skip_covered = false
-
-[tool.pylint."messages control"]
-enable = ["all"]
-disable = [
-    # allow TODO comments
-    "fixme",
-    # allow disables
-    "locally-disabled",
-    "suppressed-message",
-    # covered by isort
-    "ungrouped-imports",
-    # allow classes and functions w/o docstring
-    "missing-docstring",
-    # hard number checks can be ignored, because they are covered in code reviews
-    "too-many-instance-attributes",
-    "too-many-arguments",
-    "too-many-locals",
-    "too-many-branches",
-    "too-few-public-methods",
-    "too-many-nested-blocks",
-    "too-many-public-methods",
-    # allow methods not to use self
-    "no-self-use",
-    # currently some code seems duplicated for pylint
-    "duplicate-code",
-    # we are a command line tool and don't want to show all internals
-    "raise-missing-from",
-]
-
-[tool.pylint.basic]
-good-names = [
-    "_",
-    "i",
-    "setUp",
-    "tearDown",
-    "e",
-    "ex",
-]
-no-docstring-rgx = "^_"
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers"

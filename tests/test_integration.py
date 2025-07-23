@@ -17,6 +17,7 @@ import pytest
 from diff_cover import diff_cover_tool, diff_quality_tool
 from diff_cover.command_runner import CommandError
 from diff_cover.git_path import GitPathTool
+from diff_cover.util import to_unix_path
 from diff_cover.violationsreporters.base import QualityDriver
 
 
@@ -81,11 +82,15 @@ def patch_git_command(patch_popen, mocker):
             mock = mocker.Mock()
             mock.communicate.return_value = (helper.stdout, helper.stderr)
             mock.returncode = helper.returncode
+            mock.__enter__ = mocker.Mock(return_value=mock)
+            mock.__exit__ = mocker.Mock(return_value=None)
             return mock
         if command[0:2] == ["git", "rev-parse"]:
             mock = mocker.Mock()
             mock.communicate.return_value = (os.getcwd(), "")
             mock.returncode = helper.returncode
+            mock.__enter__ = mocker.Mock(return_value=mock)
+            mock.__exit__ = mocker.Mock(return_value=None)
             return mock
 
         return Popen(command, **kwargs)
@@ -362,7 +367,21 @@ class TestDiffCoverIntegration:
         mocker.patch.object(GitPathTool, "_git_root", return_value="/code/samplediff/")
         patch_git_command.set_stdout("git_diff_dotnet.txt")
         assert runbin(["dotnet_coverage.xml"]) == 0
-        compare_console("dotnet_coverage_console_report.txt", capsys.readouterr().out)
+        expected = textwrap.dedent(
+            f"""\
+            -------------
+            Diff Coverage
+            Diff: origin/main...HEAD, staged and unstaged changes
+            -------------
+            {to_unix_path("SampleApp/Sample.cs")} (0.0%): Missing lines 23-25
+            -------------
+            Total:   3 lines
+            Missing: 3 lines
+            Coverage: 0%
+            -------------
+            """
+        )
+        assert capsys.readouterr().out.strip() == expected.strip()
 
     def test_unicode_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_unicode.txt")

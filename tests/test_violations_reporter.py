@@ -5,7 +5,6 @@
 
 import os
 import subprocess
-import tempfile
 import xml.etree.ElementTree as etree
 from io import BytesIO, StringIO
 from subprocess import Popen
@@ -49,7 +48,10 @@ def process_patcher(mocker):
         mocked_process.returncode = status_code
         mocked_process.communicate.return_value = return_value
         mocked_subprocess = mocker.patch("diff_cover.command_runner.subprocess")
-        mocked_subprocess.Popen.return_value = mocked_process
+        popen_mock = mocked_subprocess.Popen
+        popen_instance = popen_mock.return_value
+        popen_instance.__enter__ = mocker.Mock(return_value=mocked_process)
+        popen_instance.__exit__ = mocker.Mock(return_value=None)
         return mocked_process
 
     return _inner
@@ -823,6 +825,10 @@ class TestLcovCoverageReporterTest:
         _git_path_mock.relative_path = lambda path: path
         _git_path_mock.absolute_path = lambda path: path
 
+    @pytest.fixture(autouse=True)
+    def setup(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+
     def test_violations(self):
         # Construct the LCOV report
         file_paths = ["file1.java", "subdir/file2.java"]
@@ -1058,7 +1064,7 @@ class TestLcovCoverageReporterTest:
         branch_data = branch_data or {}
         function_data = function_data or {}
 
-        with tempfile.NamedTemporaryFile("w", delete=True) as f:
+        with open("temp.lcov", "w", encoding="utf-8") as f:
             for path in file_paths:
                 f.write(f"SF:{path}\n")
                 # Write function data
@@ -1082,10 +1088,9 @@ class TestLcovCoverageReporterTest:
                     for block, branch, taken in branches:
                         f.write(f"BRDA:{line},{block},{branch},{taken}\n")
                 f.write("end_of_record\n")
-            f.flush()
-            f.seek(0)
-            # Parse and return the LCOV report
-            lcov_report = LcovCoverageReporter.parse(f.name)
+
+        # Parse and return the LCOV report
+        lcov_report = LcovCoverageReporter.parse(f.name)
         return lcov_report
 
 
@@ -1861,6 +1866,8 @@ class JsQualityBaseReporterMixin:
         self._mock_communicate = mocker.patch.object(subprocess, "Popen")
         self.subproc_mock = mocker.MagicMock()
         self.subproc_mock.returncode = 0
+        self.subproc_mock.__enter__ = mocker.Mock(return_value=self.subproc_mock)
+        self.subproc_mock.__exit__ = mocker.Mock(return_value=None)
 
     def _get_out(self):
         """
@@ -2051,9 +2058,9 @@ class TestESLintQualityReporterTest(JsQualityBaseReporterMixin):
         driver.add_driver_args(report_root_path="foo/bar")
         quality = QualityReporter(driver, reports=reports)
 
-        expected_violation = Violation(3, "Found issue")
+        expected_violations = [Violation(3, "Found issue")]
         actual_violations = quality.violations("path/to/file.js")
-        assert actual_violations == [expected_violation]
+        assert actual_violations == expected_violations
 
 
 class TestShellCheckQualityReporterTest:
@@ -2129,6 +2136,8 @@ class TestSimpleCommandTestCase:
     def patcher(self, mocker):
         self._mock_communicate = mocker.patch.object(subprocess, "Popen")
         self.subproc_mock = mocker.MagicMock()
+        self.subproc_mock.__enter__ = mocker.Mock(return_value=self.subproc_mock)
+        self.subproc_mock.__exit__ = mocker.Mock(return_value=None)
 
     def test_run_simple_failure(self):
         # command_simple should fail
@@ -2153,14 +2162,19 @@ class TestSubprocessErrorTestCase:
     def patcher(self, mocker):
         # when you create a new subprocess.Popen() object and call .communicate()
         # on it, raise an OSError
-        popen = mocker.Mock()
-        popen.return_value.communicate.side_effect = OSError
-        mocker.patch("diff_cover.command_runner.subprocess.Popen", popen)
+        popen_instance = mocker.Mock()
+        popen_instance.communicate.side_effect = OSError
+        popen_instance.__enter__ = mocker.Mock(return_value=popen_instance)
+        popen_instance.__exit__ = mocker.Mock(return_value=None)
+        mocker.patch(
+            "diff_cover.command_runner.subprocess.Popen", return_value=popen_instance
+        )
 
     def test_quality_reporter(self, mocker):
         mock_stderr = mocker.patch("sys.stderr", new_callable=StringIO)
-        code = mocker.patch("diff_cover.violationsreporters.base.run_command_for_code")
-        code.return_value = 0
+        mocker.patch(
+            "diff_cover.violationsreporters.base.run_command_for_code", return_value=0
+        )
         reporter = QualityReporter(pycodestyle_driver)
         with pytest.raises(OSError):
             reporter.violations("path/to/file.py")

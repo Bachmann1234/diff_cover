@@ -23,7 +23,10 @@ def process(mocker):
 @pytest.fixture(autouse=True)
 def subprocess(mocker, process):
     subprocess_ = mocker.patch("diff_cover.command_runner.subprocess")
-    subprocess_.Popen.return_value = process
+    popen_mock = subprocess_.Popen
+    popen_instance = popen_mock.return_value
+    popen_instance.__enter__.return_value = process
+    popen_instance.__exit__.return_value = None
     return subprocess_
 
 
