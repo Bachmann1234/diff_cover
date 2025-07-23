@@ -53,8 +53,8 @@ pytest-datadir = "^1.5.0"
 pytest-mock = "^3.14.0"
 pytest-xdist = "^3.6.1"
 pycodestyle = ">=2.9.1"
-flake8 = "^7.2.0"
-pyflakes = "^3.3.2 "
+flake8-pyproject = "^1.2.3"
+pyflakes = "^3.3.2"
 pylint = "^3.3.4"
 pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
@@ -72,42 +72,24 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ['py39']
 include = '\.pyi?$'
-exclude = "tests/fixtures/*"
+exclude = "tests/fixtures/*|\\.venv/*"
 
 [tool.isort]
 profile = "black"
-extend_skip = "tests/fixtures/"
+extend_skip = "tests/fixtures/|\\.venv/"
 
 [tool.pylint.master]
 max-line-length = 100
 load-plugins = [
     "pylint_pytest",
 ]
-
-[tool.coverage.run]
-branch = true
-relative_files = true
-parallel = true
-concurrency = ["multiprocessing"]
-source = ["diff_cover"]
-omit = ["./tests/*"]
-
-[tool.coverage.report]
-show_missing = true
-exclude_also = [
-    "if typing.TYPE_CHECKING:",
-    "if TYPE_CHECKING:",
-    "if __name__ == \"__main__\":",
-    "raise NotImplementedError",
-    "raise AssertionError",
-    "^\\s*pass\\s*$",
+ignore = [
+    ".venv",
+    "tests/fixtures"
 ]
-
-[tool.coverage.html]
-show_contexts = true
-skip_covered = false
+ignore-paths = ["tests/fixtures/.*"]
 
 [tool.pylint."messages control"]
 enable = ["all"]
@@ -147,6 +129,40 @@ good-names = [
     "ex",
 ]
 no-docstring-rgx = "^_"
+
+[tool.flake8]
+max-line-length = 100
+exclude = [
+    ".venv",
+    "tests/fixtures"
+]
+ignore = [
+    "E501", # line too long
+    "W503", # line break before binary operator
+]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+parallel = true
+concurrency = ["multiprocessing"]
+source = ["diff_cover"]
+omit = ["./tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_also = [
+    "if typing.TYPE_CHECKING:",
+    "if TYPE_CHECKING:",
+    "if __name__ == \"__main__\":",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "^\\s*pass\\s*$",
+]
+
+[tool.coverage.html]
+show_contexts = true
+skip_covered = false
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers"

@@ -6,15 +6,12 @@ try:
 
     _HAS_TOML = True
 except ImportError:  # pragma: no cover
-    _HAS_TOML = False
-
-if not _HAS_TOML:
     try:
         import tomllib as toml
 
         _HAS_TOML = True
-    except ImportError:  # pragma: no cover
-        pass
+    except ImportError:
+        _HAS_TOML = False
 
 
 class Tool(enum.Enum):
