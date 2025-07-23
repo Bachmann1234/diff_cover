@@ -111,8 +111,6 @@ disable = [
     "too-few-public-methods",
     "too-many-nested-blocks",
     "too-many-public-methods",
-    # allow methods not to use self
-    "no-self-use",
     # currently some code seems duplicated for pylint
     "duplicate-code",
     # we are a command line tool and don't want to show all internals

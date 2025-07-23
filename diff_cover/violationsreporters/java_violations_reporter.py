@@ -66,10 +66,9 @@ class CheckstyleXmlDriver(QualityDriver):
             for file_tree in files:
                 for error in file_tree.findall("error"):
                     line_number = error.get("line")
-                    error_str = "{}: {}".format(
-                        error.get("severity"), error.get("message")
-                    )
-                    violation = Violation(int(line_number), error_str)
+                    severity = error.get("severity")
+                    message = error.get("message")
+                    violation = Violation(int(line_number), f"{severity}: {message}")
                     filename = GitPathTool.relative_path(file_tree.get("name"))
                     violations_dict[to_unix_path(filename)].append(violation)
         return violations_dict
@@ -149,8 +148,9 @@ class PmdXmlDriver(QualityDriver):
             for node_file in node_files:
                 for error in node_file.findall("violation"):
                     line_number = error.get("beginline")
-                    error_str = "{}: {}".format(error.get("rule"), error.text.strip())
-                    violation = Violation(int(line_number), error_str)
+                    rule = error.get("rule")
+                    message = error.text.strip()
+                    violation = Violation(int(line_number), f"{rule}: {message}")
                     filename = GitPathTool.relative_path(node_file.get("name"))
                     violations_dict[to_unix_path(filename)].append(violation)
 

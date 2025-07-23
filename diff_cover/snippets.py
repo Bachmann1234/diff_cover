@@ -128,21 +128,16 @@ class Snippet:
             if i in self._violation_lines:
                 notice = "!"
 
-            format_string = "{} {:>" + str(line_number_length) + "} {}"
-            text += format_string.format(notice, i, line)
+            text += f"{notice} {i:>{line_number_length}} {line}"
 
-        header = "Lines %d-%d\n\n" % (self._start_line, self._last_line)
+        header = f"Lines {self._start_line}-{self._last_line}\n\n"
         if self._lexer_name in self.LEXER_TO_MARKDOWN_CODE_HINT:
-            return header + (
-                "```"
-                + self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
-                + "\n"
-                + text
-                + "\n```\n"
-            )
+            code_hint = self.LEXER_TO_MARKDOWN_CODE_HINT[self._lexer_name]
+            code_block = f"""```{code_hint}\n{text}\n```\n"""
+            return header + code_block
 
         # unknown programming language, return a non-decorated fenced code block:
-        return "```\n" + text + "\n```\n"
+        return f"""```\n{text}\n```\n"""
 
     def terminal(self):
         """

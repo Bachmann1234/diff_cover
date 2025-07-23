@@ -317,7 +317,8 @@ class LcovCoverageReporter(BaseViolationReporter):
             dict
         )  # { source_file: { func_name: (line_no, hit_count) } }
         lcov_report = defaultdict(dict)
-        lcov = open(lcov_file)
+        lcov = open(lcov_file, encoding="utf-8")
+        source_file = None
         while True:
             line = lcov.readline()
             if not line:
@@ -328,7 +329,7 @@ class LcovCoverageReporter(BaseViolationReporter):
                 # SF:<absolute path to the source file>
                 source_file = util.to_unix_path(GitPathTool.relative_path(content))
                 continue
-            elif directive == "DA":
+            if directive == "DA":
                 # DA:<line number>,<execution count>[,<checksum>]
                 args = content.split(",")
                 if len(args) < 2 or len(args) > 3:
