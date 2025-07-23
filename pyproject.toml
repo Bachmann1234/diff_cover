@@ -71,7 +71,7 @@ requires = ["poetry-core>=1.0.7"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
-line-length = 88
+line-length = 100
 target-version = ['py39']
 include = '\.pyi?$'
 exclude = "tests/fixtures/*|\\.venv/*"
@@ -137,17 +137,6 @@ exclude = [
 ignore = [
     "E501", # line too long
     "W503", # line break before binary operator
-    "E203", # whitespace before ':', conflicts with black
-]
-select = [
-    "C901", # flake8-mccabe
-    "E",    # flake8-pycodestyle
-    "F",    # flake8-pyflakes
-    "W",    # flake8-pycodestyle
-]
-per-file-ignores = [
-    "diff_cover/tests/*: E501",         # suppression for __init__
-    "diff_cover/tests/fixtures/*: E,F,W"
 ]
 
 [tool.coverage.run]
