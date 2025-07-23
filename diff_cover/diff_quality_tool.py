@@ -81,8 +81,8 @@ QUALITY_DRIVERS = {
     "shellcheck": shellcheck_driver,
 }
 
-VIOLATION_CMD_HELP = "Which code quality tool to use (%s)" % "/".join(
-    sorted(QUALITY_DRIVERS)
+VIOLATION_CMD_HELP = (
+    f"Which code quality tool to use ({'/'.join(sorted(QUALITY_DRIVERS))})"
 )
 INPUT_REPORTS_HELP = "Which violations reports to use"
 OPTIONS_HELP = "Options to be passed to the violations tool"
@@ -315,9 +315,7 @@ def main(argv=None, directory=None):
         plugin_manager.add_hookspecs(hookspecs)
         plugin_manager.load_setuptools_entrypoints("diff_cover")
 
-        hooks = (
-            plugin_manager.hook.diff_cover_report_quality  # pylint: disable=no-member
-        )
+        hooks = plugin_manager.hook.diff_cover_report_quality
         for hookimpl in hooks.get_hookimpls():
             if hookimpl.plugin_name == tool:
                 reporter_factory_fn = hookimpl.function

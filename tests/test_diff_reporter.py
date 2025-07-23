@@ -146,7 +146,7 @@ def test_git_source_paths(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the source paths in the diff
@@ -217,7 +217,7 @@ def test_git_lines_changed(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -278,7 +278,7 @@ def test_git_deleted_lines(diff, git_diff):
             {"subdir/file1.py": line_numbers(3, 10) + line_numbers(34, 47)}
         ),
         git_diff_output({"subdir/file2.py": line_numbers(3, 10), "file3.py": [0]}),
-        git_diff_output(dict(), deleted_files=["README.md"]),
+        git_diff_output({}, deleted_files=["README.md"]),
     )
 
     # Get the lines changed in the diff
@@ -693,7 +693,7 @@ def test_name_with_default_range(git_diff):
 
 
 def test_name_different_range(mocker):
-    diff = mocker.MagicMock(GitDiffTool)
-    diff.range_notation = ".."
-    reporter = GitDiffReporter(git_diff=diff, ignore_staged=True)
+    diff_tool = mocker.MagicMock(GitDiffTool)
+    diff_tool.range_notation = ".."
+    reporter = GitDiffReporter(git_diff=diff_tool, ignore_staged=True)
     assert reporter.name() == "origin/main..HEAD and unstaged changes"

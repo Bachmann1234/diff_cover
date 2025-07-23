@@ -1,4 +1,4 @@
-# pylint: disable=attribute-defined-outside-init,not-callable
+# pylint: disable=attribute-defined-outside-init
 
 import json
 from io import BytesIO

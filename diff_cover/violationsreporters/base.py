@@ -61,7 +61,7 @@ class BaseViolationReporter(ABC):
         """
         # An existing quality plugin "sqlfluff" depends on this
         # being not abstract and returning None
-        return None
+        del src_path
 
     def name(self):
         """

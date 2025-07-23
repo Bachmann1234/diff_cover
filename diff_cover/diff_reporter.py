@@ -504,7 +504,7 @@ class GitDiffReporter(BaseDiffReporter):
         number is included once and the lines are ordered sequentially.
         """
 
-        if len(line_numbers) == 0:
+        if not line_numbers:
             return []
 
         # Ensure lines are unique by putting them in a set
