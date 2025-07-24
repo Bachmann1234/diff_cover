@@ -149,10 +149,7 @@ class BaseReportGenerator(ABC):
         """
 
         return sum(
-            [
-                len(summary.measured_lines)
-                for summary in self._diff_violations().values()
-            ]
+            len(summary.measured_lines) for summary in self._diff_violations().values()
         )
 
     def total_num_violations(self):
