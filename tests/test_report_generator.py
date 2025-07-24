@@ -1,4 +1,4 @@
-# pylint: disable=attribute-defined-outside-init
+# pylint: disable=attribute-defined-outside-init,use-implicit-booleaness-not-comparison
 
 import json
 from io import BytesIO
