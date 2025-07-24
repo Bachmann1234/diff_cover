@@ -22,12 +22,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/dev-requirements.txt') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
       - name: Install dependencies
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
-          uv pip install -r dev-requirements.txt
+          uv pip install -e '.[dev,toml]'
       - name: ruff check
         continue-on-error: true
         run: .venv/bin/ruff check
@@ -70,12 +70,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/dev-requirements.txt') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
       - name: Install dependencies
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
-          uv pip install -r dev-requirements.txt
+          uv pip install -e '.[dev,toml]'
       - name: Run tests
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
@@ -108,12 +108,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/dev-requirements.txt') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
       - name: Install dependencies
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
-          uv pip install -r dev-requirements.txt
+          uv pip install -e '.[dev,toml]'
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
