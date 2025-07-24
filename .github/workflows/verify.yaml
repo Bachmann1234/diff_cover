@@ -80,10 +80,9 @@ jobs:
           uv pip install -e '.[dev,toml]'
       - name: Run tests
         run: |
+          echo ".venv/bin" >> $GITHUB_PATH
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           .venv/bin/pytest -n auto --cov-context test --cov --cov-report=xml tests
-        env:
-          PATH: .venv/bin:${{ env.PATH }}
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
