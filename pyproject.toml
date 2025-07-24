@@ -87,8 +87,6 @@ include-package-data = true
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
-# ---- OTHER TOOLS UNCHANGED ----
-
 [tool.black]
 line-length = 88
 target-version = ['py39']
