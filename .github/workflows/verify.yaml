@@ -73,12 +73,14 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
       - name: Install dependencies
+        shell: bash
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
           source .venv/bin/activate
           uv pip install -e '.[dev,toml]'
       - name: Set PATH
+        shell: bash
         run: echo "$(pwd)/.venv/bin" >> "$GITHUB_PATH"
       - name: Run tests
         run: |
