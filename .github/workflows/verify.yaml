@@ -93,6 +93,7 @@ jobs:
           uv venv .venv
           uv pip install -e '.[dev,toml]'
       - name: Run tests
+        shell: bash
         run: |
           "$VENV_PYTHON" -m pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
