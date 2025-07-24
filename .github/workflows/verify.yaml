@@ -79,7 +79,7 @@ jobs:
           source .venv/bin/activate
           uv pip install -e '.[dev,toml]'
       - name: Set PATH
-        run: echo ".venv/bin" >> "$GITHUB_PATH"
+        run: echo "$(pwd)/.venv/bin" >> "$GITHUB_PATH"
       - name: Run tests
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
