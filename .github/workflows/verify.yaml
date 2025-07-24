@@ -15,37 +15,31 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          virtualenvs-path: .venv
-          installer-parallel: true
+      - name: Install uv
+        run: pip install uv
       - name: Load cached venv
-        id: cached-poetry-dependencies
+        id: cached-uv-dependencies
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/requirements.txt') }}
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install
+        if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
+        run: |
+          uv venv .venv
+          uv pip install -r requirements.txt
       - name: ruff check
-        continue-on-error: true
-        run: poetry run ruff check
+        run: .venv/bin/ruff check
       - name: ruff format
-        continue-on-error: true
-        run: poetry run ruff check
+        run: .venv/bin/ruff check
       - name: pylint
-        continue-on-error: true
-        run: poetry run pylint .
+        run: .venv/bin/pylint .
       - name: black
-        run: poetry run black --check .
+        run: .venv/bin/black --check .
       - name: isort
-        run: poetry run isort --check .
+        run: .venv/bin/isort --check .
       - name: doc8
-        run: poetry run doc8 README.rst --ignore D001
+        run: .venv/bin/doc8 README.rst --ignore D001
 
   verify:
     runs-on: ${{ matrix.os }}
@@ -66,28 +60,23 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          virtualenvs-path: .venv
-          installer-parallel: true
+      - name: Install uv
+        run: pip install uv
       - name: Load cached venv
-        id: cached-poetry-dependencies
+        id: cached-uv-dependencies
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/requirements.txt') }}
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        shell: bash
-        run: poetry install
+        if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
+        run: |
+          uv venv .venv
+          uv pip install -r requirements.txt
       - name: Run tests
-        shell: bash
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
-          poetry run pytest -n auto --cov-context test --cov --cov-report=xml tests
+          .venv/bin/pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
@@ -109,23 +98,19 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          virtualenvs-path: .venv
-          installer-parallel: true
+      - name: Install uv
+        run: pip install uv
       - name: Load cached venv
-        id: cached-poetry-dependencies
+        id: cached-uv-dependencies
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/requirements.txt') }}
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        shell: bash
-        run: poetry install
+        if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
+        run: |
+          uv venv .venv
+          uv pip install -r requirements.txt
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -136,17 +121,17 @@ jobs:
           name: coverage_*
       - name: Combine coverage.py
         run: |
-          poetry run coverage combine $(find downloaded_artifacts/ -type f | xargs)
-          poetry run coverage xml
-          poetry run coverage html
-          poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+          .venv/bin/coverage combine $(find downloaded_artifacts/ -type f | xargs)
+          .venv/bin/coverage xml
+          .venv/bin/coverage html
+          .venv/bin/coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
           cp coverage.xml htmlcov/coverage.xml
           cp .coverage htmlcov/.coverage
       - name: Complete coverage
         run: |
-          poetry run diff-cover coverage.xml --include-untracked --format github-annotations:warning
-          poetry run diff-quality --violations flake8 --include-untracked
-          poetry run diff-quality --violations pylint --include-untracked
+          .venv/bin/diff-cover coverage.xml --include-untracked --format github-annotations:warning
+          .venv/bin/diff-quality --violations flake8 --include-untracked
+          .venv/bin/diff-quality --violations pylint --include-untracked
       - name: Upload single coverage artifact
         uses: actions/upload-artifact@v4
         with:
