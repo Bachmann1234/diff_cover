@@ -72,9 +72,10 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
-      - name: Set VENV_PATH and update PATH
+      - name: Set envs
         shell: bash
         run: |
+          echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             VENV_PATH="$(pwd)/.venv/Scripts"
           else
@@ -88,10 +89,7 @@ jobs:
           uv venv .venv
           uv pip install -e '.[dev,toml]'
       - name: Run tests
-        run: |
-          echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
-          env
-          .venv/bin/pytest -n auto --cov-context test --cov --cov-report=xml tests
+        run: pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
