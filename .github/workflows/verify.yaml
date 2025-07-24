@@ -75,7 +75,7 @@ jobs:
       - name: Set envs
         shell: bash
         run: |
-          echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
+          echo "ARTIFACT_NAME=coverage-${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             VENV_PATH="$(pwd)/.venv/Scripts"
           else
@@ -132,7 +132,7 @@ jobs:
       - name: Clean up temporary artifacts
         uses: geekyeggo/delete-artifact@v5
         with:
-          name: coverage_*
+          name: coverage-*
       - name: Combine coverage.py
         run: |
           .venv/bin/coverage combine $(find downloaded_artifacts/ -type f | xargs)
