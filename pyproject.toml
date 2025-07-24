@@ -6,8 +6,6 @@ authors = [
     { name = "See Contributors" }
 ]
 readme = "README.rst"
-homepage = "https://github.com/Bachmann1234/diff-cover"
-repository = "https://github.com/Bachmann1234/diff-cover"
 license = { text = "Apache-2.0" }
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -60,8 +58,8 @@ diff-cover = "diff_cover.diff_cover_tool:main"
 diff-quality = "diff_cover.diff_quality_tool:main"
 
 [project.urls]
-Homepage = "https://github.com/Bachmann1234/diff-cover"
-Repository = "https://github.com/Bachmann1234/diff-cover"
+homepage = "https://github.com/Bachmann1234/diff-cover"
+repository = "https://github.com/Bachmann1234/diff-cover"
 
 [tool.setuptools.packages.find]
 where = ["."]
