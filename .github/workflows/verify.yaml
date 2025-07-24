@@ -78,10 +78,13 @@ jobs:
           echo "ARTIFACT_NAME=coverage-${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             VENV_PATH="$(pwd)/.venv/Scripts"
+            VENV_PYTHON="$VENV_PATH/python.exe"
           else
             VENV_PATH="$(pwd)/.venv/bin"
+            VENV_PYTHON="$VENV_PATH/python"
           fi
           echo "VENV_PATH=$VENV_PATH" >> "$GITHUB_ENV"
+          echo "VENV_PYTHON=$VENV_PYTHON" >> "$GITHUB_ENV"
           echo "$VENV_PATH" >> "$GITHUB_PATH"
       - name: Install dependencies
         shell: bash
@@ -90,10 +93,7 @@ jobs:
           uv venv .venv
           uv pip install -e '.[dev,toml]'
       - name: Run tests
-        run: |
-          env
-          ls $VENV_PATH
-          pytest -n auto --cov-context test --cov --cov-report=xml tests
+        run: "$VENV_PYTHON" -m pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
