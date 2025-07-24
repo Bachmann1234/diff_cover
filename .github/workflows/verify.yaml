@@ -27,7 +27,7 @@ jobs:
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
-          uv pip install -e '.[dev,toml]'
+          .venv/bin/uv pip install -e '.[dev,toml]'
       - name: ruff check
         continue-on-error: true
         run: .venv/bin/ruff check
@@ -75,7 +75,7 @@ jobs:
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
-          uv pip install -e '.[dev,toml]'
+          .venv/bin/uv pip install -e '.[dev,toml]'
       - name: Run tests
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
@@ -113,7 +113,7 @@ jobs:
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: |
           uv venv .venv
-          uv pip install -e '.[dev,toml]'
+          .venv/bin/pip install -e '.[dev,toml]'
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
