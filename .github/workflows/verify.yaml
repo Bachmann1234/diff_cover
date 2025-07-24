@@ -92,7 +92,7 @@ jobs:
       - name: Run tests
         run: |
           env
-          ls -ls $VENV_PATH
+          ls $VENV_PATH
           pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
