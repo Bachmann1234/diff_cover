@@ -83,11 +83,11 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         shell: bash
         run: poetry install
-      - name: Run The lints and tests
+      - name: Run tests
         shell: bash
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
-          poetry run bash -x verify.sh
+          poetry run pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
