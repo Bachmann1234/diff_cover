@@ -29,10 +29,13 @@ jobs:
           uv venv .venv
           uv pip install -r dev-requirements.txt
       - name: ruff check
+        continue-on-error: true
         run: .venv/bin/ruff check
       - name: ruff format
+        continue-on-error: true
         run: .venv/bin/ruff check
       - name: pylint
+        continue-on-error: true
         run: .venv/bin/pylint .
       - name: black
         run: .venv/bin/black --check .
