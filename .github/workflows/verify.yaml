@@ -82,6 +82,8 @@ jobs:
         run: |
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           .venv/bin/pytest -n auto --cov-context test --cov --cov-report=xml tests
+        env:
+          PATH: .venv/bin:$PATH
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
