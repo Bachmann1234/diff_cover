@@ -157,6 +157,10 @@ class QualityReporter(BaseViolationReporter):
                 self.violations_dict = self.driver.parse_reports(self.reports)
                 return self.violations_dict[src_path]
 
+            if not os.path.exists(src_path):
+                self.violations_dict[src_path] = []
+                return self.violations_dict[src_path]
+
             if self.driver_tool_installed is None:
                 self.driver_tool_installed = self.driver.installed()
             if not self.driver_tool_installed:
@@ -166,8 +170,7 @@ class QualityReporter(BaseViolationReporter):
             if self.options:
                 for arg in self.options.split():
                     command.append(arg)
-            if os.path.exists(src_path):
-                command.append(src_path.encode(sys.getfilesystemencoding()))
+            command.append(src_path.encode(sys.getfilesystemencoding()))
 
             stdout, stderr = execute(command, self.driver.exit_codes)
             output = stderr if self.driver.output_stderr else stdout
