@@ -1586,12 +1586,15 @@ class TestPydocstlyeQualityReporterTest:
 
 
 class TestPylintQualityReporterTest:
+    @pytest.mark.disable_all_files_exist
     def test_no_such_file(self):
+        file_paths = ["ajshdjlasdhajksdh.py"]
         quality = QualityReporter(PylintDriver())
 
         # Expect that we get no results
-        result = quality.violations("")
-        assert result == []
+        for path in file_paths:
+            result = quality.violations(path)
+            assert result == []
 
     def test_no_python_file(self):
         quality = QualityReporter(PylintDriver())
@@ -2180,6 +2183,15 @@ class TestSubprocessErrorTestCase:
             reporter.violations("path/to/file.py")
 
         assert mock_stderr.getvalue() == "pycodestyle path/to/file.py"
+
+    @pytest.mark.disable_all_files_exist
+    def test_file_does_not_exist(self):
+        quality = QualityReporter(pycodestyle_driver)
+        file_paths = ["ajshdjlasdhajksdh.py"]
+        # Expect that we get no results because that file does not exist
+        for path in file_paths:
+            result = quality.violations(path)
+            assert result == []
 
 
 class TestCppcheckQualityDriverTest:
