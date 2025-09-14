@@ -530,6 +530,22 @@ class LcovCoverageReporter(BaseViolationReporter):
         return self._info_cache[src_path][1]
 
 
+mypy_driver = RegexBasedDriver(
+    name="mypy",
+    supported_extensions=["py"],
+    command=["mypy"],
+    # Match lines of the form:
+    # main.py:1: error: Function is missing a type annotation  [no-untyped-def]
+    # foo/bar.py:6: error: "int" has no attribute "upper"  [attr-defined]
+    expression=r"^([^:]+):(\d+):\d*:? (.*)$",
+    command_to_check_install=["mypy", "--version"],
+    # mypy exit codes:
+    # 0 - no violations;
+    # 1 - there are violations;
+    # 2 - other error.
+    exit_codes=[0, 1],
+)
+
 pycodestyle_driver = RegexBasedDriver(
     name="pycodestyle",
     supported_extensions=["py"],

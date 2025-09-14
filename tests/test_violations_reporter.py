@@ -25,6 +25,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     XmlCoverageReporter,
     flake8_driver,
     jshint_driver,
+    mypy_driver,
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
@@ -2212,6 +2213,31 @@ class TestCppcheckQualityDriverTest:
         assert len(actual_violations) == len(expected_violations)
         for expected in expected_violations:
             assert expected in actual_violations
+
+
+class TestMypyQualityDriverTest:
+    """Tests for mypy quality driver."""
+
+    def test_quality(self, process_patcher):
+        """Integration test."""
+        process_patcher(
+            (
+                'foo/bar.py:6: error: "int" has no attribute "upper"  [attr-defined]',
+                "",
+            )
+        )
+
+        expected_violations = [
+            Violation(
+                line=6,
+                message='error: "int" has no attribute "upper"  [attr-defined]'),
+        ]
+
+        quality = QualityReporter(mypy_driver)
+        actual_violations = quality.violations("foo/bar.py")
+
+        assert quality.name() == "mypy"
+        assert actual_violations == expected_violations
 
 
 class TestRuffCheckQualityDriverTest:
