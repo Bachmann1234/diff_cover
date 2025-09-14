@@ -2230,7 +2230,8 @@ class TestMypyQualityDriverTest:
         expected_violations = [
             Violation(
                 line=6,
-                message='error: "int" has no attribute "upper"  [attr-defined]'),
+                message='error: "int" has no attribute "upper"  [attr-defined]',
+            ),
         ]
 
         quality = QualityReporter(mypy_driver)
