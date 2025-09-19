@@ -57,6 +57,7 @@ from diff_cover.violationsreporters.violations_reporter import (
     PylintDriver,
     flake8_driver,
     jshint_driver,
+    mypy_driver,
     pycodestyle_driver,
     pydocstyle_driver,
     pyflakes_driver,
@@ -67,6 +68,7 @@ from diff_cover.violationsreporters.violations_reporter import (
 QUALITY_DRIVERS = {
     "clang": ClangFormatDriver(),
     "cppcheck": CppcheckDriver(),
+    "mypy": mypy_driver,
     "pycodestyle": pycodestyle_driver,
     "pyflakes": pyflakes_driver,
     "pylint": PylintDriver(),
