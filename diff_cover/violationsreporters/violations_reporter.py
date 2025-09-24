@@ -574,7 +574,7 @@ pyflakes_driver = RegexBasedDriver(
 ruff_check_driver = RegexBasedDriver(
     name="ruff.check",
     supported_extensions=["py"],
-    command=["ruff", "check"],
+    command=["ruff", "check", "--output-format", "pylint"],
     # Match lines of the form:
     # path/to/file.py:328:27 F541 [*] f-string without any placeholders
     # path/to/file.py:418:26 F841 [*] Local variable `e` is assigned to but never used
