@@ -1,3 +1,17 @@
+09/23/2025 v9.7.0
+
+* Adds the work @kingbuzzman did to support windows!
+* Fixes a bug where deleted files were not benig handled properly (thanks @CliveCorbishleyTAL
+)
+* Adds a mypy driver for diff_quality (thanks @YeeaaahMan)
+* Fixes ruff >=0.12.9 support (thanks again @YeeaaahMan)
+
+Some internal items
+
+* Fixing various pilint errors in the codebase (thanks again @kingbuzzman)
+* Moves flake8 config into pyproject (Thanks @kingbuzzman)
+* CI test performance improvements (thanks @kingbuzzman)
+
 07/16/2025 v9.6.0
 
 * Fixes issue when sending markdown reports to stdout. Thanks @kingbuzzman! [PR 516](https://github.com/Bachmann1234/diff_cover/pull/516)
