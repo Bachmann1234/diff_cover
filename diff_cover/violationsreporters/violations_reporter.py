@@ -579,7 +579,7 @@ ruff_check_driver = RegexBasedDriver(
     # path/to/file.py:328:27 F541 [*] f-string without any placeholders
     # path/to/file.py:418:26 F841 [*] Local variable `e` is assigned to but never used
     expression=r"^([^:]+):(\d+):\d*:? (.*)$",
-    command_to_check_install=["ruff", "--version"],
+    command_to_check_install=["ruff", "--version", "--output-format", "pylint"],
     # ruff exit code is 1 if there are violations
     # https://docs.astral.sh/ruff/linter/#exit-codes
     exit_codes=[0, 1],
