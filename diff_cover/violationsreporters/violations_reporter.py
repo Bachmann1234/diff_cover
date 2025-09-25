@@ -574,12 +574,12 @@ pyflakes_driver = RegexBasedDriver(
 ruff_check_driver = RegexBasedDriver(
     name="ruff.check",
     supported_extensions=["py"],
-    command=["ruff", "check"],
+    command=["ruff", "check", "--output-format", "pylint"],
     # Match lines of the form:
     # path/to/file.py:328:27 F541 [*] f-string without any placeholders
     # path/to/file.py:418:26 F841 [*] Local variable `e` is assigned to but never used
     expression=r"^([^:]+):(\d+):\d*:? (.*)$",
-    command_to_check_install=["ruff", "--version", "--output-format", "pylint"],
+    command_to_check_install=["ruff", "--version"],
     # ruff exit code is 1 if there are violations
     # https://docs.astral.sh/ruff/linter/#exit-codes
     exit_codes=[0, 1],
