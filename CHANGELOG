@@ -1,3 +1,7 @@
+09/25/2025 v9.7.1
+
+* Revert the change to attempt to support ruff >=0.12.9 (@YeeaahMan caught the error)
+
 09/23/2025 v9.7.0
 
 * Adds the work @kingbuzzman did to support windows!
