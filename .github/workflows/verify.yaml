@@ -2,7 +2,7 @@ name: PR Job
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  DEFAULT_PYTHON_VERSION: 3.12
+  DEFAULT_PYTHON_VERSION: 3.13
 
 jobs:
   linter:
@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
