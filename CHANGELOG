@@ -1,3 +1,7 @@
+11/10/2025 v9.7.2
+
+* Fix file path issue on windows. Thanks @amos-chen [PR 553](https://github.com/Bachmann1234/diff_cover/pull/553/files)
+
 09/25/2025 v9.7.1
 
 * Revert the change to attempt to support ruff >=0.12.9 (@YeeaahMan caught the error)
