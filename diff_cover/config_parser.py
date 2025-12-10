@@ -67,6 +67,20 @@ def _parse_config_file(file_name, tool):
     raise ParserError(f"No config parser could handle {file_name}")
 
 
+def _normalize_patterns(patterns):
+    """
+    Normalize exclude/include patterns to always be a list.
+
+    :param patterns: Pattern(s) from config (None, str, or list)
+    :returns: Normalized list or None
+    """
+    if patterns is None:
+        return None
+    if isinstance(patterns, str):
+        return [patterns]
+    return patterns
+
+
 def get_config(parser, argv, defaults, tool):
     cli_config = vars(parser.parse_args(argv))
     if cli_config["config_file"]:
@@ -83,5 +97,11 @@ def get_config(parser, argv, defaults, tool):
             else:
                 # else just override the existing value
                 config[key] = value
+
+    # Normalize exclude and include patterns to always be lists
+    if "exclude" in config:
+        config["exclude"] = _normalize_patterns(config["exclude"])
+    if "include" in config:
+        config["include"] = _normalize_patterns(config["include"])
 
     return config
