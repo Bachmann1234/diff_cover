@@ -98,3 +98,86 @@ def test_get_config(
     parser = mocker.Mock()
     parser.parse_args().__dict__ = cli_config
     assert get_config(parser, argv=[], defaults=defaults, tool=tool) == expected
+
+
+@pytest.mark.parametrize(
+    "tool,content,expected_exclude",
+    [
+        (Tool.DIFF_COVER, '[tool.diff_cover]\nexclude="*.pyc"', ["*.pyc"]),
+        (Tool.DIFF_QUALITY, '[tool.diff_quality]\nexclude="*.pyc"', ["*.pyc"]),
+    ],
+)
+def test_normalize_exclude_string(mocker, tmp_path, tool, content, expected_exclude):
+    """String exclude from TOML should be normalized to list."""
+    toml_file = tmp_path / "foo.toml"
+    toml_file.write_text(content)
+
+    cli_config = {"config_file": str(toml_file), "exclude": None}
+    parser = mocker.Mock()
+    parser.parse_args().__dict__ = cli_config
+
+    result = get_config(parser, argv=[], defaults={}, tool=tool)
+    assert result["exclude"] == expected_exclude
+
+
+@pytest.mark.parametrize(
+    "tool,content,expected_exclude",
+    [
+        (
+            Tool.DIFF_COVER,
+            '[tool.diff_cover]\nexclude=["*.pyc", "*.pyo"]',
+            ["*.pyc", "*.pyo"],
+        ),
+        (
+            Tool.DIFF_QUALITY,
+            '[tool.diff_quality]\nexclude=["*.pyc", "*.pyo"]',
+            ["*.pyc", "*.pyo"],
+        ),
+    ],
+)
+def test_exclude_list_unchanged(mocker, tmp_path, tool, content, expected_exclude):
+    """List exclude from TOML should remain as list."""
+    toml_file = tmp_path / "foo.toml"
+    toml_file.write_text(content)
+
+    cli_config = {"config_file": str(toml_file), "exclude": None}
+    parser = mocker.Mock()
+    parser.parse_args().__dict__ = cli_config
+
+    result = get_config(parser, argv=[], defaults={}, tool=tool)
+    assert result["exclude"] == expected_exclude
+
+
+@pytest.mark.parametrize(
+    "tool,content,expected_include",
+    [
+        (Tool.DIFF_COVER, '[tool.diff_cover]\ninclude="src/**"', ["src/**"]),
+        (Tool.DIFF_QUALITY, '[tool.diff_quality]\ninclude="src/**"', ["src/**"]),
+    ],
+)
+def test_normalize_include_string(mocker, tmp_path, tool, content, expected_include):
+    """String include from TOML should be normalized to list."""
+    toml_file = tmp_path / "foo.toml"
+    toml_file.write_text(content)
+
+    cli_config = {"config_file": str(toml_file), "include": None}
+    parser = mocker.Mock()
+    parser.parse_args().__dict__ = cli_config
+
+    result = get_config(parser, argv=[], defaults={}, tool=tool)
+    assert result["include"] == expected_include
+
+
+def test_get_config_normalizes_both_patterns(mocker, tmp_path):
+    """get_config should normalize both exclude and include from TOML files."""
+    toml_file = tmp_path / "foo.toml"
+    toml_file.write_text('[tool.diff_cover]\nexclude="*.pyc"\ninclude="src/**"')
+
+    cli_config = {"config_file": str(toml_file), "exclude": None, "include": None}
+    parser = mocker.Mock()
+    parser.parse_args().__dict__ = cli_config
+
+    result = get_config(parser, argv=[], defaults={}, tool=Tool.DIFF_COVER)
+
+    assert result["exclude"] == ["*.pyc"]
+    assert result["include"] == ["src/**"]
