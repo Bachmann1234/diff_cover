@@ -1,3 +1,9 @@
+12/09/2025 v10.0.0
+
+* Remove python 3.9 support
+* Add python 3.14 support
+* Normalize exlude/include in pyproject.toml to support string or list
+
 11/10/2025 v9.7.2
 
 * Fix file path issue on windows. Thanks @amos-chen [PR 553](https://github.com/Bachmann1234/diff_cover/pull/553/files)
