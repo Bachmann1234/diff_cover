@@ -55,7 +55,7 @@ To install the latest release:
 
 .. code:: bash
 
-    pip install diff_cover
+    pip install diff-cover
 
 
 To install the development version:
