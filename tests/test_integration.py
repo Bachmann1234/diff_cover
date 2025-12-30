@@ -186,6 +186,22 @@ class TestDiffCoverIntegration:
         compare_json("add_json_report.json", "dummy/diff_coverage.json")
         compare_markdown("add_markdown_report.md", "dummy/diff_coverage.md")
 
+    def test_json_report_total_percent_float(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert (
+            runbin(
+                [
+                    "coverage.xml",
+                    "--format",
+                    "json:dummy/diff_coverage.json",
+                    "--total-percent-float",
+                    "-q",
+                ]
+            )
+            == 0
+        )
+        compare_json("add_json_report_float.json", "dummy/diff_coverage.json")
+
     def test_all_reports_with_stdout(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
         assert (
@@ -609,6 +625,24 @@ class TestDiffQualityIntegration:
         compare_html("pycodestyle_violations_report.html", "dummy/diff_coverage.html")
         compare_json("pycodestyle_violations_report.json", "dummy/diff_coverage.json")
         compare_markdown("pycodestyle_violations_report.md", "dummy/diff_coverage.md")
+
+    def test_json_report_total_percent_float(self, runbin, patch_git_command):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(
+                [
+                    "--violations=pycodestyle",
+                    "--format",
+                    "json:dummy/diff_coverage.json",
+                    "--total-percent-float",
+                    "-q",
+                ]
+            )
+            == 0
+        )
+        compare_json(
+            "pycodestyle_violations_report_float.json", "dummy/diff_coverage.json"
+        )
 
     def test_added_file_pyflakes_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_violations.txt")
