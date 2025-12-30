@@ -290,7 +290,11 @@ class TemplateReportGenerator(BaseReportGenerator):
     include_snippets = False
 
     def __init__(
-        self, violations_reporter, diff_reporter, css_url=None, total_percent_float=False
+        self,
+        violations_reporter,
+        diff_reporter,
+        css_url=None,
+        total_percent_float=False,
     ):
         super().__init__(
             violations_reporter,
