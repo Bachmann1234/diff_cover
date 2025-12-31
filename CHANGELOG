@@ -1,3 +1,7 @@
+12/30/2026 v10.1.0
+
+* Add support for floating-point total percentage in reports [PR 565](https://github.com/Bachmann1234/diff_cover/pull/565) thanks @tilaven
+
 12/09/2025 v10.0.0
 
 * Remove python 3.9 support
