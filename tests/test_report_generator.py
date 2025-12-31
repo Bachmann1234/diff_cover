@@ -212,6 +212,11 @@ class TestSimpleReportGenerator(BaseReportGeneratorTest):
         # individually.
         assert self.report.total_percent_covered() == 66
 
+    @pytest.mark.usefixtures("use_default_values")
+    def test_total_percent_covered_float(self, coverage, diff):
+        report = SimpleReportGenerator(coverage, diff, total_percent_float=True)
+        assert report.total_percent_covered() == pytest.approx(66.67)
+
 
 class TestTemplateReportGenerator(BaseReportGeneratorTest):
 
@@ -334,6 +339,24 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
 
         self.assert_report(expected)
 
+    @pytest.mark.usefixtures("use_default_values")
+    def test_total_percent_covered_float(self, coverage, diff):
+        output = BytesIO()
+        report = JsonReportGenerator(coverage, diff, total_percent_float=True)
+        report.generate_report(output)
+        report_data = json.loads(output.getvalue().decode("utf-8"))
+        assert isinstance(report_data["total_percent_covered"], float)
+        assert report_data["total_percent_covered"] == pytest.approx(66.67)
+
+    @pytest.mark.usefixtures("use_default_values")
+    def test_total_percent_covered_int(self, coverage, diff):
+        output = BytesIO()
+        report = JsonReportGenerator(coverage, diff)
+        report.generate_report(output)
+        report_data = json.loads(output.getvalue().decode("utf-8"))
+        assert isinstance(report_data["total_percent_covered"], int)
+        assert report_data["total_percent_covered"] == 66
+
 
 class TestStringReportGenerator(BaseReportGeneratorTest):
 
@@ -405,6 +428,14 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
         ).strip()
 
         self.assert_report(expected)
+
+    @pytest.mark.usefixtures("use_default_values")
+    def test_total_percent_covered_float(self, coverage, diff):
+        output = BytesIO()
+        report = StringReportGenerator(coverage, diff, total_percent_float=True)
+        report.generate_report(output)
+        report_output = output.getvalue().decode("utf-8")
+        assert "Coverage: 66.67%" in report_output
 
 
 class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):

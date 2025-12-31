@@ -51,6 +51,9 @@ EXPAND_COVERAGE_REPORT = (
 INCLUDE_UNTRACKED_HELP = "Include untracked files"
 CONFIG_FILE_HELP = "The configuration file to use"
 DIFF_FILE_HELP = "The diff file to use"
+TOTAL_PERCENT_FLOAT_HELP = (
+    "Show total coverage/quality as a float rounded to 2 decimal places"
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -181,6 +184,12 @@ def parse_coverage_args(argv):
     )
 
     parser.add_argument("--diff-file", type=str, default=None, help=DIFF_FILE_HELP)
+    parser.add_argument(
+        "--total-percent-float",
+        action="store_true",
+        default=None,
+        help=TOTAL_PERCENT_FLOAT_HELP,
+    )
 
     defaults = {
         "show_uncovered": False,
@@ -194,6 +203,7 @@ def parse_coverage_args(argv):
         "diff_range_notation": "...",
         "quiet": False,
         "expand_coverage_report": False,
+        "total_percent_float": False,
     }
 
     return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
@@ -214,6 +224,7 @@ def generate_coverage_report(
     quiet=False,
     show_uncovered=False,
     expand_coverage_report=False,
+    total_percent_float=False,
 ):
     """
     Generate the diff coverage report, using kwargs from `parse_args()`.
@@ -251,7 +262,9 @@ def generate_coverage_report(
         css_url = css_file
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
-        reporter = HtmlReportGenerator(coverage, diff, css_url=css_url)
+        reporter = HtmlReportGenerator(
+            coverage, diff, css_url=css_url, total_percent_float=total_percent_float
+        )
         with open_file(html_report, "wb") as output_file:
             reporter.generate_report(output_file)
         if css_file is not None:
@@ -260,13 +273,17 @@ def generate_coverage_report(
 
     if "json" in report_formats:
         json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
-        reporter = JsonReportGenerator(coverage, diff)
+        reporter = JsonReportGenerator(
+            coverage, diff, total_percent_float=total_percent_float
+        )
         with open_file(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     if "markdown" in report_formats:
         markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
-        reporter = MarkdownReportGenerator(coverage, diff)
+        reporter = MarkdownReportGenerator(
+            coverage, diff, total_percent_float=total_percent_float
+        )
         with open_file(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
@@ -276,11 +293,17 @@ def generate_coverage_report(
             coverage,
             diff,
             report_formats["github-annotations"],
+            total_percent_float=total_percent_float,
         )
         reporter.generate_report(sys.stdout.buffer)
 
     # Generate the report for stdout
-    reporter = StringReportGenerator(coverage, diff, show_uncovered)
+    reporter = StringReportGenerator(
+        coverage,
+        diff,
+        show_uncovered,
+        total_percent_float=total_percent_float,
+    )
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
 
     # Generate the report
@@ -376,6 +399,7 @@ def main(argv=None, directory=None):
         quiet=quiet,
         show_uncovered=arg_dict["show_uncovered"],
         expand_coverage_report=arg_dict["expand_coverage_report"],
+        total_percent_float=arg_dict["total_percent_float"],
     )
 
     if percent_covered >= fail_under:

@@ -42,7 +42,7 @@ class BaseReportGenerator(ABC):
     Generate a diff coverage report.
     """
 
-    def __init__(self, violations_reporter, diff_reporter):
+    def __init__(self, violations_reporter, diff_reporter, total_percent_float=False):
         """
         Configure the report generator to build a report
         from `violations_reporter` (of type BaseViolationReporter)
@@ -50,6 +50,7 @@ class BaseReportGenerator(ABC):
         """
         self._violations = violations_reporter
         self._diff = diff_reporter
+        self._total_percent_float = total_percent_float
         self._diff_violations_dict = None
 
         self._cache_violations = None
@@ -169,9 +170,12 @@ class BaseReportGenerator(ABC):
 
         if total_lines > 0:
             num_covered = total_lines - self.total_num_violations()
-            return int(float(num_covered) / total_lines * 100)
+            total_percent = float(num_covered) / total_lines * 100
+            if self._total_percent_float:
+                return round(total_percent, 2)
+            return int(total_percent)
 
-        return 100
+        return 100.0 if self._total_percent_float else 100
 
     def num_changed_lines(self):
         """Returns the number of changed lines."""
@@ -285,8 +289,18 @@ class TemplateReportGenerator(BaseReportGenerator):
     # that they want to include source file snippets.
     include_snippets = False
 
-    def __init__(self, violations_reporter, diff_reporter, css_url=None):
-        super().__init__(violations_reporter, diff_reporter)
+    def __init__(
+        self,
+        violations_reporter,
+        diff_reporter,
+        css_url=None,
+        total_percent_float=False,
+    ):
+        super().__init__(
+            violations_reporter,
+            diff_reporter,
+            total_percent_float=total_percent_float,
+        )
         self.css_url = css_url
 
     def generate_report(self, output_file):
@@ -347,7 +361,12 @@ class TemplateReportGenerator(BaseReportGenerator):
             snippet_style = None
 
         context = super().report_dict()
-        context.update({"css_url": self.css_url, "snippet_style": snippet_style})
+        context.update(
+            {
+                "css_url": self.css_url,
+                "snippet_style": snippet_style,
+            }
+        )
 
         return context
 
@@ -413,8 +432,18 @@ class StringReportGenerator(TemplateReportGenerator):
 
     template_path = "console_coverage_report.txt"
 
-    def __init__(self, violations_reporter, diff_reporter, show_uncovered=False):
-        super().__init__(violations_reporter, diff_reporter)
+    def __init__(
+        self,
+        violations_reporter,
+        diff_reporter,
+        show_uncovered=False,
+        total_percent_float=False,
+    ):
+        super().__init__(
+            violations_reporter,
+            diff_reporter,
+            total_percent_float=total_percent_float,
+        )
         self.include_snippets = show_uncovered
 
 
@@ -429,8 +458,18 @@ class GitHubAnnotationsReportGenerator(TemplateReportGenerator):
 
     template_path = "github_coverage_annotations.txt"
 
-    def __init__(self, violations_reporter, diff_reporter, annotations_type):
-        super().__init__(violations_reporter, diff_reporter)
+    def __init__(
+        self,
+        violations_reporter,
+        diff_reporter,
+        annotations_type,
+        total_percent_float=False,
+    ):
+        super().__init__(
+            violations_reporter,
+            diff_reporter,
+            total_percent_float=total_percent_float,
+        )
         self.annotations_type = annotations_type
 
     def _context(self):

@@ -30,6 +30,7 @@ from diff_cover.diff_cover_tool import (
     JSON_REPORT_DEFAULT_PATH,
     MARKDOWN_REPORT_DEFAULT_PATH,
     QUIET_HELP,
+    TOTAL_PERCENT_FLOAT_HELP,
     format_type,
     handle_old_format,
 )
@@ -200,6 +201,12 @@ def parse_quality_args(argv):
     parser.add_argument(
         "--report-root-path", help=REPORT_ROOT_PATH_HELP, metavar="ROOT_PATH"
     )
+    parser.add_argument(
+        "--total-percent-float",
+        action="store_true",
+        default=None,
+        help=TOTAL_PERCENT_FLOAT_HELP,
+    )
 
     defaults = {
         "ignore_whitespace": False,
@@ -211,6 +218,7 @@ def parse_quality_args(argv):
         "ignore_unstaged": False,
         "ignore_untracked": False,
         "quiet": False,
+        "total_percent_float": False,
     }
 
     return get_config(
@@ -230,6 +238,7 @@ def generate_quality_report(
     exclude=None,
     include=None,
     quiet=False,
+    total_percent_float=False,
 ):
     """
     Generate the quality report, using kwargs from `parse_args()`.
@@ -253,7 +262,9 @@ def generate_quality_report(
         css_url = css_file
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
-        reporter = HtmlQualityReportGenerator(tool, diff, css_url=css_url)
+        reporter = HtmlQualityReportGenerator(
+            tool, diff, css_url=css_url, total_percent_float=total_percent_float
+        )
         with open_file(html_report, "wb") as output_file:
             reporter.generate_report(output_file)
         if css_file is not None:
@@ -262,18 +273,24 @@ def generate_quality_report(
 
     if "json" in report_formats:
         json_report = report_formats["json"] or JSON_REPORT_DEFAULT_PATH
-        reporter = JsonReportGenerator(tool, diff)
+        reporter = JsonReportGenerator(
+            tool, diff, total_percent_float=total_percent_float
+        )
         with open_file(json_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     if "markdown" in report_formats:
         markdown_report = report_formats["markdown"] or MARKDOWN_REPORT_DEFAULT_PATH
-        reporter = MarkdownQualityReportGenerator(tool, diff)
+        reporter = MarkdownQualityReportGenerator(
+            tool, diff, total_percent_float=total_percent_float
+        )
         with open_file(markdown_report, "wb") as output_file:
             reporter.generate_report(output_file)
 
     # Generate the report for stdout
-    reporter = StringQualityReportGenerator(tool, diff)
+    reporter = StringQualityReportGenerator(
+        tool, diff, total_percent_float=total_percent_float
+    )
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
     reporter.generate_report(output_file)
 
@@ -367,6 +384,7 @@ def main(argv=None, directory=None):
                 exclude=arg_dict["exclude"],
                 include=arg_dict["include"],
                 quiet=quiet,
+                total_percent_float=arg_dict["total_percent_float"],
             )
             if percent_passing >= fail_under:
                 return 0

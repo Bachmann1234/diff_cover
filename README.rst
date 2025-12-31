@@ -219,6 +219,18 @@ You can then run ``diff-cover`` with the diff file as an argument:
 
     diff-cover coverage.xml --diff-file=diff.txt
 
+Total Percent Formatting
+------------------------
+
+By default, ``diff-cover`` and ``diff-quality`` round the total coverage/quality
+percentage to an integer. To keep up to two decimal places, use
+``--total-percent-float``:
+
+.. code:: bash
+
+    diff-cover coverage.xml --total-percent-float
+    diff-quality --violations=pycodestyle --total-percent-float
+
 Fail Under
 ----------
 
