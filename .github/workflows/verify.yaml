@@ -89,7 +89,7 @@ jobs:
           echo "ARTIFACT_NAME=coverage_${{ runner.os }}-py-${{ matrix.python-version }}" | sed 's|\\.\\*||g' >> "$GITHUB_ENV"
           poetry run pytest -n auto --cov-context test --cov --cov-report=xml tests
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           include-hidden-files: true
           if-no-files-found: error
@@ -148,7 +148,7 @@ jobs:
           poetry run diff-quality --violations flake8 --include-untracked
           poetry run diff-quality --violations pylint --include-untracked
       - name: Upload single coverage artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           include-hidden-files: true
           if-no-files-found: error
