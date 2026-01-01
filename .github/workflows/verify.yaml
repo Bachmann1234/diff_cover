@@ -127,7 +127,7 @@ jobs:
         shell: bash
         run: poetry install
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: downloaded_artifacts
       - name: Clean up temporary artifacts
