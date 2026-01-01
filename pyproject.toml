@@ -60,7 +60,7 @@ pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
 black = "^25.1.0"
 isort = "^6.0.1"
-doc8 = "1.1.2"
+doc8 = "2.0.0"
 ruff = ">=0.11.10,<0.15.0"
 
 [tool.poetry.extras]
