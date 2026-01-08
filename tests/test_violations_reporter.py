@@ -2351,5 +2351,7 @@ class TestQualityReporterSubdirectory:
         violations = quality.violations("subdir/file.py")
 
         # Verify violations are found (the fix makes this work)
-        expected = [Violation(line=10, message="error: Something is wrong  [error-code]")]
+        expected = [
+            Violation(line=10, message="error: Something is wrong  [error-code]")
+        ]
         assert violations == expected
