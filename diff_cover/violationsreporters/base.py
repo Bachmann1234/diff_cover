@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
 
 from diff_cover.command_runner import execute, run_command_for_code
+from diff_cover.git_path import GitPathTool
 from diff_cover.util import to_unix_path
 
 Violation = namedtuple("Violation", "line, message")
@@ -152,14 +153,19 @@ class QualityReporter(BaseViolationReporter):
         if not any(src_path.endswith(ext) for ext in self.driver.supported_extensions):
             return []
 
-        if src_path not in self.violations_dict:
+        # `src_path` is relative to the git root. We convert it to be relative to
+        # the current working directory, since quality tools report paths relative
+        # to the current working directory.
+        relative_src_path = to_unix_path(GitPathTool.relative_path(src_path))
+
+        if relative_src_path not in self.violations_dict:
             if self.reports:
                 self.violations_dict = self.driver.parse_reports(self.reports)
-                return self.violations_dict[src_path]
+                return self.violations_dict[relative_src_path]
 
-            if not os.path.exists(src_path):
-                self.violations_dict[src_path] = []
-                return self.violations_dict[src_path]
+            if not os.path.exists(relative_src_path):
+                self.violations_dict[relative_src_path] = []
+                return self.violations_dict[relative_src_path]
 
             if self.driver_tool_installed is None:
                 self.driver_tool_installed = self.driver.installed()
@@ -170,13 +176,13 @@ class QualityReporter(BaseViolationReporter):
             if self.options:
                 for arg in self.options.split():
                     command.append(arg)
-            command.append(src_path.encode(sys.getfilesystemencoding()))
+            command.append(relative_src_path.encode(sys.getfilesystemencoding()))
 
             stdout, stderr = execute(command, self.driver.exit_codes)
             output = stderr if self.driver.output_stderr else stdout
             self.violations_dict.update(self.driver.parse_reports([output]))
 
-        return self.violations_dict[src_path]
+        return self.violations_dict[relative_src_path]
 
     def measured_lines(self, src_path):
         """

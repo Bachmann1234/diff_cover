@@ -2312,3 +2312,46 @@ class TestClangFormatcheckQualityDriverTest:
         driver = ClangFormatDriver()
         actual_violations = driver.parse_reports([report])
         assert actual_violations == expected_violations
+
+
+class TestQualityReporterSubdirectory:
+    """
+    Test that QualityReporter works correctly when running from a subdirectory.
+
+    When running diff-quality from a subdirectory:
+    - Git reports paths relative to the git root (e.g., "subdir/file.py")
+    - Quality tools report paths relative to the current working directory (e.g., "file.py")
+    """
+
+    def test_violations_from_subdirectory(self, mocker, process_patcher):
+        """
+        Test that violations are found when running from a subdirectory.
+
+        Simulates running diff-quality from "subdir/" where:
+        - Git reports the file as "subdir/file.py" (relative to git root)
+        - The quality tool reports violations on "file.py" (relative to cwd)
+        """
+        from diff_cover.git_path import GitPathTool
+
+        # Simulate running from a subdirectory by mocking relative_path
+        # to strip the "subdir/" prefix (as it would when cwd is inside subdir/)
+        mocker.patch.object(
+            GitPathTool, "relative_path", side_effect=lambda x: x.replace("subdir/", "")
+        )
+
+        # Quality tool outputs violations with paths relative to cwd
+        # (without the "subdir/" prefix)
+        tool_output = "file.py:10: error: Something is wrong  [error-code]"
+        process_patcher((tool_output.encode("utf-8"), b""))
+
+        quality = QualityReporter(mypy_driver)
+
+        # Request violations using the git-relative path (with "subdir/" prefix)
+        # This is what diff-quality would pass based on git diff output
+        violations = quality.violations("subdir/file.py")
+
+        # Verify violations are found (the fix makes this work)
+        expected = [
+            Violation(line=10, message="error: Something is wrong  [error-code]")
+        ]
+        assert violations == expected

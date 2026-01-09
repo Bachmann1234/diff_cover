@@ -36,6 +36,10 @@ class GitPathTool:
         """
         Returns git_diff_path relative to cwd.
         """
+        # If GitPathTool hasn't been initialized, return the path unchanged
+        if cls._cwd is None or cls._root is None:
+            return git_diff_path
+
         # Remove git_root from src_path for searching the correct filename
         # If cwd is `/home/user/work/diff-cover/diff_cover`
         # and src_path is `diff_cover/violations_reporter.py`
