@@ -1,4 +1,8 @@
-12/30/2026 v10.1.0
+01/08/2026 v10.2.0
+
+* Fixes issue where diff quality could not be run from subfolders [PR 574](https://github.com/Bachmann1234/diff_cover/pull/574) [Issue 573](https://github.com/Bachmann1234/diff_cover/issues/573) Thanks @eacherkan-via
+
+12/30/2025 v10.1.0
 
 * Add support for floating-point total percentage in reports [PR 565](https://github.com/Bachmann1234/diff_cover/pull/565) thanks @tilaven
 
