@@ -151,15 +151,13 @@ class TestXmlCoverageReporterTest:
         In the wild empty sources can happen. See https://github.com/Bachmann1234/diff-cover/issues/88
         Best I can tell its mostly irrelevant but I mostly don't want it crashing
         """
-        xml = etree.fromstring(
-            """
+        xml = etree.fromstring("""
         <coverage line-rate="0.178" branch-rate="0.348" version="1.9" timestamp="1545037553" lines-covered="675" lines-valid="3787" branches-covered="260" branches-valid="747">
         <sources>
         <source></source>
         </sources>
         </coverage>
-        """
-        )
+        """)
 
         coverage = XmlCoverageReporter([xml])
 
@@ -1099,17 +1097,11 @@ class TestPycodestyleQualityReporterTest:
     def test_quality(self, mocker, process_patcher):
         # Patch the output of `pycodestyle`
         mocker.patch.object(Popen, "communicate")
-        return_string = (
-            "\n"
-            + dedent(
-                """
+        return_string = "\n" + dedent("""
                 ../new_file.py:1:17: E231 whitespace
                 ../new_file.py:3:13: E225 whitespace
                 ../new_file.py:7:1: E302 blank lines
-            """
-            ).strip()
-            + "\n"
-        )
+            """).strip() + "\n"
         process_patcher((return_string.encode("utf-8"), b""))
 
         # Parse the report
@@ -1179,31 +1171,15 @@ class TestPycodestyleQualityReporterTest:
         # When the user provides us with a pre-generated pycodestyle report
         # then use that instead of calling pycodestyle directly.
         pycodestyle_reports = [
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            BytesIO(("\n" + dedent("""
                 path/to/file.py:1:17: E231 whitespace
                 path/to/file.py:3:13: E225 whitespace
                 another/file.py:7:1: E302 blank lines
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            """).strip() + "\n").encode("utf-8")),
+            BytesIO(("\n" + dedent("""
                 path/to/file.py:24:2: W123 \u9134\u1912
                 another/file.py:50:1: E302 blank lines
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
+            """).strip() + "\n").encode("utf-8")),
         ]
 
         # Parse the report
@@ -1236,16 +1212,10 @@ class TestPyflakesQualityReporterTest:
 
     def test_quality(self, process_patcher):
         # Patch the output of `pyflakes`
-        return_string = (
-            "\n"
-            + dedent(
-                """
+        return_string = "\n" + dedent("""
                 ../new_file.py:328: undefined name '_thing'
                 ../new_file.py:418: 'random' imported but unused
-            """
-            ).strip()
-            + "\n"
-        )
+            """).strip() + "\n"
         process_patcher((return_string.encode("utf-8"), b""))
 
         # Parse the report
@@ -1312,31 +1282,15 @@ class TestPyflakesQualityReporterTest:
         # When the user provides us with a pre-generated pyflakes report
         # then use that instead of calling pyflakes directly.
         pyflakes_reports = [
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            BytesIO(("\n" + dedent("""
                 path/to/file.py:1: undefined name 'this'
                 path/to/file.py:3: 'random' imported but unused
                 another/file.py:7: 'os' imported but unused
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            """).strip() + "\n").encode("utf-8")),
+            BytesIO(("\n" + dedent("""
                 path/to/file.py:24: undefined name 'that'
                 another/file.py:50: undefined name 'another'
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
+            """).strip() + "\n").encode("utf-8")),
         ]
 
         # Parse the report
@@ -1365,10 +1319,7 @@ class TestPyflakesQualityReporterTest:
 class TestFlake8QualityReporterTest:
     def test_quality(self, process_patcher):
         # Patch the output of `flake8`
-        return_string = (
-            "\n"
-            + dedent(
-                """
+        return_string = "\n" + dedent("""
                 ../new_file.py:1:17: E231 whitespace
                 ../new_file.py:3:13: E225 whitespace
                 ../new_file.py:7:1: E302 blank lines
@@ -1383,10 +1334,7 @@ class TestFlake8QualityReporterTest:
                 ../new_file.py:100:0: S100 Snippet found
                 ../new_file.py:110:0: Q000 Remove Single quotes
                 ../new_file.py:120:0: ABCXYZ000 Dummy
-            """
-            ).strip()
-            + "\n"
-        )
+            """).strip() + "\n"
         process_patcher((return_string.encode("utf-8"), b""))
 
         # Parse the report
@@ -1475,31 +1423,15 @@ class TestFlake8QualityReporterTest:
         # When the user provides us with a pre-generated flake8 report
         # then use that instead of calling flake8 directly.
         flake8_reports = [
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            BytesIO(("\n" + dedent("""
                 path/to/file.py:1:17: E231 whitespace
                 path/to/file.py:3:13: E225 whitespace
                 another/file.py:7:1: E302 blank lines
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            """).strip() + "\n").encode("utf-8")),
+            BytesIO(("\n" + dedent("""
                 path/to/file.py:24:2: W123 \u9134\u1912
                 another/file.py:50:1: E302 blank lines
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
+            """).strip() + "\n").encode("utf-8")),
         ]
 
         # Parse the report
@@ -1548,16 +1480,12 @@ class TestPydocstlyeQualityReporterTest:
         # Patch the output of `pydocstye`
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             ../new_file.py:1 at module level:
                     D100: Missing docstring in public module
             ../new_file.py:13 in public function `gather`:
                     D103: Missing docstring in public function
-            """
-                )
-                .strip()
-                .encode("ascii"),
+            """).strip().encode("ascii"),
                 "",
             )
         )
@@ -1609,8 +1537,7 @@ class TestPylintQualityReporterTest:
         # Patch the output of `pylint`
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             file1.py:1: [C0111] Missing docstring
             file1.py:1: [C0111, func_1] Missing docstring
             file1.py:2: [W0612, cls_name.func] Unused variable 'd'
@@ -1632,10 +1559,7 @@ class TestPylintQualityReporterTest:
             import foo
             import bar
             path/to/file2.py:100: [W0212, openid_login_complete] Access to a protected member
-            """
-                )
-                .strip()
-                .encode("ascii"),
+            """).strip().encode("ascii"),
                 "",
             )
         )
@@ -1677,12 +1601,10 @@ class TestPylintQualityReporterTest:
     def test_unicode(self, process_patcher):
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             file_\u6729.py:616: [W1401] Anomalous backslash in string: '\u5922'. String constant might be missing an r prefix.
             file.py:2: [W0612, cls_name.func_\u9492] Unused variable '\u2920'
-            """
-                ).encode("utf-8"),
+            """).encode("utf-8"),
                 "",
             ),
             0,
@@ -1713,12 +1635,10 @@ class TestPylintQualityReporterTest:
     def test_non_integer_line_num(self, process_patcher):
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             file.py:not_a_number: C0111: Missing docstring
             file.py:\u8911: C0111: Missing docstring
-        """
-                ).encode("utf-8"),
+        """).encode("utf-8"),
                 "",
             ),
             0,
@@ -1782,9 +1702,7 @@ class TestPylintQualityReporterTest:
         # When the user provides us with a pre-generated pylint report
         # then use that instead of calling pylint directly.
         pylint_reports = [
-            BytesIO(
-                dedent(
-                    """
+            BytesIO(dedent("""
                 path/to/file.py:1: [C0111] Missing docstring
                 path/to/file.py:57: [W0511] TODO the name of this method is a little bit confusing
                 another/file.py:41: [W1201, assign_default_role] Specify string format arguments as logging function parameters
@@ -1793,21 +1711,11 @@ class TestPylintQualityReporterTest:
                           ^
                         Unicode: \u9404 \u1239
                 another/file.py:259: [C0103, bar] Invalid name "\u4920" for type variable (should match [a-z_][a-z0-9_]{2,30}$)
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
-            BytesIO(
-                dedent(
-                    """
+            """).strip().encode("utf-8")),
+            BytesIO(dedent("""
             path/to/file.py:183: [C0103, Foo.bar.gettag] Invalid name "\u3240" for type argument (should match [a-z_][a-z0-9_]{2,30}$)
             another/file.py:183: [C0111, Foo.bar.gettag] Missing docstring
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
+            """).strip().encode("utf-8")),
         ]
 
         # Generate the violation report
@@ -1884,16 +1792,10 @@ class JsQualityBaseReporterMixin:
         Test basic scenarios, including special characters that would appear in JavaScript and mixed quotation marks
         """
         # Patch the output of the linter cmd
-        return_string = (
-            "\n"
-            + dedent(
-                """
+        return_string = "\n" + dedent("""
                 ../test_file.js: line 3, col 9, Missing "use strict" statement.
                 ../test_file.js: line 10, col 17, '$hi' is defined but never used.
-            """
-            ).strip()
-            + "\n"
-        )
+            """).strip() + "\n"
         self.subproc_mock.communicate.return_value = (
             return_string.encode("utf-8"),
             b"",
@@ -1967,31 +1869,15 @@ class JsQualityBaseReporterMixin:
         # When the user provides us with a pre-generated linter report
         # then use that instead of calling linter directly.
         reports = [
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            BytesIO(("\n" + dedent("""
                 path/to/file.js: line 3, col 9, Missing "use strict" statement.
                 path/to/file.js: line 10, col 130, Line is too long.
                 another/file.js: line 1, col 1, 'require' is not defined.
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
-            BytesIO(
-                (
-                    "\n"
-                    + dedent(
-                        """
+            """).strip() + "\n").encode("utf-8")),
+            BytesIO(("\n" + dedent("""
                 path/to/file.js: line 12, col 14, \u9134\u1912
                 path/to/file.js: line 10, col 17, '$hi' is defined but never used.
-            """
-                    ).strip()
-                    + "\n"
-                ).encode("utf-8")
-            ),
+            """).strip() + "\n").encode("utf-8")),
         ]
 
         # Parse the report
@@ -2089,14 +1975,10 @@ class TestShellCheckQualityReporterTest:
         """Integration test."""
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             foo/bar/path/to/file.sh:2:18: note: Double quote to prevent globbing and word splitting. [SC2086]
             foo/bar/path/to/file.sh:53:10: warning: Use 'cd ... || exit' or 'cd ... || return' in case cd fails. [SC2164]
-            """
-                )
-                .strip()
-                .encode("ascii"),
+            """).strip().encode("ascii"),
                 "",
             )
         )
@@ -2248,8 +2130,7 @@ class TestRuffCheckQualityDriverTest:
         """Integration test."""
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             foo/bar/path/to/file.py:244:26: F541 [*] f-string without any placeholders
                 |
             242 |     ]
@@ -2271,10 +2152,7 @@ class TestRuffCheckQualityDriverTest:
             134 |                 dedent(
                 |
                 = help: Remove assignment to unused variable `e`
-            """
-                )
-                .strip()
-                .encode("ascii"),
+            """).strip().encode("ascii"),
                 "",
             )
         )

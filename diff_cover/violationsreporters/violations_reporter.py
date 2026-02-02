@@ -831,7 +831,7 @@ class CppcheckDriver(QualityDriver):
                 # Ignore any line that isn't matched
                 # (for example, snippets from the source code)
                 if match is not None:
-                    (cppcheck_src_path, line_number, message) = match.groups()
+                    cppcheck_src_path, line_number, message = match.groups()
 
                     violation = Violation(int(line_number), message)
                     violations_dict[util.to_unix_path(cppcheck_src_path)].append(

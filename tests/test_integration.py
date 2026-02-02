@@ -2,6 +2,7 @@
 # pylint: disable=use-implicit-booleaness-not-comparison
 
 """High-level integration tests of diff-cover tool."""
+
 import json
 import os
 import os.path
@@ -383,8 +384,7 @@ class TestDiffCoverIntegration:
         mocker.patch.object(GitPathTool, "_git_root", return_value="/code/samplediff/")
         patch_git_command.set_stdout("git_diff_dotnet.txt")
         assert runbin(["dotnet_coverage.xml"]) == 0
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
             -------------
             Diff Coverage
             Diff: origin/main...HEAD, staged and unstaged changes
@@ -395,8 +395,7 @@ class TestDiffCoverIntegration:
             Missing: 3 lines
             Coverage: 0%
             -------------
-            """
-        )
+            """)
         assert capsys.readouterr().out.strip() == expected.strip()
 
     def test_unicode_html(self, runbin, patch_git_command):
@@ -469,22 +468,19 @@ class TestDiffCoverIntegration:
         assert (
             runbin(["coverage.xml", "--format", "github-annotations:notice", "-q"]) == 0
         )
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
         ::notice file=test_src.txt,line=2,title=Missing Coverage::Line 2 missing coverage
         ::notice file=test_src.txt,line=4,title=Missing Coverage::Line 4 missing coverage
         ::notice file=test_src.txt,line=6,title=Missing Coverage::Line 6 missing coverage
         ::notice file=test_src.txt,line=8,title=Missing Coverage::Line 8 missing coverage
         ::notice file=test_src.txt,line=10,title=Missing Coverage::Line 10 missing coverage
-        """
-        )
+        """)
         assert capsys.readouterr().out == expected
 
     @pytest.mark.usefixtures("patch_git_command")
     def test_github_fully_covered(self, runbin, capsys):
         assert runbin(["coverage2.xml", "--format", "github-annotations:notice"]) == 0
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
         -------------
         Diff Coverage
         Diff: origin/main...HEAD, staged and unstaged changes
@@ -492,15 +488,13 @@ class TestDiffCoverIntegration:
         No lines with coverage information in this diff.
         -------------
 
-        """
-        )
+        """)
         assert capsys.readouterr().out == expected
 
     def test_github_empty_diff(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("")
         assert runbin(["coverage.xml", "--format", "github-annotations:notice"]) == 0
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
         -------------
         Diff Coverage
         Diff: origin/main...HEAD, staged and unstaged changes
@@ -508,8 +502,7 @@ class TestDiffCoverIntegration:
         No lines with coverage information in this diff.
         -------------
 
-        """
-        )
+        """)
         assert capsys.readouterr().out == expected
 
     def test_real_world_cpp_lcov_coverage(self, runbin, patch_git_command, capsys):

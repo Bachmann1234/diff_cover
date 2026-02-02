@@ -62,14 +62,10 @@ class TestCheckstyleQualityReporterTest:
         # Patch the output of `checkstyle`
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             [WARN] ../new_file.java:1:1: Line contains a tab character.
             [WARN] ../new_file.java:13: 'if' construct must use '{}'s.
-            """
-                )
-                .strip()
-                .encode("ascii"),
+            """).strip().encode("ascii"),
                 "",
             )
         )
@@ -127,8 +123,7 @@ class TestCheckstyleXmlQualityReporterTest:
         # Patch the output of `checkstyle`
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             <?xml version="1.0" encoding="UTF-8"?>
             <checkstyle version="8.0">
                 <file name="file1.java">
@@ -144,10 +139,7 @@ class TestCheckstyleXmlQualityReporterTest:
                     <error line="100" severity="error" message="Access to a protected member"/>
                 </file>
             </checkstyle>
-            """
-                )
-                .strip()
-                .encode("ascii"),
+            """).strip().encode("ascii"),
                 "",
             )
         )
@@ -187,16 +179,14 @@ class TestCheckstyleXmlQualityReporterTest:
         # Patch the output stderr/stdout and returncode of `checkstyle`
         process_patcher(
             (
-                dedent(
-                    """
+                dedent("""
             <?xml version="1.0" encoding="UTF-8"?>
             <checkstyle version="8.0">
                 <file name="file1.java">
                     <error line="1" severity="error" message="Missing docstring"/>
                 </file>
             </checkstyle>
-            """
-                ),
+            """),
                 b"oops",
             ),
             status_code=1,
@@ -216,9 +206,7 @@ class TestCheckstyleXmlQualityReporterTest:
         # When the user provides us with a pre-generated checkstyle report
         # then use that instead of calling checkstyle directly.
         checkstyle_reports = [
-            BytesIO(
-                dedent(
-                    """
+            BytesIO(dedent("""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <checkstyle version="8.0">
                     <file name="path/to/file.java">
@@ -231,14 +219,8 @@ class TestCheckstyleXmlQualityReporterTest:
                         <error line="259" severity="error" message="Invalid name '' for type variable (should match [a-z_][a-z0-9_]{2,30}$)"/>
                     </file>
                 </checkstyle>
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
-            BytesIO(
-                dedent(
-                    """
+            """).strip().encode("utf-8")),
+            BytesIO(dedent("""
             <?xml version="1.0" encoding="UTF-8"?>
             <checkstyle version="8.0">
                 <file name="path/to/file.java">
@@ -248,11 +230,7 @@ class TestCheckstyleXmlQualityReporterTest:
                     <error line="183" severity="error" message="Missing docstring"/>
                 </file>
             </checkstyle>
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
+            """).strip().encode("utf-8")),
         ]
 
         # Generate the violation report
@@ -307,9 +285,7 @@ class TestFindbugsQualityReporterTest:
         # When the user provides us with a pre-generated findbugs report
         # then use that instead of calling findbugs directly.
         findbugs_reports = [
-            BytesIO(
-                dedent(
-                    """
+            BytesIO(dedent("""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <BugCollection sequence="0" release="" analysisTimestamp="1512755361404" version="3.0.1" timestamp="1512755226000">
                     <BugInstance instanceOccurrenceNum="0" instanceHash="1967bf8c4d25c6b964f30356014aa9fb" rank="20" abbrev="Dm" category="I18N" priority="3" type="DM_CONVERT_CASE" instanceOccurrenceMax="0">
@@ -333,14 +309,8 @@ class TestFindbugsQualityReporterTest:
                         </SourceLine>
                     </BugInstance>
                 </BugCollection>
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
-            BytesIO(
-                dedent(
-                    """
+            """).strip().encode("utf-8")),
+            BytesIO(dedent("""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <BugCollection sequence="0" release="" analysisTimestamp="1512755361404" version="3.0.1" timestamp="1512755226000">
                     <BugInstance instanceOccurrenceNum="0" instanceHash="1967bf8c4d25c6b964f30356014aa9fb" rank="20" abbrev="Dm" category="I18N" priority="3" type="DM_CONVERT_CASE" instanceOccurrenceMax="0">
@@ -364,15 +334,9 @@ class TestFindbugsQualityReporterTest:
                         </SourceLine>
                     </BugInstance>
                 </BugCollection>
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
+            """).strip().encode("utf-8")),
             # this is a violation which is not bounded to a specific line. We'll skip those
-            BytesIO(
-                dedent(
-                    """
+            BytesIO(dedent("""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <BugCollection sequence="0" release="" analysisTimestamp="1512755361404" version="3.0.1" timestamp="1512755226000">
                     <BugInstance instanceOccurrenceNum="0" instanceHash="2820338ec68e2e75a81848c95d31167f" rank="19" abbrev="Se" category="BAD_PRACTICE" priority="3" type="SE_BAD_FIELD" instanceOccurrenceMax="0">
@@ -383,11 +347,7 @@ class TestFindbugsQualityReporterTest:
                         </SourceLine>
                     </BugInstance>
                 </BugCollection>
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            ),
+            """).strip().encode("utf-8")),
         ]
 
         # Generate the violation report
@@ -441,10 +401,7 @@ class TestPmdXmlQualityReporterTest:
     def test_quality_pregenerated_report(self):
         # When the user provides us with a pre-generated findbugs report
         # then use that instead of calling findbugs directly.
-        pmd_reports = [
-            BytesIO(
-                dedent(
-                    """
+        pmd_reports = [BytesIO(dedent("""
             <?xml version="1.0" encoding="UTF-8"?>
             <pmd version="5.6.1" timestamp="2019-06-24T15:47:13.429">
             <file name="path/to/file.java">
@@ -458,12 +415,7 @@ class TestPmdXmlQualityReporterTest:
             </violation>
             </file>
             </pmd>
-            """
-                )
-                .strip()
-                .encode("utf-8")
-            )
-        ]
+            """).strip().encode("utf-8"))]
 
         pmd_xml_driver = PmdXmlDriver()
         # Generate the violation report
