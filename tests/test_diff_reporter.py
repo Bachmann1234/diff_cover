@@ -246,8 +246,7 @@ def test_ignore_lines_outside_src(diff, git_diff):
 def test_one_line_file(diff, git_diff):
     # Files with only one line have a special format
     # in which the "length" part of the hunk is not specified
-    diff_str = dedent(
-        """
+    diff_str = dedent("""
         diff --git a/diff_cover/one_line.txt b/diff_cover/one_line.txt
         index 0867e73..9daeafb 100644
         --- a/diff_cover/one_line.txt
@@ -256,8 +255,7 @@ def test_one_line_file(diff, git_diff):
         test
         -test
         -test
-        """
-    ).strip()
+        """).strip()
 
     # Configure the git diff output
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
@@ -291,8 +289,7 @@ def test_git_deleted_lines(diff, git_diff):
 def test_git_unicode_filename(diff, git_diff):
     # Filenames with unicode characters have double quotes surrounding them
     # in the git diff output.
-    diff_str = dedent(
-        """
+    diff_str = dedent("""
         diff --git "a/unic\303\270\342\210\202e\314\201.txt" "b/unic\303\270\342\210\202e\314\201.txt"
         new file mode 100644
         index 0000000..248ebea
@@ -302,8 +299,7 @@ def test_git_unicode_filename(diff, git_diff):
         +μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆος
         +οὐλομένην, ἣ μυρί᾽ Ἀχαιοῖς ἄλγε᾽ ἔθηκε,
         +πολλὰς δ᾽ ἰφθίμους ψυχὰς Ἄϊδι προΐαψεν
-        """
-    ).strip()
+        """).strip()
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
     # Get the lines changed in the diff
@@ -429,28 +425,22 @@ def test_git_diff_error(
     diff,
     git_diff,
 ):
-    invalid_hunk_str = dedent(
-        """
+    invalid_hunk_str = dedent("""
         diff --git a/subdir/file1.py b/subdir/file1.py
         @@ invalid @@ Text
-    """
-    ).strip()
+    """).strip()
 
     no_src_line_str = "@@ -33,10 +34,13 @@ Text"
 
-    non_numeric_lines = dedent(
-        """
+    non_numeric_lines = dedent("""
         diff --git a/subdir/file1.py b/subdir/file1.py
         @@ -1,2 +a,b @@
-    """
-    ).strip()
+    """).strip()
 
-    missing_line_num = dedent(
-        """
+    missing_line_num = dedent("""
         diff --git a/subdir/file1.py b/subdir/file1.py
         @@ -1,2 +  @@
-    """
-    ).strip()
+    """).strip()
 
     missing_src_str = "diff --git "
 
@@ -478,16 +468,14 @@ def test_git_diff_error(
 
 def test_plus_sign_in_hunk_bug(diff, git_diff):
     # This was a bug that caused a parse error
-    diff_str = dedent(
-        """
+    diff_str = dedent("""
         diff --git a/file.py b/file.py
         @@ -16,16 +16,7 @@ 1 + 2
         + test
         + test
         + test
         + test
-        """
-    )
+        """)
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
 
@@ -498,16 +486,14 @@ def test_plus_sign_in_hunk_bug(diff, git_diff):
 def test_terminating_chars_in_hunk(diff, git_diff):
     # Check what happens when there's an @@ symbol after the
     # first terminating @@ symbol
-    diff_str = dedent(
-        """
+    diff_str = dedent("""
         diff --git a/file.py b/file.py
         @@ -16,16 +16,7 @@ and another +23,2 @@ symbol
         + test
         + test
         + test
         + test
-        """
-    )
+        """)
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
 
@@ -518,8 +504,7 @@ def test_terminating_chars_in_hunk(diff, git_diff):
 def test_merge_conflict_diff(diff, git_diff):
     # Handle different git diff format when in the middle
     # of a merge conflict
-    diff_str = dedent(
-        """
+    diff_str = dedent("""
         diff --cc subdir/src.py
         index d2034c0,e594d54..0000000
         diff --cc subdir/src.py
@@ -531,8 +516,7 @@ def test_merge_conflict_diff(diff, git_diff):
         ++<<<<<< HEAD
         + test
         ++=======
-    """
-    )
+    """)
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
 

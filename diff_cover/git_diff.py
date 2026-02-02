@@ -72,14 +72,10 @@ class GitDiffTool:
             )[0]
         except CommandError as e:
             if "unknown revision" in str(e):
-                raise ValueError(
-                    dedent(
-                        f"""
+                raise ValueError(dedent(f"""
                         Could not find the branch to compare to. Does '{compare_branch}' exist?
                         the `--compare-branch` argument allows you to set a different branch.
-                    """
-                    )
-                ) from e
+                    """)) from e
             raise
 
     def diff_unstaged(self):

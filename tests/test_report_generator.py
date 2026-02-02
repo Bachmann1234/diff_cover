@@ -368,8 +368,7 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
     @pytest.mark.usefixtures("use_default_values")
     def test_generate_report(self):
         # Verify that we got the expected string
-        expected = dedent(
-            """
+        expected = dedent("""
         -------------
         Diff Coverage
         Diff: main
@@ -381,8 +380,7 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
         Missing: 4 lines
         Coverage: 66%
         -------------
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -395,8 +393,7 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
         coverage_violations.update({"file.py": []})
         coverage_measured_lines.update({"file.py": [2]})
 
-        expected = dedent(
-            """
+        expected = dedent("""
         -------------
         Diff Coverage
         Diff: main
@@ -407,8 +404,7 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
         Missing: 0 lines
         Coverage: 100%
         -------------
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -416,16 +412,14 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
         # Have the dependencies return an empty report
         # (this is the default)
 
-        expected = dedent(
-            """
+        expected = dedent("""
         -------------
         Diff Coverage
         Diff: main
         -------------
         No lines with coverage information in this diff.
         -------------
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -448,12 +442,10 @@ class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):
     @pytest.mark.usefixtures("use_default_values")
     def test_generate_report(self):
         # Verify that we got the expected string
-        expected = dedent(
-            """
+        expected = dedent("""
         ::warning file=file1.py,line=10,endLine=11,title=Missing Coverage::Line 10-11 missing coverage
         ::warning file=subdir/file2.py,line=10,endLine=11,title=Missing Coverage::Line 10-11 missing coverage
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -466,11 +458,9 @@ class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):
         coverage_measured_lines.update({"file.py": [2]})
 
         # Verify that we got the expected string
-        expected = dedent(
-            """
+        expected = dedent("""
         ::warning file=file.py,line=10,title=Missing Coverage::Line 10 missing coverage
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -549,8 +539,7 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         # Generate a default report
 
         # Verify that we got the expected string
-        expected = dedent(
-            """
+        expected = dedent("""
         # Diff Coverage
         ## Diff: main
 
@@ -562,8 +551,7 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         - **Total**: 12 lines
         - **Missing**: 4 lines
         - **Coverage**: 66%
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -576,8 +564,7 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         coverage_violations.update({"file.py": []})
         coverage_measured_lines.update({"file.py": [2]})
 
-        expected = dedent(
-            """
+        expected = dedent("""
         # Diff Coverage
         ## Diff: main
 
@@ -588,8 +575,7 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         - **Total**: 1 line
         - **Missing**: 0 lines
         - **Coverage**: 100%
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
@@ -597,14 +583,12 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         # Have the dependencies return an empty report
         # (this is the default)
 
-        expected = dedent(
-            """
+        expected = dedent("""
         # Diff Coverage
         ## Diff: main
 
         No lines with coverage information in this diff.
-        """
-        ).strip()
+        """).strip()
 
         self.assert_report(expected)
 
