@@ -20,7 +20,11 @@ class DiffViolations:
     """
 
     def __init__(
-        self, violations, measured_lines, diff_lines, treat_unmeasured_as_uncovered=False
+        self,
+        violations,
+        measured_lines,
+        diff_lines,
+        treat_unmeasured_as_uncovered=False,
     ):
         self.lines = {violation.line for violation in violations}.intersection(
             diff_lines

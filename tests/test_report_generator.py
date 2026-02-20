@@ -618,9 +618,7 @@ class TestTreatUnmeasuredAsUncovered(BaseReportGeneratorTest):
 
     @pytest.fixture
     def report(self, coverage, diff):
-        return SimpleReportGenerator(
-            coverage, diff, treat_unmeasured_as_uncovered=True
-        )
+        return SimpleReportGenerator(coverage, diff, treat_unmeasured_as_uncovered=True)
 
     def test_unmeasured_diff_lines_become_violations(
         self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
