@@ -613,6 +613,97 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
         self.assert_report(expected)
 
 
+class TestTreatUnmeasuredAsUncovered(BaseReportGeneratorTest):
+    """Tests for the treat_unmeasured_as_uncovered flag."""
+
+    @pytest.fixture
+    def report(self, coverage, diff):
+        return SimpleReportGenerator(
+            coverage, diff, treat_unmeasured_as_uncovered=True
+        )
+
+    def test_unmeasured_diff_lines_become_violations(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        """When flag is enabled, diff lines absent from measured_lines become violations."""
+        diff.src_paths_changed.return_value = ["file.py"]
+        # Diff has lines 1, 2, 3
+        diff_lines_changed.update({"file.py": [1, 2, 3]})
+        # Coverage only measures line 1 (with a hit)
+        coverage_measured_lines.update({"file.py": [1]})
+        coverage_violations.update({"file.py": []})
+
+        # Lines 2 and 3 are unmeasured, should become violations
+        assert self.report.total_num_lines() == 3
+        assert self.report.total_num_violations() == 2
+        assert sorted(self.report.violation_lines("file.py")) == [2, 3]
+
+    def test_empty_measured_lines_no_expansion(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        """When measured_lines is empty (file not in coverage), no expansion happens."""
+        diff.src_paths_changed.return_value = ["file.py"]
+        diff_lines_changed.update({"file.py": [1, 2, 3]})
+        # Empty measured lines means file is not in coverage report
+        coverage_measured_lines.update({"file.py": []})
+        coverage_violations.update({"file.py": []})
+
+        # No measured lines means no expansion
+        assert self.report.total_num_lines() == 0
+        assert self.report.total_num_violations() == 0
+
+    def test_measured_lines_none_no_expansion(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        """When measured_lines is None (quality reporters), all diff lines are measured."""
+        diff.src_paths_changed.return_value = ["file.py"]
+        diff_lines_changed.update({"file.py": [1, 2, 3]})
+        # None means all lines are measured (quality reporter convention)
+        coverage_measured_lines.update({"file.py": None})
+        coverage_violations.update({"file.py": []})
+
+        # All 3 lines measured, no violations
+        assert self.report.total_num_lines() == 3
+        assert self.report.total_num_violations() == 0
+
+    def test_existing_violations_plus_unmeasured(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        """Existing violations are preserved alongside new unmeasured-line violations."""
+        diff.src_paths_changed.return_value = ["file.py"]
+        diff_lines_changed.update({"file.py": [1, 2, 3, 4]})
+        # Lines 1 and 2 are measured; line 2 is a violation
+        coverage_measured_lines.update({"file.py": [1, 2]})
+        coverage_violations.update({"file.py": [Violation(2, None)]})
+
+        # Line 2 is an existing violation, lines 3 and 4 are unmeasured -> violations
+        assert self.report.total_num_lines() == 4
+        assert self.report.total_num_violations() == 3
+        assert sorted(self.report.violation_lines("file.py")) == [2, 3, 4]
+
+
+class TestTreatUnmeasuredDisabled(BaseReportGeneratorTest):
+    """Tests to confirm default behavior (flag disabled) is preserved."""
+
+    @pytest.fixture
+    def report(self, coverage, diff):
+        return SimpleReportGenerator(coverage, diff)
+
+    def test_unmeasured_lines_not_flagged_by_default(
+        self, diff, diff_lines_changed, coverage_violations, coverage_measured_lines
+    ):
+        """With flag disabled, unmeasured diff lines are silently ignored."""
+        diff.src_paths_changed.return_value = ["file.py"]
+        diff_lines_changed.update({"file.py": [1, 2, 3]})
+        # Coverage only measures line 1
+        coverage_measured_lines.update({"file.py": [1]})
+        coverage_violations.update({"file.py": []})
+
+        # Only 1 measured line, no violations (lines 2,3 are ignored)
+        assert self.report.total_num_lines() == 1
+        assert self.report.total_num_violations() == 0
+
+
 class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTest):
 
     @pytest.fixture

@@ -466,6 +466,45 @@ def test_git_diff_error(
             diff.lines_changed("subdir/file1.py")
 
 
+def test_blank_added_lines_excluded(diff, git_diff):
+    """Blank/whitespace-only added lines should be excluded from lines_changed()."""
+    diff_str = dedent("""
+        diff --git a/file.py b/file.py
+        @@ -1,3 +1,6 @@
+         existing line
+        +
+        +def something():
+        +    print("hello")
+        +
+        +
+        """)
+
+    _set_git_diff_output(diff, git_diff, diff_str, "", "")
+
+    lines_changed = diff.lines_changed("file.py")
+    # Lines 2, 5, 6 are blank/whitespace-only, should be excluded
+    # Only lines 3 and 4 (non-blank added lines) should be included
+    assert lines_changed == [3, 4]
+
+
+def test_whitespace_only_added_lines_excluded(diff, git_diff):
+    """Added lines with only spaces/tabs should be excluded from lines_changed()."""
+    diff_str = dedent("""
+        diff --git a/file.py b/file.py
+        @@ -1,1 +1,4 @@
+         existing line
+        +    \t
+        +code_line
+        +
+        """)
+
+    _set_git_diff_output(diff, git_diff, diff_str, "", "")
+
+    lines_changed = diff.lines_changed("file.py")
+    # Only line 3 (code_line) should be included
+    assert lines_changed == [3]
+
+
 def test_plus_sign_in_hunk_bug(diff, git_diff):
     # This was a bug that caused a parse error
     diff_str = dedent("""

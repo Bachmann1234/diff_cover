@@ -399,8 +399,10 @@ class GitDiffReporter(BaseDiffReporter):
                 # calling this method, we're guaranteed to have a source
                 # file specified.  We check anyway just to be safe.
                 if current_line_new is not None:
-                    # Store the added line
-                    added_lines.append(current_line_new)
+                    # Skip blank/whitespace-only added lines
+                    if line[1:].strip():
+                        # Store the added line
+                        added_lines.append(current_line_new)
 
                     # Increment the line number in the file
                     current_line_new += 1
