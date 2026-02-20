@@ -117,6 +117,7 @@ class GitDiffReporter(BaseDiffReporter):
         supported_extensions=None,
         exclude=None,
         include=None,
+        filter_blank_lines=False,
     ):
         """
         Configure the reporter to use `git_diff` as the wrapper
@@ -148,6 +149,7 @@ class GitDiffReporter(BaseDiffReporter):
         self._ignore_unstaged = ignore_unstaged
         self._include_untracked = include_untracked
         self._supported_extensions = supported_extensions
+        self._filter_blank_lines = filter_blank_lines
 
         # Cache diff information as a dictionary
         # with file path keys and line number list values
@@ -377,6 +379,9 @@ class GitDiffReporter(BaseDiffReporter):
         where `ADDED_LINES` and `DELETED_LINES` are lists of line
         numbers added/deleted respectively.
 
+        If `self._filter_blank_lines` is True, blank/whitespace-only
+        added lines are excluded from `ADDED_LINES`.
+
         Raises a `GitDiffError` if the diff lines are in an invalid format.
         """
 
@@ -399,8 +404,8 @@ class GitDiffReporter(BaseDiffReporter):
                 # calling this method, we're guaranteed to have a source
                 # file specified.  We check anyway just to be safe.
                 if current_line_new is not None:
-                    # Skip blank/whitespace-only added lines
-                    if line[1:].strip():
+                    # Skip blank/whitespace-only added lines when filtering
+                    if not self._filter_blank_lines or line[1:].strip():
                         # Store the added line
                         added_lines.append(current_line_new)
 

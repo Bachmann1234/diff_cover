@@ -466,8 +466,8 @@ def test_git_diff_error(
             diff.lines_changed("subdir/file1.py")
 
 
-def test_blank_added_lines_excluded(diff, git_diff):
-    """Blank/whitespace-only added lines should be excluded from lines_changed()."""
+def test_blank_lines_included_by_default(diff, git_diff):
+    """Without filter_blank_lines, blank added lines are included in lines_changed()."""
     diff_str = dedent("""
         diff --git a/file.py b/file.py
         @@ -1,3 +1,6 @@
@@ -481,14 +481,33 @@ def test_blank_added_lines_excluded(diff, git_diff):
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
 
-    lines_changed = diff.lines_changed("file.py")
-    # Lines 2, 5, 6 are blank/whitespace-only, should be excluded
-    # Only lines 3 and 4 (non-blank added lines) should be included
-    assert lines_changed == [3, 4]
+    # All added lines are included (default behavior preserved)
+    assert diff.lines_changed("file.py") == [2, 3, 4, 5, 6]
 
 
-def test_whitespace_only_added_lines_excluded(diff, git_diff):
-    """Added lines with only spaces/tabs should be excluded from lines_changed()."""
+def test_blank_lines_filtered_when_flag_set(git_diff):
+    """With filter_blank_lines=True, blank added lines are excluded from lines_changed()."""
+    diff = GitDiffReporter(git_diff=git_diff, filter_blank_lines=True)
+    diff_str = dedent("""
+        diff --git a/file.py b/file.py
+        @@ -1,3 +1,6 @@
+         existing line
+        +
+        +def something():
+        +    print("hello")
+        +
+        +
+        """)
+
+    _set_git_diff_output(diff, git_diff, diff_str, "", "")
+
+    # Only non-blank added lines are included
+    assert diff.lines_changed("file.py") == [3, 4]
+
+
+def test_whitespace_only_lines_filtered_when_flag_set(git_diff):
+    """With filter_blank_lines=True, whitespace-only added lines are excluded."""
+    diff = GitDiffReporter(git_diff=git_diff, filter_blank_lines=True)
     diff_str = dedent("""
         diff --git a/file.py b/file.py
         @@ -1,1 +1,4 @@
@@ -500,9 +519,8 @@ def test_whitespace_only_added_lines_excluded(diff, git_diff):
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
 
-    lines_changed = diff.lines_changed("file.py")
-    # Only line 3 (code_line) should be included
-    assert lines_changed == [3]
+    # Only non-blank added line is included
+    assert diff.lines_changed("file.py") == [3]
 
 
 def test_plus_sign_in_hunk_bug(diff, git_diff):

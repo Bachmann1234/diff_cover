@@ -248,6 +248,7 @@ def generate_coverage_report(
         include_untracked=include_untracked,
         exclude=exclude,
         include=include,
+        filter_blank_lines=treat_unmeasured_as_uncovered,
     )
 
     xml_roots = [
