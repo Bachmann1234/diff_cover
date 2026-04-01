@@ -131,7 +131,7 @@ jobs:
         with:
           path: downloaded_artifacts
       - name: Clean up temporary artifacts
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@v6
         with:
           name: coverage_*
       - name: Combine coverage.py
