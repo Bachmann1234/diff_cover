@@ -6,7 +6,18 @@ in HTML reports.
 import contextlib
 from tokenize import open as openpy
 
-import chardet
+try:
+    import charset_normalizer
+
+    _detect_encoding = charset_normalizer.detect
+except ImportError:
+    try:
+        import chardet
+
+        _detect_encoding = chardet.detect
+    except ImportError:
+        _detect_encoding = None
+
 import pygments
 from pygments.formatters.html import HtmlFormatter
 from pygments.formatters.terminal import TerminalFormatter
@@ -207,17 +218,21 @@ class Snippet:
                 contents = src_file.read()
 
         if isinstance(contents, bytes):
-            encoding = chardet.detect(contents).get("encoding", "utf-8")
-            with contextlib.suppress(UnicodeDecodeError):
-                contents = contents.decode(encoding)
+            if _detect_encoding is not None:
+                encoding = _detect_encoding(contents).get("encoding", "utf-8")
+                with contextlib.suppress(UnicodeDecodeError):
+                    contents = contents.decode(encoding)
+            else:
+                # No encoding detection library available — try utf-8
+                with contextlib.suppress(UnicodeDecodeError):
+                    contents = contents.decode("utf-8")
 
         if isinstance(contents, bytes):
             # We failed to decode the file.
-            # if this is happening a lot I should just bite the bullet
-            # and write a parameter to let people list their file encodings
             print(
-                "Warning: I was not able to decode your src file. "
-                "I can continue but code snippets in the final report may look wrong"
+                "Warning: Unable to detect encoding for source file. "
+                "Install charset-normalizer or chardet for better encoding support. "
+                "Falling back to utf-8 with replacements."
             )
             contents = contents.decode("utf-8", "replace")
         return contents
