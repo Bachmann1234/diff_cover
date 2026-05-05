@@ -44,7 +44,8 @@ python = ">=3.10"
 Pygments = "^2.19.1"
 Jinja2 = ">=2.7.1"
 pluggy = ">=0.13.1,<2"
-chardet = ">=3.0.0"
+charset-normalizer = ">=2.0.0"
+chardet = {version = ">=3.0.0", optional = true}
 tomli = {version = ">=1.2.1", optional = true}
 
 [tool.poetry.group.dev.dependencies]
@@ -65,6 +66,7 @@ ruff = ">=0.11.10,<0.16.0"
 
 [tool.poetry.extras]
 toml = ["tomli"]
+chardet = ["chardet"]
 
 [build-system]
 requires = ["poetry-core>=1.0.7"]
