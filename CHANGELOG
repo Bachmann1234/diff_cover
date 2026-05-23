@@ -1,3 +1,7 @@
+05/23/2026 v10.2.1
+
+* Fix --help hiding most CLI options in diff-cover/diff-quality [PR 599](https://github.com/Bachmann1234/diff_cover/pull/599) Thanks @duxiaocheng
+
 01/08/2026 v10.2.0
 
 * Fixes issue where diff quality could not be run from subfolders [PR 574](https://github.com/Bachmann1234/diff_cover/pull/574) [Issue 573](https://github.com/Bachmann1234/diff_cover/issues/573) Thanks @eacherkan-via
