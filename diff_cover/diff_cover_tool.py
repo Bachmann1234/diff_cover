@@ -312,7 +312,7 @@ def generate_coverage_report(
 
 
 def handle_old_format(description, argv):
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(description=description, add_help=False)
     arg_html = parser.add_argument("--html-report", type=str)
     arg_json = parser.add_argument("--json-report", type=str)
     arg_markdown = parser.add_argument("--markdown-report", type=str)
