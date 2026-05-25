@@ -4,6 +4,7 @@ in HTML reports.
 """
 
 import contextlib
+import re
 from tokenize import open as openpy
 
 import chardet
@@ -23,7 +24,10 @@ class Snippet:
     """
 
     VIOLATION_COLOR = "#ffcccc"
+    COVERED_COLOR = "#ddffdd"
     DIV_CSS_CLASS = "snippet"
+    COVERED_LINE_CSS_CLASS = "diff-cover-covered-line"
+    LINESPANS_PREFIX = "diff-cover-src-line"
 
     # Number of extra lines to include before and after
     # each snippet to provide context.
@@ -50,6 +54,7 @@ class Snippet:
         last_line,
         violation_lines,
         lexer_name,
+        covered_lines=None,
     ):
         """
         Create a source code snippet.
@@ -75,6 +80,10 @@ class Snippet:
         programming language for this snippet.
         See https://pygments.org/docs/lexers/
 
+        `covered_lines` is an optional list of line numbers
+        to highlight as covered. When omitted (the default),
+        no covered-line highlighting is rendered.
+
         Raises a `ValueError` if `start_line` is less than 1
         """
         if start_line < 1:
@@ -86,6 +95,7 @@ class Snippet:
         self._last_line = last_line
         self._violation_lines = violation_lines
         self._lexer_name = lexer_name
+        self._covered_lines = covered_lines or []
 
     @classmethod
     def style_defs(cls):
@@ -95,21 +105,76 @@ class Snippet:
         """
         formatter = HtmlFormatter()
         formatter.style.highlight_color = cls.VIOLATION_COLOR
-        return formatter.get_style_defs()
+        base_styles = formatter.get_style_defs()
+        # Append a rule for covered-line highlighting.
+        covered_style = (
+            f".{cls.COVERED_LINE_CSS_CLASS} "
+            f"{{ background-color: {cls.COVERED_COLOR}; }}"
+        )
+        return f"{base_styles}\n{covered_style}"
 
     def html(self):
         """
         Return an HTML representation of the snippet.
+
+        Violation lines are highlighted via Pygments' built-in
+        `hl_lines` mechanism. When the snippet was constructed with
+        `covered_lines`, those lines are additionally marked by adding
+        the covered-line CSS class to their per-line span, produced via
+        the `linespans` formatter option.
         """
-        formatter = HtmlFormatter(
+        formatter_kwargs = dict(
             cssclass=self.DIV_CSS_CLASS,
             linenos=True,
             linenostart=self._start_line,
             hl_lines=self._shift_lines(self._violation_lines, self._start_line),
             lineanchors=self._src_filename,
         )
+        # Only enable per-line `<span id="...">` wrapping when we actually
+        # need it for covered-line highlighting. This keeps the rendered
+        # HTML byte-for-byte identical to the historical output when no
+        # covered lines are supplied.
+        if self._covered_lines:
+            formatter_kwargs["linespans"] = self.LINESPANS_PREFIX
 
-        return pygments.format(self.src_tokens(), formatter)
+        rendered = pygments.format(
+            self.src_tokens(), HtmlFormatter(**formatter_kwargs)
+        )
+
+        if self._covered_lines:
+            # NOTE: do NOT shift these line numbers. Unlike `hl_lines`
+            # (which is snippet-relative, 1-based), Pygments' `linespans`
+            # IDs are emitted using the same numbering as `linenostart`,
+            # i.e. the absolute file line number. So we match the raw
+            # values from `_covered_lines` directly.
+            rendered = self._mark_covered_lines(rendered, self._covered_lines)
+
+        return rendered
+
+    @classmethod
+    def _mark_covered_lines(cls, html, covered_file_lines):
+        """
+        Add the covered-line CSS class to per-line spans whose line
+        number is in `covered_file_lines`.
+
+        `covered_file_lines` are absolute (file-relative) line numbers,
+        matching the IDs that Pygments emits via `linespans` when
+        `linenostart` is set to the snippet's starting line number.
+        """
+        wanted = set(covered_file_lines)
+        if not wanted:
+            return html
+
+        prefix = cls.LINESPANS_PREFIX
+        css_class = cls.COVERED_LINE_CSS_CLASS
+
+        def _replace(match):
+            line_num = int(match.group(1))
+            if line_num in wanted:
+                return f'<span id="{prefix}-{line_num}" class="{css_class}">'
+            return match.group(0)
+
+        return re.sub(rf'<span id="{re.escape(prefix)}-(\d+)">', _replace, html)
 
     def markdown(self):
         """
@@ -174,24 +239,40 @@ class Snippet:
         return "".join([val for _, val in self._src_tokens])
 
     @classmethod
-    def load_formatted_snippets(cls, src_path, violation_lines):
+    def load_formatted_snippets(cls, src_path, violation_lines, covered_lines=None):
         """
         Load snippets from the file at `src_path` and format
         them as HTML and as plain text.
         Returns a dictionary containing the two types of formatting
         results for code snippets.
 
+        If `covered_lines` is provided (non-empty), the HTML output will
+        additionally render snippets around those lines and highlight
+        them as covered. Markdown and terminal output is unchanged
+        regardless of `covered_lines`, to keep those formats stable.
+
         See `load_snippets()` for details.
         """
 
-        # load once...
-        snippet_list = cls.load_snippets(src_path, violation_lines)
+        # Snippets used for markdown/terminal output keep the historical
+        # behaviour: ranges only around violation lines, no covered-line
+        # information attached.
+        violation_only_snippets = cls.load_snippets(src_path, violation_lines)
 
-        # ...render twice in different formats
+        if covered_lines:
+            # HTML rendering also visualises covered diff lines, so widen
+            # the snippet ranges to include them and pass the covered list
+            # through to the snippet for per-line highlighting.
+            html_snippets = cls.load_snippets(
+                src_path, violation_lines, covered_lines
+            )
+        else:
+            html_snippets = violation_only_snippets
+
         return {
-            "html": [snippet.html() for snippet in snippet_list],
-            "markdown": [snippet.markdown() for snippet in snippet_list],
-            "terminal": [snippet.terminal() for snippet in snippet_list],
+            "html": [snippet.html() for snippet in html_snippets],
+            "markdown": [snippet.markdown() for snippet in violation_only_snippets],
+            "terminal": [snippet.terminal() for snippet in violation_only_snippets],
         }
 
     @classmethod
@@ -223,11 +304,16 @@ class Snippet:
         return contents
 
     @classmethod
-    def load_snippets(cls, src_path, violation_lines):
+    def load_snippets(cls, src_path, violation_lines, covered_lines=None):
         """
         Load snippets from the file at `src_path` to show
         violations on lines in the list `violation_lines`
         (list of line numbers, starting at index 0).
+
+        If `covered_lines` is provided, those lines are also treated as
+        "interesting" when computing snippet ranges (so a fully-covered
+        file still yields snippets) and are stored on the resulting
+        `Snippet` instances for use during rendering.
 
         The file at `src_path` should be a text file (not binary).
 
@@ -237,9 +323,15 @@ class Snippet:
         """
         contents = cls.load_contents(src_path)
 
-        # Construct a list of snippet ranges
+        # Construct a list of snippet ranges. When `covered_lines` is
+        # provided, expand the set of "interesting" lines so we also
+        # render context around covered diff lines, not just violations.
         src_lines = contents.split("\n")
-        snippet_ranges = cls._snippet_ranges(len(src_lines), violation_lines)
+        if covered_lines:
+            interesting_lines = sorted(set(violation_lines) | set(covered_lines))
+        else:
+            interesting_lines = violation_lines
+        snippet_ranges = cls._snippet_ranges(len(src_lines), interesting_lines)
 
         # Parse the source into tokens
         token_stream, lexer = cls._parse_src(contents, src_path)
@@ -248,7 +340,15 @@ class Snippet:
         token_groups = cls._group_tokens(token_stream, snippet_ranges)
 
         return [
-            Snippet(tokens, src_path, start, end, violation_lines, lexer.name)
+            Snippet(
+                tokens,
+                src_path,
+                start,
+                end,
+                violation_lines,
+                lexer.name,
+                covered_lines=covered_lines,
+            )
             for (start, end), tokens in sorted(token_groups.items())
         ]
 

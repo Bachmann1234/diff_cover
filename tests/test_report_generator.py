@@ -498,6 +498,41 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
         expected = load_fixture("html_report.html")
         self.assert_report(expected)
 
+    @pytest.mark.usefixtures("use_default_values")
+    def test_show_covered_passes_covered_lines_to_snippets(
+        self, coverage, diff
+    ):
+        """
+        When `show_covered=True`, the html reporter should pass each
+        source file's covered lines into `Snippet.load_formatted_snippets`
+        so the snippet renderer can highlight them.
+        """
+        report = HtmlReportGenerator(coverage, diff, show_covered=True)
+        report.generate_report(BytesIO())
+
+        calls = self._load_formatted_snippets.call_args_list
+        assert calls, "Expected snippet loading to be invoked"
+        for call in calls:
+            assert call.kwargs.get("covered_lines"), (
+                "Expected covered_lines to be forwarded when show_covered=True"
+            )
+
+    @pytest.mark.usefixtures("use_default_values")
+    def test_show_covered_default_false_does_not_pass_covered_lines(
+        self, coverage, diff
+    ):
+        """
+        With the default `show_covered=False`, no covered_lines should be
+        passed to the snippet loader, preserving the historical behaviour.
+        """
+        report = HtmlReportGenerator(coverage, diff)
+        report.generate_report(BytesIO())
+
+        calls = self._load_formatted_snippets.call_args_list
+        assert calls, "Expected snippet loading to be invoked"
+        for call in calls:
+            assert call.kwargs.get("covered_lines") is None
+
     def test_empty_report(self):
         # Have the dependencies return an empty report
         # (this is the default)

@@ -37,6 +37,16 @@ def test_parse_with_no_report():
     assert not arg_dict["ignore_unstaged"]
 
 
+def test_show_covered_defaults_false():
+    arg_dict = parse_coverage_args(["reports/coverage.xml"])
+    assert arg_dict["show_covered"] is False
+
+
+def test_show_covered_flag():
+    arg_dict = parse_coverage_args(["reports/coverage.xml", "--show-covered"])
+    assert arg_dict["show_covered"] is True
+
+
 def test_parse_with_multiple_reports():
     argv = [
         "reports/coverage.xml",
