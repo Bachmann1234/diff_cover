@@ -499,9 +499,7 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
         self.assert_report(expected)
 
     @pytest.mark.usefixtures("use_default_values")
-    def test_show_covered_passes_covered_lines_to_snippets(
-        self, coverage, diff
-    ):
+    def test_show_covered_passes_covered_lines_to_snippets(self, coverage, diff):
         """
         When `show_covered=True`, the html reporter should pass each
         source file's covered lines into `Snippet.load_formatted_snippets`
@@ -513,9 +511,9 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
         calls = self._load_formatted_snippets.call_args_list
         assert calls, "Expected snippet loading to be invoked"
         for call in calls:
-            assert call.kwargs.get("covered_lines"), (
-                "Expected covered_lines to be forwarded when show_covered=True"
-            )
+            assert call.kwargs.get(
+                "covered_lines"
+            ), "Expected covered_lines to be forwarded when show_covered=True"
 
     @pytest.mark.usefixtures("use_default_values")
     def test_show_covered_default_false_does_not_pass_covered_lines(

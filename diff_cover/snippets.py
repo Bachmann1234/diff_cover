@@ -137,9 +137,7 @@ class Snippet:
         if self._covered_lines:
             formatter_kwargs["linespans"] = self.LINESPANS_PREFIX
 
-        rendered = pygments.format(
-            self.src_tokens(), HtmlFormatter(**formatter_kwargs)
-        )
+        rendered = pygments.format(self.src_tokens(), HtmlFormatter(**formatter_kwargs))
 
         if self._covered_lines:
             # NOTE: do NOT shift these line numbers. Unlike `hl_lines`
@@ -263,9 +261,7 @@ class Snippet:
             # HTML rendering also visualises covered diff lines, so widen
             # the snippet ranges to include them and pass the covered list
             # through to the snippet for per-line highlighting.
-            html_snippets = cls.load_snippets(
-                src_path, violation_lines, covered_lines
-            )
+            html_snippets = cls.load_snippets(src_path, violation_lines, covered_lines)
         else:
             html_snippets = violation_only_snippets
 
