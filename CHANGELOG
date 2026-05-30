@@ -1,3 +1,10 @@
+05/30/2026 v10.3.0
+
+* Add --show-covered flag to highlight covered diff lines in HTML report [PR 600](https://github.com/Bachmann1234/diff_cover/pull/600) Thanks @duxiaocheng
+
+
+* Update readme with cli flags [PR 601](https://github.com/Bachmann1234/diff_cover/pull/601) Thanks me
+
 05/23/2026 v10.2.1
 
 * Fix --help hiding most CLI options in diff-cover/diff-quality [PR 599](https://github.com/Bachmann1234/diff_cover/pull/599) Thanks @duxiaocheng
