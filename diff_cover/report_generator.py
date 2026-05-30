@@ -295,6 +295,7 @@ class TemplateReportGenerator(BaseReportGenerator):
         diff_reporter,
         css_url=None,
         total_percent_float=False,
+        show_covered=False,
     ):
         super().__init__(
             violations_reporter,
@@ -302,6 +303,11 @@ class TemplateReportGenerator(BaseReportGenerator):
             total_percent_float=total_percent_float,
         )
         self.css_url = css_url
+        # When True, the rendered HTML snippet for each source file will
+        # additionally highlight covered diff lines (in green) on top of
+        # the existing violation (red) highlighting. Defaults to False to
+        # preserve historical behaviour.
+        self.show_covered = show_covered
 
     def generate_report(self, output_file):
         """
@@ -406,9 +412,12 @@ class TemplateReportGenerator(BaseReportGenerator):
         # If we cannot load the file, then fail gracefully
         formatted_snippets = {"html": [], "markdown": [], "terminal": []}
         if self.include_snippets:
+            covered_lines = stats["covered_lines"] if self.show_covered else None
             with contextlib.suppress(OSError):
                 formatted_snippets = Snippet.load_formatted_snippets(
-                    src_path, stats["violation_lines"]
+                    src_path,
+                    stats["violation_lines"],
+                    covered_lines=covered_lines,
                 )
 
         stats.update(

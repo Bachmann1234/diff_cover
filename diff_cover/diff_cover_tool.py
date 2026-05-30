@@ -45,6 +45,10 @@ DIFF_RANGE_NOTATION_HELP = (
 )
 QUIET_HELP = "Only print errors and failures"
 SHOW_UNCOVERED = "Show uncovered lines on the console"
+SHOW_COVERED_HELP = (
+    "Also highlight covered diff lines (in green) in the HTML coverage report, "
+    "in addition to the existing missing-line (red) highlighting."
+)
 EXPAND_COVERAGE_REPORT = (
     "Append missing lines in coverage reports based on the hits of the previous line."
 )
@@ -97,6 +101,13 @@ def parse_coverage_args(argv):
 
     parser.add_argument(
         "--show-uncovered", action="store_true", default=None, help=SHOW_UNCOVERED
+    )
+
+    parser.add_argument(
+        "--show-covered",
+        action="store_true",
+        default=None,
+        help=SHOW_COVERED_HELP,
     )
 
     parser.add_argument(
@@ -193,6 +204,7 @@ def parse_coverage_args(argv):
 
     defaults = {
         "show_uncovered": False,
+        "show_covered": False,
         "compare_branch": "origin/main",
         "fail_under": 0,
         "ignore_staged": False,
@@ -223,6 +235,7 @@ def generate_coverage_report(
     src_roots=None,
     quiet=False,
     show_uncovered=False,
+    show_covered=False,
     expand_coverage_report=False,
     total_percent_float=False,
 ):
@@ -263,7 +276,11 @@ def generate_coverage_report(
         if css_url is not None:
             css_url = os.path.relpath(css_file, os.path.dirname(html_report))
         reporter = HtmlReportGenerator(
-            coverage, diff, css_url=css_url, total_percent_float=total_percent_float
+            coverage,
+            diff,
+            css_url=css_url,
+            total_percent_float=total_percent_float,
+            show_covered=show_covered,
         )
         with open_file(html_report, "wb") as output_file:
             reporter.generate_report(output_file)
@@ -398,6 +415,7 @@ def main(argv=None, directory=None):
         src_roots=arg_dict["src_roots"],
         quiet=quiet,
         show_uncovered=arg_dict["show_uncovered"],
+        show_covered=arg_dict["show_covered"],
         expand_coverage_report=arg_dict["expand_coverage_report"],
         total_percent_float=arg_dict["total_percent_float"],
     )
