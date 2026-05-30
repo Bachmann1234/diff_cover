@@ -288,6 +288,83 @@ It can be enabled by using the ``-q``/``--quiet`` flag:
 
 If enabled, the tool will only print errors and failures but no information or warning messages.
 
+Showing Covered and Uncovered Lines
+-----------------------------------
+By default the console report only lists the percentage of covered lines.
+
+``diff-cover`` can also show the individual lines that lack coverage on the
+console with ``--show-uncovered``:
+
+.. code:: bash
+
+    diff-cover coverage.xml --show-uncovered
+
+When generating an HTML report, ``--show-covered`` additionally highlights the
+covered diff lines (in green), alongside the existing missing-line (red)
+highlighting:
+
+.. code:: bash
+
+    diff-cover coverage.xml --html-report report.html --show-covered
+
+Source Roots
+------------
+For ``jacoco`` coverage reports, ``diff-cover`` needs to know the source
+directories in order to map coverage data back to source files. Provide one or
+more directories with ``--src-roots`` (defaults to ``src/main/java`` and
+``src/test/java``):
+
+.. code:: bash
+
+    diff-cover coverage.xml --src-roots src/main/java src/test/java
+
+Report Root Path
+----------------
+``diff-quality`` resolves violation report paths relative to the current working
+directory. If your quality tool was run from a different directory, use
+``--report-root-path`` to specify the root path that should be used when
+generating the report:
+
+.. code:: bash
+
+    diff-quality --violations=pycodestyle --report-root-path=path/to/root
+
+External CSS File
+-----------------
+By default an HTML report embeds its styles inline. To write the CSS into a
+separate file instead, use ``--external-css-file``:
+
+.. code:: bash
+
+    diff-cover coverage.xml --html-report report.html --external-css-file report.css
+    diff-quality --violations=pycodestyle --html-report report.html --external-css-file report.css
+
+Diff Range Notation
+-------------------
+When comparing branches, ``diff-cover`` and ``diff-quality`` use the ``...``
+git diff range notation by default (changes on the current branch since it
+diverged from the compare branch). To use the ``..`` notation instead (all
+differences between the two branches), pass ``--diff-range-notation``:
+
+.. code:: bash
+
+    diff-cover coverage.xml --diff-range-notation=..
+    diff-quality --violations=pycodestyle --diff-range-notation=..
+
+See the `git diff documentation`_ for details on the two notations.
+
+.. _git diff documentation: https://git-scm.com/docs/git-diff
+
+Ignore Whitespace
+-----------------
+To ignore any and all whitespace changes when computing the diff, use
+``--ignore-whitespace``:
+
+.. code:: bash
+
+    diff-cover coverage.xml --ignore-whitespace
+    diff-quality --violations=pycodestyle --ignore-whitespace
+
 Compatibility with multi-line statements
 ----------------------------------------
 ``diff-cover`` relies on the comparison of diff reports and coverage reports, and does not report
