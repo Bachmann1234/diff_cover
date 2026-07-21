@@ -333,6 +333,75 @@ class TestXmlCoverageReporterTest:
 
         assert set() == coverage.violations("file1.java")
 
+    def test_partial_branch_is_violation_when_branch_coverage_enabled(self):
+        # A line that executed (hits=1) but only exercised 1 of its 2
+        # branches. With branch coverage enabled this should count as a
+        # violation, even though the statement itself ran.
+        xml = etree.fromstring("""<?xml version="1.0"?>
+            <coverage>
+                <packages><classes>
+                    <class filename="file1.py">
+                        <lines>
+                            <line number="1" hits="1"/>
+                            <line number="2" hits="1" branch="true"
+                                  condition-coverage="50% (1/2)"/>
+                            <line number="3" hits="1" branch="true"
+                                  condition-coverage="100% (2/2)"/>
+                        </lines>
+                    </class>
+                </classes></packages>
+            </coverage>
+            """)
+
+        coverage = XmlCoverageReporter([xml], branch_coverage=True)
+
+        # Line 2 is a partially covered branch -> violation.
+        # Line 3 is a fully covered branch, line 1 a plain statement -> covered.
+        assert coverage.violations("file1.py") == {Violation(2, None)}
+        assert coverage.measured_lines("file1.py") == {1, 2, 3}
+
+    def test_partial_branch_ignored_by_default(self):
+        # Without branch coverage enabled, an executed-but-partially-covered
+        # branch stays covered, preserving the historical behaviour.
+        xml = etree.fromstring("""<?xml version="1.0"?>
+            <coverage>
+                <packages><classes>
+                    <class filename="file1.py">
+                        <lines>
+                            <line number="1" hits="1"/>
+                            <line number="2" hits="1" branch="true"
+                                  condition-coverage="50% (1/2)"/>
+                        </lines>
+                    </class>
+                </classes></packages>
+            </coverage>
+            """)
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert coverage.violations("file1.py") == set()
+        assert coverage.measured_lines("file1.py") == {1, 2}
+
+    def test_uncovered_branch_line_is_single_violation(self):
+        # A line that is both never executed (hits=0) and a partial branch is
+        # reported once, not twice.
+        xml = etree.fromstring("""<?xml version="1.0"?>
+            <coverage>
+                <packages><classes>
+                    <class filename="file1.py">
+                        <lines>
+                            <line number="1" hits="0" branch="true"
+                                  condition-coverage="0% (0/2)"/>
+                        </lines>
+                    </class>
+                </classes></packages>
+            </coverage>
+            """)
+
+        coverage = XmlCoverageReporter([xml], branch_coverage=True)
+
+        assert coverage.violations("file1.py") == {Violation(1, None)}
+
     def _coverage_xml(self, file_paths, violations, measured, source_paths=None):
         """
         Build an XML tree with source files specified by `file_paths`.

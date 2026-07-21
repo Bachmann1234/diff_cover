@@ -24,7 +24,13 @@ class XmlCoverageReporter(BaseViolationReporter):
     Query information from a Cobertura|Clover|JaCoCo XML coverage report.
     """
 
-    def __init__(self, xml_roots, src_roots=None, expand_coverage_report=False):
+    def __init__(
+        self,
+        xml_roots,
+        src_roots=None,
+        expand_coverage_report=False,
+        branch_coverage=False,
+    ):
         """
         Load the XML coverage report represented
         by the cElementTree with root element `xml_root`.
@@ -42,6 +48,11 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         self._src_roots = src_roots or [""]
         self._expand_coverage_report = expand_coverage_report
+        self._branch_coverage = branch_coverage
+
+        # Pulls the "(covered/total)" pair out of Cobertura's
+        # condition-coverage attribute, e.g. "50% (1/2)".
+        self._cobertura_condition_coverage_re = re.compile(r"\((\d+)/(\d+)\)")
 
     def _get_xml_classes(self, xml_document):
         """
@@ -239,23 +250,19 @@ class XmlCoverageReporter(BaseViolationReporter):
                                     {_hits: last_hit_number, _number: line_number}
                                 )
 
-                # First case, need to define violations initially
-                if violations is None:
-                    violations = {
-                        Violation(int(line.get(_number)), None)
-                        for line in line_nodes
-                        if int(line.get(_hits, 0)) == 0
-                    }
+                new_violations = {
+                    Violation(int(line.get(_number)), None)
+                    for line in line_nodes
+                    if self._is_violation(line, _hits)
+                }
 
-                # If we already have a violations set,
-                # take the intersection of the new
-                # violations set and its old self
+                # The first report defines the violations set. Each subsequent
+                # report narrows it, since we only keep violations that show up
+                # in every report.
+                if violations is None:
+                    violations = new_violations
                 else:
-                    violations = violations & {
-                        Violation(int(line.get(_number)), None)
-                        for line in line_nodes
-                        if int(line.get(_hits, 0)) == 0
-                    }
+                    violations = violations & new_violations
 
                 # Measured is the union of itself and the new measured
                 measured = measured | {int(line.get(_number)) for line in line_nodes}
@@ -266,6 +273,29 @@ class XmlCoverageReporter(BaseViolationReporter):
                 violations = set()
 
             self._info_cache[src_path] = (violations, measured)
+
+    def _is_violation(self, line, hits_attr):
+        """
+        Return whether a coverage `line` node counts as a violation.
+
+        A line is a violation if it was never executed, or -- when branch
+        coverage is enabled -- if it is a partially covered branch.
+        """
+        if int(line.get(hits_attr, 0)) == 0:
+            return True
+        return self._branch_coverage and self._is_partial_branch(line)
+
+    def _is_partial_branch(self, line):
+        """Return whether a Cobertura `line` node is a partially covered branch."""
+        if line.get("branch") != "true":
+            return False
+        match = self._cobertura_condition_coverage_re.search(
+            line.get("condition-coverage", "")
+        )
+        if not match:
+            return False
+        covered, total = int(match.group(1)), int(match.group(2))
+        return covered < total
 
     def violations(self, src_path):
         """

@@ -52,6 +52,10 @@ SHOW_COVERED_HELP = (
 EXPAND_COVERAGE_REPORT = (
     "Append missing lines in coverage reports based on the hits of the previous line."
 )
+BRANCH_COVERAGE_HELP = (
+    "Treat partially covered branches as uncovered. Requires a coverage report "
+    'with branch coverage data (Cobertura branch="true" condition-coverage).'
+)
 INCLUDE_UNTRACKED_HELP = "Include untracked files"
 CONFIG_FILE_HELP = "The configuration file to use"
 DIFF_FILE_HELP = "The diff file to use"
@@ -115,6 +119,13 @@ def parse_coverage_args(argv):
         action="store_true",
         default=None,
         help=EXPAND_COVERAGE_REPORT,
+    )
+
+    parser.add_argument(
+        "--branch-coverage",
+        action="store_true",
+        default=None,
+        help=BRANCH_COVERAGE_HELP,
     )
 
     parser.add_argument(
@@ -215,6 +226,7 @@ def parse_coverage_args(argv):
         "diff_range_notation": "...",
         "quiet": False,
         "expand_coverage_report": False,
+        "branch_coverage": False,
         "total_percent_float": False,
     }
 
@@ -237,6 +249,7 @@ def generate_coverage_report(
     show_uncovered=False,
     show_covered=False,
     expand_coverage_report=False,
+    branch_coverage=False,
     total_percent_float=False,
 ):
     """
@@ -265,7 +278,9 @@ def generate_coverage_report(
     if xml_roots and lcov_roots:
         raise ValueError("Mixing LCov and XML reports is not supported yet")
     if xml_roots:
-        coverage = XmlCoverageReporter(xml_roots, src_roots, expand_coverage_report)
+        coverage = XmlCoverageReporter(
+            xml_roots, src_roots, expand_coverage_report, branch_coverage
+        )
     else:
         coverage = LcovCoverageReporter(lcov_roots, src_roots)
 
@@ -417,6 +432,7 @@ def main(argv=None, directory=None):
         show_uncovered=arg_dict["show_uncovered"],
         show_covered=arg_dict["show_covered"],
         expand_coverage_report=arg_dict["expand_coverage_report"],
+        branch_coverage=arg_dict["branch_coverage"],
         total_percent_float=arg_dict["total_percent_float"],
     )
 

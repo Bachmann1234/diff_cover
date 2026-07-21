@@ -1,3 +1,8 @@
+Unreleased
+
+* Add --branch-coverage flag to diff-cover to treat partially covered branches in Cobertura XML reports as uncovered
+
+
 05/30/2026 v10.3.0
 
 * Add --show-covered flag to highlight covered diff lines in HTML report [PR 600](https://github.com/Bachmann1234/diff_cover/pull/600) Thanks @duxiaocheng
