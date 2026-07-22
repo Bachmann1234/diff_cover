@@ -47,6 +47,16 @@ def test_show_covered_flag():
     assert arg_dict["show_covered"] is True
 
 
+def test_branch_coverage_defaults_false():
+    arg_dict = parse_coverage_args(["reports/coverage.xml"])
+    assert arg_dict["branch_coverage"] is False
+
+
+def test_branch_coverage_flag():
+    arg_dict = parse_coverage_args(["reports/coverage.xml", "--branch-coverage"])
+    assert arg_dict["branch_coverage"] is True
+
+
 def test_parse_with_multiple_reports():
     argv = [
         "reports/coverage.xml",
