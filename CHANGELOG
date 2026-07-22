@@ -1,6 +1,6 @@
-Unreleased
+7/21/2026 v10.4.0
 
-* Add --branch-coverage flag to diff-cover to treat partially covered branches in Cobertura XML reports as uncovered
+* Add --branch-coverage flag to diff-cover to treat partially covered branches in Cobertura XML reports as uncovered [PR 608](https://github.com/Bachmann1234/diff_cover/pull/608) Thanks @mofr
 
 
 05/30/2026 v10.3.0
