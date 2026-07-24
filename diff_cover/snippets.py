@@ -17,6 +17,17 @@ from pygments.util import ClassNotFound
 
 from diff_cover.git_path import GitPathTool
 
+# Below this, chardet is essentially guessing. Short files with only a
+# handful of non-ascii bytes decode cleanly under every single byte
+# encoding, so which one comes back is down to the detector's internals
+# (chardet 7 answers MacRoman at 0.16 confidence for latin-1 text that
+# chardet 5 called ISO-8859-1 at 0.73).
+MIN_DETECTION_CONFIDENCE = 0.5
+
+# What to try before an unconfident guess. cp1252 is the de facto default
+# for undeclared western text and is a superset of latin-1 in practice.
+FALLBACK_ENCODING = "cp1252"
+
 
 class Snippet:
     """
@@ -284,9 +295,15 @@ class Snippet:
                 contents = src_file.read()
 
         if isinstance(contents, bytes):
-            encoding = chardet.detect(contents).get("encoding", "utf-8")
-            with contextlib.suppress(UnicodeDecodeError):
-                contents = contents.decode(encoding)
+            detected = chardet.detect(contents)
+            candidates = [detected.get("encoding") or "utf-8"]
+            if (detected.get("confidence") or 0) < MIN_DETECTION_CONFIDENCE:
+                candidates.insert(0, FALLBACK_ENCODING)
+
+            for encoding in candidates:
+                with contextlib.suppress(UnicodeDecodeError, LookupError):
+                    contents = contents.decode(encoding)
+                    break
 
         if isinstance(contents, bytes):
             # We failed to decode the file.
