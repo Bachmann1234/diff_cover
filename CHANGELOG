@@ -1,5 +1,8 @@
-7/21/2026 v10.4.0
+7/23/2026 v10.4.1
 
+* Handle low confidence chardet detection for undeclared encodings. Fixes a failing test for chardet 7 and upgrades the tested suite to chardet7 (PR 611)[https://github.com/Bachmann1234/diff_cover/pull/611] (bachmann1234)
+
+7/21/2026 v10.4.0
 * Add --branch-coverage flag to diff-cover to treat partially covered branches in Cobertura XML reports as uncovered [PR 608](https://github.com/Bachmann1234/diff_cover/pull/608) Thanks @mofr
 
 
