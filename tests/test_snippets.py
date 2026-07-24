@@ -429,3 +429,42 @@ def test_latin_one_undeclared(tmp_path):
 
     contents = Snippet.load_contents(str(file))
     assert contents == "I am some latin 1 Â encoded text"
+
+
+def test_unconfident_detection_falls_back(tmp_path, mocker):
+    # Which single byte encoding chardet picks for a short file varies by
+    # version (5 said ISO-8859-1, 6 WINDOWS-1252, 7 MacRoman) so pin the
+    # low confidence branch rather than depending on the installed one.
+    mocker.patch(
+        "diff_cover.snippets.chardet.detect",
+        return_value={"encoding": "MacRoman", "confidence": 0.16},
+    )
+    file = tmp_path / "tmp"
+    file.write_bytes("I am some latin 1 Â encoded text".encode("latin1"))
+
+    contents = Snippet.load_contents(str(file))
+    assert contents == "I am some latin 1 Â encoded text"
+
+
+def test_confident_detection_is_trusted(tmp_path, mocker):
+    mocker.patch(
+        "diff_cover.snippets.chardet.detect",
+        return_value={"encoding": "MacRoman", "confidence": 0.99},
+    )
+    file = tmp_path / "tmp"
+    file.write_bytes("I am some latin 1 Â encoded text".encode("latin1"))
+
+    contents = Snippet.load_contents(str(file))
+    assert contents == "I am some latin 1 ¬ encoded text"
+
+
+def test_detection_returns_no_encoding(tmp_path, mocker):
+    mocker.patch(
+        "diff_cover.snippets.chardet.detect",
+        return_value={"encoding": None, "confidence": None},
+    )
+    file = tmp_path / "tmp"
+    file.write_bytes("I am some latin 1 Â encoded text".encode("latin1"))
+
+    contents = Snippet.load_contents(str(file))
+    assert contents == "I am some latin 1 Â encoded text"
