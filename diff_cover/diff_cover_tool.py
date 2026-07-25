@@ -76,6 +76,16 @@ def format_type(value):
     return dict((item.split(":", 1) for item in value.split(",")) if value else {})
 
 
+def normalize_format(config):
+    """
+    Config files provide ``format`` as a raw string, because ``type=`` is only
+    applied to values that come from the command line. Parse it the same way.
+    """
+    if isinstance(config.get("format"), str):
+        config["format"] = format_type(config["format"])
+    return config
+
+
 def parse_coverage_args(argv):
     """
     Parse command line arguments, returning a dict of
@@ -99,7 +109,7 @@ def parse_coverage_args(argv):
     parser.add_argument(
         "--format",
         type=format_type,
-        default="",
+        default=None,
         help=FORMAT_HELP,
     )
 
@@ -217,6 +227,7 @@ def parse_coverage_args(argv):
         "show_uncovered": False,
         "show_covered": False,
         "compare_branch": "origin/main",
+        "format": {},
         "fail_under": 0,
         "ignore_staged": False,
         "ignore_unstaged": False,
@@ -230,7 +241,9 @@ def parse_coverage_args(argv):
         "total_percent_float": False,
     }
 
-    return get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
+    return normalize_format(
+        get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_COVER)
+    )
 
 
 def generate_coverage_report(
