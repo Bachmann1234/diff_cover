@@ -2,8 +2,10 @@
 
 """Test for diff_cover.diff_quality - main"""
 
+import pluggy
 import pytest
 
+from diff_cover import hookspecs
 from diff_cover.diff_quality_tool import main, parse_quality_args
 
 
@@ -147,3 +149,33 @@ def _run_main(report, argv):
     quality_reporter = report.call_args[0][0]
     assert quality_reporter.driver.name == "pylint"
     assert quality_reporter.options == "--foobar"
+
+
+def test_plugin_may_declare_hook_arguments():
+    """A plugin declaring reports/options must validate against the hookspec."""
+    hookimpl = pluggy.HookimplMarker("diff_cover")
+
+    class Plugin:
+        @hookimpl
+        def diff_cover_report_quality(self, reports, options):
+            return (reports, options)
+
+    plugin_manager = pluggy.PluginManager("diff_cover")
+    plugin_manager.add_hookspecs(hookspecs)
+    plugin_manager.register(Plugin(), name="myplugin")
+
+
+@pytest.mark.parametrize(
+    "factory,expected",
+    [
+        (lambda: "none", "none"),
+        (lambda options: options, "--foobar"),
+        (lambda reports: reports, ["report"]),
+        (lambda reports, options: (reports, options), (["report"], "--foobar")),
+        (lambda **kwargs: kwargs, {"reports": ["report"], "options": "--foobar"}),
+    ],
+)
+def test_call_reporter_factory_passes_declared_arguments(factory, expected):
+    from diff_cover.diff_quality_tool import _call_reporter_factory
+
+    assert _call_reporter_factory(factory, ["report"], "--foobar") == expected
