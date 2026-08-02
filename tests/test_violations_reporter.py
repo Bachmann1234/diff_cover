@@ -497,6 +497,21 @@ class TestCloverXmlCoverageReporterTest:
         result = coverage.violations("file1.java")
         assert result == violations
 
+    def test_phpunit_clover_without_clover_attribute(self):
+        xml = self._coverage_xml(
+            ["/workspace/project/subdir/file.java"],
+            self.FEW_VIOLATIONS,
+            self.FEW_MEASURED,
+        )
+        del xml.attrib["clover"]
+        file_node = xml.find(".//file")
+        file_node.set("name", file_node.attrib.pop("path"))
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert coverage.violations("subdir/file.java") == self.FEW_VIOLATIONS
+        assert coverage.measured_lines("subdir/file.java") == self.FEW_MEASURED
+
     def test_two_inputs_first_violate(self):
         # Construct the XML report
         file_paths = ["file1.java"]

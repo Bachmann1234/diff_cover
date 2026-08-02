@@ -129,11 +129,20 @@ class XmlCoverageReporter(BaseViolationReporter):
         If file is not present in `xml_document`, return None
         """
 
-        files = [
-            file_tree
-            for file_tree in xml_document.findall(".//file")
-            if GitPathTool.relative_path(file_tree.get("path")) == src_path
-        ]
+        files = []
+        normalized_src_path = util.to_unix_path(src_path)
+        for file_tree in xml_document.findall(".//file"):
+            file_path = file_tree.get("path") or file_tree.get("name")
+            if not file_path:
+                continue
+
+            normalized_file_path = util.to_unix_path(file_path)
+            relative_file_path = util.to_unix_path(GitPathTool.relative_path(file_path))
+            if (
+                relative_file_path == normalized_src_path
+                or normalized_file_path.endswith(f"/{normalized_src_path}")
+            ):
+                files.append(file_tree)
         if not files:
             return None
         lines = []
@@ -141,6 +150,13 @@ class XmlCoverageReporter(BaseViolationReporter):
             lines.append(file_tree.findall('./line[@type="stmt"]'))
             lines.append(file_tree.findall('./line[@type="cond"]'))
         return list(itertools.chain(*lines))
+
+    @staticmethod
+    def _is_clover_report(xml_document):
+        return (
+            bool(xml_document.findall(".[@clover]"))
+            or xml_document.find(".//file/line[@num][@count]") is not None
+        )
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
         # find src_path in any of the source roots
@@ -204,7 +220,7 @@ class XmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for i, xml_document in enumerate(self._xml_roots):
-                if xml_document.findall(".[@clover]"):
+                if self._is_clover_report(xml_document):
                     # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
                     line_nodes = self.get_src_path_line_nodes_clover(
                         xml_document, src_path
