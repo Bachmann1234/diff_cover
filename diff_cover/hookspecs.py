@@ -4,7 +4,7 @@ hookspec = pluggy.HookspecMarker("diff_cover")
 
 
 @hookspec
-def diff_cover_report_quality(reports, options):
+def diff_cover_report_quality(reports, options):  # pylint: disable=unused-argument
     """
     Return a 2-part tuple:
     - Quality plugin name

@@ -574,6 +574,21 @@ Important notes:
   * Marked with the ``@diff_cover_hookimpl`` decorator
   * Named ``diff_cover_report_quality``. (This distinguishes it from any other
     plugin types ``diff_cover`` may support.)
+* The function may declare either, both, or neither of the hook's arguments:
+
+  * ``reports`` - the list of open file handles for the pre-generated reports
+    passed on the command line.
+  * ``options`` - the string given to ``--options``.
+
+  Only the arguments you declare are passed, so the zero-argument form above
+  keeps working. A plugin that wants the user's input would be written as:
+
+  .. code:: python
+
+      @diff_cover_hookimpl
+      def diff_cover_report_quality(reports, options):
+          return SQLFluffViolationReporter(reports=reports, options=options)
+
 * The function should return an object with the following properties and methods:
 
   * ``supported_extensions`` property with a list of supported file extensions

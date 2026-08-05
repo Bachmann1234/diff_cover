@@ -6,7 +6,11 @@ import pluggy
 import pytest
 
 from diff_cover import hookspecs
-from diff_cover.diff_quality_tool import main, parse_quality_args
+from diff_cover.diff_quality_tool import (
+    _call_reporter_factory,
+    main,
+    parse_quality_args,
+)
 
 
 def test_parse_with_html_report():
@@ -187,6 +191,4 @@ def test_plugin_may_declare_hook_arguments():
     ],
 )
 def test_call_reporter_factory_passes_declared_arguments(factory, expected):
-    from diff_cover.diff_quality_tool import _call_reporter_factory
-
     assert _call_reporter_factory(factory, ["report"], "--foobar") == expected
