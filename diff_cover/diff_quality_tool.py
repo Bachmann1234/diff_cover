@@ -34,6 +34,7 @@ from diff_cover.diff_cover_tool import (
     TOTAL_PERCENT_FLOAT_HELP,
     format_type,
     handle_old_format,
+    normalize_format,
 )
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffTool
@@ -120,7 +121,7 @@ def parse_quality_args(argv):
     parser.add_argument(
         "--format",
         type=format_type,
-        default="",
+        default=None,
         help=FORMAT_HELP,
     )
 
@@ -212,6 +213,7 @@ def parse_quality_args(argv):
     defaults = {
         "ignore_whitespace": False,
         "compare_branch": "origin/main",
+        "format": {},
         "diff_range_notation": "...",
         "input_reports": [],
         "fail_under": 0,
@@ -222,8 +224,8 @@ def parse_quality_args(argv):
         "total_percent_float": False,
     }
 
-    return get_config(
-        parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_QUALITY
+    return normalize_format(
+        get_config(parser=parser, argv=argv, defaults=defaults, tool=Tool.DIFF_QUALITY)
     )
 
 

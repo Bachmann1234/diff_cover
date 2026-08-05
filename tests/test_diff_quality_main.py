@@ -151,6 +151,17 @@ def _run_main(report, argv):
     assert quality_reporter.options == "--foobar"
 
 
+def test_parse_format_from_config_file(tmp_path):
+    config_file = tmp_path / "diff_quality.toml"
+    config_file.write_text('[tool.diff_quality]\nformat = "html:report.html"\n')
+
+    arg_dict = parse_quality_args(
+        ["--violations", "pylint", "--config-file", str(config_file)]
+    )
+
+    assert arg_dict.get("format") == {"html": "report.html"}
+
+
 def test_plugin_may_declare_hook_arguments():
     """A plugin declaring reports/options must validate against the hookspec."""
     hookimpl = pluggy.HookimplMarker("diff_cover")

@@ -156,3 +156,31 @@ def test_parse_with_include():
 
 def test_parse_with_exclude():
     _test_parse_with_path_patterns("exclude")
+
+
+def test_parse_format_from_config_file(tmp_path):
+    config_file = tmp_path / "diff_cover.toml"
+    config_file.write_text('[tool.diff_cover]\nformat = "html:report.html"\n')
+
+    arg_dict = parse_coverage_args(
+        ["reports/coverage.xml", "--config-file", str(config_file)]
+    )
+
+    assert arg_dict["format"] == {"html": "report.html"}
+
+
+def test_parse_format_cli_overrides_config_file(tmp_path):
+    config_file = tmp_path / "diff_cover.toml"
+    config_file.write_text('[tool.diff_cover]\nformat = "html:report.html"\n')
+
+    arg_dict = parse_coverage_args(
+        [
+            "reports/coverage.xml",
+            "--config-file",
+            str(config_file),
+            "--format",
+            "json:report.json",
+        ]
+    )
+
+    assert arg_dict["format"] == {"json": "report.json"}
