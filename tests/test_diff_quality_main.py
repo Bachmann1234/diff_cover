@@ -2,9 +2,15 @@
 
 """Test for diff_cover.diff_quality - main"""
 
+import pluggy
 import pytest
 
-from diff_cover.diff_quality_tool import main, parse_quality_args
+from diff_cover import hookspecs
+from diff_cover.diff_quality_tool import (
+    _call_reporter_factory,
+    main,
+    parse_quality_args,
+)
 
 
 def test_parse_with_html_report():
@@ -158,3 +164,31 @@ def test_parse_format_from_config_file(tmp_path):
     )
 
     assert arg_dict.get("format") == {"html": "report.html"}
+
+
+def test_plugin_may_declare_hook_arguments():
+    """A plugin declaring reports/options must validate against the hookspec."""
+    hookimpl = pluggy.HookimplMarker("diff_cover")
+
+    class Plugin:
+        @hookimpl
+        def diff_cover_report_quality(self, reports, options):
+            return (reports, options)
+
+    plugin_manager = pluggy.PluginManager("diff_cover")
+    plugin_manager.add_hookspecs(hookspecs)
+    plugin_manager.register(Plugin(), name="myplugin")
+
+
+@pytest.mark.parametrize(
+    "factory,expected",
+    [
+        (lambda: "none", "none"),
+        (lambda options: options, "--foobar"),
+        (lambda reports: reports, ["report"]),
+        (lambda reports, options: (reports, options), (["report"], "--foobar")),
+        (lambda **kwargs: kwargs, {"reports": ["report"], "options": "--foobar"}),
+    ],
+)
+def test_call_reporter_factory_passes_declared_arguments(factory, expected):
+    assert _call_reporter_factory(factory, ["report"], "--foobar") == expected
