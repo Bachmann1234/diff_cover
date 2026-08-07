@@ -1,3 +1,10 @@
+8/06/2026 v10.4.2
+
+* Honor format option from config file- (PR 612)[https://github.com/Bachmann1234/diff_cover/pull/612] Thanks @Sanjays2402
+
+* Accept reports/options in diff_cover_report_quality hookspec- (PR 613)[https://github.com/Bachmann1234/diff_cover/pull/613]
+ Thanks @Sanjays2402
+
 7/23/2026 v10.4.1
 
 * Handle low confidence chardet detection for undeclared encodings. Fixes a failing test for chardet 7 and upgrades the tested suite to chardet7 (PR 611)[https://github.com/Bachmann1234/diff_cover/pull/611] (bachmann1234)
