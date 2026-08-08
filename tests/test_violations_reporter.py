@@ -497,6 +497,60 @@ class TestCloverXmlCoverageReporterTest:
         result = coverage.violations("file1.java")
         assert result == violations
 
+    def test_phpunit_clover_without_clover_attribute(self):
+        xml = self._coverage_xml(
+            ["/workspace/project/subdir/file.java"],
+            self.FEW_VIOLATIONS,
+            self.FEW_MEASURED,
+        )
+        del xml.attrib["clover"]
+        file_node = xml.find(".//file")
+        file_node.set("name", file_node.attrib.pop("path"))
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert coverage.violations("subdir/file.java") == self.FEW_VIOLATIONS
+        assert coverage.measured_lines("subdir/file.java") == self.FEW_MEASURED
+
+    def test_method_lines_are_measured(self):
+        # PHPUnit's Clover writer emits type="method" for the declaration line of
+        # every measured function. Those lines carry a count like any other and
+        # must not be reported as unmeasured.
+        xml = self._coverage_xml(
+            ["file1.java"], self.FEW_VIOLATIONS, self.FEW_MEASURED, method_lines={42}
+        )
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert 42 in coverage.measured_lines("file1.java")
+        assert coverage.violations("file1.java") == self.FEW_VIOLATIONS
+
+    def test_method_line_can_be_a_violation(self):
+        xml = self._coverage_xml(
+            ["file1.java"], self.FEW_VIOLATIONS, self.FEW_MEASURED, method_lines={42}
+        )
+        method_line = xml.find('.//line[@type="method"]')
+        method_line.set("count", "0")
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert 42 in coverage.measured_lines("file1.java")
+        assert Violation(42, None) in coverage.violations("file1.java")
+
+    def test_report_format_is_detected_once(self):
+        # Classifying the report is a search through the whole document; doing it
+        # per source file was the review comment on #617.
+        xml = self._coverage_xml(
+            ["file1.java", "file2.java"], self.FEW_VIOLATIONS, self.FEW_MEASURED
+        )
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert coverage._report_formats == ["clover"]
+        coverage.violations("file1.java")
+        coverage.violations("file2.java")
+        assert coverage._report_formats == ["clover"]
+
     def test_two_inputs_first_violate(self):
         # Construct the XML report
         file_paths = ["file1.java"]
@@ -620,7 +674,7 @@ class TestCloverXmlCoverageReporterTest:
         result = coverage.violations("file.java")
         assert result == set()
 
-    def _coverage_xml(self, file_paths, violations, measured):
+    def _coverage_xml(self, file_paths, violations, measured, method_lines=None):
         """
         Build an XML tree with source files specified by `file_paths`.
         Each source fill will have the same set of covered and
@@ -630,6 +684,9 @@ class TestCloverXmlCoverageReporterTest:
         `line_dict` is a dictionary with keys that are line numbers
         and values that are True/False indicating whether the line
         is covered
+        `method_lines` is an optional set of line numbers to emit as
+        `type="method"` instead of `type="stmt"`, the way PHPUnit's Clover
+        writer marks the declaration line of a measured function
 
         This leaves out some attributes of the Cobertura format,
         but includes all the elements.
@@ -654,6 +711,12 @@ class TestCloverXmlCoverageReporterTest:
                 line.set("count", str(hits))
                 line.set("num", str(line_num))
                 line.set("type", "stmt")
+
+            for line_num in method_lines or ():
+                line = etree.SubElement(src_node, "line")
+                line.set("count", "1")
+                line.set("num", str(line_num))
+                line.set("type", "method")
         return root
 
 
