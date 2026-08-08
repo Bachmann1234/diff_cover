@@ -46,6 +46,11 @@ class XmlCoverageReporter(BaseViolationReporter):
         # Values are output of `self._get_xml_classes()`
         self._xml_cache = [{} for i in range(len(xml_roots))]
 
+        # Which format each report is in. Classifying costs a search through the
+        # document, and the answer cannot change, so do it once here rather than
+        # once per source file in `_cache_file`.
+        self._report_formats = [self._detect_report_format(root) for root in xml_roots]
+
         self._src_roots = src_roots or [""]
         self._expand_coverage_report = expand_coverage_report
         self._branch_coverage = branch_coverage
@@ -147,16 +152,34 @@ class XmlCoverageReporter(BaseViolationReporter):
             return None
         lines = []
         for file_tree in files:
+            # Clover marks an executable line as one of these three types. PHPUnit's
+            # writer emits `method` for the declaration line of every function it
+            # measured; leaving it out reported those lines as unmeasured.
+            # https://github.com/sebastianbergmann/php-code-coverage/blob/main/src/Report/Clover.php
+            lines.append(file_tree.findall('./line[@type="method"]'))
             lines.append(file_tree.findall('./line[@type="stmt"]'))
             lines.append(file_tree.findall('./line[@type="cond"]'))
         return list(itertools.chain(*lines))
 
     @staticmethod
-    def _is_clover_report(xml_document):
-        return (
-            bool(xml_document.findall(".[@clover]"))
+    def _detect_report_format(xml_document):
+        """
+        Return which of the supported formats `xml_document` is in.
+
+        Clover writes a `clover` attribute on the root, but PHPUnit's Clover
+        writer does not, so fall back to the shape of its line elements.
+        """
+        if (
+            xml_document.findall(".[@clover]")
             or xml_document.find(".//file/line[@num][@count]") is not None
-        )
+        ):
+            # see etc/schema/clover.xsd at https://bitbucket.org/atlassian/clover/src
+            return "clover"
+        if xml_document.findall(".[@name]"):
+            # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
+            return "jacoco"
+        # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
+        return "cobertura"
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
         # find src_path in any of the source roots
@@ -220,22 +243,20 @@ class XmlCoverageReporter(BaseViolationReporter):
 
             # Loop through the files that contain the xml roots
             for i, xml_document in enumerate(self._xml_roots):
-                if self._is_clover_report(xml_document):
-                    # see etc/schema/clover.xsd at  https://bitbucket.org/atlassian/clover/src
+                report_format = self._report_formats[i]
+                if report_format == "clover":
                     line_nodes = self.get_src_path_line_nodes_clover(
                         xml_document, src_path
                     )
                     _number = "num"
                     _hits = "count"
-                elif xml_document.findall(".[@name]"):
-                    # https://github.com/jacoco/jacoco/blob/master/org.jacoco.report/src/org/jacoco/report/xml/report.dtd
+                elif report_format == "jacoco":
                     line_nodes = self.get_src_path_line_nodes_jacoco(
                         xml_document, src_path
                     )
                     _number = "nr"
                     _hits = "ci"
                 else:
-                    # https://github.com/cobertura/web/blob/master/htdocs/xml/coverage-04.dtd
                     line_nodes = self.get_src_path_line_nodes_cobertura(
                         i, xml_document, src_path
                     )
