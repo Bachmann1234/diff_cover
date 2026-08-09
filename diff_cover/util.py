@@ -88,3 +88,32 @@ def to_unescaped_filename(filename: str) -> str:
             i += 1
 
     return "".join(result)
+
+
+def merge_ranges(nums):
+    """
+    Merge a list of numbers into a list of ranges.
+    Given a list of numbers, merge consecutive numbers
+    into ranges of strings e.g. [1, 2, 3] -> ["1-3"]
+    """
+    if not nums:
+        return []
+    nums = sorted(set(nums))
+    ranges = []
+    start = prev = nums[0]
+
+    def add_range(start_, end_):
+        """Helper function to add a range to the list."""
+        if start_ == end_:
+            ranges.append(str(start_))
+        else:
+            ranges.append(f"{start_}-{end_}")
+
+    for n in nums[1:]:
+        if n == prev + 1:
+            prev = n
+            continue
+        add_range(start, prev)
+        start = prev = n
+    add_range(start, prev)
+    return ranges
