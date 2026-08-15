@@ -8,6 +8,7 @@ See https://github.com/Bachmann1234/diff_cover/issues/303
 import pytest
 
 from diff_cover.command_runner import (
+    GIT_INSTALL_URL,
     CommandError,
     ExecutableNotFoundError,
     execute,
@@ -42,7 +43,7 @@ def test_execute_turns_a_missing_executable_into_a_helpful_error(missing_git):
     message = str(exc_info.value)
     assert "git" in message
     assert "PATH" in message
-    assert "https://git-scm.com/" in message
+    assert message.endswith(f"See {GIT_INSTALL_URL} for installation instructions.")
 
 
 def test_the_new_error_stays_a_command_error(missing_git):
@@ -63,7 +64,7 @@ def test_execute_does_not_link_git_docs_for_other_executables(mocker):
 
     message = str(exc_info.value)
     assert "pycodestyle" in message
-    assert "git-scm.com" not in message
+    assert GIT_INSTALL_URL not in message
 
 
 def test_diff_cover_main_reports_missing_git_without_a_traceback(missing_git, caplog):
