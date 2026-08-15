@@ -551,6 +551,44 @@ class TestCloverXmlCoverageReporterTest:
         coverage.violations("file2.java")
         assert coverage._report_formats == ["clover"]
 
+    def test_file_lookup_is_built_once(self, mocker):
+        # Locating a source file used to walk every `.//file` again, so a report
+        # with N files cost N walks for N source paths. Each `<file>` is now
+        # classified once, which shows up as one `relative_path` call per file
+        # however many source paths are looked up.
+        file_paths = ["file1.java", "subdir/file2.java", "subdir/file3.java"]
+        xml = self._coverage_xml(file_paths, self.FEW_VIOLATIONS, self.FEW_MEASURED)
+
+        relative_path = mocker.patch(
+            "diff_cover.violationsreporters.violations_reporter."
+            "GitPathTool.relative_path",
+            side_effect=lambda path: path,
+        )
+        coverage = XmlCoverageReporter([xml])
+        for src_path in file_paths:
+            assert coverage.violations(src_path) == self.FEW_VIOLATIONS
+
+        assert relative_path.call_count == len(file_paths), (
+            "expected each <file> to be classified once, got "
+            f"{relative_path.call_count} calls for {len(file_paths)} files"
+        )
+
+    def test_absolute_paths_still_match_by_suffix(self):
+        # Reports that carry absolute paths are matched by suffix, not equality.
+        # The lookup groups those candidates by their last path segment, so a
+        # file whose segment collides with another must still resolve correctly.
+        xml = self._coverage_xml(
+            ["/build/one/shared.java", "/build/two/shared.java"],
+            self.FEW_VIOLATIONS,
+            self.FEW_MEASURED,
+        )
+
+        coverage = XmlCoverageReporter([xml])
+
+        assert coverage.violations("two/shared.java") == self.FEW_VIOLATIONS
+        assert coverage.measured_lines("two/shared.java") == self.FEW_MEASURED
+        assert coverage.violations("nowhere/shared.java") == set()
+
     def test_two_inputs_first_violate(self):
         # Construct the XML report
         file_paths = ["file1.java"]
