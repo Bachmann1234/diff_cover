@@ -17,6 +17,7 @@ from diff_cover.violationsreporters.base import (
     RegexBasedDriver,
     Violation,
 )
+from diff_cover.violationsreporters.clover import CloverFileIndex
 
 
 class XmlCoverageReporter(BaseViolationReporter):
@@ -51,9 +52,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         # once per source file in `_cache_file`.
         self._report_formats = [self._detect_report_format(root) for root in xml_roots]
 
-        # Lookup tables for the `<file>` elements of each Clover report, built
-        # on first use. Without them every source path walks every `.//file`
-        # again, which is quadratic in a report with many files.
+        # A `CloverFileIndex` for each Clover report, built on first use.
         self._clover_file_index = [None] * len(xml_roots)
 
         self._src_roots = src_roots or [""]
@@ -130,40 +129,6 @@ class XmlCoverageReporter(BaseViolationReporter):
         lines = [clazz.findall("./lines/line") for clazz in classes]
         return list(itertools.chain(*lines))
 
-    def _clover_file_lookup(self, index, xml_document):
-        """
-        Return the `<file>` lookup tables for the report at `index`, building
-        them on first use.
-
-        A file is matched either by its path relative to the repository root or,
-        when the report carries absolute paths, by a suffix test. The suffix can
-        only match when the last path segment does, so candidates for it are
-        grouped by that segment and the test is applied to the few that share it.
-
-        Both tables store the document position of each element so that callers
-        can return matches in document order, as a direct walk would.
-        """
-        lookup = self._clover_file_index[index]
-        if lookup is None:
-            by_relative_path = defaultdict(list)
-            by_last_segment = defaultdict(list)
-            for position, file_tree in enumerate(xml_document.findall(".//file")):
-                file_path = file_tree.get("path") or file_tree.get("name")
-                if not file_path:
-                    continue
-
-                normalized_file_path = util.to_unix_path(file_path)
-                relative_file_path = util.to_unix_path(
-                    GitPathTool.relative_path(file_path)
-                )
-                by_relative_path[relative_file_path].append((position, file_tree))
-                by_last_segment[normalized_file_path.rsplit("/", 1)[-1]].append(
-                    (position, normalized_file_path, file_tree)
-                )
-            lookup = (by_relative_path, by_last_segment)
-            self._clover_file_index[index] = lookup
-        return lookup
-
     def get_src_path_line_nodes_clover(self, index, xml_document, src_path):
         """
         Return a list of nodes containing line information for `src_path`
@@ -171,35 +136,9 @@ class XmlCoverageReporter(BaseViolationReporter):
 
         If file is not present in `xml_document`, return None
         """
-
-        normalized_src_path = util.to_unix_path(src_path)
-        by_relative_path, by_last_segment = self._clover_file_lookup(
-            index, xml_document
-        )
-
-        matches = {}
-        for position, file_tree in by_relative_path.get(normalized_src_path, ()):
-            matches[position] = file_tree
-        suffix = f"/{normalized_src_path}"
-        for position, normalized_file_path, file_tree in by_last_segment.get(
-            normalized_src_path.rsplit("/", 1)[-1], ()
-        ):
-            if normalized_file_path.endswith(suffix):
-                matches[position] = file_tree
-
-        files = [matches[position] for position in sorted(matches)]
-        if not files:
-            return None
-        lines = []
-        for file_tree in files:
-            # Clover marks an executable line as one of these three types. PHPUnit's
-            # writer emits `method` for the declaration line of every function it
-            # measured; leaving it out reported those lines as unmeasured.
-            # https://github.com/sebastianbergmann/php-code-coverage/blob/main/src/Report/Clover.php
-            lines.append(file_tree.findall('./line[@type="method"]'))
-            lines.append(file_tree.findall('./line[@type="stmt"]'))
-            lines.append(file_tree.findall('./line[@type="cond"]'))
-        return list(itertools.chain(*lines))
+        if self._clover_file_index[index] is None:
+            self._clover_file_index[index] = CloverFileIndex(xml_document)
+        return self._clover_file_index[index].line_nodes(src_path)
 
     @staticmethod
     def _detect_report_format(xml_document):
