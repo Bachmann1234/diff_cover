@@ -14,6 +14,7 @@ import pluggy
 
 import diff_cover
 from diff_cover import hookspecs
+from diff_cover.command_runner import ExecutableNotFoundError
 from diff_cover.config_parser import Tool, get_config
 from diff_cover.diff_cover_tool import (
     COMPARE_BRANCH_HELP,
@@ -339,7 +340,11 @@ def main(argv=None, directory=None):
     level = logging.ERROR if quiet else logging.WARNING
     logging.basicConfig(format="%(message)s", level=level)
 
-    GitPathTool.set_cwd(directory)
+    try:
+        GitPathTool.set_cwd(directory)
+    except ExecutableNotFoundError as exc:
+        LOGGER.error("%s", exc)
+        return 1
     fail_under = arg_dict.get("fail_under")
     tool = arg_dict["violations"]
     user_options = arg_dict.get("options")
