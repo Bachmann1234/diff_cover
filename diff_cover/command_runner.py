@@ -1,10 +1,22 @@
 import subprocess
 import sys
 
+GIT_INSTALL_URL = "https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"
+
 
 class CommandError(Exception):
     """
     Error raised when a command being executed returns an error
+    """
+
+
+class ExecutableNotFoundError(CommandError):
+    """
+    Error raised when the executable of a command cannot be found at all.
+
+    This is a `CommandError` so that existing handling keeps working, but a
+    distinct type so the command line tools can tell "your tooling is not
+    installed" apart from "the command ran and failed".
     """
 
 
@@ -24,7 +36,12 @@ def execute(command, exit_codes=None):
         exit_codes = [0]
 
     stdout_pipe = subprocess.PIPE
-    with subprocess.Popen(command, stdout=stdout_pipe, stderr=stdout_pipe) as process:
+    try:
+        popen = subprocess.Popen(command, stdout=stdout_pipe, stderr=stdout_pipe)
+    except FileNotFoundError as exc:
+        raise ExecutableNotFoundError(_executable_not_found_message(command)) from exc
+
+    with popen as process:
         try:
             stdout, stderr = process.communicate()
         except OSError:
@@ -50,6 +67,20 @@ def run_command_for_code(command):
     except FileNotFoundError:
         return 1
     return process.returncode
+
+
+def _executable_not_found_message(command):
+    """
+    Explain that the executable of `command` is not installed or not on PATH.
+    """
+    executable = _ensure_unicode(command[0]) if command else ""
+    message = (
+        f"'{executable}' was not found. diff-cover needs '{executable}' to be "
+        "installed and on your PATH in order to run."
+    )
+    if executable == "git":
+        message += f" See {GIT_INSTALL_URL} for installation instructions."
+    return message
 
 
 def _ensure_unicode(text):

@@ -7,6 +7,7 @@ import warnings
 import xml.etree.ElementTree as etree
 
 from diff_cover import DESCRIPTION, VERSION
+from diff_cover.command_runner import ExecutableNotFoundError
 from diff_cover.config_parser import Tool, get_config
 from diff_cover.diff_reporter import GitDiffReporter
 from diff_cover.git_diff import GitDiffFileTool, GitDiffTool
@@ -418,7 +419,11 @@ def main(argv=None, directory=None):
     level = logging.ERROR if quiet else logging.WARNING
     logging.basicConfig(format="%(message)s", level=level)
 
-    GitPathTool.set_cwd(directory)
+    try:
+        GitPathTool.set_cwd(directory)
+    except ExecutableNotFoundError as exc:
+        LOGGER.error("%s", exc)
+        return 1
     fail_under = arg_dict.get("fail_under")
     diff_tool = None
 
