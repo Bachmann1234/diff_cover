@@ -1,71 +1,70 @@
-[tool.poetry]
+[project]
 name = "diff_cover"
 version = "10.5.1"
 description = "Run coverage and linting reports on diffs"
-authors = ["See Contributors"]
-homepage = "https://github.com/Bachmann1234/diff-cover"
-repository = "https://github.com/Bachmann1234/diff-cover"
+authors = [{ name = "See Contributors" }]
 license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 readme = "README.rst"
-classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Environment :: Console",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3.13",
-        "Programming Language :: Python :: 3.14",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Topic :: Software Development :: Testing",
-        "Topic :: Software Development :: Quality Assurance",
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
 ]
-packages = [
-    { include = "diff_cover" }
-]
-include = [
-    {path = 'templates/*.txt'},
-    {path = 'templates/*.html'},
-    {path = 'templates/*.css'},
-    {path = 'templates/*.md'},
-    {path = 'tests/*', format = 'sdist'},
+dependencies = [
+    "Pygments>=2.19.1,<3",
+    "Jinja2>=2.7.1",
+    "pluggy>=0.13.1,<2",
+    "chardet>=3.0.0",
 ]
 
-[tool.poetry.scripts]
-diff-cover = 'diff_cover.diff_cover_tool:main'
-diff-quality = 'diff_cover.diff_quality_tool:main'
+[project.optional-dependencies]
+toml = ["tomli>=1.2.1"]
 
-[tool.poetry.dependencies]
-python = ">=3.10"
-Pygments = "^2.19.1"
-Jinja2 = ">=2.7.1"
-pluggy = ">=0.13.1,<2"
-chardet = ">=3.0.0"
-tomli = {version = ">=1.2.1", optional = true}
+[project.urls]
+Homepage = "https://github.com/Bachmann1234/diff-cover"
+Repository = "https://github.com/Bachmann1234/diff-cover"
 
-[tool.poetry.group.dev.dependencies]
-pytest-cov = ">=6.1.1,<8.0.0"
-pytest-datadir = "^1.5.0"
-pytest-mock = "^3.14.0"
-pytest-xdist = "^3.6.1"
-pycodestyle = ">=2.9.1"
-flake8 = ">=7.0.0"
-pyflakes = "^3.3.2"
-pylint = ">=3.3.4,<5.0.0"
-pydocstyle = "^6.1.1"
-doc8 = "2.0.0"
-ruff = ">=0.11.10,<0.17.0"
+[project.scripts]
+diff-cover = "diff_cover.diff_cover_tool:main"
+diff-quality = "diff_cover.diff_quality_tool:main"
 
-[tool.poetry.extras]
-toml = ["tomli"]
+[dependency-groups]
+dev = [
+    "pytest-cov>=6.1.1,<8.0.0",
+    "pytest-datadir>=1.5.0,<2",
+    "pytest-mock>=3.14.0,<4",
+    "pytest-xdist>=3.6.1,<4",
+    "pycodestyle>=2.9.1",
+    "flake8>=7.0.0",
+    "pyflakes>=3.3.2,<4",
+    "pylint>=3.3.4,<5.0.0",
+    "pydocstyle>=6.1.1,<7",
+    "doc8==2.0.0",
+    "ruff>=0.11.10,<0.17.0",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.7"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["diff_cover"]
+
+[tool.hatch.build.targets.sdist]
+include = ["diff_cover", "tests", "README.rst"]
 
 [tool.ruff]
 line-length = 88
