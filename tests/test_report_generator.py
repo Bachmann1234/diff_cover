@@ -219,7 +219,6 @@ class TestSimpleReportGenerator(BaseReportGeneratorTest):
 
 
 class TestTemplateReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -251,7 +250,6 @@ class TestTemplateReportGenerator(BaseReportGeneratorTest):
 
 
 class TestJsonReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -359,7 +357,6 @@ class TestJsonReportGenerator(BaseReportGeneratorTest):
 
 
 class TestStringReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -433,7 +430,6 @@ class TestStringReportGenerator(BaseReportGeneratorTest):
 
 
 class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -487,7 +483,6 @@ class TestGitHubAnnotationsReportGenerator(BaseReportGeneratorTest):
 
 
 class TestHtmlReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -511,9 +506,9 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
         calls = self._load_formatted_snippets.call_args_list
         assert calls, "Expected snippet loading to be invoked"
         for call in calls:
-            assert call.kwargs.get(
-                "covered_lines"
-            ), "Expected covered_lines to be forwarded when show_covered=True"
+            assert call.kwargs.get("covered_lines"), (
+                "Expected covered_lines to be forwarded when show_covered=True"
+            )
 
     @pytest.mark.usefixtures("use_default_values")
     def test_show_covered_default_false_does_not_pass_covered_lines(
@@ -561,7 +556,6 @@ class TestHtmlReportGenerator(BaseReportGeneratorTest):
 
 
 class TestMarkdownReportGenerator(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator
@@ -647,7 +641,6 @@ class TestMarkdownReportGenerator(BaseReportGeneratorTest):
 
 
 class TestSimpleReportGeneratorWithBatchViolationReporter(BaseReportGeneratorTest):
-
     @pytest.fixture
     def report(self, coverage, diff):
         # Create a concrete instance of a report generator

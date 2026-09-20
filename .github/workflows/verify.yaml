@@ -31,19 +31,10 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install
-      - name: ruff check
-        continue-on-error: true
-        run: poetry run ruff check
       - name: ruff format
-        continue-on-error: true
-        run: poetry run ruff check
-      - name: pylint
-        continue-on-error: true
-        run: poetry run pylint .
-      - name: black
-        run: poetry run black --check .
-      - name: isort
-        run: poetry run isort --check .
+        run: poetry run ruff format --check .
+      - name: ruff check
+        run: poetry run ruff check .
       - name: doc8
         run: poetry run doc8 README.rst --ignore D001
 
