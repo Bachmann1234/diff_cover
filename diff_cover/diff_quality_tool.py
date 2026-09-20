@@ -408,7 +408,7 @@ def main(argv=None, directory=None):
                     reporter_factory_fn, input_reports, user_options
                 )
 
-            report_result = generate_quality_report(
+            percent_passing, num_changed_lines = generate_quality_report(
                 reporter,
                 arg_dict["compare_branch"],
                 GitDiffTool(
@@ -424,11 +424,7 @@ def main(argv=None, directory=None):
                 quiet=quiet,
                 total_percent_float=arg_dict["total_percent_float"],
             )
-            if isinstance(report_result, tuple):
-                percent_passing, num_changed_lines = report_result
-            else:
-                percent_passing, num_changed_lines = report_result, 0
-
+            
             if percent_passing >= fail_under or (
                 minimum_change and num_changed_lines < minimum_change
             ):
