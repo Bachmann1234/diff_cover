@@ -454,9 +454,9 @@ class LcovCoverageReporter(BaseViolationReporter):
                         if not has_da_directive:
                             # No line execution data, use branch coverage
                             if info["total"] > 0 and info["hit"] < info["total"]:
-                                lcov_report[source_file][
-                                    line_no
-                                ] = 0  # Partial branch coverage
+                                lcov_report[source_file][line_no] = (
+                                    0  # Partial branch coverage
+                                )
                             else:
                                 lcov_report[source_file][line_no] = info["executions"]
                             continue
@@ -934,7 +934,6 @@ class ClangFormatDriver(QualityDriver):
         """
         violations_dict = defaultdict(list)
         for report in reports:
-
             matches = list(re.finditer(self.clang_expression, report))
             for match in matches:
                 if match is not None:
