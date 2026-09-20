@@ -64,8 +64,11 @@ To install the development version:
 
     git clone https://github.com/Bachmann1234/diff-cover.git
     cd diff-cover
-    poetry install
-    poetry shell
+    uv sync
+
+This creates a ``.venv`` with the project installed. Run commands through it with
+``uv run``, for example ``uv run diff-cover --help``, or activate it the usual way
+with ``source .venv/bin/activate``.
 
 
 Getting Started
@@ -476,17 +479,21 @@ Support for a New Quality Checker".
 Setting Up For Development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This project is managed with `poetry` this can be installed with `pip`
-poetry manages a python virtual environment and organizes dependencies. It also
-packages this project.
+This project is managed with `uv <https://docs.astral.sh/uv/>`_. uv provisions the
+Python toolchain and a project virtual environment, resolves and locks dependencies,
+and packages this project. Install it by following the
+`uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
 .. code:: bash
 
-    pip install poetry
+    uv sync
+
+This creates ``.venv`` with all runtime and development dependencies. Run project
+commands through ``uv run``, for example the full verification suite:
 
 .. code:: bash
 
-    poetry install
+    uv run ./verify.sh
 
 I would also suggest running this command after. This will make it so git blame ignores the commit
 that formatted the entire codebase.
