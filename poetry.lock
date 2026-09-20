@@ -895,4 +895,4 @@ toml = ["tomli"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "76f535310fcf53eb0097d18f0d8493362aad02411a936f3b2bb81f0f91f848cc"
+content-hash = "0db6fb2b83acbbb370a5807435c83f9e90e2d18cc121314c3eccecae9c6885bb"
