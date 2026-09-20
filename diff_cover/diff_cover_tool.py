@@ -363,7 +363,7 @@ def generate_coverage_report(
 
     # Generate the report
     reporter.generate_report(output_file)
-    return reporter.total_percent_covered(), reporter.total_num_lines()
+    return reporter.total_percent_covered(), reporter.num_changed_lines()
 
 
 def handle_old_format(description, argv):
@@ -444,7 +444,7 @@ def main(argv=None, directory=None):
     else:
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 
-    report_result = generate_coverage_report(
+    percent_covered, num_changed_lines = generate_coverage_report(
         arg_dict["coverage_files"],
         arg_dict["compare_branch"],
         diff_tool,
@@ -463,11 +463,6 @@ def main(argv=None, directory=None):
         branch_coverage=arg_dict["branch_coverage"],
         total_percent_float=arg_dict["total_percent_float"],
     )
-
-    if isinstance(report_result, tuple):
-        percent_covered, num_changed_lines = report_result
-    else:
-        percent_covered, num_changed_lines = report_result, 0
 
     if percent_covered >= fail_under or (
         minimum_change and num_changed_lines < minimum_change
