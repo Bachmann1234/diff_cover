@@ -28,10 +28,11 @@ dependencies = [
     "Jinja2>=2.7.1",
     "pluggy>=0.13.1,<2",
     "chardet>=3.0.0",
+    "tomli>=1.2.1; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
-toml = ["tomli>=1.2.1"]
+toml = []
 
 [project.urls]
 Homepage = "https://github.com/Bachmann1234/diff-cover"

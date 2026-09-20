@@ -398,7 +398,8 @@ TOML configuration
 ~~~~~~~~~~~~~~~~~~
 
 The parser will only react to configuration files ending with `.toml`.
-To use it, install `diff-cover` with the extra requirement `toml`.
+TOML support is available out of the box (using Python's standard library
+on Python 3.11+ and automatically installed on Python 3.10).
 
 The option names are the same as on the command line, but all dashes should be underscores.
 If an option can be specified multiple times, the configuration value should be specified as a list.

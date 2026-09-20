@@ -1,17 +1,13 @@
 import abc
 import enum
+import sys
 
-try:
+if sys.version_info >= (3, 11):
+    import tomllib as toml
+else:
     import tomli as toml
 
-    _HAS_TOML = True
-except ImportError:  # pragma: no cover
-    try:
-        import tomllib as toml
-
-        _HAS_TOML = True
-    except ImportError:
-        _HAS_TOML = False
+_HAS_TOML = True
 
 
 class Tool(enum.Enum):

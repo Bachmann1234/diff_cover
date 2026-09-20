@@ -181,3 +181,32 @@ def test_get_config_normalizes_both_patterns(mocker, tmp_path):
 
     assert result["exclude"] == ["*.pyc"]
     assert result["include"] == ["src/**"]
+
+
+def test_toml_library_selection_by_python_version(monkeypatch):
+    import importlib
+    import sys
+    from unittest.mock import MagicMock
+
+    try:
+        # On Python < 3.11, tomli must be selected
+        monkeypatch.setattr(sys, "version_info", (3, 10, 0))
+        mock_tomli = MagicMock()
+        mock_tomli.__name__ = "tomli"
+        monkeypatch.setitem(sys.modules, "tomli", mock_tomli)
+        monkeypatch.delitem(sys.modules, "diff_cover.config_parser", raising=False)
+        mod = importlib.import_module("diff_cover.config_parser")
+        assert mod.toml is mock_tomli
+
+        # On Python >= 3.11, tomllib must be selected
+        monkeypatch.setattr(sys, "version_info", (3, 11, 0))
+        mock_tomllib = MagicMock()
+        mock_tomllib.__name__ = "tomllib"
+        monkeypatch.setitem(sys.modules, "tomllib", mock_tomllib)
+        monkeypatch.delitem(sys.modules, "diff_cover.config_parser", raising=False)
+        mod = importlib.import_module("diff_cover.config_parser")
+        assert mod.toml is mock_tomllib
+    finally:
+        monkeypatch.undo()
+        sys.modules.pop("diff_cover.config_parser", None)
+        importlib.import_module("diff_cover.config_parser")
