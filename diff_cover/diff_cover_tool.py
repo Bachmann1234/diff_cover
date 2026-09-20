@@ -365,7 +365,7 @@ def generate_coverage_report(
     reporter.generate_report(output_file)
     return reporter.total_percent_covered(), reporter.total_num_lines()
 
-
+  
 def handle_old_format(description, argv):
     parser = argparse.ArgumentParser(description=description, add_help=False)
     arg_html = parser.add_argument("--html-report", type=str)
