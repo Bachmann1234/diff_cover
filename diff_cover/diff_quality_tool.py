@@ -424,7 +424,7 @@ def main(argv=None, directory=None):
                 quiet=quiet,
                 total_percent_float=arg_dict["total_percent_float"],
             )
-            
+
             if percent_passing >= fail_under or (
                 minimum_change and num_changed_lines < minimum_change
             ):
