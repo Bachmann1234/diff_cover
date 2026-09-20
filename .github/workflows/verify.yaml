@@ -136,7 +136,8 @@ jobs:
       - name: Complete coverage
         run: |
           poetry run diff-cover coverage.xml --include-untracked --format github-annotations:warning
-          poetry run diff-quality --violations ruff.check --include-untracked
+          poetry run diff-quality --violations flake8 --include-untracked
+          poetry run diff-quality --violations pylint --include-untracked
       - name: Upload single coverage artifact
         uses: actions/upload-artifact@v7
         with:
