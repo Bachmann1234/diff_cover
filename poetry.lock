@@ -291,24 +291,6 @@ pycodestyle = ">=2.14.0,<2.15.0"
 pyflakes = ">=3.4.0,<3.5.0"
 
 [[package]]
-name = "flake8-pyproject"
-version = "1.2.4"
-description = "Flake8 plug-in loading the configuration from pyproject.toml"
-optional = false
-python-versions = ">=3.6"
-groups = ["dev"]
-files = [
-    {file = "flake8_pyproject-1.2.4-py3-none-any.whl", hash = "sha256:ea34c057f9a9329c76d98723bb2bb498cc6ba8ff9872c4d19932d48c91249a77"},
-]
-
-[package.dependencies]
-Flake8 = ">=5"
-TOMLi = {version = "*", markers = "python_version < \"3.11\""}
-
-[package.extras]
-dev = ["Flit (>=3.4)", "pyTest (>=7)", "pyTest-cov (>=7) ; python_version >= \"3.10\""]
-
-[[package]]
 name = "iniconfig"
 version = "2.1.0"
 description = "brain-dead simple config-ini parsing"
@@ -634,22 +616,6 @@ spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
 
 [[package]]
-name = "pylint-pytest"
-version = "1.1.8"
-description = "A Pylint plugin to suppress pytest-related false positives."
-optional = false
-python-versions = ">=3.6"
-groups = ["dev"]
-files = [
-    {file = "pylint_pytest-1.1.8-py3-none-any.whl", hash = "sha256:8a532c1709c161406b8459bfc414c57a32a4ab488efd4bc97a22a21cb235331f"},
-    {file = "pylint_pytest-1.1.8.tar.gz", hash = "sha256:5c862c88870aa8eb1b376df48ab9e820b5bdadfe37d965aa9ac567a6305955ca"},
-]
-
-[package.dependencies]
-pylint = ">=2"
-pytest = ">=4.6,<=8.2.0"
-
-[[package]]
 name = "pytest"
 version = "8.2.0"
 description = "pytest: simple powerful testing with Python"
@@ -929,4 +895,4 @@ toml = ["tomli"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "a8840bc9078da86d56559aab84e202bb47e83903d9b85218fa6db4577dcc6a8e"
+content-hash = "76f535310fcf53eb0097d18f0d8493362aad02411a936f3b2bb81f0f91f848cc"
