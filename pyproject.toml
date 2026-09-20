@@ -58,8 +58,6 @@ pyflakes = "^3.3.2"
 pylint = ">=3.3.4,<5.0.0"
 pylint-pytest = "^1.1.8"
 pydocstyle = "^6.1.1"
-black = "^26.1.0"
-isort = ">=6.0.1,<10.0.0"
 doc8 = "2.0.0"
 ruff = ">=0.11.10,<0.17.0"
 
@@ -70,85 +68,43 @@ toml = ["tomli"]
 requires = ["poetry-core>=1.0.7"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
+[tool.ruff]
 line-length = 88
-target-version = ['py39']
-include = '\.pyi?$'
-exclude = "tests/fixtures/*|\\.venv/*"
-
-[tool.isort]
-profile = "black"
-extend_skip = "tests/fixtures/|\\.venv/"
-
-[tool.pylint.master]
-max-line-length = 100
-load-plugins = [
-    "pylint_pytest",
-]
-ignore = [
-    ".venv",
-    "tests/fixtures"
-]
-ignore-paths = ["tests/fixtures/.*"]
-
-[tool.pylint."messages control"]
-enable = ["all"]
-disable = [
-    # allow TODO comments
-    "fixme",
-    # allow disables
-    "locally-disabled",
-    "suppressed-message",
-    # covered by isort
-    "ungrouped-imports",
-    # allow classes and functions w/o docstring
-    "missing-docstring",
-    # hard number checks can be ignored, because they are covered in code reviews
-    "too-many-instance-attributes",
-    "too-many-arguments",
-    "too-many-locals",
-    "too-many-branches",
-    "too-few-public-methods",
-    "too-many-nested-blocks",
-    "too-many-public-methods",
-    # currently some code seems duplicated for pylint
-    "duplicate-code",
-    # we are a command line tool and don't want to show all internals
-    "raise-missing-from",
-]
-
-[tool.pylint.basic]
-good-names = [
-    "_",
-    "i",
-    "setUp",
-    "tearDown",
-    "e",
-    "ex",
-]
-no-docstring-rgx = "^_"
-
-[tool.flake8]
-max-line-length = 100
+target-version = "py310"
 exclude = [
     ".venv",
-    "tests/fixtures"
+    "tests/fixtures",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "PLC",  # pylint conventions
+    "PLE",  # pylint errors
+    "PLR",  # pylint refactoring
+    "PLW",  # pylint warnings
 ]
 ignore = [
-    "E501", # line too long
-    "W503", # line break before binary operator
-    "E203", # whitespace before ':', conflicts with black
+    "E501",     # line too long (handled by formatter, ignored for multiline docstrings/strings)
+    "PLR0904",  # too-many-public-methods
+    "PLR0911",  # too-many-return-statements
+    "PLR0912",  # too-many-branches
+    "PLR0913",  # too-many-arguments
+    "PLR0914",  # too-many-locals
+    "PLR0915",  # too-many-statements
+    "PLR0916",  # too-many-boolean-expressions
+    "PLR0917",  # too-many-positional-arguments
+    "PLR1702",  # too-many-nested-blocks
+    "PLR2004",  # magic-value-comparison
+    "PLC0415",  # import-outside-top-level
+    "PLW2901",  # redefined-loop-name
 ]
-select = [
-    "C901", # flake8-mccabe
-    "E",    # flake8-pycodestyle
-    "F",    # flake8-pyflakes
-    "W",    # flake8-pycodestyle
-]
-per-file-ignores = [
-    "diff_cover/tests/*: E501",         # suppression for __init__
-    "diff_cover/tests/fixtures/*: E,F,W"
-]
+
+[tool.ruff.lint.isort]
+known-first-party = ["diff_cover"]
 
 [tool.coverage.run]
 branch = true
