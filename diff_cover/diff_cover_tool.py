@@ -34,6 +34,7 @@ CSS_FILE_HELP = "Write CSS into an external file"
 FAIL_UNDER_HELP = (
     "Returns an error code if coverage or quality score is below this value"
 )
+MINIMUM_CHANGE_HELP = "Always pass if total lines of change is below this value"
 IGNORE_STAGED_HELP = "Ignores staged changes"
 IGNORE_UNSTAGED_HELP = "Ignores unstaged changes"
 IGNORE_WHITESPACE = "When getting a diff ignore any and all whitespace"
@@ -156,6 +157,13 @@ def parse_coverage_args(argv):
     parser.add_argument(
         "--fail-under", metavar="SCORE", type=float, default=None, help=FAIL_UNDER_HELP
     )
+    parser.add_argument(
+        "--minimum-change",
+        metavar="LINES",
+        type=int,
+        default=None,
+        help=MINIMUM_CHANGE_HELP,
+    )
 
     parser.add_argument(
         "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
@@ -230,6 +238,7 @@ def parse_coverage_args(argv):
         "compare_branch": "origin/main",
         "format": {},
         "fail_under": 0,
+        "minimum_change": 0,
         "ignore_staged": False,
         "ignore_unstaged": False,
         "ignore_untracked": False,
@@ -354,7 +363,7 @@ def generate_coverage_report(
 
     # Generate the report
     reporter.generate_report(output_file)
-    return reporter.total_percent_covered()
+    return reporter.total_percent_covered(), reporter.num_changed_lines()
 
 
 def handle_old_format(description, argv):
@@ -425,6 +434,7 @@ def main(argv=None, directory=None):
         LOGGER.error("%s", exc)
         return 1
     fail_under = arg_dict.get("fail_under")
+    minimum_change = arg_dict.get("minimum_change") or 0
     diff_tool = None
 
     if not arg_dict["diff_file"]:
@@ -434,7 +444,7 @@ def main(argv=None, directory=None):
     else:
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 
-    percent_covered = generate_coverage_report(
+    report_result = generate_coverage_report(
         arg_dict["coverage_files"],
         arg_dict["compare_branch"],
         diff_tool,
@@ -454,7 +464,14 @@ def main(argv=None, directory=None):
         total_percent_float=arg_dict["total_percent_float"],
     )
 
-    if percent_covered >= fail_under:
+    if isinstance(report_result, tuple):
+        percent_covered, num_changed_lines = report_result
+    else:
+        percent_covered, num_changed_lines = report_result, 0
+
+    if percent_covered >= fail_under or (
+        minimum_change and num_changed_lines < minimum_change
+    ):
         return 0
     LOGGER.error("Failure. Coverage is below %i%%.", fail_under)
     return 1

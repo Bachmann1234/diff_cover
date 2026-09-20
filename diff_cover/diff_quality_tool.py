@@ -31,6 +31,7 @@ from diff_cover.diff_cover_tool import (
     INCLUDE_UNTRACKED_HELP,
     JSON_REPORT_DEFAULT_PATH,
     MARKDOWN_REPORT_DEFAULT_PATH,
+    MINIMUM_CHANGE_HELP,
     QUIET_HELP,
     TOTAL_PERCENT_FLOAT_HELP,
     format_type,
@@ -147,6 +148,12 @@ def parse_quality_args(argv):
     parser.add_argument(
         "--fail-under", metavar="SCORE", type=float, help=FAIL_UNDER_HELP
     )
+    parser.add_argument(
+        "--minimum-change",
+        metavar="LINES",
+        type=int,
+        help=MINIMUM_CHANGE_HELP,
+    )
 
     parser.add_argument(
         "--ignore-staged", action="store_true", default=None, help=IGNORE_STAGED_HELP
@@ -218,6 +225,7 @@ def parse_quality_args(argv):
         "diff_range_notation": "...",
         "input_reports": [],
         "fail_under": 0,
+        "minimum_change": 0,
         "ignore_staged": False,
         "ignore_unstaged": False,
         "ignore_untracked": False,
@@ -298,7 +306,7 @@ def generate_quality_report(
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
     reporter.generate_report(output_file)
 
-    return reporter.total_percent_covered()
+    return reporter.total_percent_covered(), reporter.num_changed_lines()
 
 
 def _call_reporter_factory(factory_fn, reports, options):
@@ -346,6 +354,7 @@ def main(argv=None, directory=None):
         LOGGER.error("%s", exc)
         return 1
     fail_under = arg_dict.get("fail_under")
+    minimum_change = arg_dict.get("minimum_change") or 0
     tool = arg_dict["violations"]
     user_options = arg_dict.get("options")
     if user_options:
@@ -399,7 +408,7 @@ def main(argv=None, directory=None):
                     reporter_factory_fn, input_reports, user_options
                 )
 
-            percent_passing = generate_quality_report(
+            report_result = generate_quality_report(
                 reporter,
                 arg_dict["compare_branch"],
                 GitDiffTool(
@@ -415,7 +424,14 @@ def main(argv=None, directory=None):
                 quiet=quiet,
                 total_percent_float=arg_dict["total_percent_float"],
             )
-            if percent_passing >= fail_under:
+            if isinstance(report_result, tuple):
+                percent_passing, num_changed_lines = report_result
+            else:
+                percent_passing, num_changed_lines = report_result, 0
+
+            if percent_passing >= fail_under or (
+                minimum_change and num_changed_lines < minimum_change
+            ):
                 return 0
 
             LOGGER.error("Failure. Quality is below %i.", fail_under)
