@@ -363,7 +363,7 @@ def generate_coverage_report(
 
     # Generate the report
     reporter.generate_report(output_file)
-    return reporter.total_percent_covered(), reporter.num_changed_lines()
+    return reporter.total_percent_covered(), reporter.total_num_lines()
 
 
 def handle_old_format(description, argv):
