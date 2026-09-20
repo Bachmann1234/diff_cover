@@ -257,6 +257,20 @@ class TestDiffCoverIntegration:
         assert runbin(["coverage.xml", "--fail-under=5"]) == 0
         compare_console("add_console_report.txt", capsys.readouterr().out)
 
+    def test_fail_under_with_minimum_change_pass(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml", "--fail-under=90", "--minimum-change=15"]) == 0
+        compare_console("add_console_report.txt", capsys.readouterr().out)
+
+    def test_fail_under_with_minimum_change_fail(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["coverage.xml", "--fail-under=90", "--minimum-change=10"]) == 1
+        compare_console("add_console_report.txt", capsys.readouterr().out)
+
     def test_deleted_file_html(self, runbin, patch_git_command):
         patch_git_command.set_stdout("git_diff_delete.txt")
         assert (
@@ -734,6 +748,26 @@ class TestDiffQualityIntegration:
     def test_fail_under_pass_console(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_violations.txt")
         assert runbin(["--violations=pyflakes", "--fail-under=30"]) == 0
+        compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
+
+    def test_fail_under_with_minimum_change_pass(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(["--violations=pyflakes", "--fail-under=90", "--minimum-change=15"])
+            == 0
+        )
+        compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
+
+    def test_fail_under_with_minimum_change_fail(
+        self, runbin, patch_git_command, capsys
+    ):
+        patch_git_command.set_stdout("git_diff_violations.txt")
+        assert (
+            runbin(["--violations=pyflakes", "--fail-under=90", "--minimum-change=9"])
+            == 1
+        )
         compare_console("pyflakes_violations_report.txt", capsys.readouterr().out)
 
     def test_added_file_pyflakes_console(self, runbin, patch_git_command, capsys):

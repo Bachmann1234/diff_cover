@@ -184,3 +184,24 @@ def test_parse_format_cli_overrides_config_file(tmp_path):
     )
 
     assert arg_dict["format"] == {"json": "report.json"}
+
+
+def test_minimum_change_defaults_zero():
+    arg_dict = parse_coverage_args(["reports/coverage.xml"])
+    assert arg_dict["minimum_change"] == 0
+
+
+def test_minimum_change_flag():
+    arg_dict = parse_coverage_args(["reports/coverage.xml", "--minimum-change=10"])
+    assert arg_dict["minimum_change"] == 10
+
+
+def test_minimum_change_from_config_file(tmp_path):
+    config_file = tmp_path / "diff_cover.toml"
+    config_file.write_text("[tool.diff_cover]\nminimum_change = 15\n")
+
+    arg_dict = parse_coverage_args(
+        ["reports/coverage.xml", "--config-file", str(config_file)]
+    )
+
+    assert arg_dict["minimum_change"] == 15

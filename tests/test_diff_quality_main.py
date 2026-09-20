@@ -120,7 +120,7 @@ def patch_git_patch(mocker):
 @pytest.fixture
 def report_mock(mocker):
     return mocker.patch(
-        "diff_cover.diff_quality_tool.generate_quality_report", return_value=100
+        "diff_cover.diff_quality_tool.generate_quality_report", return_value=(100, 0)
     )
 
 
@@ -192,3 +192,24 @@ def test_plugin_may_declare_hook_arguments():
 )
 def test_call_reporter_factory_passes_declared_arguments(factory, expected):
     assert _call_reporter_factory(factory, ["report"], "--foobar") == expected
+
+
+def test_minimum_change_defaults_zero():
+    arg_dict = parse_quality_args(["--violations", "pylint"])
+    assert arg_dict["minimum_change"] == 0
+
+
+def test_minimum_change_flag():
+    arg_dict = parse_quality_args(["--violations", "pylint", "--minimum-change=10"])
+    assert arg_dict["minimum_change"] == 10
+
+
+def test_minimum_change_from_config_file(tmp_path):
+    config_file = tmp_path / "diff_quality.toml"
+    config_file.write_text("[tool.diff_quality]\nminimum_change = 20\n")
+
+    arg_dict = parse_quality_args(
+        ["--violations", "pylint", "--config-file", str(config_file)]
+    )
+
+    assert arg_dict["minimum_change"] == 20
