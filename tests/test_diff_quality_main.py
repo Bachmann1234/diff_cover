@@ -120,7 +120,7 @@ def patch_git_patch(mocker):
 @pytest.fixture
 def report_mock(mocker):
     return mocker.patch(
-        "diff_cover.diff_quality_tool.generate_quality_report", return_value=100
+        "diff_cover.diff_quality_tool.generate_quality_report", return_value=(100, 0)
     )
 
 
