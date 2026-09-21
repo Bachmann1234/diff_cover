@@ -306,7 +306,7 @@ def generate_quality_report(
     output_file = io.BytesIO() if quiet else sys.stdout.buffer
     reporter.generate_report(output_file)
 
-    return reporter.total_percent_covered(), reporter.num_changed_lines()
+    return reporter.total_percent_covered(), reporter.total_num_lines()
 
 
 def _call_reporter_factory(factory_fn, reports, options):
