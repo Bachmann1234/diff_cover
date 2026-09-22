@@ -99,6 +99,32 @@ def test_name_include_untracked(git_diff):
             ["file1.py", "file3.py"],
             to_unix_paths(["subdir2/file2.py"]),
         ),
+        # exclude by a path pattern rather than a bare filename
+        (
+            [],
+            ["subdir1/*"],
+            to_unix_paths(["file3.py", "README.md", "subdir2/file2.py"]),
+        ),
+        # the same shape the README shows for include patterns
+        (
+            [],
+            ["subdir1/**"],
+            to_unix_paths(["file3.py", "README.md", "subdir2/file2.py"]),
+        ),
+        # a path pattern that matches nothing leaves every path in place
+        (
+            [],
+            ["subdir3/*"],
+            to_unix_paths(
+                ["file3.py", "README.md", "subdir1/file1.py", "subdir2/file2.py"]
+            ),
+        ),
+        # several path patterns at once
+        (
+            [],
+            ["subdir1/*", "subdir2/*"],
+            to_unix_paths(["file3.py", "README.md"]),
+        ),
     ],
 )
 def test_git_path_selection(
