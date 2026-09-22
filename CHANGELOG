@@ -1,3 +1,10 @@
+09/21/2026 v10.6.0
+
+* Add minimum-change flag to allow diff cover to pass in in small prs [PR 628](https://github.com/Bachmann1234/diff_cover/pull/628) thanks @philipp-horstenkamp
+* Replace poetry with uv [PR 631](https://github.com/Bachmann1234/diff_cover/pull/631)
+* Unify project formatting/linting To ruff [PR 630](https://github.com/Bachmann1234/diff_cover/pull/630) thanks @philipp-horstenkamp
+
+
 8/16/2026 v10.5.1
 
 * Improve performance by indexing clover files [PR 618](https://github.com/Bachmann1234/diff_cover/pull/618) Thanks @Eljees

@@ -1,6 +1,6 @@
 [project]
 name = "diff_cover"
-version = "10.5.1"
+version = "10.6.0"
 description = "Run coverage and linting reports on diffs"
 authors = [{ name = "See Contributors" }]
 license = "Apache-2.0"
