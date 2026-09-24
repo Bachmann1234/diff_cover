@@ -217,13 +217,20 @@ class Snippet:
         """
         Return a Terminal-friendly (with ANSI color sequences) representation of the snippet.
         """
-        formatter = TerminalFormatter(
-            linenos=True,
-            colorscheme=None,
-            linenostart=self._start_line,
+        # Pygments' TerminalFormatter ignores `linenostart` and always numbers
+        # from 1, so the snippet is rendered without line numbers and they are
+        # added here, in the same `0001: ` form, starting at the snippet's
+        # first line. See #283.
+        rendered = pygments.format(
+            self.src_tokens(), TerminalFormatter(colorscheme=None)
         )
-
-        return pygments.format(self.src_tokens(), formatter)
+        numbered = [
+            f"{line_number:04d}: {line}"
+            for line_number, line in enumerate(
+                rendered.split("\n"), start=self._start_line
+            )
+        ]
+        return "\n".join(numbered) + "\n"
 
     def src_tokens(self):
         """
