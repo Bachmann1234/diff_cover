@@ -98,8 +98,16 @@ class BaseDiffReporter(ABC):
         if self._fnmatch(basename, exclude):
             return True
 
+        # A pattern that names a directory - "subdir/*", the shape the README
+        # uses for include patterns - matches neither the basename nor the
+        # absolute path, so it used to exclude nothing at all and said so
+        # nowhere. Match the path as the diff reports it, which is relative to
+        # the repository root.
+        if self._fnmatch(to_unix_path(path), exclude):
+            return True
+
         absolute_path = os.path.abspath(path)
-        return self._fnmatch(absolute_path, exclude)
+        return self._fnmatch(to_unix_path(absolute_path), exclude)
 
 
 class GitDiffReporter(BaseDiffReporter):
