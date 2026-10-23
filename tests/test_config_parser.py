@@ -1,6 +1,5 @@
 import pytest
 
-from diff_cover import config_parser
 from diff_cover.config_parser import ParserError, TOMLParser, Tool, get_config
 
 tools = pytest.mark.parametrize("tool", list(Tool))
@@ -11,13 +10,6 @@ class TestTOMLParser:
     def test_parse_no_toml_file(self, tool):
         parser = TOMLParser("myfile", tool)
         assert parser.parse() is None
-
-    @tools
-    def test_parse_but_no_tomli_installed(self, tool, mocker):
-        mocker.patch.object(config_parser, "_HAS_TOML", False)
-        parser = TOMLParser("myfile.toml", tool)
-        with pytest.raises(ParserError):
-            parser.parse()
 
     @pytest.mark.parametrize(
         "tool,content",

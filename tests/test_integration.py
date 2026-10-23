@@ -216,20 +216,20 @@ class TestDiffCoverIntegration:
             == 0
         )
         output = capsys.readouterr().out
-        with open("add_console_report.txt", "r", encoding="utf-8") as f:
+        with open("add_console_report.txt", encoding="utf-8") as f:
             actual = f.read()
             assert actual in output
-        with open("add_html_report.html", "r", encoding="utf-8") as f:
+        with open("add_html_report.html", encoding="utf-8") as f:
             actual = clean_html(f.read(), clear_inline_css=True)
             # can't compare the output inside <head> since it changes
             # a lot so we just compare the body
             actual = actual[actual.find("</head>") :]
             assert len(actual) > 20
             assert actual in output
-        with open("add_json_report.json", "r", encoding="utf-8") as f:
+        with open("add_json_report.json", encoding="utf-8") as f:
             actual = json.dumps(json.loads(f.read()))
             assert actual in output
-        with open("add_markdown_report.md", "r", encoding="utf-8") as f:
+        with open("add_markdown_report.md", encoding="utf-8") as f:
             actual = f.read()
             assert actual in output
 
