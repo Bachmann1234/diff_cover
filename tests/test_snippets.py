@@ -2,7 +2,7 @@
 
 """Test for diff_cover.snippets"""
 
-import os
+import contextlib
 
 import pytest
 from pygments.token import Token
@@ -135,12 +135,11 @@ def patch_path_tool(mocker):
 
 
 @pytest.fixture
-def switch_to_fixture_dir(request):
+def switch_to_fixture_dir():
     # Need to be in the fixture directory
     # so the source path is displayed correctly
-    os.chdir(fixture_path(""))
-    yield
-    os.chdir(request.config.invocation_dir)
+    with contextlib.chdir(fixture_path("")):
+        yield
 
 
 def test_style_defs():

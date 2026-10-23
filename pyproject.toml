@@ -6,7 +6,7 @@ authors = [{ name = "See Contributors" }]
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -14,11 +14,11 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Testing",
     "Topic :: Software Development :: Quality Assurance",
@@ -31,7 +31,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-toml = ["tomli>=1.2.1"]
+# Kept so existing `diff_cover[toml]` installs keep working; tomllib is stdlib on 3.11+
+toml = []
 
 [project.urls]
 Homepage = "https://github.com/Bachmann1234/diff-cover"
@@ -68,7 +69,7 @@ include = ["diff_cover", "tests", "README.rst"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 exclude = [
     ".venv",
     "tests/fixtures",

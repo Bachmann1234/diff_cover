@@ -2,7 +2,7 @@ name: PR Job
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  DEFAULT_PYTHON_VERSION: 3.13
+  DEFAULT_PYTHON_VERSION: 3.14
   # Keep `uv run` from re-locking/re-syncing behind the explicit `uv sync --locked`
   UV_LOCKED: 1
 
@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+        python-version: [ "3.11", "3.12", "3.13", "3.14", "3.15" ]
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
