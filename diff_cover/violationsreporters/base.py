@@ -1,6 +1,7 @@
 import copy
 import os
 import re
+import shlex
 import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict, namedtuple
@@ -174,8 +175,7 @@ class QualityReporter(BaseViolationReporter):
                 raise OSError(msg)
             command = copy.deepcopy(self.driver.command)
             if self.options:
-                for arg in self.options.split():
-                    command.append(arg)
+                command += shlex.split(self.options, posix=os.name != "nt")
             command.append(relative_src_path.encode(sys.getfilesystemencoding()))
 
             stdout, stderr = execute(command, self.driver.exit_codes)
