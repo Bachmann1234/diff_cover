@@ -1278,20 +1278,26 @@ class TestLcovCoverageReporterTest:
 
 
 class TestPycodestyleQualityReporterTest:
-    @pytest.mark.skipif(os.name == "nt", reason="Uses POSIX quoting")
-    def test_quality_quoted_options(self, mocker):
+    @pytest.mark.parametrize(
+        "options, config",
+        [
+            ("--config='lint config.ini' --ignore='E501'", "lint config.ini"),
+            (
+                r"--config=C:\lint\config.ini --ignore='E501'",
+                r"C:\lint\config.ini",
+            ),
+        ],
+    )
+    def test_quality_quoted_options(self, mocker, options, config):
         execute = mocker.patch.object(base, "execute", return_value=("", ""))
-        quality = QualityReporter(
-            pycodestyle_driver,
-            options="--config='lint config.ini' --ignore='E501'",
-        )
+        quality = QualityReporter(pycodestyle_driver, options=options)
         quality.driver_tool_installed = True
 
         assert quality.violations("file1.py") == []
         execute.assert_called_once_with(
             [
                 "pycodestyle",
-                "--config=lint config.ini",
+                f"--config={config}",
                 "--ignore=E501",
                 b"file1.py",
             ],

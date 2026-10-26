@@ -13,6 +13,15 @@ from diff_cover.util import to_unix_path
 Violation = namedtuple("Violation", "line, message")
 
 
+def split_options(options):
+    """Split quoted options without consuming backslashes in paths."""
+    lexer = shlex.shlex(options, posix=True)
+    lexer.whitespace_split = True
+    lexer.escape = ""
+    lexer.commenters = ""
+    return list(lexer)
+
+
 class QualityReporterError(Exception):
     """
     A quality reporter command produced an error.
@@ -175,7 +184,7 @@ class QualityReporter(BaseViolationReporter):
                 raise OSError(msg)
             command = copy.deepcopy(self.driver.command)
             if self.options:
-                command += shlex.split(self.options, posix=os.name != "nt")
+                command += split_options(self.options)
             command.append(relative_src_path.encode(sys.getfilesystemencoding()))
 
             stdout, stderr = execute(command, self.driver.exit_codes)
