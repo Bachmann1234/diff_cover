@@ -1,3 +1,10 @@
+10/22/2026 v11.0.0
+
+* Drop python 3.10 as its EOL and add python 3.15 support [PR 645](https://github.com/Bachmann1234/diff_cover/pull/645)
+* Fix exclude patterns that name a directory (e.g. `subdir/*`) silently matching nothing; patterns now also match the repo-relative path [PR 636](https://github.com/Bachmann1234/diff_cover/pull/636) thanks @Eljees
+* Fix `--show-uncovered` terminal snippets always being numbered from line 1 [PR 637](https://github.com/Bachmann1234/diff_cover/pull/637) thanks @Eljees
+* Split quoted `--options` values with shlex while keeping backslashes [PR 646](https://github.com/Bachmann1234/diff_cover/pull/646) thanks @Don-Yin
+
 09/21/2026 v10.6.0
 
 * Add minimum-change flag to allow diff cover to pass in in small prs [PR 628](https://github.com/Bachmann1234/diff_cover/pull/628) thanks @philipp-horstenkamp
