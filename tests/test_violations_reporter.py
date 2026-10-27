@@ -1278,6 +1278,32 @@ class TestLcovCoverageReporterTest:
 
 
 class TestPycodestyleQualityReporterTest:
+    @pytest.mark.parametrize(
+        "options, config",
+        [
+            ("--config='lint config.ini' --ignore='E501'", "lint config.ini"),
+            (
+                r"--config=C:\lint\config.ini --ignore='E501'",
+                r"C:\lint\config.ini",
+            ),
+        ],
+    )
+    def test_quality_quoted_options(self, mocker, options, config):
+        execute = mocker.patch.object(base, "execute", return_value=("", ""))
+        quality = QualityReporter(pycodestyle_driver, options=options)
+        quality.driver_tool_installed = True
+
+        assert quality.violations("file1.py") == []
+        execute.assert_called_once_with(
+            [
+                "pycodestyle",
+                f"--config={config}",
+                "--ignore=E501",
+                b"file1.py",
+            ],
+            [0, 1],
+        )
+
     def test_quality(self, mocker, process_patcher):
         # Patch the output of `pycodestyle`
         mocker.patch.object(Popen, "communicate")
