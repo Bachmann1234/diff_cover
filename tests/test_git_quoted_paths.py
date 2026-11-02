@@ -50,7 +50,7 @@ def test_coverage_for_git_quoted_paths(
 
     def git(*args):
         return subprocess.run(
-            ["git", *args], check=True, capture_output=True, text=True
+            ["git", *args], check=True, capture_output=True, encoding="utf-8"
         ).stdout
 
     git("init")
