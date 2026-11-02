@@ -9,7 +9,7 @@ import re
 from abc import ABC, abstractmethod
 
 from diff_cover.git_diff import GitDiffError
-from diff_cover.util import to_unix_path, to_unix_paths
+from diff_cover.util import to_unescaped_filename, to_unix_path, to_unix_paths
 
 
 class BaseDiffReporter(ABC):
@@ -292,7 +292,10 @@ class GitDiffReporter(BaseDiffReporter):
         return True
 
     # Regular expressions used to parse the diff output
-    SRC_FILE_RE = re.compile(r'^diff --git "?a/.*"? "?b/([^\n"]*)"?')
+    SRC_FILE_RE = re.compile(
+        r'^diff --git (?:"a/(?:[^"\\]|\\.)*"|a/[^"\\]*) '
+        r'("b/(?:[^"\\]|\\.)*"|b/.*)$'
+    )
     MERGE_CONFLICT_RE = re.compile(r"^diff --cc ([^\n]*)")
     HUNK_LINE_RE = re.compile(r"\+([0-9]*)")
 
@@ -445,10 +448,12 @@ class GitDiffReporter(BaseDiffReporter):
         Given a source line in `git diff` output, return the path
         to the source file.
         """
-        if "--git" in line:
+        if line.startswith("diff --git "):
             regex = self.SRC_FILE_RE
-        elif "--cc" in line:
+            prefix_length = 2
+        elif line.startswith("diff --cc "):
             regex = self.MERGE_CONFLICT_RE
+            prefix_length = 0
         else:
             msg = f"Do not recognize format of source in line '{line}'"
             raise GitDiffError(msg)
@@ -457,7 +462,7 @@ class GitDiffReporter(BaseDiffReporter):
         groups = regex.findall(line)
 
         if len(groups) == 1:
-            return groups[0]
+            return to_unescaped_filename(groups[0])[prefix_length:]
 
         msg = f"Could not parse source path in line '{line}'"
         raise GitDiffError(msg)

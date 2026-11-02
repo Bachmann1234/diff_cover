@@ -63,28 +63,41 @@ def to_unescaped_filename(filename: str) -> str:
     # Remove surrounding quotes
     unquoted = filename[1:-1]
 
-    # Handle C-style escape sequences
-    result = []
+    # Git quotes filename bytes; adjacent octal escapes can form one character.
+    result = bytearray()
     i = 0
     while i < len(unquoted):
         if unquoted[i] == "\\" and i + 1 < len(unquoted):
-            # Handle common C escape sequences
-            next_char = unquoted[i + 1]
-            result.append(
-                {
-                    "\\": "\\",
-                    '"': '"',
-                    "a": "a",
-                    "n": "\n",
-                    "t": "\t",
-                    "r": "\r",
-                    "b": "\b",
-                    "f": "\f",
-                }.get(next_char, next_char)
+            escape_start = i + 1
+            escape_end = i + 4
+            octal = unquoted[escape_start:escape_end]
+            if (
+                len(octal) == 3
+                and octal[0] in "0123"
+                and all(c in "01234567" for c in octal)
+            ):
+                result.append(int(octal, 8))
+                i += 4
+                continue
+            next_char = unquoted[escape_start]
+            result.extend(
+                os.fsencode(
+                    {
+                        "\\": "\\",
+                        '"': '"',
+                        "a": "\a",
+                        "n": "\n",
+                        "t": "\t",
+                        "r": "\r",
+                        "b": "\b",
+                        "f": "\f",
+                        "v": "\v",
+                    }.get(next_char, next_char)
+                )
             )
             i += 2
         else:
-            result.append(unquoted[i])
+            result.extend(os.fsencode(unquoted[i]))
             i += 1
 
-    return "".join(result)
+    return os.fsdecode(bytes(result))
