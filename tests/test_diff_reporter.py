@@ -315,7 +315,7 @@ def test_git_deleted_lines(diff, git_diff):
 def test_git_unicode_filename(diff, git_diff):
     # Filenames with unicode characters have double quotes surrounding them
     # in the git diff output.
-    diff_str = dedent("""
+    diff_str = dedent(r"""
         diff --git "a/unic\303\270\342\210\202e\314\201.txt" "b/unic\303\270\342\210\202e\314\201.txt"
         new file mode 100644
         index 0000000..248ebea
@@ -329,7 +329,7 @@ def test_git_unicode_filename(diff, git_diff):
 
     _set_git_diff_output(diff, git_diff, diff_str, "", "")
     # Get the lines changed in the diff
-    lines_changed = diff.lines_changed("unic\303\270\342\210\202e\314\201.txt")
+    lines_changed = diff.lines_changed("unicø∂é.txt")
 
     # Expect that three lines changed
     assert lines_changed == [1, 2, 3]

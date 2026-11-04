@@ -1,3 +1,7 @@
+Unreleased
+
+* Count changed and untracked lines in Git-quoted UTF-8 filenames in coverage reports.
+
 10/22/2026 v11.0.0
 
 * Drop python 3.10 as its EOL and add python 3.15 support [PR 645](https://github.com/Bachmann1234/diff_cover/pull/645)

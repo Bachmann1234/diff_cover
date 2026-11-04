@@ -78,3 +78,23 @@ def test_open_file_encoding_binary(tmp_path):
     with util.open_file(tmp_path / "some_file.txt", "br", encoding="utf-16") as f:
         assert not hasattr(f, "encoding")
         assert f.read() == b"cafe naive resume"
+
+
+@pytest.mark.parametrize(
+    ("quoted", "expected"),
+    [
+        (r'"\303\251.py"', "é.py"),
+        (r'"\346\235\261\344\272\254.py"', "東京.py"),
+        (r'"\360\237\223\232.py"', "📚.py"),
+        ('"résumé\\t.py"', "résumé\t.py"),
+        (r'"literal\\303.py"', r"literal\303.py"),
+        (r'"quote\".py"', 'quote".py'),
+        (r'"tab\tline\nreturn\r.py"', "tab\tline\nreturn\r.py"),
+        (r'"\a\b\f\v.py"', "\a\b\f\v.py"),
+        (r"\303\251.py", r"\303\251.py"),
+        ("é.py", "é.py"),
+    ],
+)
+def test_git_filename_bytes(quoted, expected):
+    """Decode Git bytes once while preserving literal unquoted names."""
+    assert util.to_unescaped_filename(quoted) == expected
