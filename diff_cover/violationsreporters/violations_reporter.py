@@ -403,22 +403,22 @@ class LcovCoverageReporter(BaseViolationReporter):
                     if taken > 0:
                         branch_coverage[source_file][line_no]["hit"] += 1
                 elif directive == "FN":
-                    args = content.split(",")
+                    args = content.split(",", 1)
                     # FN:<line number of function start>,[<line number of function end>,]<function name>
-                    if len(args) != 2 and len(args) != 3:
+                    if len(args) != 2:
                         raise ValueError(f"Unknown syntax in lcov report: {line}")
                     if source_file is None:
                         raise ValueError(
                             f"No source file specified for line coverage: {line}"
                         )
                     line_no = int(args[0])
-                    if len(args) == 3:
-                        func_name = args[2]
-                    else:
-                        func_name = args[1]
+                    func_name = args[1]
+                    end_line, separator, name = func_name.partition(",")
+                    if separator and end_line.isdecimal():
+                        func_name = name
                     function_lines[source_file][func_name] = (line_no, 0)
                 elif directive == "FNDA":
-                    args = content.split(",")
+                    args = content.split(",", 1)
                     if len(args) != 2:
                         raise ValueError(f"Unknown syntax in lcov report: {line}")
                     if source_file is None:
