@@ -1228,6 +1228,25 @@ class TestLcovCoverageReporterTest:
         }
         assert lcov_report_obsolete_format == lcov_report
 
+    @pytest.mark.parametrize(
+        "declaration",
+        ["FN:10,foo(int, int)", "FN:10,12,foo(int, int)"],
+    )
+    def test_function_name_with_comma(self, tmp_path, declaration):
+        report = tmp_path / "functions.lcov"
+        report.write_text(
+            f"SF:file.cpp\n{declaration}\nFNDA:3,foo(int, int)\n"
+            "FN:20,unused(int, int)\nFNDA:0,unused(int, int)\nend_of_record\n",
+            encoding="utf-8",
+        )
+
+        parsed = LcovCoverageReporter.parse(report)
+
+        assert parsed == {"file.cpp": {10: 3, 20: 0}}
+        coverage = LcovCoverageReporter([parsed])
+        assert coverage.measured_lines("file.cpp") == {10, 20}
+        assert coverage.violations("file.cpp") == {Violation(20, None)}
+
     def _coverage_lcov(
         self,
         file_paths,
