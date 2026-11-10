@@ -444,25 +444,29 @@ def main(argv=None, directory=None):
     else:
         diff_tool = GitDiffFileTool(arg_dict["diff_file"])
 
-    percent_covered, num_changed_lines = generate_coverage_report(
-        arg_dict["coverage_files"],
-        arg_dict["compare_branch"],
-        diff_tool,
-        report_formats=arg_dict["format"],
-        css_file=arg_dict["external_css_file"],
-        ignore_staged=arg_dict["ignore_staged"],
-        ignore_unstaged=arg_dict["ignore_unstaged"],
-        include_untracked=arg_dict["include_untracked"],
-        exclude=arg_dict["exclude"],
-        include=arg_dict["include"],
-        src_roots=arg_dict["src_roots"],
-        quiet=quiet,
-        show_uncovered=arg_dict["show_uncovered"],
-        show_covered=arg_dict["show_covered"],
-        expand_coverage_report=arg_dict["expand_coverage_report"],
-        branch_coverage=arg_dict["branch_coverage"],
-        total_percent_float=arg_dict["total_percent_float"],
-    )
+    try:
+        percent_covered, num_changed_lines = generate_coverage_report(
+            arg_dict["coverage_files"],
+            arg_dict["compare_branch"],
+            diff_tool,
+            report_formats=arg_dict["format"],
+            css_file=arg_dict["external_css_file"],
+            ignore_staged=arg_dict["ignore_staged"],
+            ignore_unstaged=arg_dict["ignore_unstaged"],
+            include_untracked=arg_dict["include_untracked"],
+            exclude=arg_dict["exclude"],
+            include=arg_dict["include"],
+            src_roots=arg_dict["src_roots"],
+            quiet=quiet,
+            show_uncovered=arg_dict["show_uncovered"],
+            show_covered=arg_dict["show_covered"],
+            expand_coverage_report=arg_dict["expand_coverage_report"],
+            branch_coverage=arg_dict["branch_coverage"],
+            total_percent_float=arg_dict["total_percent_float"],
+        )
+    except OSError as exc:
+        LOGGER.error("Couldn't read coverage file: %s", exc)
+        return 1
 
     if percent_covered >= fail_under or (
         minimum_change and num_changed_lines < minimum_change
