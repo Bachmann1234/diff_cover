@@ -1,3 +1,7 @@
+11/13/2026 v11.0.2
+
+* Fix LCOV parsing for function names containing commas. Thanks @zombieli [PR 655](https://github.com/Bachmann1234/diff_cover/pull/655)
+
 11/3/2026 v11.0.1
 
 * Count changed and untracked lines in Git-quoted UTF-8 filenames in coverage reports. [PR 654](https://github.com/Bachmann1234/diff_cover/pull/654)
