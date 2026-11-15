@@ -1038,6 +1038,21 @@ class TestLcovCoverageReporterTest:
         result = coverage.violations("file1.java")
         assert result == violations
 
+    @pytest.mark.parametrize("absolute", [False, True])
+    def test_violations_from_subdirectory(self, mocker, tmp_path, absolute):
+        # Running from "svc/": git paths start with "svc/", coverage tools
+        # write paths relative to the cwd or absolute
+        mocker.patch(
+            "diff_cover.violationsreporters.violations_reporter.GitPathTool.relative_path",
+            side_effect=lambda path: os.path.relpath(path, "svc"),
+        )
+        source = str(tmp_path / "app.py") if absolute else "app.py"
+        lcov = self._coverage_lcov([source], self.MANY_VIOLATIONS, self.FEW_MEASURED)
+
+        coverage = LcovCoverageReporter([lcov])
+
+        assert coverage.violations("svc/app.py") == self.MANY_VIOLATIONS
+
     def test_two_inputs_first_violate(self):
         # Construct the LCOV report
         file_paths = ["file1.java"]
