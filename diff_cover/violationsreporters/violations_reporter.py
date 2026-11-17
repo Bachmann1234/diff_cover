@@ -370,7 +370,9 @@ class LcovCoverageReporter(BaseViolationReporter):
                 # we're only interested in file name and line coverage
                 if directive == "SF":
                     # SF:<absolute path to the source file>
-                    source_file = util.to_unix_path(GitPathTool.relative_path(content))
+                    # Coverage tools write paths absolute or relative to the cwd,
+                    # so make them relative to the cwd, like src_rel_path below
+                    source_file = util.to_unix_path(os.path.relpath(content))
                     continue
                 if directive == "DA":
                     # DA:<line number>,<execution count>[,<checksum>]
