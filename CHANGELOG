@@ -1,7 +1,11 @@
+11/18/2026 v11.0.4
+
+* Fix changed line numbers when the old file has no trailing newline. Thanks @TohruSu [PR 658](https://github.com/Bachmann1234/diff_cover/pull/658)
+
 11/16/2026 v11.0.3
 
 * Fix LCOV reports being ignored when run from a subdirectory. Thanks @jayhemnani9910 [PR 657](https://github.com/Bachmann1234/diff_cover/pull/657)
-
+P
 11/13/2026 v11.0.2
 
 * Fix LCOV parsing for function names containing commas. Thanks @zombieli [PR 655](https://github.com/Bachmann1234/diff_cover/pull/655)

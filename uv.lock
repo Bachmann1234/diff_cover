@@ -192,7 +192,7 @@ toml = [
 
 [[package]]
 name = "diff-cover"
-version = "11.0.3"
+version = "11.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "chardet" },
