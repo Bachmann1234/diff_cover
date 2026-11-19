@@ -12,6 +12,8 @@ from diff_cover.git_diff import GitDiffError, GitDiffTool
 from diff_cover.util import to_unix_paths
 from tests.helpers import git_diff_output, line_numbers
 
+NO_NEWLINE = "\\ No newline at end of file"
+
 
 @pytest.fixture
 def git_diff(mocker):
@@ -525,6 +527,56 @@ def test_terminating_chars_in_hunk(diff, git_diff):
 
     lines_changed = diff.lines_changed("file.py")
     assert lines_changed == [16, 17, 18, 19]
+
+
+@pytest.mark.parametrize(
+    ("hunk", "expected"),
+    [
+        pytest.param(
+            ["@@ -3 +3 @@ b = 2", "-c = 3", NO_NEWLINE, "+c = 30", NO_NEWLINE],
+            [3],
+            id="last line changed",
+        ),
+        pytest.param(
+            [
+                "@@ -2,2 +2,2 @@ a = 1",
+                "-b = 2",
+                "-c = 3",
+                NO_NEWLINE,
+                "+b = 20",
+                "+c = 30",
+            ],
+            [2, 3],
+            id="last two lines changed",
+        ),
+        pytest.param(
+            ["@@ -3 +3,2 @@ b = 2", "-c = 3", NO_NEWLINE, "+c = 3", "+d = 4"],
+            [3, 4],
+            id="line appended",
+        ),
+        pytest.param(
+            ["@@ -3 +3 @@ b = 2", "-c = 3", "+c = 30", NO_NEWLINE],
+            [3],
+            id="newline removed",
+        ),
+    ],
+)
+def test_no_newline_at_end_of_file_marker(diff, git_diff, hunk, expected):
+    # The marker that git prints for a missing final newline is not a line
+    # of the file, so it must not shift the lines that follow it in the hunk
+    diff_str = "\n".join(
+        [
+            "diff --git a/file.py b/file.py",
+            "index ee16b27..2d24206 100644",
+            "--- a/file.py",
+            "+++ b/file.py",
+            *hunk,
+        ]
+    )
+
+    _set_git_diff_output(diff, git_diff, diff_str, "", "")
+
+    assert diff.lines_changed("file.py") == expected
 
 
 def test_merge_conflict_diff(diff, git_diff):

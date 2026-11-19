@@ -429,6 +429,11 @@ class GitDiffReporter(BaseDiffReporter):
                     # Increment the line number in the file
                     current_line_old += 1
 
+            # "\ No newline at end of file" describes the line before it.
+            # It is not a line of the file, so it does not have a line number.
+            elif line.startswith("\\"):
+                continue
+
             # This is a line in the final version that was not modified.
             # Increment the line number, but do not store this as a changed
             # line.
