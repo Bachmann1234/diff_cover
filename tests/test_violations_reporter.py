@@ -822,6 +822,22 @@ class TestJacocoXmlCoverageReporterTest:
         result = coverage.violations("file1.java")
         assert result == violations
 
+    def test_violations_from_subdirectory(self, mocker):
+        # Running from "svc/": git paths start with "svc/", source roots are
+        # relative to the cwd
+        mocker.patch(
+            "diff_cover.violationsreporters.violations_reporter.GitPathTool.relative_path",
+            side_effect=lambda path: os.path.relpath(path, "svc"),
+        )
+        xml = self._coverage_xml(
+            ["com/x/A.java"], self.MANY_VIOLATIONS, self.FEW_MEASURED
+        )
+
+        coverage = XmlCoverageReporter([xml], src_roots=["src/main/java"])
+
+        result = coverage.violations("svc/src/main/java/com/x/A.java")
+        assert result == self.MANY_VIOLATIONS
+
     def test_two_inputs_first_violate(self):
         # Construct the XML report
         file_paths = ["file1.java"]
