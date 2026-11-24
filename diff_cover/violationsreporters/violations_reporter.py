@@ -162,7 +162,7 @@ class XmlCoverageReporter(BaseViolationReporter):
 
     def _measured_source_path_matches(self, package_name, file_name, src_path):
         # find src_path in any of the source roots
-        if not src_path.endswith(util.to_unix_path(file_name)):
+        if not util.to_unix_path(src_path).endswith(util.to_unix_path(file_name)):
             return False
 
         # src_path is relative to the git root and the source roots are relative
@@ -173,7 +173,7 @@ class XmlCoverageReporter(BaseViolationReporter):
         for root in self._src_roots:
             if (
                 os.path.normcase(
-                    os.path.normpath(os.path.join(root, package_name, file_name))
+                    os.path.relpath(os.path.join(root, package_name, file_name))
                 )
                 == norm_src_path
             ):
