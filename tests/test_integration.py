@@ -163,6 +163,20 @@ class TestDiffCoverIntegration:
         )
         compare_html("add_html_report.html", "dummy/diff_coverage.html")
 
+    def test_html_report_in_missing_directory(self, runbin, patch_git_command, caplog):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert (
+            runbin(["coverage.xml", "--format", "html:missing/diff_coverage.html"]) == 1
+        )
+        assert "Failure: " in caplog.text
+        assert "No such file or directory" in caplog.text
+
+    def test_missing_coverage_file(self, runbin, patch_git_command, caplog):
+        patch_git_command.set_stdout("git_diff_add.txt")
+        assert runbin(["missing_coverage.xml"]) == 1
+        assert "Failure: " in caplog.text
+        assert "missing_coverage.xml" in caplog.text
+
     def test_added_file_console(self, runbin, patch_git_command, capsys):
         patch_git_command.set_stdout("git_diff_add.txt")
         assert runbin(["coverage.xml"]) == 0
